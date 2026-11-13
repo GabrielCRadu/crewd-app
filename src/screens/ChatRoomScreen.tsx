@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ActivityIndicator, FlatList, KeyboardAvoidingView, Linking, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, KeyboardAvoidingView, Linking, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -13,6 +13,8 @@ import { useMyGroups } from '../hooks/useMyGroups';
 import { useUserLocation } from '../hooks/useUserLocation';
 import { formatDay, formatTime } from '../utils/dates';
 import { canOpenChat } from '../utils/groupRules';
+import { useAuth } from '../context/AuthContext';
+import { leaveGroup } from '../services/groupsService';
 import type { ChatsStackParamList } from '../navigation/chatsTypes';
 import { colors } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
@@ -26,6 +28,7 @@ type Props = NativeStackScreenProps<ChatsStackParamList, 'ChatRoom'>;
  */
 export default function ChatRoomScreen({ navigation, route }: Props) {
   const { groups, loading } = useMyGroups();
+  const { user, profile } = useAuth();
   const location = useUserLocation();
   const { events } = useEvents(location.coords);
   const group = groups.find((g) => g.id === route.params.groupId) ?? null;
@@ -52,6 +55,24 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
       </SafeAreaView>
     );
   }
+
+  // Ieși din grupuleț din conversație: rămâi înscris la eveniment.
+  const confirmLeave = () => {
+    const uid = user?.uid ?? profile?.uid;
+    if (!uid) return;
+    Alert.alert('Ieși din grupuleț?', 'Rămâi înscris la eveniment și poți alege alt grupuleț.', [
+      { text: 'Rămân', style: 'cancel' },
+      {
+        text: 'Ies',
+        style: 'destructive',
+        onPress: () => {
+          leaveGroup(group.eventId, group.id, uid)
+            .then(() => navigation.goBack())
+            .catch((e: Error) => Alert.alert('Nu ai ieșit din grupuleț', e.message));
+        },
+      },
+    ]);
+  };
 
   // „Pe hartă”: deschide locul evenimentului în aplicația de hărți (Google Maps / Apple Maps).
   const openMap = () => {
@@ -83,6 +104,7 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
               .join(', ')}
           </Text>
         </View>
+        <GlassIconButton icon="exit-outline" size={40} onPress={confirmLeave} />
       </View>
 
       <View style={styles.banner}>

@@ -1,4 +1,4 @@
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -6,12 +6,14 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import GlassIconButton from '../components/GlassIconButton';
 import GradientButton from '../components/GradientButton';
 import EventGroupsSection from '../components/groups/EventGroupsSection';
+import { useAuth } from '../context/AuthContext';
 import { useEvents } from '../hooks/useEvents';
 import { useMyGroups } from '../hooks/useMyGroups';
 import { useNow } from '../hooks/useNow';
 import { usePreferences } from '../hooks/usePreferences';
 import { useUserLocation } from '../hooks/useUserLocation';
 import type { EventsStackParamList } from '../navigation/eventsTypes';
+import { leaveGroup } from '../services/groupsService';
 import { isJoined } from '../services/preferencesService';
 import { colors } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
@@ -31,6 +33,7 @@ export default function EventGroupsScreen({ navigation, route }: Props) {
   const preferences = usePreferences();
   const { groups: myGroups } = useMyGroups();
   const now = useNow();
+  const { user, profile } = useAuth();
 
   const event = events.find((e) => e.id === eventId) ?? null;
   if (!event) {
@@ -51,6 +54,22 @@ export default function EventGroupsScreen({ navigation, route }: Props) {
     navigation
       .getParent()
       ?.navigate('Chats', { screen: 'ChatRoom', params: { eventId: event.id, groupId: myGroup.id }, initial: false });
+  };
+
+  // „Ieși din grupuleț”: rămâi înscris la eveniment și poți alege alt grupuleț.
+  const confirmLeaveGroup = () => {
+    const uid = user?.uid ?? profile?.uid;
+    if (!myGroup || !uid) return;
+    Alert.alert('Ieși din grupuleț?', 'Rămâi înscris la eveniment și poți alege alt grupuleț.', [
+      { text: 'Rămân', style: 'cancel' },
+      {
+        text: 'Ies',
+        style: 'destructive',
+        onPress: () => {
+          leaveGroup(event.id, myGroup.id, uid).catch((e: Error) => Alert.alert('Nu ai ieșit din grupuleț', e.message));
+        },
+      },
+    ]);
   };
 
   return (
@@ -96,6 +115,10 @@ export default function EventGroupsScreen({ navigation, route }: Props) {
                 </Text>
               </>
             )}
+            <Pressable onPress={confirmLeaveGroup} hitSlop={8} style={styles.leave}>
+              <Ionicons name="exit-outline" size={16} color={colors.muted} />
+              <Text style={styles.leaveText}>Ieși din grupuleț</Text>
+            </Pressable>
           </View>
         ) : null}
 
@@ -122,4 +145,6 @@ const styles = StyleSheet.create({
   mineRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   mineTitle: { color: colors.text, fontSize: 16, fontWeight: '600' },
   mineText: { color: colors.muted, fontSize: 14, lineHeight: 20 },
+  leave: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'center', paddingTop: 4 },
+  leaveText: { color: colors.muted, fontSize: 14, textDecorationLine: 'underline' },
 });
