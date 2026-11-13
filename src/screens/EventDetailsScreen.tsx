@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
@@ -19,8 +20,9 @@ import { isJoined, joinEvent, leaveEvent } from '../services/preferencesService'
 import { colors } from '../theme/colors';
 import { gradients } from '../theme/gradients';
 import { glass, radii } from '../theme/shape';
+import type { IconName } from '../types/events';
 import type { ChatGroup } from '../types/social';
-import { formatLongDate, isLive } from '../utils/dates';
+import { formatLongDay, formatTime, isLive } from '../utils/dates';
 import { formatDistance, haversineKm } from '../utils/distance';
 import { formatFriendsGoing } from '../utils/format';
 
@@ -86,18 +88,10 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
           {/* 2. Titlul */}
           <Text style={styles.title}>{event.title}</Text>
 
-          {/* 3. Când | Unde */}
+          {/* 3. Când | Unde: fiecare informație pe rândul ei, fără să treacă pe rândul următor */}
           <View style={styles.infoRow}>
-            <View style={styles.infoBox}>
-              <Text style={styles.infoLabel}>Când</Text>
-              <Text style={styles.infoValue}>{formatLongDate(event.startsAt)}</Text>
-            </View>
-            <View style={styles.infoBox}>
-              <Text style={styles.infoLabel}>Unde</Text>
-              <Text style={styles.infoValue}>
-                {event.venueName} · {formatDistance(distanceKm)}
-              </Text>
-            </View>
+            <InfoBox icon="calendar-outline" label="Când" main={formatLongDay(event.startsAt)} secondary={formatTime(event.startsAt)} />
+            <InfoBox icon="location-outline" label="Unde" main={event.venueName} secondary={formatDistance(distanceKm)} />
           </View>
 
           {/* 4. Descrierea */}
@@ -161,6 +155,27 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
   );
 }
 
+/**
+ * O casetă „Când” / „Unde”: eticheta cu iconiță, apoi valoarea principală și cea secundară,
+ * fiecare pe câte un rând. Textele lungi se micșorează ca să încapă pe un rând, nu se rup.
+ */
+function InfoBox({ icon, label, main, secondary }: { icon: IconName; label: string; main: string; secondary: string }) {
+  return (
+    <View style={styles.infoBox}>
+      <View style={styles.infoLabelRow}>
+        <Ionicons name={icon} size={14} color={colors.faint} />
+        <Text style={styles.infoLabel}>{label}</Text>
+      </View>
+      <Text style={styles.infoValue} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>
+        {main}
+      </Text>
+      <Text style={styles.infoSecondary} numberOfLines={1}>
+        {secondary}
+      </Text>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
@@ -172,9 +187,11 @@ const styles = StyleSheet.create({
   body: { padding: 20, gap: 16 },
   title: { fontSize: 30, fontWeight: '600', letterSpacing: -0.5, color: colors.text },
   infoRow: { flexDirection: 'row', gap: 12 },
-  infoBox: { ...glass, flex: 1, padding: 14, gap: 4, borderRadius: radii.inner },
+  infoBox: { ...glass, flex: 1, padding: 14, gap: 6, borderRadius: radii.inner },
+  infoLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   infoLabel: { fontSize: 12, color: colors.faint },
-  infoValue: { fontSize: 15, fontWeight: '600', color: colors.text },
+  infoValue: { fontSize: 16, fontWeight: '600', color: colors.text },
+  infoSecondary: { fontSize: 14, color: colors.muted },
   description: { fontSize: 15, lineHeight: 22, color: colors.muted },
   muted: { fontSize: 13, color: colors.muted },
   friendsRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
