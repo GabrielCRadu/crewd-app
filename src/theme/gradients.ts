@@ -8,6 +8,8 @@ export const gradients = {
   aurora: [colors.accentYellow, colors.accentOrange, colors.accentPink, colors.accentMagenta] as const,
   /** Umbrire de jos în sus, ca textul peste poze/aurora să fie lizibil. */
   scrim: ['rgba(11,10,16,0)', 'rgba(11,10,16,0.85)'] as const,
+  /** Umbrire scurtă de sus în jos, ca badge-urile de deasupra unei poze să se citească. */
+  scrimTop: ['rgba(11,10,16,0.55)', 'rgba(11,10,16,0)'] as const,
   /** Avatare cu inițiale. */
   avatar: [colors.accentOrange, colors.accentMagenta] as const,
   /**
