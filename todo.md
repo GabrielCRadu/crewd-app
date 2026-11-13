@@ -22,7 +22,7 @@ Actualizează lista când rezolvi ceva sau adaugi un mock nou.
 
 ## Erori cunoscute
 
-- [ ] **Centrul de rezervă e Chișinău** (`CITY_CENTER` în `src/hooks/useUserLocation.ts`): fără acces la locație, distanțele se calculează din Chișinău, deși evenimentele sunt în Timișoara (~500 km); mesajul spune tot „centrul Chișinăului”.
+- [x] ~~Centrul de rezervă e Chișinău~~: acum e Timișoara (Piața Victoriei), iar mesajele spun „centrul Timișoarei”.
 
 ## Stare care nu se salvează (se pierde la repornire)
 
