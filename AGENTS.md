@@ -31,6 +31,19 @@ Run lint and typecheck before declaring any task done.
 - Install navigation-related packages with `npx expo install` so versions match the Expo SDK.
 - Docs: https://reactnavigation.org/docs/getting-started
 
+## Layout guide
+
+- `docs/layout-guide.md` (transcribed from `docs/UI_layout_guide.pdf`) is the source of truth for **layout only**: which screens exist, which elements each has, their order and placement, and the 5 bottom tabs (Descoperă · Evenimente · Hartă · Chat · Profil).
+- It does **NOT** define the visual style. Do not copy colors, fonts, borders, shadows or the cream background from the PDF.
+- When building or changing a screen, follow its section in `docs/layout-guide.md`. If the guide and the code disagree on layout, ask before diverging.
+
+## Visual style (design language)
+
+- `docs/design-language.md` is the source of truth for **how the app looks**: dark near-black backgrounds, soft warm "aurora" gradients (orange → pink → magenta), frosted-glass surfaces with thin translucent borders, large rounded corners and pill-shaped controls, white text, a light white-to-pink gradient pill for the single primary CTA.
+- Implement it only through tokens in `src/theme/` (colors, gradients, glass surfaces, radii). Screens must not hard-code colors.
+- The reference images it was extracted from are private (`UI_design_language/`, git-ignored). Never commit them, and do not ask for them: everything needed is in `docs/design-language.md`.
+- Layout comes from `docs/layout-guide.md`, look comes from `docs/design-language.md`. Never mix them up.
+
 ## Building with EAS
 
 Use EAS to build, sign, and submit the app in the cloud (`eas build`, `eas submit`) and to ship over-the-air updates (`eas update`) — no local Xcode or Android Studio required. Run EAS CLI as `bunx eas-cli <command>` in Bun projects, or `npx eas-cli@latest <command>` otherwise; substitute that for bare `eas` in docs examples.

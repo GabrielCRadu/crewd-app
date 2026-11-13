@@ -4,8 +4,8 @@ import * as Location from 'expo-location';
 import type { LatLng } from '../types/events';
 import { haversineKm } from '../utils/distance';
 
-/** Centrul Timișoarei (Piața Victoriei). Folosit dacă nu avem locația reală. */
-export const CITY_CENTER: LatLng = { latitude: 45.7537, longitude: 21.2257 };
+/** Centrul Chișinăului (Piața Marii Adunări Naționale). Folosit dacă nu avem locația reală. */
+export const CITY_CENTER: LatLng = { latitude: 47.0245, longitude: 28.8323 };
 
 /** Dacă ești mai departe de atât de oraș, folosim centrul (ca demo-ul să aibă sens). */
 const MAX_KM_FROM_CITY = 50;
@@ -14,7 +14,7 @@ const MAX_KM_FROM_CITY = 50;
  * - loading: încă așteptăm
  * - granted: avem locația reală
  * - denied: utilizatorul a refuzat permisiunea
- * - outside-city: locația e prea departe de Timișoara
+ * - outside-city: locația e prea departe de Chișinău
  * - error: nu am putut lua locația
  */
 export type LocationStatus = 'loading' | 'granted' | 'denied' | 'outside-city' | 'error';
@@ -34,10 +34,8 @@ async function loadLocation(): Promise<UserLocation> {
       (await Location.getLastKnownPositionAsync({ maxAge: 5 * 60 * 1000 })) ??
       (await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced }));
 
+    // Folosim locația dispozitivului oriunde ar fi; CITY_CENTER e doar fallback fără permisiune.
     const coords = { latitude: position.coords.latitude, longitude: position.coords.longitude };
-    if (haversineKm(coords, CITY_CENTER) > MAX_KM_FROM_CITY) {
-      return { coords: CITY_CENTER, status: 'outside-city' };
-    }
     return { coords, status: 'granted' };
   } catch {
     return { coords: CITY_CENTER, status: 'error' };
@@ -69,11 +67,11 @@ export function useUserLocation(): UserLocation {
 export function getLocationNotice(status: LocationStatus): string | null {
   switch (status) {
     case 'denied':
-      return 'Fără acces la locație: distanțele sunt calculate de la centrul Timișoarei.';
+      return 'Fără acces la locație: distanțele sunt calculate de la centrul Chișinăului.';
     case 'outside-city':
-      return 'Ești în afara Timișoarei: distanțele sunt calculate de la centrul orașului.';
+      return 'Ești în afara Chișinăului: distanțele sunt calculate de la centrul orașului.';
     case 'error':
-      return 'Nu am putut afla locația: folosim centrul Timișoarei.';
+      return 'Nu am putut afla locația: folosim centrul Chișinăului.';
     default:
       return null;
   }
