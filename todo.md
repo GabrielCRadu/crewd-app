@@ -13,6 +13,10 @@ Actualizează lista când rezolvi ceva sau adaugi un mock nou.
 - [ ] **Prietenii**: `FRIENDS` (Hartă, „merg și ei”). Pozițiile sunt decalaje față de locația dispozitivului.
 - [ ] **Prietenii și cererile de prietenie** (Cami): `src/services/friendsService.ts`, doar în memorie (adaugă, acceptă, refuză, elimină, blochează). Profilul altei persoane și lista de prieteni folosesc `PEOPLE` prin `src/services/peopleService.ts`. Pentru Firestore trebuie un profil public separat (`users/{uid}` e privat) și o colecție de prietenii, cu reguli noi.
 - [ ] **Notificarea de cerere de prietenie** (Cami, `FriendRequestPopup`): apare în colțul din dreapta sus. DEMO: Tudor îți trimite o cerere la 8 secunde după pornire (`scheduleDemoFriendRequest` în `friendsService`); de scos când cererile vin din Firestore (onSnapshot).
+- [ ] **Prietenii altor persoane și cei comuni** (Cami): `MOCK_FRIENDSHIPS` (`src/data/mockFriendships.ts`). Cu Firebase: o colecție de prietenii vizibile.
+- [ ] **„Vă potriviți”** (Cami): cine ți-a dat „Aș mai ieși” e mock (`THEY_WOULD_GO_AGAIN` în `mockRatings.ts`); notificarea apare doar pe telefonul tău. Cu Firebase: se verifică pe server și primesc amândoi notificarea.
+- [ ] **Mesaje directe** (Cami, `directMessagesService`): doar în memorie, cu un răspuns automat DEMO după ce trimiți un eveniment. Cu Firebase: `directChats/{uidA_uidB}/messages` și reguli noi.
+- [x] ~~Reamintire cu o oră înainte de evenimentele la care ești înscris~~ (Cami, `remindersService`, `expo-notifications`): notificări locale, merg și în Expo Go.
 - [ ] **Raportarea din profilul cuiva** (meniul ⋯): se adună la totalul de rapoarte din `ratingsService`, doar în memorie.
 - [ ] **Cine merge / câți caută companie** la un eveniment: generate stabil din id (`demoSocial` în `src/services/eventsService.ts`). Trebuie calculate din înscrierile reale.
 - [ ] **Evenimente trecute pentru istoric**: `e16`–`e18` (`PAST_JOINED_EVENT_IDS` în `src/data/mockEvents.ts`), adăugate peste datele din Firestore ca să meargă istoricul și evaluările.
