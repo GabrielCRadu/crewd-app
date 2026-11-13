@@ -8,18 +8,23 @@ import Avatar from '../components/Avatar';
 import GlassIconButton from '../components/GlassIconButton';
 import GradientButton from '../components/GradientButton';
 import ScreenGlow from '../components/ScreenGlow';
+import BadgePicker from '../components/badges/BadgePicker';
 import RatingTagToggle from '../components/events/RatingTagToggle';
 import { RATING_TAGS } from '../data/ratingTags';
+import { useBadgeProposals } from '../hooks/useBadgeProposals';
 import { useEvents } from '../hooks/useEvents';
 import { useRatings } from '../hooks/useRatings';
 import { useUserLocation } from '../hooks/useUserLocation';
 import type { EventsStackParamList } from '../navigation/eventsTypes';
+import { saveEventBadgeProposals } from '../services/badgesService';
 import { getCompanions, saveEventRatings } from '../services/ratingsService';
 import { colors } from '../theme/colors';
 import { type } from '../theme/typography';
 import { glass, radii } from '../theme/shape';
+import type { EventBadgeProposals, VotedBadgeId } from '../types/badges';
 import type { EventRatings, PersonRating, RatingTag } from '../types/ratings';
 import type { Person } from '../types/social';
+import { BADGE_THRESHOLD, toggleProposal } from '../utils/badgeRules';
 import { formatLongDay } from '../utils/dates';
 
 type Props = NativeStackScreenProps<EventsStackParamList, 'RateEvent'>;
@@ -40,6 +45,9 @@ export default function RateEventScreen({ navigation, route }: Props) {
   const event = useMemo(() => events.find((e) => e.id === eventId) ?? null, [events, eventId]);
   // Pornim de la ce ai dat deja (dacă revii să modifici).
   const [draft, setDraft] = useState<EventRatings>(() => myRatings[eventId] ?? {});
+  // Badge-urile propuse (separat de tag-uri): personId → badge-uri.
+  const myBadgeProposals = useBadgeProposals();
+  const [badgeDraft, setBadgeDraft] = useState<EventBadgeProposals>(() => myBadgeProposals[eventId] ?? {});
 
   if (!event) {
     return (
@@ -59,6 +67,9 @@ export default function RateEventScreen({ navigation, route }: Props) {
     setRating(personId, { ...current, tags });
   };
 
+  const toggleBadge = (personId: string, badgeId: VotedBadgeId) =>
+    setBadgeDraft((prev) => ({ ...prev, [personId]: toggleProposal(prev[personId] ?? [], badgeId) }));
+
   // Raportul cere confirmare și șterge tag-urile pozitive date aceleiași persoane.
   const report = (person: Person) => {
     Alert.alert(
@@ -76,7 +87,12 @@ export default function RateEventScreen({ navigation, route }: Props) {
     const given = Object.fromEntries(
       Object.entries(draft).filter(([, r]) => r.reported || r.tags.length > 0),
     );
+    // Un raport anulează și badge-urile propuse aceleiași persoane.
+    const proposed = Object.fromEntries(
+      Object.entries(badgeDraft).filter(([personId, badges]) => badges.length > 0 && !draft[personId]?.reported),
+    );
     await saveEventRatings(event.id, given);
+    await saveEventBadgeProposals(event.id, proposed);
     navigation.goBack();
   };
 
@@ -98,7 +114,8 @@ export default function RateEventScreen({ navigation, route }: Props) {
         <View style={styles.notice}>
           <Ionicons name="lock-closed-outline" size={16} color={colors.text} />
           <Text style={styles.noticeText}>
-            Evaluările sunt anonime: nimeni nu află cine ce a dat. Pe profiluri apar doar totalurile.
+            Evaluările sunt anonime: nimeni nu află cine ce a dat. Pe profiluri apar doar totalurile. Un badge apare
+            abia când {BADGE_THRESHOLD} persoane diferite l-au propus.
           </Text>
         </View>
 
@@ -141,6 +158,10 @@ export default function RateEventScreen({ navigation, route }: Props) {
                         />
                       ))}
                     </View>
+                    <BadgePicker
+                      selected={badgeDraft[person.id] ?? []}
+                      onToggle={(badgeId) => toggleBadge(person.id, badgeId)}
+                    />
                     <Pressable onPress={() => report(person)} hitSlop={8} style={styles.reportButton}>
                       <Ionicons name="flag-outline" size={14} color={colors.muted} />
                       <Text style={styles.reportText}>Nu a fost ok? Raportează</Text>

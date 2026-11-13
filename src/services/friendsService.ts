@@ -75,3 +75,38 @@ export async function blockPerson(personId: string): Promise<void> {
 export async function unblockPerson(personId: string): Promise<void> {
   setStatus(personId, 'none');
 }
+
+// ---------- Cereri noi (pentru notificarea din colțul ecranului) ----------
+
+const requestListeners = new Set<(personId: string) => void>();
+
+/** Abonare la cererile de prietenie care sosesc acum. Returnează o funcție de dezabonare. */
+export function subscribeToFriendRequests(listener: (personId: string) => void): () => void {
+  requestListeners.add(listener);
+  return () => {
+    requestListeners.delete(listener);
+  };
+}
+
+/**
+ * Cineva ți-a trimis o cerere. Cu Firestore, asta ar veni dintr-un onSnapshot pe
+ * friendships unde `requestedBy` e celălalt și statusul e „pending”.
+ * Cererile de la persoane blocate sau deja prietene sunt ignorate.
+ */
+export function receiveFriendRequest(personId: string): void {
+  const current = statusOf(state, personId);
+  if (current === 'blocked' || current === 'friends' || current === 'incoming') return;
+  setStatus(personId, 'incoming');
+  requestListeners.forEach((listener) => listener(personId));
+}
+
+/** DEMO: după cât timp de la pornire îți trimite Tudor o cerere, ca să se vadă notificarea. */
+const DEMO_REQUEST_DELAY_MS = 8000;
+let demoScheduled = false;
+
+/** DEMO: programează o singură cerere de prietenie (de la Tudor), o dată pe pornire de aplicație. */
+export function scheduleDemoFriendRequest(): void {
+  if (demoScheduled) return;
+  demoScheduled = true;
+  setTimeout(() => receiveFriendRequest('p6'), DEMO_REQUEST_DELAY_MS);
+}

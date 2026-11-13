@@ -1,6 +1,12 @@
+import { useState } from 'react';
 import type { ComponentProps, ComponentType } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
-import { DarkTheme, NavigationContainer, getFocusedRouteNameFromRoute } from '@react-navigation/native';
+import {
+  DarkTheme,
+  NavigationContainer,
+  createNavigationContainerRef,
+  getFocusedRouteNameFromRoute,
+} from '@react-navigation/native';
 import type { Theme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
@@ -10,6 +16,7 @@ import EventsNavigator from './EventsNavigator';
 import FriendsMapScreen from '../screens/FriendsMapScreen';
 import ChatsNavigator from './ChatsNavigator';
 import ProfileNavigator from './ProfileNavigator';
+import FriendRequestPopup from '../components/FriendRequestPopup';
 import GradientButton from '../components/GradientButton';
 import { useAuth } from '../context/AuthContext';
 import { colors } from '../theme/colors';
@@ -48,16 +55,51 @@ const TABS: {
   { name: 'Profile', title: 'Profil', component: ProfileNavigator, icon: 'person-outline', iconActive: 'person' },
 ];
 
+/** Navigarea din afara ecranelor (ex. notificarea de cerere de prietenie). */
+const navigationRef = createNavigationContainerRef<Record<string, object | undefined>>();
+
+/** Deschide profilul unei persoane în tab-ul Profil (cu profilul tău dedesubt, pentru „înapoi”). */
+function openPersonProfile(personId: string) {
+  if (navigationRef.isReady()) {
+    navigationRef.navigate('Profile', { screen: 'PersonProfile', params: { personId }, initial: false });
+  }
+}
+
+/** Deschide lista de prieteni (cererile primite sunt sus). */
+function openFriendRequests() {
+  if (navigationRef.isReady()) {
+    navigationRef.navigate('Profile', { screen: 'FriendsList', initial: false });
+  }
+}
+
+/**
+ * Ecranele pe care stă butonul mic cu cererile de prietenie: cele principale, unde colțul din
+ * dreapta sus e liber. (Pe Profil ai deja badge-ul de la „prieteni”.)
+ */
+const REQUESTS_PILL_ROUTES = ['EventsHome', 'Map', 'ChatsHome'];
+
 /**
  * Alege ce vede utilizatorul după starea sesiunii (src/context/AuthContext.tsx):
  * se verifică sesiunea → login / creare cont → onboarding → tab-uri.
  */
 export default function RootNavigator() {
   const { status, error, retry, signOut } = useAuth();
+  // Ecranul curent (pornim pe Evenimente, primul tab), ca să știm unde arătăm butonul de cereri.
+  const [routeName, setRouteName] = useState('EventsHome');
+  const updateRoute = () => setRouteName(navigationRef.getCurrentRoute()?.name ?? 'EventsHome');
+
   return (
-    <NavigationContainer theme={theme}>
+    <NavigationContainer theme={theme} ref={navigationRef} onReady={updateRoute} onStateChange={updateRoute}>
       {status === 'ready' ? (
-        <MainTabs />
+        <>
+          <MainTabs />
+          {/* Cererile de prietenie: notificarea mare, apoi butonul mic cu numărul lor */}
+          <FriendRequestPopup
+            onOpenProfile={openPersonProfile}
+            onOpenRequests={openFriendRequests}
+            showPill={REQUESTS_PILL_ROUTES.includes(routeName)}
+          />
+        </>
       ) : status === 'signedOut' ? (
         <AuthNavigator />
       ) : status === 'needsProfile' ? (

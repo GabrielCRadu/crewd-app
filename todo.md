@@ -10,12 +10,14 @@ Actualizează lista când rezolvi ceva sau adaugi un mock nou.
 - [x] ~~Grupuri pe gustul tău (mock)~~: înlocuite de grupulețele reale (`EventGroupsSection`, `groupsService`).
 - [ ] **Blocarea după raportări** la grupulețe folosește reputația mock (`ratingsService`, `ME_ID`); se verifică doar în aplicație, nu în regulile Firestore.
 - [ ] **Anunțul „grupulețul nu s-a format”**: grupulețele expirate doar dispar din listă; nu există încă un mesaj/notificare pentru membri.
-- [ ] **Prietenii**: `FRIENDS` (Hartă, „merg și ei”). Pozițiile sunt decalaje față de locația dispozitivului.
+- [ ] **Prietenii**: `FRIENDS` (Hartă, statisticile din Profil, „merg și ei”). Pozițiile sunt decalaje față de locația dispozitivului. Harta îi citește prin `src/services/friendsMapService.ts` (statusul și „Vezi evenimentul” vin din `friendsGoing`); acolo se leagă datele reale.
 - [ ] **Prietenii și cererile de prietenie** (Cami): `src/services/friendsService.ts`, doar în memorie (adaugă, acceptă, refuză, elimină, blochează). Profilul altei persoane și lista de prieteni folosesc `PEOPLE` prin `src/services/peopleService.ts`. Pentru Firestore trebuie un profil public separat (`users/{uid}` e privat) și o colecție de prietenii, cu reguli noi.
+- [ ] **Notificarea de cerere de prietenie** (Cami, `FriendRequestPopup`): apare în colțul din dreapta sus. DEMO: Tudor îți trimite o cerere la 8 secunde după pornire (`scheduleDemoFriendRequest` în `friendsService`); de scos când cererile vin din Firestore (onSnapshot).
 - [ ] **Raportarea din profilul cuiva** (meniul ⋯): se adună la totalul de rapoarte din `ratingsService`, doar în memorie.
 - [ ] **Cine merge / câți caută companie** la un eveniment: generate stabil din id (`demoSocial` în `src/services/eventsService.ts`). Trebuie calculate din înscrierile reale.
 - [ ] **Evenimente trecute pentru istoric**: `e16`–`e18` (`PAST_JOINED_EVENT_IDS` în `src/data/mockEvents.ts`), adăugate peste datele din Firestore ca să meargă istoricul și evaluările.
 - [ ] **Evaluări și reputație**: `src/data/mockRatings.ts` + `src/services/ratingsService.ts`, doar în memorie. `ME_ID` trebuie înlocuit cu uid-ul din Auth. Raportările nu blochează încă pe nimeni.
+- [ ] **Badge-uri pe profil** (Stef): `src/services/badgesService.ts` + `src/data/mockBadges.ts`, doar în memorie. Voturile celorlalți și badge-urile automate ale altor persoane sunt mock; ale tale se calculează din istoric (`src/utils/badgeRules.ts`). Cu Firestore, numărarea celor 3 persoane diferite trebuie făcută pe server, cu reguli noi.
 - [ ] **Persoanele** (`PEOPLE`) din profilul altei persoane (`PersonProfileScreen`), folosite la evaluări și la grupulețele demo fără Firebase. (Descoperă a fost scos.)
 - [ ] **Profil demo** fără Firebase (`DEMO_PROFILE` / `MY_PROFILE`): fallback doar când lipsește `.env.local`.
 - [ ] **Evenimente mock** (`src/data/mockEvents.ts`): fallback doar când lipsește `.env.local`.
@@ -28,12 +30,13 @@ Actualizează lista când rezolvi ceva sau adaugi un mock nou.
 
 - [x] ~~Înscrierile la evenimente și scorurile tag-urilor~~: salvate în `users/{uid}` la apăsarea butonului (`joinedEventIds`, `tagScores`).
 - [ ] **Tag-uri învățate automat**: nu se adaugă încă nimic în `learnedTags` după înscrieri. Doar ștergerea funcționează.
-- [ ] **Vizibilitatea locației pentru prieteni** (switch-ul din Hartă): doar local.
+- [ ] **Vizibilitatea locației pentru prieteni** (switch-ul din Hartă): se ține minte pe dispozitiv (AsyncStorage, `friendsMapService`), dar nu ajunge în Firestore și locația nu se partajează încă nimănui.
 
 ## Butoane fără acțiune
 
 - [x] ~~Profil → Editează~~: făcut de Cami (poză, nume, oraș, bio, preferințe). Data nașterii și genul sunt blocate după onboarding.
-- [ ] Hartă → **Scrie-i** și **Vezi evenimentul** (cardul prietenului).
+- [x] ~~Hartă → **Vezi evenimentul**~~: deschide detaliile evenimentului la care merge prietenul (dezactivat dacă nu merge nicăieri).
+- [ ] Hartă → **Scrie-i**: deschide doar lista de chat-uri; nu există încă mesaje private.
 - [ ] Conversație → **Pe hartă** (bannerul „Ne vedem”).
 
 ## Neimplementat
