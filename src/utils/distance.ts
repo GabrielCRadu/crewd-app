@@ -7,19 +7,12 @@ export const FAR_KM = 5;
 
 export type DistanceLevel = 'near' | 'medium' | 'far';
 
-/** Verde / galben / roșu. Galbenul nu există în colors.ts, așa că îl definim aici. */
+/** Verde / galben / roșu, din src/theme/colors.ts. */
 export const DISTANCE_COLORS: Record<DistanceLevel, string> = {
-  near: colors.like,
-  medium: '#F5B700',
-  far: colors.nope,
+  near: colors.distanceNear,
+  medium: colors.distanceMedium,
+  far: colors.distanceFar,
 };
-
-/** Folosit de legenda de pe hartă. */
-export const DISTANCE_LEVELS: { level: DistanceLevel; label: string }[] = [
-  { level: 'near', label: `< ${NEAR_KM} km` },
-  { level: 'medium', label: `${NEAR_KM}–${FAR_KM} km` },
-  { level: 'far', label: `> ${FAR_KM} km` },
-];
 
 /**
  * Distanța în linie dreaptă între două puncte, în km (formula Haversine).
@@ -50,15 +43,4 @@ export function getDistanceColor(km: number): string {
 export function formatDistance(km: number): string {
   if (km < 1) return `${Math.round(km * 1000)} m`;
   return `${km.toFixed(1)} km`;
-}
-
-/** Zona de hartă care cuprinde ambele puncte (pentru harta mică din detalii). */
-export function regionForPoints(a: LatLng, b: LatLng) {
-  return {
-    latitude: (a.latitude + b.latitude) / 2,
-    longitude: (a.longitude + b.longitude) / 2,
-    // Puțin mai mare decât distanța dintre puncte, ca să încapă amândouă cu margine.
-    latitudeDelta: Math.max(Math.abs(a.latitude - b.latitude) * 1.8, 0.01),
-    longitudeDelta: Math.max(Math.abs(a.longitude - b.longitude) * 1.8, 0.01),
-  };
 }

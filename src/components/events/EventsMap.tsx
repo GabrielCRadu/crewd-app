@@ -1,58 +1,44 @@
 import { useEffect, useRef, useState } from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
-import { Ionicons } from '@expo/vector-icons';
 
+import GlassIconButton from '../GlassIconButton';
+import GradientButton from '../GradientButton';
+import DistanceDot from './DistanceDot';
 import type { EventWithDistance, LatLng } from '../../types/events';
 import { colors } from '../../theme/colors';
+import { darkMapStyle } from '../../theme/mapStyle';
+import { radii } from '../../theme/shape';
 import { cardShadow } from '../../theme/shadows';
 import { formatEventDate } from '../../utils/dates';
-import {
-  DISTANCE_COLORS,
-  DISTANCE_LEVELS,
-  formatDistance,
-  getDistanceColor,
-  getDistanceLevel,
-  type DistanceLevel,
-} from '../../utils/distance';
-import DistanceDot from './DistanceDot';
+import { formatDistance, getDistanceColor } from '../../utils/distance';
 
 interface Props {
   events: EventWithDistance[];
   userLocation: LatLng;
-  /** Afișăm punctul albastru „tu ești aici” doar dacă avem locația reală. */
+  /** Afișăm punctul „tu ești aici” doar dacă avem locația reală. */
   showUserLocation: boolean;
-  height: number;
   onOpenEvent: (eventId: string) => void;
 }
 
-/** Cât de mult din oraș se vede la început (în grade; ~0.1 ≈ 11 km). */
+/** Cât de mult se vede la început (în grade; ~0.1 ≈ 11 km), ca să încapă și evenimentele mai depărtate. */
 const ZOOM_DELTA = 0.1;
 
-/** Harta cu pini colorați după distanță + legendă (care e și filtru) + mini-card. */
-export default function EventsMap({ events, userLocation, showUserLocation, height, onOpenEvent }: Props) {
+/** Modul „Hartă” al tab-ului: pini colorați după distanță + card plutitor pentru pinul apăsat. */
+export default function EventsMap({ events, userLocation, showUserLocation, onOpenEvent }: Props) {
   const mapRef = useRef<MapView>(null);
-  const [hiddenLevels, setHiddenLevels] = useState<DistanceLevel[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   // Când aflăm locația reală, mutăm harta acolo.
   useEffect(() => {
-    mapRef.current?.animateToRegion(
-      { ...userLocation, latitudeDelta: ZOOM_DELTA, longitudeDelta: ZOOM_DELTA },
-      500,
-    );
+    mapRef.current?.animateToRegion({ ...userLocation, latitudeDelta: ZOOM_DELTA, longitudeDelta: ZOOM_DELTA }, 500);
   }, [userLocation.latitude, userLocation.longitude]);
 
-  const visible = events.filter((e) => !hiddenLevels.includes(getDistanceLevel(e.distanceKm)));
-  // Dacă evenimentul selectat dispare din filtre, ascundem și mini-card-ul.
-  const selected = visible.find((e) => e.id === selectedId) ?? null;
-
-  const toggleLevel = (level: DistanceLevel) => {
-    setHiddenLevels((prev) => (prev.includes(level) ? prev.filter((l) => l !== level) : [...prev, level]));
-  };
+  // Dacă evenimentul selectat dispare din filtre, ascundem și cardul.
+  const selected = events.find((e) => e.id === selectedId) ?? null;
 
   return (
-    <View style={[styles.container, { height }]}>
+    <View style={styles.container}>
       <MapView
         ref={mapRef}
         style={StyleSheet.absoluteFill}
@@ -60,8 +46,10 @@ export default function EventsMap({ events, userLocation, showUserLocation, heig
         showsUserLocation={showUserLocation}
         showsMyLocationButton={false}
         toolbarEnabled={false}
+        userInterfaceStyle="dark"
+        customMapStyle={darkMapStyle}
       >
-        {visible.map((e) => (
+        {events.map((e) => (
           <Marker
             key={e.id}
             coordinate={e.location}
@@ -71,47 +59,29 @@ export default function EventsMap({ events, userLocation, showUserLocation, heig
         ))}
       </MapView>
 
-      {/* Legenda: apasă pe o culoare ca s-o ascunzi/afișezi */}
-      <View style={styles.legend}>
-        {DISTANCE_LEVELS.map(({ level, label }) => {
-          const hidden = hiddenLevels.includes(level);
-          return (
-            <Pressable key={level} onPress={() => toggleLevel(level)} style={[styles.legendItem, hidden && styles.legendHidden]}>
-              <View style={[styles.legendDot, { backgroundColor: DISTANCE_COLORS[level] }]} />
-              <Text style={[styles.legendText, hidden && styles.legendTextHidden]}>{label}</Text>
-            </Pressable>
-          );
-        })}
-      </View>
-
-      {visible.length === 0 ? (
+      {events.length === 0 ? (
         <View style={styles.emptyOverlay} pointerEvents="none">
-          <Text style={styles.emptyText}>Niciun eveniment pentru filtrele alese</Text>
+          <Text style={styles.emptyText}>Niciun eveniment pentru categoriile alese</Text>
         </View>
       ) : null}
 
-      {/* Mini-card-ul pinului apăsat */}
+      {/* Cardul plutitor al pinului apăsat */}
       {selected ? (
-        <View style={styles.miniCard}>
-          <Image source={{ uri: selected.imageUrl }} style={styles.miniImage} />
-          <View style={styles.miniBody}>
-            <Text style={styles.miniTitle} numberOfLines={1}>
-              {selected.title}
-            </Text>
-            <Text style={styles.miniMeta}>{formatEventDate(selected.startsAt)}</Text>
-            <View style={styles.miniDistance}>
-              <DistanceDot km={selected.distanceKm} />
-              <Text style={styles.miniMeta}>{formatDistance(selected.distanceKm)}</Text>
+        <View style={styles.card}>
+          <View style={styles.cardTop}>
+            <View style={styles.cardText}>
+              <Text style={styles.cardTitle} numberOfLines={1}>
+                {selected.title}
+              </Text>
+              <View style={styles.metaRow}>
+                <Text style={styles.cardMeta}>{formatEventDate(selected.startsAt)} ·</Text>
+                <DistanceDot km={selected.distanceKm} />
+                <Text style={styles.cardMeta}>{formatDistance(selected.distanceKm)}</Text>
+              </View>
             </View>
+            <GlassIconButton icon="close" size={36} round onPress={() => setSelectedId(null)} />
           </View>
-          <View style={styles.miniActions}>
-            <Pressable onPress={() => setSelectedId(null)} hitSlop={10}>
-              <Ionicons name="close" size={18} color={colors.muted} />
-            </Pressable>
-            <Pressable onPress={() => onOpenEvent(selected.id)} style={styles.miniButton}>
-              <Text style={styles.miniButtonText}>Vezi detalii</Text>
-            </Pressable>
-          </View>
+          <GradientButton label="Vezi detalii" icon="arrow-forward" compact onPress={() => onOpenEvent(selected.id)} />
         </View>
       ) : null}
     </View>
@@ -119,56 +89,33 @@ export default function EventsMap({ events, userLocation, showUserLocation, heig
 }
 
 const styles = StyleSheet.create({
-  container: {
-    marginHorizontal: 20,
-    borderRadius: 24,
-    overflow: 'hidden',
-    backgroundColor: colors.border,
-  },
-  legend: {
-    position: 'absolute',
-    top: 12,
-    left: 12,
-    flexDirection: 'row',
-    gap: 4,
-    backgroundColor: colors.card,
-    borderRadius: 14,
-    padding: 4,
-  },
-  legendItem: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 8, paddingVertical: 5, borderRadius: 10 },
-  legendHidden: { opacity: 0.35 },
-  legendDot: { width: 10, height: 10, borderRadius: 5 },
-  legendText: { fontSize: 12, fontWeight: '600', color: colors.text },
-  legendTextHidden: { textDecorationLine: 'line-through' },
+  container: { flex: 1, marginTop: 12, backgroundColor: colors.backgroundAlt },
   emptyOverlay: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, alignItems: 'center', justifyContent: 'center' },
   emptyText: {
-    backgroundColor: colors.card,
     color: colors.muted,
-    fontWeight: '600',
+    backgroundColor: colors.surface,
     paddingHorizontal: 14,
     paddingVertical: 8,
-    borderRadius: 12,
+    borderRadius: radii.pill,
     overflow: 'hidden',
   },
-  miniCard: {
+  // Suprafață opacă (surface), ca pe tab-ul Hartă: sticla nu se citește bine peste hartă.
+  card: {
     position: 'absolute',
-    left: 12,
-    right: 12,
-    bottom: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    backgroundColor: colors.card,
-    borderRadius: 18,
-    padding: 10,
+    left: 16,
+    right: 16,
+    bottom: 16,
+    padding: 16,
+    gap: 14,
+    borderRadius: radii.card,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
     ...cardShadow,
   },
-  miniImage: { width: 60, height: 60, borderRadius: 12, backgroundColor: colors.border },
-  miniBody: { flex: 1, gap: 2 },
-  miniTitle: { fontSize: 15, fontWeight: '800', color: colors.text },
-  miniMeta: { fontSize: 12, color: colors.muted },
-  miniDistance: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  miniActions: { alignItems: 'flex-end', gap: 8 },
-  miniButton: { backgroundColor: colors.primary, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 10 },
-  miniButtonText: { color: '#fff', fontWeight: '700', fontSize: 12 },
+  cardTop: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  cardText: { flex: 1, gap: 3 },
+  cardTitle: { color: colors.text, fontSize: 17, fontWeight: '600' },
+  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  cardMeta: { color: colors.muted, fontSize: 13 },
 });
