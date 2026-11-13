@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Avatar from '../components/Avatar';
 import GradientButton from '../components/GradientButton';
 import SegmentedControl from '../components/SegmentedControl';
-import { placeMockEvents } from '../data/mockEvents';
+import { useEvents } from '../hooks/useEvents';
 import { FRIENDS, placeAround } from '../data/mockSocial';
 import { useUserLocation } from '../hooks/useUserLocation';
 import { colors } from '../theme/colors';
@@ -37,8 +37,8 @@ export default function FriendsMapScreen() {
     [location.coords],
   );
   const selected = friends.find((f) => f.id === selectedId) ?? null;
-  // Evenimentele mock stau și ele în jurul locației dispozitivului.
-  const events = useMemo(() => placeMockEvents(location.coords), [location.coords]);
+  // Aceleași evenimente ca în tab-ul Evenimente (Firestore, sau mock fără config).
+  const { events } = useEvents(location.coords);
 
   // Când aflăm locația reală, mutăm harta acolo.
   useEffect(() => {

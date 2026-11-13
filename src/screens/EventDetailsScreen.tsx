@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { ActivityIndicator, Image, Linking, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -71,8 +71,11 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
         {/* 1. Zona foto (~1/4 din ecran): aurora sub poză, umbrire jos, butonul „înapoi” și categoria */}
         <View style={[styles.hero, { height: Math.max(200, height * 0.28) }]}>
           <Aurora style={StyleSheet.absoluteFill} />
-          <Image source={{ uri: event.imageUrl }} style={StyleSheet.absoluteFill} />
+          {event.imageUrl ? <Image source={{ uri: event.imageUrl }} style={StyleSheet.absoluteFill} /> : null}
           <LinearGradient colors={gradients.scrim} style={styles.scrim} />
+          {event.imageUrl && event.imageCredit ? (
+            <Text style={styles.imageCredit}>Foto: {event.imageCredit}</Text>
+          ) : null}
           <GlassIconButton
             icon="chevron-back"
             onPress={() => navigation.goBack()}
@@ -90,12 +93,47 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
 
           {/* 3. Când | Unde: fiecare informație pe rândul ei, fără să treacă pe rândul următor */}
           <View style={styles.infoRow}>
-            <InfoBox icon="calendar-outline" label="Când" main={formatLongDay(event.startsAt)} secondary={formatTime(event.startsAt)} />
+            <InfoBox
+              icon="calendar-outline"
+              label="Când"
+              main={formatLongDay(event.startsAt)}
+              secondary={
+                event.endsAtEstimated
+                  ? formatTime(event.startsAt)
+                  : `${formatTime(event.startsAt)} – ${formatTime(event.endsAt)}`
+              }
+            />
             <InfoBox icon="location-outline" label="Unde" main={event.venueName} secondary={formatDistance(distanceKm)} />
           </View>
+          {event.timeNote ? <Text style={styles.muted}>{event.timeNote}</Text> : null}
+
+          {/* Preț, organizator, vârstă: doar ce e cunoscut */}
+          {event.priceInfo || event.organizer || event.ageRestriction || event.address ? (
+            <View style={styles.factsCard}>
+              {event.priceInfo ? (
+                <Fact icon="pricetag-outline">
+                  {event.priceInfo.label}
+                  {event.priceInfo.soldOut ? '  ·  Sold out' : ''}
+                </Fact>
+              ) : null}
+              {event.address ? <Fact icon="map-outline">{event.address}</Fact> : null}
+              {event.organizer ? <Fact icon="people-outline">Organizator: {event.organizer}</Fact> : null}
+              {event.ageRestriction ? <Fact icon="alert-circle-outline">Vârstă: {event.ageRestriction}</Fact> : null}
+            </View>
+          ) : null}
 
           {/* 4. Descrierea */}
-          <Text style={styles.description}>{event.description}</Text>
+          {event.description ? <Text style={styles.description}>{event.description}</Text> : null}
+
+          {/* Atribuire: de unde provine evenimentul (obligatoriu cât timp folosim date din surse externe) */}
+          {event.source ? (
+            <Pressable onPress={() => Linking.openURL(event.source!.url)} hitSlop={6} style={styles.sourceRow}>
+              <Ionicons name="open-outline" size={14} color={colors.faint} />
+              <Text style={styles.sourceText}>
+                Sursa: <Text style={styles.sourceLink}>{event.source.name}</Text> · verifică detaliile acolo
+              </Text>
+            </Pressable>
+          ) : null}
 
           {/* 5. Cine merge */}
           {event.friendsGoing.length > 0 ? (
@@ -148,7 +186,18 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
             </Pressable>
           </View>
         ) : (
-          <GradientButton label="Înscrie-te" icon="arrow-forward" onPress={() => joinEvent(event)} />
+          <View style={styles.ctaRow}>
+            {event.ticketUrl ? (
+              <Pressable
+                onPress={() => Linking.openURL(event.ticketUrl!)}
+                style={({ pressed }) => [styles.ticketButton, pressed && styles.pressed]}
+              >
+                <Ionicons name="ticket-outline" size={18} color={colors.text} />
+                <Text style={styles.ticketText}>{event.priceInfo?.isFree ? 'Înscriere' : 'Bilete'}</Text>
+              </Pressable>
+            ) : null}
+            <GradientButton label="Înscrie-te" icon="arrow-forward" onPress={() => joinEvent(event)} style={styles.ctaMain} />
+          </View>
         )}
       </View>
     </View>
@@ -176,8 +225,37 @@ function InfoBox({ icon, label, main, secondary }: { icon: IconName; label: stri
   );
 }
 
+/** Un rând de informație cu iconiță (preț, adresă, organizator, vârstă). */
+function Fact({ icon, children }: { icon: IconName; children: React.ReactNode }) {
+  return (
+    <View style={styles.factRow}>
+      <Ionicons name={icon} size={16} color={colors.muted} />
+      <Text style={styles.factText}>{children}</Text>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
+  imageCredit: { position: 'absolute', right: 12, bottom: 8, fontSize: 10, color: colors.faint },
+  factsCard: { ...glass, padding: 14, gap: 10, borderRadius: radii.inner },
+  factRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
+  factText: { flex: 1, fontSize: 14, lineHeight: 20, color: colors.text },
+  sourceRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  sourceText: { flex: 1, fontSize: 12, color: colors.faint },
+  sourceLink: { color: colors.muted, textDecorationLine: 'underline' },
+  ctaRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  ctaMain: { flex: 1 },
+  ticketButton: {
+    ...glass,
+    height: 58,
+    paddingHorizontal: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    borderRadius: radii.pill,
+  },
+  ticketText: { color: colors.text, fontSize: 16, fontWeight: '500' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
   content: { paddingBottom: 24 },
   hero: { overflow: 'hidden', backgroundColor: colors.backgroundAlt },

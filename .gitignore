@@ -43,3 +43,13 @@ yarn-error.*
 
 # Referințe vizuale private (aspectul e extras în docs/design-language.md)
 UI_design_language/
+
+# Firebase: cheia contului de serviciu (folosită doar de scripts/import-events.mjs) și config-ul local
+service-account*.json
+*-firebase-adminsdk-*.json
+.env
+.env.local
+
+# Datele de evenimente preluate din surse externe: doar pentru import în Firestore (demo intern), nu în repo
+evenimente-timisoara*.json
+scripts/data/

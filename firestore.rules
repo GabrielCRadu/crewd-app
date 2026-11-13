@@ -1,0 +1,25 @@
+rules_version = '2';
+
+// Reguli Firestore pentru Crewd.
+// Se aplică din Firebase Console → Firestore Database → Rules (copiază tot fișierul) sau cu `firebase deploy --only firestore:rules`.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Evenimentele: oricine le poate citi; scrierea se face doar prin scripts/import-events.mjs
+    // (firebase-admin cu cheia contului de serviciu, care ocolește aceste reguli).
+    match /events/{eventId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Informații despre import (data colectării, numărul de evenimente).
+    match /meta/{docId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Orice altceva e închis până adăugăm reguli explicite (ex. users/{uid} după autentificare).
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -13,8 +13,30 @@ import { placeAround } from './mockSocial';
  * - Afișele sunt imagini placeholder de pe picsum.photos; înlocuiește `imageUrl`.
  */
 
+/** Câmpurile pe care datele mock nu le au (vin doar din Firestore). */
+type ExtraFields =
+  | 'endsAtEstimated'
+  | 'timeNote'
+  | 'imageCredit'
+  | 'priceInfo'
+  | 'organizer'
+  | 'ageRestriction'
+  | 'ticketUrl'
+  | 'source';
+
 /** Un eveniment mock: ca Event, dar cu poziția relativă la dispozitiv în loc de coordonate. */
-type MockEvent = Omit<Event, 'location'> & { offset: LatLng };
+type MockEvent = Omit<Event, 'location' | ExtraFields> & { offset: LatLng };
+
+const MOCK_DEFAULTS: Pick<Event, ExtraFields> = {
+  endsAtEstimated: false,
+  timeNote: null,
+  imageCredit: null,
+  priceInfo: null,
+  organizer: null,
+  ageRestriction: null,
+  ticketUrl: null,
+  source: null,
+};
 
 const now = new Date();
 const HOUR = 60 * 60 * 1000;
@@ -276,5 +298,9 @@ const MOCK_EVENTS: MockEvent[] = [
 
 /** Evenimentele mock așezate în jurul locației date (de obicei, locația dispozitivului). */
 export function placeMockEvents(center: LatLng): Event[] {
-  return MOCK_EVENTS.map(({ offset, ...event }) => ({ ...event, location: placeAround(center, offset) }));
+  return MOCK_EVENTS.map(({ offset, ...event }) => ({
+    ...MOCK_DEFAULTS,
+    ...event,
+    location: placeAround(center, offset),
+  }));
 }

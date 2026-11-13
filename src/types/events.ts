@@ -17,9 +17,27 @@ export type CategoryId =
   | 'film'
   | 'party'
   | 'standup'
+  | 'ateliere'
   | 'sport'
   | 'social'
   | 'studenti';
+
+/** Prețul unui eveniment, cum e anunțat de organizator. */
+export interface EventPrice {
+  isFree: boolean;
+  /** În lei; null = necunoscut. */
+  min: number | null;
+  max: number | null;
+  /** Textul afișat, ex. „80–120 lei” sau „Gratuit, cu înscriere”. */
+  label: string;
+  soldOut: boolean;
+}
+
+/** De unde provine evenimentul (atribuire obligatorie în interfață). */
+export interface EventSource {
+  name: string;
+  url: string;
+}
 
 export interface Category {
   id: CategoryId;
@@ -39,17 +57,30 @@ export interface Event {
   category: CategoryId;
   /** Tag-uri folosite pentru preferințe; aceleași denumiri ca în profil (ex. „Concerte”, „Jazz”). */
   tags: string[];
-  /** În Firestore vor fi Timestamp; le transformăm în Date cu `.toDate()`. */
+  /** În Firestore sunt Timestamp; le transformăm în Date cu `.toDate()`. */
   startsAt: Date;
   endsAt: Date;
+  /** true când organizatorul nu a anunțat ora de final și `endsAt` e estimat. */
+  endsAtEstimated: boolean;
+  /** Ex. „Accesul de la 20:00, concertul începe la 21:00”. */
+  timeNote: string | null;
   venueName: string;
   address: string;
-  /** În Firestore: GeoPoint sau un obiect { latitude, longitude }. */
+  /** În Firestore: GeoPoint. */
   location: LatLng;
-  /** Link către afiș. */
+  /** Link către afiș (poate fi gol). */
   imageUrl: string;
-  /** Preț în lei. 0 = gratuit, null = necunoscut. */
+  /** Cui aparține imaginea (atribuire). */
+  imageCredit: string | null;
+  /** Preț minim în lei. 0 = gratuit, null = necunoscut. Detaliile sunt în `priceInfo`. */
   price: number | null;
+  priceInfo: EventPrice | null;
+  organizer: string | null;
+  /** Ex. „18+”. */
+  ageRestriction: string | null;
+  /** Unde se cumpără bilete sau unde te înscrii. */
+  ticketUrl: string | null;
+  source: EventSource | null;
   /** Numele prietenilor care merg (mai târziu: calculat din lista de prieteni a utilizatorului). */
   friendsGoing: string[];
   /** Câte persoane caută cu cine să meargă. */

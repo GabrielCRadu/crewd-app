@@ -44,6 +44,13 @@ Run lint and typecheck before declaring any task done.
 - The reference images it was extracted from are private (`UI_design_language/`, git-ignored). Never commit them, and do not ask for them: everything needed is in `docs/design-language.md`.
 - Layout comes from `docs/layout-guide.md`, look comes from `docs/design-language.md`. Never mix them up.
 
+## Data (Firebase)
+
+- Events come from Firestore via the Firebase JS SDK. Setup, import script and schema are in `docs/firebase.md`.
+- Screens never talk to Firestore directly: use `src/services/*Service.ts` and the hooks in `src/hooks/`.
+- Firebase config lives in `.env.local` (`EXPO_PUBLIC_FIREBASE_*`), never in code. Never commit `.env.local`, `service-account*.json` or the raw event JSON files (all git-ignored).
+- Event data from external sources must keep visible attribution (`source`, `imageCredit`) in the UI.
+
 ## Building with EAS
 
 Use EAS to build, sign, and submit the app in the cloud (`eas build`, `eas submit`) and to ship over-the-air updates (`eas update`) — no local Xcode or Android Studio required. Run EAS CLI as `bunx eas-cli <command>` in Bun projects, or `npx eas-cli@latest <command>` otherwise; substitute that for bare `eas` in docs examples.

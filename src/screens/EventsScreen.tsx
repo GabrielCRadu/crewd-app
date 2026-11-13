@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -31,7 +31,7 @@ type Mode = 'list' | 'map';
  */
 export default function EventsScreen({ navigation }: Props) {
   const location = useUserLocation();
-  const { events } = useEvents(location.coords);
+  const { events, loading, error } = useEvents(location.coords);
   const preferences = usePreferences();
 
   const [mode, setMode] = useState<Mode>('list');
@@ -82,6 +82,13 @@ export default function EventsScreen({ navigation }: Props) {
         </View>
       ) : null}
 
+      {error ? (
+        <View style={styles.notice}>
+          <Ionicons name="cloud-offline-outline" size={16} color={colors.text} />
+          <Text style={styles.noticeText}>{error}</Text>
+        </View>
+      ) : null}
+
       {mode === 'map' ? (
         <EventsMap
           events={visible}
@@ -96,7 +103,9 @@ export default function EventsScreen({ navigation }: Props) {
           ) : null}
 
           <Text style={styles.sectionTitle}>Urmează</Text>
-          {upcoming.length === 0 ? (
+          {loading ? (
+            <ActivityIndicator color={colors.text} style={styles.loader} />
+          ) : upcoming.length === 0 ? (
             <Text style={styles.empty}>Niciun eveniment pentru categoriile alese.</Text>
           ) : (
             upcoming.map((e) => (
@@ -133,4 +142,5 @@ const styles = StyleSheet.create({
   content: { padding: 20, paddingTop: 16, paddingBottom: 32, gap: 12 },
   sectionTitle: { fontSize: 18, fontWeight: '600', color: colors.text, marginTop: 10 },
   empty: { fontSize: 14, color: colors.muted },
+  loader: { marginTop: 24 },
 });

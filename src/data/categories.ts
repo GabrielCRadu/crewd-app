@@ -8,6 +8,7 @@ export const CATEGORIES: Category[] = [
   { id: 'teatru', label: 'Teatru', icon: 'happy-outline' },
   { id: 'social', label: 'Socializare', icon: 'people-outline' },
   { id: 'standup', label: 'Stand-up', icon: 'mic-outline' },
+  { id: 'ateliere', label: 'Ateliere', icon: 'color-palette-outline' },
   { id: 'sport', label: 'Sport', icon: 'football-outline' },
   { id: 'studenti', label: 'Studenți', icon: 'school-outline' },
 ];
