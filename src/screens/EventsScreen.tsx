@@ -15,8 +15,7 @@ import { usePreferences } from '../hooks/usePreferences';
 import { getLocationNotice, useUserLocation } from '../hooks/useUserLocation';
 import type { EventsStackParamList } from '../navigation/eventsTypes';
 import { getRecommendedEvents, isJoined, joinEvent } from '../services/preferencesService';
-import { colors } from '../theme/colors';
-import { fonts, ui } from '../theme/eventsTheme';
+import { fonts, palette, ui } from '../theme/eventsTheme';
 import type { CategoryId, Period } from '../types/events';
 import { getCurrentWeekPeriod, isLive } from '../utils/dates';
 import { addDistance, filterEvents, isUpcomingOrLive } from '../utils/eventFilters';
@@ -60,12 +59,12 @@ export default function EventsScreen({ navigation }: Props) {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <Text style={styles.title}>Evenimente</Text>
-          {loading || location.status === 'loading' ? <ActivityIndicator color={colors.primary} /> : null}
+          {loading || location.status === 'loading' ? <ActivityIndicator color={palette.ink} /> : null}
         </View>
 
         {locationNotice ? (
           <View style={styles.notice}>
-            <Ionicons name="information-circle-outline" size={16} color={colors.muted} />
+            <Ionicons name="information-circle-outline" size={16} color={palette.muted} />
             <Text style={styles.noticeText}>{locationNotice}</Text>
           </View>
         ) : null}
@@ -103,9 +102,9 @@ export default function EventsScreen({ navigation }: Props) {
           onPress={() => navigation.navigate('EventsList', { period, categoryIds })}
           style={({ pressed }) => [styles.allButton, pressed && styles.pressed]}
         >
-          <Raised color={ui.accent} radius={22} contentStyle={styles.allButtonInner}>
+          <Raised color={ui.cta} radius={22} contentStyle={styles.allButtonInner}>
             <Text style={styles.allButtonText}>Vezi toate evenimentele ({filtered.length})</Text>
-            <Ionicons name="arrow-forward" size={20} color={ui.onAccent} />
+            <Ionicons name="arrow-forward" size={20} color={palette.ink} />
           </Raised>
         </Pressable>
 
@@ -122,7 +121,7 @@ export default function EventsScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
+  safe: { flex: 1, backgroundColor: palette.background },
   content: { paddingBottom: 32 },
   header: {
     flexDirection: 'row',
@@ -132,7 +131,7 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     paddingBottom: 16,
   },
-  title: { fontFamily: fonts.display, fontSize: 38, color: colors.text, letterSpacing: -0.5 },
+  title: { fontFamily: fonts.display, fontSize: 38, color: palette.ink, letterSpacing: -0.5 },
   notice: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -142,13 +141,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 14,
-    backgroundColor: colors.card,
+    borderWidth: ui.outlineWidth,
+    borderColor: ui.outline,
+    backgroundColor: palette.card,
   },
-  noticeText: { flex: 1, fontSize: 12, fontFamily: fonts.semibold, color: colors.muted },
+  noticeText: { flex: 1, fontSize: 12, fontFamily: fonts.semibold, color: palette.muted },
   sectionTitle: {
     fontFamily: fonts.display,
     fontSize: 22,
-    color: colors.text,
+    color: palette.ink,
     marginHorizontal: 20,
     marginTop: 26,
     marginBottom: 12,
@@ -161,6 +162,6 @@ const styles = StyleSheet.create({
     gap: 10,
     paddingVertical: 18,
   },
-  allButtonText: { color: ui.onAccent, fontSize: 17, fontFamily: fonts.display },
+  allButtonText: { color: palette.ink, fontSize: 17, fontFamily: fonts.display },
   pressed: { opacity: 0.85 },
 });

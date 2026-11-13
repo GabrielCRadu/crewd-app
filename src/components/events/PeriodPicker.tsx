@@ -2,8 +2,7 @@ import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import type { Period } from '../../types/events';
-import { colors } from '../../theme/colors';
-import { fonts, ui } from '../../theme/eventsTheme';
+import { fonts, palette, ui } from '../../theme/eventsTheme';
 import {
   getMonthPeriod,
   getNowPeriod,
@@ -96,7 +95,7 @@ const styles = StyleSheet.create({
   container: { gap: 14 },
   wrapRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingHorizontal: 20 },
   row: { paddingHorizontal: 20, gap: 8 },
-  // Rândul de luni arată ca un comutator: o „șină” cu contur și luna activă umplută.
+  // Rândul de luni arată ca un comutator: o „șină” cu contur și luna activă umplută cu galben.
   monthsTrack: {
     marginHorizontal: 20,
     padding: 4,
@@ -104,10 +103,16 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     borderWidth: ui.outlineWidth,
     borderColor: ui.outline,
-    backgroundColor: colors.card,
+    backgroundColor: palette.card,
   },
-  month: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 14, borderWidth: ui.outlineWidth, borderColor: 'transparent' },
-  monthActive: { backgroundColor: ui.accent, borderColor: ui.accent },
-  monthText: { fontFamily: fonts.extrabold, fontSize: 15, color: colors.muted },
-  monthTextActive: { color: ui.onAccent },
+  month: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 14,
+    borderWidth: ui.outlineWidth,
+    borderColor: 'transparent',
+  },
+  monthActive: { backgroundColor: ui.selected, borderColor: ui.outline },
+  monthText: { fontFamily: fonts.extrabold, fontSize: 15, color: palette.muted },
+  monthTextActive: { color: palette.ink },
 });

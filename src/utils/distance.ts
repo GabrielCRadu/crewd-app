@@ -1,5 +1,5 @@
 import type { LatLng } from '../types/events';
-import { colors } from '../theme/colors';
+import { palette } from '../theme/eventsTheme';
 
 /** Pragurile de distanță (km) pentru culorile pinilor. */
 export const NEAR_KM = 2;
@@ -7,11 +7,11 @@ export const FAR_KM = 5;
 
 export type DistanceLevel = 'near' | 'medium' | 'far';
 
-/** Verde / galben / roșu. Galbenul nu există în colors.ts, așa că îl definim aici. */
+/** Verde / galben / roșu (puțin diferite de galbenul și coralul din machetă, ca să nu se confunde). */
 export const DISTANCE_COLORS: Record<DistanceLevel, string> = {
-  near: colors.like,
-  medium: '#F5B700',
-  far: colors.nope,
+  near: palette.green,
+  medium: '#F5A300',
+  far: '#E5484D',
 };
 
 /** Folosit de legenda de pe hartă. */

@@ -15,16 +15,15 @@ import { usePreferences } from '../hooks/usePreferences';
 import { useUserLocation } from '../hooks/useUserLocation';
 import type { EventsStackParamList } from '../navigation/eventsTypes';
 import { isJoined, joinEvent, leaveEvent } from '../services/preferencesService';
-import { colors } from '../theme/colors';
-import { fonts, ui } from '../theme/eventsTheme';
+import { fonts, palette, ui } from '../theme/eventsTheme';
 import { formatEventDateRange, isLive } from '../utils/dates';
 import { formatDistance, getDistanceColor, haversineKm, regionForPoints } from '../utils/distance';
 import { formatPrice } from '../utils/format';
 
 type Props = NativeStackScreenProps<EventsStackParamList, 'EventDetails'>;
 
-/** Culori pentru avatarele prietenilor (se repetă dacă sunt mulți). */
-const AVATAR_COLORS = [ui.accent, colors.card, ui.live];
+/** Culori pentru avatarele prietenilor, ca în machetă: galben, alb, coral (se repetă dacă sunt mulți). */
+const AVATAR_COLORS = [palette.yellow, palette.card, palette.coral];
 
 /** „Ana merge”, „Ana și Mihai merg și ei”, „Ana, Mihai și încă 3 merg și ei”. */
 function friendsText(names: string[]): string {
@@ -47,7 +46,7 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
     return (
       <View style={styles.center}>
         {loading ? (
-          <ActivityIndicator color={colors.primary} />
+          <ActivityIndicator color={palette.ink} />
         ) : (
           <Text style={styles.muted}>Evenimentul nu a fost găsit.</Text>
         )}
@@ -77,7 +76,7 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
           </View>
           <View style={styles.heroBottom}>
             <Pill label={category.label} icon={category.icon} active size="sm" />
-            {isLive(event) ? <LiveBadge label="ACUM" /> : null}
+            {isLive(event) ? <LiveBadge /> : null}
           </View>
         </View>
 
@@ -119,9 +118,7 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
                   const bg = AVATAR_COLORS[i % AVATAR_COLORS.length];
                   return (
                     <View key={name} style={[styles.avatar, { backgroundColor: bg, marginLeft: i === 0 ? 0 : -12 }]}>
-                      <Text style={[styles.avatarText, { color: bg === colors.card ? colors.text : colors.background }]}>
-                        {name[0]}
-                      </Text>
+                      <Text style={styles.avatarText}>{name[0]}</Text>
                     </View>
                   );
                 })}
@@ -133,7 +130,7 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
           )}
           {event.lookingForCompanyCount > 0 ? (
             <Raised radius={18} offset={0} contentStyle={styles.looking}>
-              <Ionicons name="people" size={20} color={ui.accent} />
+              <Ionicons name="people" size={20} color={palette.ink} />
               <Text style={styles.lookingText}>
                 {event.lookingForCompanyCount}{' '}
                 {event.lookingForCompanyCount === 1 ? 'persoană caută' : 'persoane caută'} cu cine să meargă
@@ -154,11 +151,11 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
               rotateEnabled={false}
               pitchEnabled={false}
               toolbarEnabled={false}
-              userInterfaceStyle="dark"
+              userInterfaceStyle="light"
             >
               <Polyline
                 coordinates={[location.coords, event.location]}
-                strokeColor={ui.accent}
+                strokeColor={palette.ink}
                 strokeWidth={3}
                 lineDashPattern={[6, 6]}
               />
@@ -175,7 +172,7 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
                 </Text>
               </View>
               <Pressable onPress={openDirections} style={styles.directions}>
-                <Ionicons name="navigate" size={14} color={colors.text} />
+                <Ionicons name="navigate" size={14} color={palette.ink} />
                 <Text style={styles.directionsText}>Google Maps</Text>
               </Pressable>
             </View>
@@ -187,8 +184,8 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
       <View style={styles.bottomBar}>
         {joined ? (
           <View style={styles.joinedRow}>
-            <Raised color={colors.card} radius={22} style={styles.flex} contentStyle={styles.ctaInner}>
-              <Text style={[styles.ctaText, { color: colors.like }]}>Înscris ✓</Text>
+            <Raised color={palette.yellow} radius={22} style={styles.flex} contentStyle={styles.ctaInner}>
+              <Text style={styles.ctaText}>Înscris ✓</Text>
             </Raised>
             <Pressable onPress={() => leaveEvent(event)} hitSlop={8}>
               <Text style={styles.cancel}>Anulează</Text>
@@ -196,7 +193,7 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
           </View>
         ) : (
           <Pressable onPress={() => joinEvent(event)} style={({ pressed }) => pressed && styles.pressed}>
-            <Raised color={ui.accent} radius={22} contentStyle={styles.ctaInner}>
+            <Raised color={ui.cta} radius={22} contentStyle={styles.ctaInner}>
               <Text style={styles.ctaText}>Mă înscriu{price ? ` · ${price}` : ''}</Text>
             </Raised>
           </Pressable>
@@ -207,24 +204,24 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
+  screen: { flex: 1, backgroundColor: palette.background },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: palette.background },
   content: { paddingBottom: 24 },
   flex: { flex: 1 },
   hero: { borderBottomWidth: ui.outlineWidth, borderBottomColor: ui.outline },
-  poster: { width: '100%', aspectRatio: 4 / 3, backgroundColor: colors.border },
+  poster: { width: '100%', aspectRatio: 4 / 3, backgroundColor: ui.placeholder },
   back: { position: 'absolute', left: 20 },
   heroBottom: { position: 'absolute', left: 20, bottom: 16, flexDirection: 'row', gap: 8, alignItems: 'center' },
   body: { padding: 20, gap: 14 },
-  title: { fontFamily: fonts.display, fontSize: 34, lineHeight: 38, color: colors.text, letterSpacing: -0.5 },
+  title: { fontFamily: fonts.display, fontSize: 34, lineHeight: 38, color: palette.ink, letterSpacing: -0.5 },
   infoRow: { flexDirection: 'row', gap: 12 },
   infoBox: { padding: 14, gap: 2, flexGrow: 1 },
-  infoLabel: { fontFamily: fonts.bold, fontSize: 13, color: colors.muted },
-  infoValue: { fontFamily: fonts.extrabold, fontSize: 15, color: colors.text },
-  muted: { fontFamily: fonts.semibold, fontSize: 13, color: colors.muted },
-  description: { fontFamily: fonts.semibold, fontSize: 16, lineHeight: 23, color: colors.muted },
+  infoLabel: { fontFamily: fonts.bold, fontSize: 13, color: palette.muted },
+  infoValue: { fontFamily: fonts.extrabold, fontSize: 15, color: palette.ink },
+  muted: { fontFamily: fonts.semibold, fontSize: 13, color: palette.muted },
+  description: { fontFamily: fonts.semibold, fontSize: 16, lineHeight: 23, color: palette.muted },
   tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  prefsNote: { fontFamily: fonts.bold, fontSize: 12, color: colors.like },
+  prefsNote: { fontFamily: fonts.bold, fontSize: 12, color: palette.green },
   friendsRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   avatars: { flexDirection: 'row' },
   avatar: {
@@ -232,15 +229,15 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: 22,
     borderWidth: ui.outlineWidth,
-    borderColor: colors.background,
+    borderColor: ui.outline,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  avatarText: { fontFamily: fonts.extrabold, fontSize: 17 },
-  friendsText: { flex: 1, fontFamily: fonts.extrabold, fontSize: 14, color: colors.text },
+  avatarText: { fontFamily: fonts.extrabold, fontSize: 17, color: palette.ink },
+  friendsText: { flex: 1, fontFamily: fonts.extrabold, fontSize: 14, color: palette.ink },
   looking: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 14 },
-  lookingText: { flex: 1, fontFamily: fonts.bold, fontSize: 14, color: colors.text },
-  sectionTitle: { fontFamily: fonts.display, fontSize: 22, color: colors.text, marginTop: 8 },
+  lookingText: { flex: 1, fontFamily: fonts.bold, fontSize: 14, color: palette.ink },
+  sectionTitle: { fontFamily: fonts.display, fontSize: 22, color: palette.ink, marginTop: 8 },
   miniMap: { width: '100%', height: 180 },
   mapFooter: {
     flexDirection: 'row',
@@ -260,19 +257,19 @@ const styles = StyleSheet.create({
     borderWidth: ui.outlineWidth,
     borderColor: ui.outline,
   },
-  directionsText: { fontFamily: fonts.extrabold, fontSize: 13, color: colors.text },
+  directionsText: { fontFamily: fonts.extrabold, fontSize: 13, color: palette.ink },
   userDot: { width: 16, height: 16, borderRadius: 8, backgroundColor: '#2D7FF9', borderWidth: 3, borderColor: '#fff' },
   bottomBar: {
     paddingHorizontal: 20,
     paddingTop: 14,
     paddingBottom: 14,
-    backgroundColor: colors.background,
+    backgroundColor: palette.background,
     borderTopWidth: ui.outlineWidth,
     borderTopColor: ui.outline,
   },
   joinedRow: { flexDirection: 'row', alignItems: 'center', gap: 16 },
   ctaInner: { alignItems: 'center', justifyContent: 'center', paddingVertical: 18 },
-  ctaText: { fontFamily: fonts.display, fontSize: 20, color: ui.onAccent },
-  cancel: { fontFamily: fonts.extrabold, fontSize: 15, color: colors.nope },
+  ctaText: { fontFamily: fonts.display, fontSize: 20, color: palette.ink },
+  cancel: { fontFamily: fonts.extrabold, fontSize: 15, color: '#D93A3A', textDecorationLine: 'underline' },
   pressed: { opacity: 0.85 },
 });

@@ -4,8 +4,7 @@ import MapView, { Marker } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 
 import type { EventWithDistance, LatLng } from '../../types/events';
-import { colors } from '../../theme/colors';
-import { fonts, ui } from '../../theme/eventsTheme';
+import { fonts, palette, ui } from '../../theme/eventsTheme';
 import { formatEventDate } from '../../utils/dates';
 import {
   DISTANCE_COLORS,
@@ -61,7 +60,7 @@ export default function EventsMap({ events, userLocation, showUserLocation, heig
         showsUserLocation={showUserLocation}
         showsMyLocationButton={false}
         toolbarEnabled={false}
-        userInterfaceStyle="dark"
+        userInterfaceStyle="light"
       >
         {visible.map((e) => (
           <Marker
@@ -109,7 +108,7 @@ export default function EventsMap({ events, userLocation, showUserLocation, heig
             </View>
             <View style={styles.miniActions}>
               <Pressable onPress={() => setSelectedId(null)} hitSlop={10}>
-                <Ionicons name="close" size={18} color={colors.muted} />
+                <Ionicons name="close" size={18} color={palette.muted} />
               </Pressable>
               <Pressable onPress={() => onOpenEvent(selected.id)} style={styles.miniButton}>
                 <Text style={styles.miniButtonText}>Vezi detalii</Text>
@@ -130,7 +129,7 @@ const styles = StyleSheet.create({
     left: 12,
     flexDirection: 'row',
     gap: 2,
-    backgroundColor: colors.card,
+    backgroundColor: palette.card,
     borderRadius: 999,
     borderWidth: ui.outlineWidth,
     borderColor: ui.outline,
@@ -139,12 +138,12 @@ const styles = StyleSheet.create({
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 999 },
   legendHidden: { opacity: 0.35 },
   legendDot: { width: 10, height: 10, borderRadius: 5 },
-  legendText: { fontSize: 12, fontFamily: fonts.bold, color: colors.text },
+  legendText: { fontSize: 12, fontFamily: fonts.bold, color: palette.ink },
   legendTextHidden: { textDecorationLine: 'line-through' },
   emptyOverlay: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, alignItems: 'center', justifyContent: 'center' },
   emptyText: {
-    backgroundColor: colors.card,
-    color: colors.muted,
+    backgroundColor: palette.card,
+    color: palette.muted,
     fontFamily: fonts.bold,
     paddingHorizontal: 14,
     paddingVertical: 8,
@@ -155,17 +154,26 @@ const styles = StyleSheet.create({
   },
   miniWrap: { position: 'absolute', left: 12, right: 12, bottom: 12 },
   miniCard: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 10 },
-  miniImage: { width: 60, height: 60, borderRadius: 12, backgroundColor: colors.border },
+  miniImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 12,
+    backgroundColor: ui.placeholder,
+    borderWidth: ui.outlineWidth,
+    borderColor: ui.outline,
+  },
   miniBody: { flex: 1, gap: 2 },
-  miniTitle: { fontSize: 16, fontFamily: fonts.display, color: colors.text },
-  miniMeta: { fontSize: 12, fontFamily: fonts.semibold, color: colors.muted },
+  miniTitle: { fontSize: 16, fontFamily: fonts.display, color: palette.ink },
+  miniMeta: { fontSize: 12, fontFamily: fonts.semibold, color: palette.muted },
   miniDistance: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   miniActions: { alignItems: 'flex-end', gap: 8 },
   miniButton: {
-    backgroundColor: ui.accent,
+    backgroundColor: ui.cta,
     paddingHorizontal: 12,
     paddingVertical: 7,
     borderRadius: 12,
+    borderWidth: ui.outlineWidth,
+    borderColor: ui.outline,
   },
-  miniButtonText: { color: ui.onAccent, fontFamily: fonts.extrabold, fontSize: 12 },
+  miniButtonText: { color: palette.ink, fontFamily: fonts.extrabold, fontSize: 12 },
 });

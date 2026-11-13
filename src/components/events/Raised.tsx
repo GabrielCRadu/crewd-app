@@ -1,8 +1,7 @@
 import type { ReactNode } from 'react';
 import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
-import { colors } from '../../theme/colors';
-import { ui } from '../../theme/eventsTheme';
+import { palette, ui } from '../../theme/eventsTheme';
 
 interface Props {
   children: ReactNode;
@@ -22,7 +21,14 @@ interface Props {
  * Umbra e un View desenat în spatele conținutului, decalat în jos-dreapta,
  * așa că arată la fel pe iOS și pe Android.
  */
-export default function Raised({ children, color = colors.card, radius = ui.radius, offset = ui.shadowOffset, style, contentStyle }: Props) {
+export default function Raised({
+  children,
+  color = palette.card,
+  radius = ui.radius,
+  offset = ui.shadowOffset,
+  style,
+  contentStyle,
+}: Props) {
   return (
     <View style={[{ marginRight: offset, marginBottom: offset }, style]}>
       {offset > 0 ? (

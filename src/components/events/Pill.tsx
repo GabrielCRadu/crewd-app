@@ -2,8 +2,7 @@ import { Pressable, StyleSheet, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import type { IconName } from '../../types/events';
-import { colors } from '../../theme/colors';
-import { fonts, ui } from '../../theme/eventsTheme';
+import { fonts, palette, ui } from '../../theme/eventsTheme';
 
 interface Props {
   label: string;
@@ -14,9 +13,8 @@ interface Props {
   size?: 'sm' | 'md';
 }
 
-/** Chip rotund cu contur (filtre, categorii, tag-uri). Selectat = umplut cu accent. */
+/** Chip rotund cu contur (filtre, categorii, tag-uri). Selectat = galben, ca în machetă. */
 export default function Pill({ label, active = false, icon, onPress, size = 'md' }: Props) {
-  const color = active ? ui.onAccent : colors.text;
   return (
     <Pressable
       onPress={onPress}
@@ -28,8 +26,8 @@ export default function Pill({ label, active = false, icon, onPress, size = 'md'
         pressed && styles.pressed,
       ]}
     >
-      {icon ? <Ionicons name={icon} size={size === 'sm' ? 13 : 16} color={color} /> : null}
-      <Text style={[styles.label, size === 'sm' && styles.labelSmall, { color }]}>{label}</Text>
+      {icon ? <Ionicons name={icon} size={size === 'sm' ? 13 : 16} color={palette.ink} /> : null}
+      <Text style={[styles.label, size === 'sm' && styles.labelSmall]}>{label}</Text>
     </Pressable>
   );
 }
@@ -44,11 +42,11 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     borderWidth: ui.outlineWidth,
     borderColor: ui.outline,
-    backgroundColor: colors.card,
+    backgroundColor: palette.card,
   },
   small: { paddingHorizontal: 11, paddingVertical: 5 },
-  active: { backgroundColor: ui.accent, borderColor: ui.accent },
+  active: { backgroundColor: ui.selected },
   pressed: { opacity: 0.8 },
-  label: { fontFamily: fonts.extrabold, fontSize: 15 },
+  label: { fontFamily: fonts.extrabold, fontSize: 15, color: palette.ink },
   labelSmall: { fontSize: 13 },
 });

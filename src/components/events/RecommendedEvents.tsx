@@ -1,8 +1,7 @@
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import type { EventWithDistance } from '../../types/events';
-import { colors } from '../../theme/colors';
-import { fonts, ui } from '../../theme/eventsTheme';
+import { fonts, palette, ui } from '../../theme/eventsTheme';
 import { formatEventDate } from '../../utils/dates';
 import { formatDistance } from '../../utils/distance';
 import DistanceDot from './DistanceDot';
@@ -47,12 +46,12 @@ const styles = StyleSheet.create({
   image: {
     width: '100%',
     height: 110,
-    backgroundColor: colors.border,
+    backgroundColor: ui.placeholder,
     borderBottomWidth: ui.outlineWidth,
     borderBottomColor: ui.outline,
   },
   body: { padding: 10, gap: 3 },
-  title: { fontSize: 16, fontFamily: fonts.display, color: colors.text },
-  meta: { fontSize: 12, fontFamily: fonts.semibold, color: colors.muted },
+  title: { fontSize: 16, fontFamily: fonts.display, color: palette.ink },
+  meta: { fontSize: 12, fontFamily: fonts.semibold, color: palette.muted },
   distance: { flexDirection: 'row', alignItems: 'center', gap: 5 },
 });

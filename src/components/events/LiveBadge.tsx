@@ -1,13 +1,11 @@
 import { StyleSheet, Text, View } from 'react-native';
 
-import { colors } from '../../theme/colors';
-import { fonts, ui } from '../../theme/eventsTheme';
+import { fonts, palette } from '../../theme/eventsTheme';
 
-/** Badge-ul „ACUM” / „LIVE” pentru evenimentele în desfășurare. */
-export default function LiveBadge({ label = 'LIVE', inverted = false }: { label?: string; inverted?: boolean }) {
-  // inverted = pe fundal roșu (cardul „ACUM”), badge-ul devine închis la culoare.
+/** Badge-ul bleumarin „ACUM” (ca în machetă) pentru evenimentele în desfășurare. */
+export default function LiveBadge({ label = 'ACUM' }: { label?: string }) {
   return (
-    <View style={[styles.badge, inverted && styles.inverted]}>
+    <View style={styles.badge}>
       <View style={styles.dot} />
       <Text style={styles.text}>{label}</Text>
     </View>
@@ -20,14 +18,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
     alignSelf: 'flex-start',
-    backgroundColor: ui.live,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    backgroundColor: palette.ink,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
     borderRadius: 999,
-    borderWidth: ui.outlineWidth,
-    borderColor: colors.background,
   },
-  inverted: { backgroundColor: colors.background, borderColor: colors.background },
-  dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.text },
-  text: { color: colors.text, fontSize: 12, fontFamily: fonts.extrabold, letterSpacing: 0.8 },
+  dot: { width: 7, height: 7, borderRadius: 4, backgroundColor: palette.coral },
+  text: { color: palette.card, fontSize: 12, fontFamily: fonts.extrabold, letterSpacing: 0.8 },
 });

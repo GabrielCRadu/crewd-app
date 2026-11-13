@@ -3,8 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import type { EventWithDistance } from '../../types/events';
 import { getCategory } from '../../data/categories';
-import { colors } from '../../theme/colors';
-import { fonts, ui } from '../../theme/eventsTheme';
+import { fonts, palette, ui } from '../../theme/eventsTheme';
 import { formatEventDate, isLive } from '../../utils/dates';
 import { formatDistance } from '../../utils/distance';
 import { formatPrice, formatSocial } from '../../utils/format';
@@ -30,7 +29,7 @@ export default function EventCard({ event, onPress }: { event: EventWithDistance
           <Image source={{ uri: event.imageUrl }} style={styles.image} />
           {isLive(event) ? (
             <View style={styles.badge}>
-              <LiveBadge label="ACUM" />
+              <LiveBadge />
             </View>
           ) : null}
         </View>
@@ -43,13 +42,13 @@ export default function EventCard({ event, onPress }: { event: EventWithDistance
 
           {/* 3. Data și ora */}
           <View style={styles.row}>
-            <Ionicons name="time-outline" size={16} color={colors.muted} />
+            <Ionicons name="time-outline" size={16} color={palette.muted} />
             <Text style={styles.meta}>{formatEventDate(event.startsAt)}</Text>
           </View>
 
           {/* 4. Locația + distanța */}
           <View style={styles.row}>
-            <Ionicons name="location-outline" size={16} color={colors.muted} />
+            <Ionicons name="location-outline" size={16} color={palette.muted} />
             <Text style={[styles.meta, styles.venue]} numberOfLines={1}>
               {event.venueName}
             </Text>
@@ -64,7 +63,7 @@ export default function EventCard({ event, onPress }: { event: EventWithDistance
           </View>
           {social ? (
             <View style={styles.social}>
-              <Ionicons name="people" size={16} color={ui.accent} />
+              <Ionicons name="people" size={16} color={palette.ink} />
               <Text style={styles.socialText}>{social}</Text>
             </View>
           ) : null}
@@ -77,16 +76,16 @@ export default function EventCard({ event, onPress }: { event: EventWithDistance
 const styles = StyleSheet.create({
   pressed: { opacity: 0.85 },
   imageWrap: { borderBottomWidth: ui.outlineWidth, borderBottomColor: ui.outline },
-  image: { width: '100%', aspectRatio: 16 / 10, backgroundColor: colors.border },
+  image: { width: '100%', aspectRatio: 16 / 10, backgroundColor: ui.placeholder },
   badge: { position: 'absolute', top: 12, left: 12 },
   body: { padding: 16, gap: 8 },
-  title: { fontSize: 24, fontFamily: fonts.display, color: colors.text, lineHeight: 28 },
+  title: { fontSize: 24, fontFamily: fonts.display, color: palette.ink, lineHeight: 28 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  meta: { fontSize: 14, fontFamily: fonts.semibold, color: colors.muted },
+  meta: { fontSize: 14, fontFamily: fonts.semibold, color: palette.muted },
   venue: { flexShrink: 1 },
-  distance: { fontSize: 14, fontFamily: fonts.extrabold, color: colors.text },
+  distance: { fontSize: 14, fontFamily: fonts.extrabold, color: palette.ink },
   footer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 4 },
-  price: { fontSize: 16, fontFamily: fonts.extrabold, color: colors.text },
+  price: { fontSize: 16, fontFamily: fonts.extrabold, color: palette.ink },
   social: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -94,7 +93,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
     padding: 10,
     borderRadius: 14,
-    backgroundColor: colors.background,
+    backgroundColor: palette.background,
   },
-  socialText: { flex: 1, fontSize: 13, fontFamily: fonts.bold, color: colors.text },
+  socialText: { flex: 1, fontSize: 13, fontFamily: fonts.bold, color: palette.ink },
 });

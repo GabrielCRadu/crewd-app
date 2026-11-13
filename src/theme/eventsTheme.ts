@@ -1,9 +1,22 @@
-import { colors } from './colors';
-
 /*
- * Stilul tab-ului Evenimente, după macheta din PDF (contururi groase,
- * umbre „tari” fără blur, chip-uri rotunde), dar cu paleta închisă din colors.ts.
+ * Stilul tab-ului Evenimente, după macheta din PDF:
+ * fundal crem, contururi bleumarin groase, umbre „tari” fără blur,
+ * coral pentru acțiuni principale și galben pentru ce e selectat.
+ *
+ * E separat de colors.ts (tema închisă a restului aplicației), ca să nu
+ * schimbăm ecranele celorlalte tab-uri.
  */
+
+/** Culorile din machetă. */
+export const palette = {
+  background: '#FFF2C4', // crem
+  card: '#FFFFFF',
+  ink: '#1B1740', // bleumarin: text, contururi, umbre
+  muted: '#4E4A6B',
+  coral: '#FF6B5B',
+  yellow: '#FFD43B',
+  green: '#22B07D',
+};
 
 /** Fonturile (încărcate în EventsNavigator). */
 export const fonts = {
@@ -15,17 +28,17 @@ export const fonts = {
 };
 
 export const ui = {
-  /** Conturul elementelor (cardurile, butoanele, chip-urile). */
-  outline: '#4A4A66',
+  /** Conturul elementelor (carduri, butoane, chip-uri). */
+  outline: palette.ink,
   outlineWidth: 2,
   /** Umbra „tare”: un bloc decalat în spatele elementului. */
-  shadow: '#000000',
+  shadow: palette.ink,
   shadowOffset: 4,
   radius: 20,
-  /** Culoarea de accent (chip-uri selectate, butonul principal) și textul de pe ea. */
-  accent: colors.primary,
-  onAccent: colors.background,
-  /** Cardul „ACUM” (în PDF e coral; aici roșul din colors.ts). */
-  live: colors.nope,
-  onLive: colors.background,
+  /** Chip-uri / opțiuni selectate: galben cu text bleumarin. */
+  selected: palette.yellow,
+  /** Butoanele principale și cardul „ACUM”: coral cu text bleumarin. */
+  cta: palette.coral,
+  /** Fundalul pentru imagini care încă se încarcă (ca „[FOTO]” din machetă). */
+  placeholder: palette.coral,
 };

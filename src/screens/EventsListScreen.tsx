@@ -10,8 +10,7 @@ import { getCategory } from '../data/categories';
 import { useEvents } from '../hooks/useEvents';
 import { useUserLocation } from '../hooks/useUserLocation';
 import type { EventsStackParamList } from '../navigation/eventsTypes';
-import { colors } from '../theme/colors';
-import { fonts, ui } from '../theme/eventsTheme';
+import { fonts, palette, ui } from '../theme/eventsTheme';
 import { addDistance, filterEvents, sortEvents, type SortBy } from '../utils/eventFilters';
 
 type Props = NativeStackScreenProps<EventsStackParamList, 'EventsList'>;
@@ -76,7 +75,7 @@ export default function EventsListScreen({ navigation, route }: Props) {
         }
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Ionicons name="calendar-clear-outline" size={48} color={colors.muted} />
+            <Ionicons name="calendar-clear-outline" size={48} color={palette.muted} />
             <Text style={styles.emptyText}>Niciun eveniment în perioada și categoriile alese.</Text>
           </View>
         }
@@ -89,14 +88,14 @@ export default function EventsListScreen({ navigation, route }: Props) {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
+  safe: { flex: 1, backgroundColor: palette.background },
   flex: { flex: 1 },
   content: { padding: 20, paddingTop: 12 },
   separator: { height: 18 },
   header: { gap: 18, marginBottom: 20 },
   topBar: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-  title: { fontFamily: fonts.display, fontSize: 30, color: colors.text },
-  subtitle: { fontFamily: fonts.semibold, fontSize: 13, color: colors.muted },
+  title: { fontFamily: fonts.display, fontSize: 30, color: palette.ink },
+  subtitle: { fontFamily: fonts.semibold, fontSize: 13, color: palette.muted },
   segment: {
     flexDirection: 'row',
     padding: 4,
@@ -104,12 +103,19 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     borderWidth: ui.outlineWidth,
     borderColor: ui.outline,
-    backgroundColor: colors.card,
+    backgroundColor: palette.card,
   },
-  segmentItem: { flex: 1, alignItems: 'center', paddingVertical: 11, borderRadius: 14 },
-  segmentActive: { backgroundColor: ui.accent },
-  segmentText: { fontFamily: fonts.extrabold, fontSize: 15, color: colors.muted },
-  segmentTextActive: { color: ui.onAccent },
+  segmentItem: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 11,
+    borderRadius: 14,
+    borderWidth: ui.outlineWidth,
+    borderColor: 'transparent',
+  },
+  segmentActive: { backgroundColor: ui.selected, borderColor: ui.outline },
+  segmentText: { fontFamily: fonts.extrabold, fontSize: 15, color: palette.muted },
+  segmentTextActive: { color: palette.ink },
   empty: { alignItems: 'center', gap: 12, paddingTop: 60 },
-  emptyText: { color: colors.muted, fontSize: 15, fontFamily: fonts.semibold, textAlign: 'center' },
+  emptyText: { color: palette.muted, fontSize: 15, fontFamily: fonts.semibold, textAlign: 'center' },
 });
