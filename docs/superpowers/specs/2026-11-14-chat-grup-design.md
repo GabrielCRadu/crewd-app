@@ -43,6 +43,7 @@ Grupurile de la evenimente există deja în Firestore, dar conversația lor e mo
 - Regulile Firestore le **publică utilizatorul manual** în consolă; noi doar modificăm `firestore.rules` și spunem ce s-a schimbat.
 - Scripturile care scriu în Firestore (`seed-groups`) **rulează doar cu acordul utilizatorului** (proiect Firebase comun).
 - Interfața în română. Fișierele comune (`firestore.rules`, `src/types`, `src/services`, `src/navigation/*Types.ts`, `todo.md`): modificări minime, adăugiri.
+- Grupurile **nu au nume propriu**: „numele grupului” din antet și din Detalii e **titlul evenimentului** (cum e și azi). Fiecare om e într-un singur grup per eveniment, deci titlul e unic în lista lui.
 - Un grup are 3–10 membri; chatul se deschide doar când grupul e format (`canOpenChat`: `formedAt != null`) și rămâne cum e azi.
 
 ## Ce s-a decis
