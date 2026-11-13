@@ -12,6 +12,7 @@ import Avatar from '../components/Avatar';
 import Chip from '../components/Chip';
 import DeleteAccount from '../components/DeleteAccount';
 import ReputationStats from '../components/ReputationStats';
+import BadgesCard from '../components/badges/BadgesCard';
 import GradientBorderCard from '../components/GradientBorderCard';
 import EventHistoryCarousel from '../components/events/EventHistoryCarousel';
 import { useAuth } from '../context/AuthContext';
@@ -21,6 +22,7 @@ import { TAG_GROUPS } from '../data/tags';
 import { useFriends } from '../hooks/useFriends';
 import { usePastEvents } from '../hooks/usePastEvents';
 import { useRatings } from '../hooks/useRatings';
+import { getMyVotedBadges } from '../services/badgesService';
 import { idsWithStatus } from '../services/friendsService';
 import { getReputation } from '../services/ratingsService';
 import { TAG_GROUP_STYLE as GROUP_STYLE } from '../data/tagGroupStyle';
@@ -28,6 +30,7 @@ import type { ProfileStackParamList } from '../navigation/profileTypes';
 import { colors, tagTints } from '../theme/colors';
 import { type } from '../theme/typography';
 import { glass, radii } from '../theme/shape';
+import { autoBadgeProgress } from '../utils/badgeRules';
 
 /**
  * Tab-ul Profil (vezi docs/layout-guide.md): identitate cu statistici, „Despre mine”,
@@ -41,6 +44,8 @@ export default function ProfileScreen() {
   const { groups: myGroups } = useMyGroups();
   // Reputația e încă mock (ratingsService); cu Firebase va fi pe uid-ul din Auth.
   const reputation = getReputation(useRatings(), ME_ID);
+  // Badge-uri: cele votate sunt încă mock (badgesService); cele automate vin din istoricul tău.
+  const badgeProgress = autoBadgeProgress(pastEvents);
 
   const navigation = useNavigation<NativeStackNavigationProp<ProfileStackParamList, 'ProfileHome'>>();
   // Detaliile sunt în tab-ul Evenimente; `initial: false` lasă lista dedesubt, pentru „înapoi”.
@@ -138,6 +143,17 @@ export default function ProfileScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Ce spun alții despre tine</Text>
           <ReputationStats reputation={reputation} />
+        </View>
+
+        {/* Badge-uri: propuse de oameni după evenimente (de la 3 persoane în sus) și câștigate din activitate */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Badge-uri</Text>
+          <BadgesCard
+            voted={getMyVotedBadges()}
+            auto={badgeProgress.filter((p) => p.earned).map((p) => p.badge)}
+            progress={badgeProgress}
+            emptyText="Încă niciun badge. Le primești de la oamenii cu care ieși și din evenimentele la care mergi."
+          />
         </View>
 
         {/* Tag-urile alese, într-un singur card, pe grupuri */}

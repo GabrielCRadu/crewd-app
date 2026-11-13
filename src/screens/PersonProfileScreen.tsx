@@ -8,14 +8,17 @@ import type { NavigationProp, RouteProp } from '@react-navigation/native';
 import Chip from '../components/Chip';
 import FriendButton from '../components/FriendButton';
 import GlassIconButton from '../components/GlassIconButton';
+import BadgesCard from '../components/badges/BadgesCard';
 import EventHistoryCarousel from '../components/events/EventHistoryCarousel';
 import { allProfileTags, useAuth } from '../context/AuthContext';
 import { RATING_TAGS } from '../data/ratingTags';
+import { useBadgeProposals } from '../hooks/useBadgeProposals';
 import { useEvents } from '../hooks/useEvents';
 import { useFriends } from '../hooks/useFriends';
 import { usePastEvents } from '../hooks/usePastEvents';
 import { useRatings } from '../hooks/useRatings';
 import { useUserLocation } from '../hooks/useUserLocation';
+import { getAutoBadges, getVotedBadges } from '../services/badgesService';
 import { blockPerson, statusOf, unblockPerson } from '../services/friendsService';
 import { commonTags, getPerson } from '../services/peopleService';
 import { getReputation, hasReportedPerson, reportPerson } from '../services/ratingsService';
@@ -44,6 +47,7 @@ export default function PersonProfileScreen() {
 
   const { profile } = useAuth();
   const myRatings = useRatings();
+  const myBadgeProposals = useBadgeProposals();
   const friends = useFriends();
   const location = useUserLocation();
   const { events } = useEvents(location.coords);
@@ -206,6 +210,16 @@ export default function PersonProfileScreen() {
                   ))}
                 </View>
                 <Text style={styles.muted}>Anonim: se văd doar totalurile.</Text>
+              </View>
+
+              {/* Badge-uri: doar cele câștigate (votate de cel puțin 3 persoane sau din activitate) */}
+              <View style={styles.section}>
+                <Text style={styles.label}>BADGE-URI</Text>
+                <BadgesCard
+                  voted={getVotedBadges(myBadgeProposals, person.id)}
+                  auto={getAutoBadges(person.id)}
+                  emptyText="Încă niciun badge."
+                />
               </View>
 
               {/* Ați fost împreună la… */}
