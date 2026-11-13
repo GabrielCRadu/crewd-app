@@ -12,6 +12,7 @@ Actualizează lista când rezolvi ceva sau adaugi un mock nou.
 - [ ] **Anunțul „grupulețul nu s-a format”**: grupulețele expirate doar dispar din listă; nu există încă un mesaj/notificare pentru membri.
 - [ ] **Prietenii**: `FRIENDS` (Hartă, „merg și ei”). Pozițiile sunt decalaje față de locația dispozitivului.
 - [ ] **Prietenii și cererile de prietenie** (Cami): `src/services/friendsService.ts`, doar în memorie (adaugă, acceptă, refuză, elimină, blochează). Profilul altei persoane și lista de prieteni folosesc `PEOPLE` prin `src/services/peopleService.ts`. Pentru Firestore trebuie un profil public separat (`users/{uid}` e privat) și o colecție de prietenii, cu reguli noi.
+- [ ] **Notificarea de cerere de prietenie** (Cami, `FriendRequestPopup`): apare în colțul din dreapta sus. DEMO: Tudor îți trimite o cerere la 8 secunde după pornire (`scheduleDemoFriendRequest` în `friendsService`); de scos când cererile vin din Firestore (onSnapshot).
 - [ ] **Raportarea din profilul cuiva** (meniul ⋯): se adună la totalul de rapoarte din `ratingsService`, doar în memorie.
 - [ ] **Cine merge / câți caută companie** la un eveniment: generate stabil din id (`demoSocial` în `src/services/eventsService.ts`). Trebuie calculate din înscrierile reale.
 - [ ] **Evenimente trecute pentru istoric**: `e16`–`e18` (`PAST_JOINED_EVENT_IDS` în `src/data/mockEvents.ts`), adăugate peste datele din Firestore ca să meargă istoricul și evaluările.
