@@ -12,7 +12,7 @@ import { colors } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
 import type { CrewGroup } from '../types/groups';
 import { formatDay, formatTime } from '../utils/dates';
-import { MIN_FORM_MEMBERS, groupStatus } from '../utils/groupRules';
+import { MIN_FORM_MEMBERS, canOpenChat, groupStatus } from '../utils/groupRules';
 
 type Props = NativeStackScreenProps<ChatsStackParamList, 'ChatsHome'>;
 
@@ -30,8 +30,12 @@ export default function ChatsScreen({ navigation }: Props) {
   const sorted = [...groups].sort((a, b) => a.meetupAt.getTime() - b.meetupAt.getTime());
 
   const open = (g: CrewGroup) => {
-    if (groupStatus(g, now) === 'forming') {
-      Alert.alert('Grupulețul se formează', `Chat-ul se deschide când sunteți cel puțin ${MIN_FORM_MEMBERS}.`);
+    if (!canOpenChat(g)) {
+      if (groupStatus(g, now) === 'expired') {
+        Alert.alert('Grupulețul nu s-a format', 'Nu s-au strâns 3 persoane la timp. Alege alt grupuleț de la eveniment.');
+      } else {
+        Alert.alert('Grupulețul se formează', `Chat-ul se deschide când sunteți cel puțin ${MIN_FORM_MEMBERS}.`);
+      }
       return;
     }
     navigation.navigate('ChatRoom', { eventId: g.eventId, groupId: g.id });
@@ -65,10 +69,10 @@ export default function ChatsScreen({ navigation }: Props) {
                       .join(', ')}
                   </Text>
                 </View>
-                {status === 'forming' ? (
+                {!canOpenChat(g) ? (
                   <View style={styles.badge}>
                     <Text style={styles.badgeText}>
-                      Se formează · {g.memberUids.length}/{MIN_FORM_MEMBERS}
+                      {status === 'expired' ? 'Nu s-a format' : `Se formează · ${g.memberUids.length}/${MIN_FORM_MEMBERS}`}
                     </Text>
                   </View>
                 ) : null}

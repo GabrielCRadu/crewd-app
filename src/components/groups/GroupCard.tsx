@@ -36,7 +36,9 @@ export default function GroupCard({ group, status, common, isMine, blockReason, 
         ? 'Complet'
         : status === 'closed'
           ? 'Închis'
-          : null;
+          : status === 'expired'
+            ? 'Nu s-a format'
+            : null;
 
   return (
     <View style={[styles.card, isMine && styles.cardMine]}>

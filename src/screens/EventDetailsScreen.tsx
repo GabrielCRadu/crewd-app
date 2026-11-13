@@ -10,12 +10,11 @@ import Avatar from '../components/Avatar';
 import GlassIconButton from '../components/GlassIconButton';
 import GradientButton from '../components/GradientButton';
 import GlassBadge from '../components/events/GlassBadge';
-import EventGroupsSection from '../components/groups/EventGroupsSection';
 import { useAuth } from '../context/AuthContext';
 import { useMyGroups } from '../hooks/useMyGroups';
 import { useNow } from '../hooks/useNow';
 import { leaveGroupForEvent } from '../services/groupsService';
-import { MIN_FORM_MEMBERS, groupStatus } from '../utils/groupRules';
+import { MIN_FORM_MEMBERS, canOpenChat, groupStatus } from '../utils/groupRules';
 import { getCategory } from '../data/categories';
 import { useEvents } from '../hooks/useEvents';
 import { usePreferences } from '../hooks/usePreferences';
@@ -79,20 +78,31 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
     action(event).catch((e: Error) => Alert.alert('Înscrierea nu s-a salvat', e.message));
   };
 
-  // Chat-ul grupulețului se deschide în tab-ul Chat (cu lista de chat-uri dedesubt, pentru „înapoi”).
-  const openChat = () => {
-    if (!myGroup) return;
-    navigation
-      .getParent()
-      ?.navigate('Chats', { screen: 'ChatRoom', params: { eventId: event.id, groupId: myGroup.id }, initial: false });
-  };
-  // „Anulează” te scoate întâi din grupuleț, apoi din eveniment (altfel ai rămâne membru-fantomă).
-  const cancelRegistration = () => {
+  const openGroups = () => navigation.navigate('EventGroups', { eventId: event.id });
+  // „Ieși din eveniment” te scoate întâi din grupuleț, apoi din eveniment (altfel ai rămâne membru-fantomă).
+  const leaveEventAndGroup = () => {
     const uid = user?.uid ?? profile?.uid;
     (uid ? leaveGroupForEvent(event.id, uid) : Promise.resolve())
       .then(() => leaveEvent(event))
-      .catch((e: Error) => Alert.alert('Înscrierea nu s-a anulat', e.message));
+      .catch((e: Error) => Alert.alert('Nu ai ieșit din eveniment', e.message));
   };
+  const confirmLeave = () =>
+    Alert.alert(
+      'Ieși din eveniment?',
+      myGroup ? 'Ieși și din grupulețul tău de la acest eveniment.' : 'Te poți înscrie din nou oricând.',
+      [
+        { text: 'Rămân', style: 'cancel' },
+        { text: 'Ies', style: 'destructive', onPress: leaveEventAndGroup },
+      ],
+    );
+  // Ce scrie pe butonul „Vezi grupulețele”, după starea grupulețului meu.
+  const groupsHint = !myGroup
+    ? 'Alege un grupuleț cu care să mergi.'
+    : canOpenChat(myGroup)
+      ? `Ești într-un grupuleț de ${myGroup.memberUids.length} · chat-ul e deschis.`
+      : myGroupStatus === 'expired'
+        ? 'Grupulețul tău nu s-a format. Alege altul.'
+        : `Grupulețul tău se formează: mai e nevoie de ${missing}.`;
 
   return (
     <View style={styles.screen}>
@@ -181,16 +191,19 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
             </View>
           ) : null}
 
-          {/* 6. Grupulețe (doar înainte de eveniment): apar după „Înscrie-te” */}
-          {ended ? null : <Text style={styles.sectionTitle}>Grupulețe pe gustul tău</Text>}
-          {ended ? null : (
-            <EventGroupsSection
-              event={event}
-              joined={joined}
-              myGroup={myGroup}
-              onPropose={() => navigation.navigate('ProposeGroup', { eventId: event.id })}
-            />
-          )}
+          {/* 6. Grupulețele sunt pe un ecran separat („Vezi grupulețele”, după înscriere) */}
+          {!ended && joined ? (
+            <View style={styles.groupsHint}>
+              <Ionicons name="people-outline" size={18} color={colors.muted} />
+              <Text style={styles.groupsHintText}>{groupsHint}</Text>
+            </View>
+          ) : null}
+          {!ended && !joined ? (
+            <View style={styles.groupsHint}>
+              <Ionicons name="people-outline" size={18} color={colors.muted} />
+              <Text style={styles.groupsHintText}>Înscrie-te ca să vezi grupulețele celor care merg.</Text>
+            </View>
+          ) : null}
         </View>
       </ScrollView>
 
@@ -214,21 +227,13 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
             <GradientButton label="Evaluează oamenii" icon="people" onPress={openRating} />
           )
         ) : joined ? (
-          <View style={styles.joinedRow}>
-            {myGroup && myGroupStatus !== 'forming' ? (
-              <GradientButton label="Deschide chat-ul" icon="chatbubbles" onPress={openChat} style={styles.ctaMain} />
-            ) : (
-              <View style={styles.joinedPill}>
-                <Text style={styles.joinedText}>
-                  {myGroup
-                    ? `Așteptăm încă ${missing} ${missing === 1 ? 'persoană' : 'persoane'}`
-                    : 'Înscris ✓ · alege un grupuleț'}
-                </Text>
-              </View>
-            )}
-            <Pressable onPress={cancelRegistration} hitSlop={8}>
-              <Text style={styles.cancel}>Anulează</Text>
+          /* După înscriere, butonul se împarte în două: ieși din eveniment / vezi grupulețele */
+          <View style={styles.ctaRow}>
+            <Pressable onPress={confirmLeave} style={({ pressed }) => [styles.ticketButton, pressed && styles.pressed]}>
+              <Ionicons name="exit-outline" size={18} color={colors.text} />
+              <Text style={styles.ticketText}>Ieși</Text>
             </Pressable>
+            <GradientButton label="Vezi grupulețele" icon="people" onPress={openGroups} style={styles.ctaMain} />
           </View>
         ) : (
           <View style={styles.ctaRow}>
@@ -290,6 +295,8 @@ const styles = StyleSheet.create({
   sourceText: { flex: 1, fontSize: 12, color: colors.faint },
   sourceLink: { color: colors.muted, textDecorationLine: 'underline' },
   ctaRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  groupsHint: { ...glass, flexDirection: 'row', alignItems: 'center', gap: 10, padding: 14, borderRadius: radii.inner },
+  groupsHintText: { flex: 1, color: colors.muted, fontSize: 14 },
   ctaMain: { flex: 1 },
   ticketButton: {
     ...glass,
