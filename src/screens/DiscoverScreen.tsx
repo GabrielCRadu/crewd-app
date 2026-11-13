@@ -7,7 +7,8 @@ import Aurora from '../components/Aurora';
 import Chip from '../components/Chip';
 import GlassIconButton from '../components/GlassIconButton';
 import GradientButton from '../components/GradientButton';
-import { MY_TAGS, PEOPLE } from '../data/mockSocial';
+import { allProfileTags, useAuth } from '../context/AuthContext';
+import { PEOPLE } from '../data/mockSocial';
 import { colors } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
 import { formatDistance } from '../utils/distance';
@@ -16,7 +17,9 @@ import { formatDistance } from '../utils/distance';
 export default function DiscoverScreen() {
   const [index, setIndex] = useState(0);
   const person = PEOPLE[index % PEOPLE.length]!;
-  const commonTags = person.tags.filter((t) => MY_TAGS.includes(t));
+  const { profile } = useAuth();
+  const myTags = allProfileTags(profile);
+  const commonTags = person.tags.filter((t) => myTags.includes(t));
   // Tag-urile comune primele, ca să se vadă ce vă leagă.
   const sortedTags = [...commonTags, ...person.tags.filter((t) => !commonTags.includes(t))];
   const next = () => setIndex((i) => i + 1);

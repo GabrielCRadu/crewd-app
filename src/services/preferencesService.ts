@@ -40,6 +40,17 @@ export function subscribeToPreferences(listener: () => void): () => void {
   };
 }
 
+/**
+ * Pornește scorurile de la tag-urile din profil (fiecare cu scorul 1), păstrând înscrierile.
+ * Apelat de AuthContext după login / onboarding.
+ */
+export function seedTagScores(profileTags: string[]): void {
+  setPreferences({
+    tagScores: Object.fromEntries(profileTags.map((tag) => [tag, 1])),
+    joinedEventIds: preferences.joinedEventIds,
+  });
+}
+
 export function isJoined(prefs: UserPreferences, eventId: string): boolean {
   return prefs.joinedEventIds.includes(eventId);
 }

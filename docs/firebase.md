@@ -11,9 +11,17 @@ Fără `.env.local`, aplicația merge în continuare, cu datele mock din `src/da
 
 `.env.local` nu se urcă pe GitHub. Config-ul web nu e secret, dar îl ținem în afara codului. Securitatea vine din regulile Firestore.
 
+## Autentificare
+
+- **Email + parolă**, prin Firebase Auth (SDK-ul JS, merge în Expo Go). Trebuie activat o singură dată: Firebase Console → Authentication → Sign-in method → **Email/Password** → Enable.
+- Sesiunea se păstrează în AsyncStorage (`initializeAuth` + `getReactNativePersistence`, după [expo.fyi/firebase-js-auth-setup](https://expo.fyi/firebase-js-auth-setup)), deci rămâi logat după repornire.
+- Fluxul (`src/context/AuthContext.tsx` + `src/navigation/RootNavigator.tsx`): sesiune → **Login / Creare cont** → **onboarding** (2 pași, `docs/layout-guide.md`) → tab-uri. Login-ul e obligatoriu.
+- Fără `.env.local`, aplicația sare peste login și folosește profilul mock.
+- **Google**: nu merge în Expo Go (cere cod nativ, adică un development build). Se adaugă după ce avem un build nativ (EAS în cloud sau local).
+
 ## Regulile Firestore
 
-Fișierul [`firestore.rules`](../firestore.rules) permite oricui să citească `events/` și `meta/`, și interzice scrierea din aplicație. Se aplică din Firebase Console → Firestore Database → Rules (lipești tot fișierul și apeși *Publish*).
+Fișierul [`firestore.rules`](../firestore.rules) permite oricui să citească `events/` și `meta/`, și interzice scrierea lor din aplicație. Fiecare utilizator logat își poate citi și scrie doar propriul `users/{uid}`, cu o validare de bază (vârsta 18–99, genul dintr-o listă fixă). Se aplică din Firebase Console → Firestore Database → Rules (lipești tot fișierul și apeși *Publish*).
 
 ## Importul evenimentelor
 
@@ -59,6 +67,20 @@ Evenimentele se scriu doar prin `scripts/import-events.mjs`, cu `firebase-admin`
 | `sourceName`, `sourceUrl` | string | **atribuire**, afișată în pagina de detalii |
 | `ticketUrl` | string \| null | butonul „Bilete” / „Înscriere” |
 | `importedAt` | Timestamp | |
+
+### `users/{uid}`
+
+Creat la finalul onboarding-ului (`src/services/profileService.ts`).
+
+| Câmp | Tip | Note |
+| --- | --- | --- |
+| `name` | string | 1–50 caractere |
+| `age` | number (întreg) | 18–99 |
+| `city` | string | |
+| `gender` | string | `female`, `male` sau `other` |
+| `chosenTags` | map | `{ events: string[], music: string[], hobbies: string[] }`, tag-urile din `src/data/tags.ts` |
+| `learnedTags` | string[] | tag-uri adăugate automat din înscrieri; se pot scoate din Profil |
+| `createdAt`, `updatedAt` | Timestamp | |
 
 ### `meta/eventsImport`
 

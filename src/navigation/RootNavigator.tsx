@@ -1,5 +1,5 @@
 import type { ComponentProps, ComponentType } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { DarkTheme, NavigationContainer, getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import type { Theme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -10,7 +10,10 @@ import EventsNavigator from './EventsNavigator';
 import FriendsMapScreen from '../screens/FriendsMapScreen';
 import ChatsNavigator from './ChatsNavigator';
 import ProfileScreen from '../screens/ProfileScreen';
+import GradientButton from '../components/GradientButton';
+import { useAuth } from '../context/AuthContext';
 import { colors } from '../theme/colors';
+import { AuthNavigator, OnboardingNavigator } from './AuthNavigator';
 
 type IconName = ComponentProps<typeof Ionicons>['name'];
 
@@ -46,10 +49,51 @@ const TABS: {
   { name: 'Profile', title: 'Profil', component: ProfileScreen, icon: 'person-outline', iconActive: 'person' },
 ];
 
+/**
+ * Alege ce vede utilizatorul după starea sesiunii (src/context/AuthContext.tsx):
+ * se verifică sesiunea → login / creare cont → onboarding → tab-uri.
+ */
 export default function RootNavigator() {
+  const { status, error, retry, signOut } = useAuth();
   return (
     <NavigationContainer theme={theme}>
-      <Tab.Navigator
+      {status === 'ready' ? (
+        <MainTabs />
+      ) : status === 'signedOut' ? (
+        <AuthNavigator />
+      ) : status === 'needsProfile' ? (
+        <OnboardingNavigator />
+      ) : (
+        <LoadingScreen error={error} onRetry={retry} onSignOut={signOut} />
+      )}
+    </NavigationContainer>
+  );
+}
+
+/** Cât timp verificăm sesiunea salvată și încărcăm profilul. */
+function LoadingScreen({ error, onRetry, onSignOut }: { error: string | null; onRetry: () => void; onSignOut: () => void }) {
+  return (
+    <View style={styles.loading}>
+      <Text style={styles.logo}>crewd</Text>
+      {error ? (
+        <View style={styles.loadingError}>
+          <Text style={styles.loadingText}>{error}</Text>
+          <GradientButton label="Încearcă din nou" icon="refresh" onPress={onRetry} compact />
+          <Pressable onPress={onSignOut} hitSlop={8}>
+            <Text style={styles.loadingLink}>Ieși din cont</Text>
+          </Pressable>
+        </View>
+      ) : (
+        <ActivityIndicator color={colors.text} />
+      )}
+    </View>
+  );
+}
+
+/** Cele 5 tab-uri ale aplicației (după login și onboarding). */
+function MainTabs() {
+  return (
+    <Tab.Navigator
         screenOptions={{
           headerShown: false,
           tabBarActiveTintColor: colors.text,
@@ -76,12 +120,16 @@ export default function RootNavigator() {
             })}
           />
         ))}
-      </Tab.Navigator>
-    </NavigationContainer>
+    </Tab.Navigator>
   );
 }
 
 const styles = StyleSheet.create({
+  loading: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 24, padding: 32, backgroundColor: colors.background },
+  logo: { fontSize: 44, fontWeight: '600', letterSpacing: -1.5, color: colors.text },
+  loadingError: { alignItems: 'center', gap: 16 },
+  loadingText: { color: colors.muted, fontSize: 15, textAlign: 'center' },
+  loadingLink: { color: colors.faint, fontSize: 13, textDecorationLine: 'underline' },
   tabBar: { backgroundColor: colors.background, borderTopColor: colors.border },
   iconPill: { width: 48, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   iconPillActive: { backgroundColor: colors.cardStrong },

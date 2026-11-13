@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -9,19 +8,28 @@ import Aurora from '../components/Aurora';
 import Avatar from '../components/Avatar';
 import Chip from '../components/Chip';
 import EventHistoryCard from '../components/events/EventHistoryCard';
-import { MY_PROFILE } from '../data/mockSocial';
+import { useAuth } from '../context/AuthContext';
 import { TAG_GROUPS } from '../data/tags';
 import { colors } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
 
 /** Tab-ul Profil: identitate, tag-uri alese și tag-uri învățate (vezi docs/layout-guide.md). */
 export default function ProfileScreen() {
-  const profile = MY_PROFILE;
-  const [learned, setLearned] = useState(profile.learnedTags);
+  const { profile, user, removeLearnedTag, signOut } = useAuth();
   const navigation = useNavigation<BottomTabNavigationProp<Record<string, object | undefined>>>();
   // Detaliile sunt în tab-ul Evenimente; `initial: false` lasă lista dedesubt, pentru „înapoi”.
   const openPastEvent = (eventId: string) =>
     navigation.navigate('Events', { screen: 'EventDetails', params: { eventId }, initial: false });
+
+  // Tab-urile apar doar cu profil încărcat (RootNavigator), deci aici profile există.
+  if (!profile) return null;
+  const learned = profile.learnedTags;
+
+  const confirmSignOut = () =>
+    Alert.alert('Ieși din cont?', 'Te poți loga din nou oricând cu emailul și parola.', [
+      { text: 'Anulează', style: 'cancel' },
+      { text: 'Ieși', style: 'destructive', onPress: () => void signOut() },
+    ]);
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -65,7 +73,7 @@ export default function ProfileScreen() {
           <Text style={styles.learnedHint}>Tag-uri adăugate automat după înscrieri. Le poți scoate oricând.</Text>
           <View style={styles.tags}>
             {learned.map((t) => (
-              <Chip key={t} label={t} dashed onRemove={() => setLearned((prev) => prev.filter((x) => x !== t))} />
+              <Chip key={t} label={t} dashed onRemove={() => void removeLearnedTag(t)} />
             ))}
             {learned.length === 0 ? <Text style={styles.learnedHint}>Niciun tag învățat încă.</Text> : null}
           </View>
@@ -73,6 +81,15 @@ export default function ProfileScreen() {
 
         {/* Istoricul evenimentelor trecute (privat); un rând deschide detaliile, de unde poți evalua */}
         <EventHistoryCard onOpen={openPastEvent} />
+
+        {/* Contul: emailul și ieșirea */}
+        <View style={styles.accountCard}>
+          {user?.email ? <Text style={styles.accountEmail}>{user.email}</Text> : null}
+          <Pressable onPress={confirmSignOut} style={({ pressed }) => [styles.signOutButton, pressed && styles.pressed]}>
+            <Ionicons name="log-out-outline" size={18} color={colors.text} />
+            <Text style={styles.signOutText}>Ieși din cont</Text>
+          </Pressable>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -86,6 +103,18 @@ const styles = StyleSheet.create({
   editButton: { ...glass, paddingHorizontal: 18, paddingVertical: 10, borderRadius: radii.pill },
   editText: { color: colors.text, fontWeight: '500' },
   pressed: { backgroundColor: colors.cardStrong },
+  accountCard: { alignItems: 'center', gap: 12, marginTop: 8 },
+  accountEmail: { color: colors.faint, fontSize: 13 },
+  signOutButton: {
+    ...glass,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: radii.pill,
+  },
+  signOutText: { color: colors.text, fontWeight: '500' },
   identity: { ...glass, borderRadius: radii.card, overflow: 'hidden' },
   identityRow: { flexDirection: 'row', alignItems: 'center', gap: 16, padding: 18 },
   identityText: { flex: 1, gap: 6 },

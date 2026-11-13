@@ -1,5 +1,5 @@
 import type { ComponentProps } from 'react';
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text } from 'react-native';
 import type { StyleProp, ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -16,13 +16,36 @@ interface Props {
   iconFirst?: boolean;
   style?: StyleProp<ViewStyle>;
   compact?: boolean;
+  /** Dezactivat: estompat și nu răspunde la apăsare. */
+  disabled?: boolean;
+  /** În curs (ex. se trimite formularul): arată un indicator în locul iconiței. */
+  loading?: boolean;
 }
 
 /** Butonul principal (CTA): pastilă cu gradient deschis și text închis. Unul singur pe ecran. */
-export default function GradientButton({ label, onPress, icon, iconFirst = false, style, compact = false }: Props) {
-  const iconEl = icon ? <Ionicons name={icon} size={compact ? 16 : 20} color={colors.onLight} /> : null;
+export default function GradientButton({
+  label,
+  onPress,
+  icon,
+  iconFirst = false,
+  style,
+  compact = false,
+  disabled = false,
+  loading = false,
+}: Props) {
+  const iconEl = loading ? (
+    <ActivityIndicator size="small" color={colors.onLight} />
+  ) : icon ? (
+    <Ionicons name={icon} size={compact ? 16 : 20} color={colors.onLight} />
+  ) : null;
   return (
-    <Pressable onPress={onPress} style={({ pressed }) => [style, pressed && styles.pressed]}>
+    <Pressable
+      onPress={onPress}
+      disabled={disabled || loading}
+      accessibilityRole="button"
+      accessibilityState={{ disabled: disabled || loading, busy: loading }}
+      style={({ pressed }) => [style, pressed && styles.pressed, (disabled || loading) && styles.disabled]}
+    >
       <LinearGradient
         colors={gradients.cta}
         start={{ x: 0, y: 0.5 }}
@@ -51,4 +74,5 @@ const styles = StyleSheet.create({
   label: { color: colors.onLight, fontSize: 17, fontWeight: '600' },
   labelCompact: { fontSize: 14 },
   pressed: { opacity: 0.85 },
+  disabled: { opacity: 0.5 },
 });

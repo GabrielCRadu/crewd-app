@@ -17,7 +17,25 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // Orice altceva e închis până adăugăm reguli explicite (ex. users/{uid} după autentificare).
+    // Profilul fiecărui utilizator: doar el îl poate citi și scrie, după login.
+    match /users/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if request.auth != null
+        && request.auth.uid == uid
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 50
+        && request.resource.data.age is int
+        && request.resource.data.age >= 18
+        && request.resource.data.age <= 99
+        && request.resource.data.city is string
+        && request.resource.data.gender in ['female', 'male', 'other']
+        && request.resource.data.chosenTags is map
+        && request.resource.data.learnedTags is list;
+      allow delete: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // Orice altceva e închis până adăugăm reguli explicite.
     match /{document=**} {
       allow read, write: if false;
     }
