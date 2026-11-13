@@ -60,7 +60,7 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
   const confirmLeave = () => {
     const uid = user?.uid ?? profile?.uid;
     if (!uid) return;
-    Alert.alert('Ieși din grupuleț?', 'Rămâi înscris la eveniment și poți alege alt grupuleț.', [
+    Alert.alert('Ieși din grupuleț?', 'Ieși și din chat-ul lui (e același lucru). Rămâi înscris la eveniment și poți alege alt grupuleț.', [
       { text: 'Rămân', style: 'cancel' },
       {
         text: 'Ies',
@@ -122,7 +122,7 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
         </Pressable>
       </View>
 
-      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <KeyboardAvoidingView style={styles.flex} behavior="padding">
         <FlatList
           style={styles.flex}
           contentContainerStyle={styles.messages}

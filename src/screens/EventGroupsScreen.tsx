@@ -60,7 +60,7 @@ export default function EventGroupsScreen({ navigation, route }: Props) {
   const confirmLeaveGroup = () => {
     const uid = user?.uid ?? profile?.uid;
     if (!myGroup || !uid) return;
-    Alert.alert('Ieși din grupuleț?', 'Rămâi înscris la eveniment și poți alege alt grupuleț.', [
+    Alert.alert('Ieși din grupuleț?', 'Ieși și din chat-ul lui (e același lucru). Rămâi înscris la eveniment și poți alege alt grupuleț.', [
       { text: 'Rămân', style: 'cancel' },
       {
         text: 'Ies',

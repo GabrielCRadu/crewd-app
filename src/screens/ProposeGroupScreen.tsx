@@ -106,7 +106,7 @@ export default function ProposeGroupScreen({ navigation, route }: Props) {
         </View>
       </View>
 
-      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <KeyboardAvoidingView style={styles.flex} behavior="padding">
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           {/* Ora întâlnirii (în ziua evenimentului) */}
           <View style={styles.block}>
