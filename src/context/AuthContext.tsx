@@ -6,7 +6,7 @@ import { isFirebaseConfigured } from '../lib/firebase';
 import { signOut as authSignOut, subscribeToAuth } from '../services/authService';
 import type { AuthUser } from '../services/authService';
 import { seedTagScores } from '../services/preferencesService';
-import { createProfile, getProfile, setLearnedTags } from '../services/profileService';
+import { createProfile, getProfile, setBio, setLearnedTags } from '../services/profileService';
 import type { ProfileDraft, UserProfile } from '../types/user';
 
 /*
@@ -26,6 +26,7 @@ interface AuthContextValue {
   /** Mesaj dacă profilul nu s-a putut încărca (ex. fără internet). */
   error: string | null;
   completeOnboarding: (draft: ProfileDraft) => Promise<void>;
+  updateBio: (bio: string) => Promise<void>;
   removeLearnedTag: (tag: string) => Promise<void>;
   signOut: () => Promise<void>;
   retry: () => void;
@@ -37,6 +38,7 @@ const DEMO_PROFILE: UserProfile = {
   age: MY_PROFILE.age,
   city: MY_PROFILE.city,
   gender: 'other',
+  bio: MY_PROFILE.bio,
   chosenTags: MY_PROFILE.chosenTags,
   learnedTags: MY_PROFILE.learnedTags,
 };
@@ -101,6 +103,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [user],
   );
 
+  const updateBio = useCallback(
+    async (bio: string) => {
+      if (!profile) return;
+      const previous = profile.bio;
+      setProfile({ ...profile, bio });
+      if (!isFirebaseConfigured) return;
+      try {
+        await setBio(profile.uid, bio);
+      } catch (e) {
+        setProfile((p) => (p ? { ...p, bio: previous } : p));
+        throw e;
+      }
+    },
+    [profile],
+  );
+
   const removeLearnedTag = useCallback(
     async (tag: string) => {
       if (!profile) return;
@@ -118,8 +136,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const retry = useCallback(() => setAttempt((n) => n + 1), []);
 
   const value = useMemo(
-    () => ({ status, user, profile, error, completeOnboarding, removeLearnedTag, signOut, retry }),
-    [status, user, profile, error, completeOnboarding, removeLearnedTag, signOut, retry],
+    () => ({ status, user, profile, error, completeOnboarding, updateBio, removeLearnedTag, signOut, retry }),
+    [status, user, profile, error, completeOnboarding, updateBio, removeLearnedTag, signOut, retry],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

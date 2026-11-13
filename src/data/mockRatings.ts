@@ -6,7 +6,11 @@ import type { EventRatings, Reputation } from '../types/ratings';
  * - INITIAL_MY_RATINGS: evaluările pe care le-ai dat deja (un eveniment trecut e deja evaluat).
  */
 
+/** Id-ul utilizatorului curent în datele mock (cu Firebase: uid-ul din Auth). */
+export const ME_ID = 'me';
+
 export const INITIAL_REPUTATION: Record<string, Reputation> = {
+  [ME_ID]: { tagCounts: { friendly: 14, punctual: 9, again: 11 }, reportsCount: 0 },
   p1: { tagCounts: { friendly: 14, punctual: 9, again: 11 }, reportsCount: 0 },
   p2: { tagCounts: { friendly: 11, punctual: 4, again: 9 }, reportsCount: 1 },
   p3: { tagCounts: { friendly: 8, punctual: 7, again: 6 }, reportsCount: 0 },

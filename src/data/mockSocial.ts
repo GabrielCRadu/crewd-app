@@ -10,6 +10,7 @@ export const MY_PROFILE: Profile = {
   name: 'Alex',
   age: 22,
   city: 'Orașul tău',
+  bio: 'Îmi place să ies cu oameni noi și să mă distrez. Ador board games, jazz-ul live și concertele mici.',
   chosenTags: {
     events: ['Concerte', 'Party-uri', 'Socializare'],
     music: ['Electronică', 'Jazz'],

@@ -24,6 +24,7 @@ export async function getProfile(uid: string): Promise<UserProfile | null> {
     age: d.age ?? 0,
     city: d.city ?? '',
     gender: d.gender ?? 'other',
+    bio: d.bio ?? '',
     chosenTags: {
       events: d.chosenTags?.events ?? [],
       music: d.chosenTags?.music ?? [],
@@ -35,10 +36,15 @@ export async function getProfile(uid: string): Promise<UserProfile | null> {
 
 /** Creează profilul la finalul onboarding-ului. */
 export async function createProfile(uid: string, draft: ProfileDraft): Promise<UserProfile> {
-  const profile: UserProfile = { uid, ...draft, learnedTags: [] };
+  const profile: UserProfile = { uid, ...draft, bio: '', learnedTags: [] };
   const { uid: _uid, ...data } = profile;
   await setDoc(doc(requireDb(), 'users', uid), { ...data, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
   return profile;
+}
+
+/** Salvează „Despre mine”. */
+export async function setBio(uid: string, bio: string): Promise<void> {
+  await updateDoc(doc(requireDb(), 'users', uid), { bio, updatedAt: serverTimestamp() });
 }
 
 /** Scoate un tag învățat (din cardul „Învățate din evenimentele tale”). */

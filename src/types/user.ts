@@ -12,6 +12,8 @@ export interface UserProfile {
   age: number;
   city: string;
   gender: Gender;
+  /** „Despre mine”, scris de utilizator din Profil. Poate fi gol. */
+  bio: string;
   /** Tag-urile alese la onboarding, pe grupuri (src/data/tags.ts). */
   chosenTags: Record<TagGroup['id'], string[]>;
   /** Tag-uri adăugate automat din evenimentele la care s-a înscris. */
@@ -19,4 +21,4 @@ export interface UserProfile {
 }
 
 /** Ce se completează în onboarding (restul câmpurilor le pune aplicația). */
-export type ProfileDraft = Omit<UserProfile, 'uid' | 'learnedTags'>;
+export type ProfileDraft = Omit<UserProfile, 'uid' | 'learnedTags' | 'bio'>;
