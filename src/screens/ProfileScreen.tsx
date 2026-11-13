@@ -10,7 +10,7 @@ import Aurora from '../components/Aurora';
 import Avatar from '../components/Avatar';
 import Chip from '../components/Chip';
 import ReputationStats from '../components/ReputationStats';
-import TintedCard from '../components/TintedCard';
+import GradientBorderCard from '../components/GradientBorderCard';
 import EventHistoryCarousel from '../components/events/EventHistoryCarousel';
 import { useAuth } from '../context/AuthContext';
 import { ME_ID } from '../data/mockRatings';
@@ -19,17 +19,16 @@ import { TAG_GROUPS } from '../data/tags';
 import { usePastEvents } from '../hooks/usePastEvents';
 import { useRatings } from '../hooks/useRatings';
 import { getReputation } from '../services/ratingsService';
-import { colors } from '../theme/colors';
-import { gradients } from '../theme/gradients';
+import { colors, tagTints } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
 import type { IconName } from '../types/events';
 import type { TagGroup } from '../types/social';
 
-/** Iconița fiecărui grup de tag-uri din cardul „Ce îți place”. */
-const GROUP_ICONS: Record<TagGroup['id'], IconName> = {
-  events: 'ticket-outline',
-  music: 'musical-notes-outline',
-  hobbies: 'color-palette-outline',
+/** Iconița și culoarea tag-urilor fiecărui grup din cardul „Ce îți place”. */
+const GROUP_STYLE: Record<TagGroup['id'], { icon: IconName; tint: keyof typeof tagTints }> = {
+  events: { icon: 'ticket-outline', tint: 'orange' },
+  music: { icon: 'musical-notes-outline', tint: 'magenta' },
+  hobbies: { icon: 'color-palette-outline', tint: 'pink' },
 };
 
 /**
@@ -68,7 +67,7 @@ export default function ProfileScreen() {
     ]);
 
   return (
-    // Fundal complet negru; culoarea apare doar în câteva carduri (identitate, „Despre mine”, „Ce îți place”).
+    // Fundal complet negru; culoarea apare doar în câteva carduri (identitate, „Despre mine”, conturul „Ce îți place”).
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScrollView
         contentContainerStyle={styles.content}
@@ -121,22 +120,22 @@ export default function ProfileScreen() {
         {/* Tag-urile alese, într-un singur card, pe grupuri */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Ce îți place</Text>
-          <TintedCard tint={gradients.tintCool}>
+          <GradientBorderCard>
             {TAG_GROUPS.map((group, i) => (
               <View key={group.id} style={[styles.tagGroup, i > 0 && styles.tagGroupDivided]}>
                 <View style={styles.tagGroupHeader}>
-                  <Ionicons name={GROUP_ICONS[group.id]} size={16} color={colors.text} />
+                  <Ionicons name={GROUP_STYLE[group.id].icon} size={16} color={colors.text} />
                   <Text style={styles.tagGroupLabel}>{group.label}</Text>
                 </View>
                 <View style={styles.tags}>
                   {profile.chosenTags[group.id].map((t) => (
-                    <Chip key={t} label={t} active />
+                    <Chip key={t} label={t} tint={tagTints[GROUP_STYLE[group.id].tint]} />
                   ))}
                   {profile.chosenTags[group.id].length === 0 ? <Text style={styles.hint}>Nimic ales încă.</Text> : null}
                 </View>
               </View>
             ))}
-          </TintedCard>
+          </GradientBorderCard>
         </View>
 
         <View style={[styles.card, styles.learnedCard]}>

@@ -25,7 +25,7 @@ type ExtraFields =
   | 'source';
 
 /** Un eveniment mock: ca Event, dar cu poziția relativă la dispozitiv în loc de coordonate. */
-type MockEvent = Omit<Event, 'location' | ExtraFields> & { offset: LatLng };
+type MockEvent = Omit<Event, 'location' | ExtraFields> & Partial<Pick<Event, ExtraFields>> & { offset: LatLng };
 
 const MOCK_DEFAULTS: Pick<Event, ExtraFields> = {
   endsAtEstimated: false,
@@ -58,6 +58,9 @@ const SAT = (6 - now.getDay() + 7) % 7;
 const SUN = SAT + 1;
 
 const poster = (id: string) => `https://picsum.photos/seed/crewd-${id}/800/600`;
+
+/** O fotografie de pe Unsplash (licență gratuită), potrivită cu evenimentul. */
+const unsplash = (photoId: string) => `https://images.unsplash.com/${photoId}?w=800&q=70&auto=format&fit=crop`;
 
 /** Un eveniment care începe la `start` și durează `hours` ore. */
 function timing(start: Date, hours: number) {
@@ -276,7 +279,8 @@ const MOCK_EVENTS: MockEvent[] = [
     venueName: 'Pivnița de jazz',
     address: 'Centru',
     offset: { latitude: 0.004, longitude: -0.006 },
-    imageUrl: poster('e16'),
+    imageUrl: unsplash('photo-1415201364774-f6f0bb35f28f'),
+    imageCredit: 'Unsplash',
     price: 30,
     friendsGoing: ['Maria', 'Andrei'],
     lookingForCompanyCount: 0,
@@ -291,7 +295,8 @@ const MOCK_EVENTS: MockEvent[] = [
     venueName: 'Bar Refren',
     address: 'Centru',
     offset: { latitude: -0.005, longitude: 0.007 },
-    imageUrl: poster('e17'),
+    imageUrl: unsplash('photo-1516450360452-9312f5e86fc7'),
+    imageCredit: 'Unsplash',
     price: 0,
     friendsGoing: ['Ioana', 'Victor', 'Maria'],
     lookingForCompanyCount: 0,
@@ -306,7 +311,8 @@ const MOCK_EVENTS: MockEvent[] = [
     venueName: 'Dealurile de lângă oraș',
     address: 'În afara orașului',
     offset: { latitude: -0.05, longitude: -0.04 },
-    imageUrl: poster('e18'),
+    imageUrl: unsplash('photo-1551632811-561732d1e306'),
+    imageCredit: 'Unsplash',
     price: 0,
     friendsGoing: ['Victor'],
     lookingForCompanyCount: 0,

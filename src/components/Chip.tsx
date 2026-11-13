@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { colors } from '../theme/colors';
+import type { TagTint } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
 
 interface Props {
@@ -10,18 +11,25 @@ interface Props {
   active?: boolean;
   /** Contur punctat: tag adăugat automat. */
   dashed?: boolean;
+  /** Pastilă colorată (fundal ușor + contur), din `tagTints` (theme/colors.ts). */
+  tint?: TagTint;
   onPress?: () => void;
   /** Afișează un ✕ și îl apelează la apăsare. */
   onRemove?: () => void;
 }
 
 /** Un tag sub formă de pastilă de sticlă (vezi docs/design-language.md). */
-export default function Chip({ label, active = false, dashed = false, onPress, onRemove }: Props) {
+export default function Chip({ label, active = false, dashed = false, tint, onPress, onRemove }: Props) {
   return (
     <Pressable
       onPress={onPress ?? onRemove}
       disabled={!onPress && !onRemove}
-      style={[styles.chip, active && styles.active, dashed && styles.dashed]}
+      style={[
+        styles.chip,
+        active && styles.active,
+        dashed && styles.dashed,
+        tint && { backgroundColor: tint.background, borderColor: tint.border },
+      ]}
     >
       <Text style={[styles.label, active && styles.labelActive]}>{label}</Text>
       {onRemove ? <Ionicons name="close" size={14} color={colors.muted} /> : null}
