@@ -1,12 +1,13 @@
 import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import SegmentedControl from '../components/SegmentedControl';
 import CategoryChips from '../components/events/CategoryChips';
 import EventsMap from '../components/events/EventsMap';
-import NowCard from '../components/events/NowCard';
+import NowCarousel from '../components/events/NowCarousel';
 import UpcomingEventRow from '../components/events/UpcomingEventRow';
 import { useEvents } from '../hooks/useEvents';
 import { usePreferences } from '../hooks/usePreferences';
@@ -14,6 +15,7 @@ import { getLocationNotice, useUserLocation } from '../hooks/useUserLocation';
 import type { EventsStackParamList } from '../navigation/eventsTypes';
 import { isJoined, joinEvent } from '../services/preferencesService';
 import { colors } from '../theme/colors';
+import { glass, radii } from '../theme/shape';
 import type { CategoryId } from '../types/events';
 import { isLive } from '../utils/dates';
 import { addDistance, isUpcomingOrLive, matchesCategories, sortByDate } from '../utils/eventFilters';
@@ -42,12 +44,12 @@ export default function EventsScreen({ navigation }: Props) {
       ),
     [events, location.coords, categoryIds],
   );
-  // „ACUM” = cel mai apropiat eveniment în desfășurare; restul intră în „Urmează”.
-  const now = useMemo(
-    () => [...visible].filter((e) => isLive(e)).sort((a, b) => a.distanceKm - b.distanceKm)[0] ?? null,
+  // „ACUM” = toate evenimentele în desfășurare (cel mai apropiat primul); restul intră în „Urmează”.
+  const liveNow = useMemo(
+    () => visible.filter((e) => isLive(e)).sort((a, b) => a.distanceKm - b.distanceKm),
     [visible],
   );
-  const upcoming = visible.filter((e) => e.id !== now?.id);
+  const upcoming = visible.filter((e) => !isLive(e));
 
   const openEvent = (eventId: string) => navigation.navigate('EventDetails', { eventId });
   const locationNotice = getLocationNotice(location.status);
@@ -68,7 +70,13 @@ export default function EventsScreen({ navigation }: Props) {
 
       <CategoryChips selected={categoryIds} onChange={setCategoryIds} />
 
-      {locationNotice ? <Text style={styles.notice}>{locationNotice}</Text> : null}
+      {/* Mesajul despre locație: pastilă de sticlă, ca să se citească pe fundalul închis */}
+      {locationNotice ? (
+        <View style={styles.notice}>
+          <Ionicons name="location-outline" size={16} color={colors.text} />
+          <Text style={styles.noticeText}>{locationNotice}</Text>
+        </View>
+      ) : null}
 
       {mode === 'map' ? (
         <EventsMap
@@ -79,12 +87,12 @@ export default function EventsScreen({ navigation }: Props) {
         />
       ) : (
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-          {now ? (
-            <NowCard
-              event={now}
-              joined={isJoined(preferences, now.id)}
-              onJoin={() => joinEvent(now)}
-              onOpen={() => openEvent(now.id)}
+          {liveNow.length > 0 ? (
+            <NowCarousel
+              events={liveNow}
+              isJoined={(id) => isJoined(preferences, id)}
+              onJoin={(e) => joinEvent(e)}
+              onOpen={openEvent}
             />
           ) : null}
 
@@ -111,7 +119,18 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   header: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 14, gap: 14 },
   title: { fontSize: 32, fontWeight: '600', letterSpacing: -0.5, color: colors.text },
-  notice: { marginHorizontal: 20, marginTop: 10, fontSize: 12, color: colors.faint },
+  notice: {
+    ...glass,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginHorizontal: 20,
+    marginTop: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: radii.inner,
+  },
+  noticeText: { flex: 1, fontSize: 13, lineHeight: 18, color: colors.text },
   content: { padding: 20, paddingTop: 16, paddingBottom: 32, gap: 12 },
   sectionTitle: { fontSize: 18, fontWeight: '600', color: colors.text, marginTop: 10 },
   empty: { fontSize: 14, color: colors.muted },

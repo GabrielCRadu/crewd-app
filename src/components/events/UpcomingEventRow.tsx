@@ -1,10 +1,12 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 
 import DistanceDot from './DistanceDot';
-import type { EventWithDistance } from '../../types/events';
-import { getCategory } from '../../data/categories';
+import type { CategoryId, EventWithDistance } from '../../types/events';
+import { CATEGORIES, getCategory } from '../../data/categories';
 import { colors } from '../../theme/colors';
+import { gradients } from '../../theme/gradients';
 import { glass, radii } from '../../theme/shape';
 import { formatTime, formatWeekdayShort } from '../../utils/dates';
 import { formatDistance } from '../../utils/distance';
@@ -15,13 +17,27 @@ interface Props {
   onPress: () => void;
 }
 
+/** Fiecare categorie primește mereu aceeași nuanță caldă (portocaliu, roz, magenta, galben...). */
+function tintFor(category: CategoryId) {
+  const index = CATEGORIES.findIndex((c) => c.id === category);
+  return gradients.cardTints[Math.max(0, index) % gradients.cardTints.length]!;
+}
+
 /**
  * Un rând din secțiunea „Urmează” (docs/layout-guide.md):
  * caseta de dată | titlu, „HH:MM · Loc · distanță”, „Categorie (· Înscris)” | chevron.
+ * Fundalul e sticlă cu o nuanță caldă discretă, în funcție de categorie.
  */
 export default function UpcomingEventRow({ event, joined, onPress }: Props) {
   return (
     <Pressable onPress={onPress} style={({ pressed }) => [styles.row, pressed && styles.pressed]}>
+      <LinearGradient
+        colors={tintFor(event.category)}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={StyleSheet.absoluteFill}
+      />
+
       {/* Caseta de dată: albă (evidențiată) dacă ești înscris */}
       <View style={[styles.dateBox, joined && styles.dateBoxActive]}>
         <Text style={[styles.weekday, joined && styles.onLight]}>{formatWeekdayShort(event.startsAt)}</Text>
@@ -51,7 +67,15 @@ export default function UpcomingEventRow({ event, joined, onPress }: Props) {
 }
 
 const styles = StyleSheet.create({
-  row: { ...glass, flexDirection: 'row', alignItems: 'center', gap: 14, padding: 12, borderRadius: radii.card },
+  row: {
+    ...glass,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    padding: 12,
+    borderRadius: radii.card,
+    overflow: 'hidden',
+  },
   pressed: { backgroundColor: colors.cardStrong },
   dateBox: { ...glass, width: 58, height: 58, borderRadius: radii.inner, alignItems: 'center', justifyContent: 'center' },
   dateBoxActive: { backgroundColor: colors.text, borderColor: colors.text },
@@ -62,5 +86,5 @@ const styles = StyleSheet.create({
   title: { color: colors.text, fontSize: 16, fontWeight: '600' },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   meta: { flexShrink: 1, color: colors.muted, fontSize: 13 },
-  category: { color: colors.faint, fontSize: 12, fontWeight: '500' },
+  category: { color: colors.muted, fontSize: 12, fontWeight: '500' },
 });
