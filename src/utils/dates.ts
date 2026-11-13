@@ -56,7 +56,7 @@ export function formatEventDate(d: Date, now = new Date()): string {
   return `${formatDay(d, now)} · ${formatTime(d)}`;
 }
 
-/** Ex: „Vineri, 13 nov · 20:00” (caseta „Când” din detalii). */
-export function formatLongDate(d: Date): string {
-  return `${WEEKDAYS_LONG[d.getDay()]}, ${d.getDate()} ${MONTHS_SHORT[d.getMonth()]} · ${formatTime(d)}`;
+/** Ex: „Vineri, 13 nov” (caseta „Când” din detalii; ora se afișează separat, dedesubt). */
+export function formatLongDay(d: Date): string {
+  return `${WEEKDAYS_LONG[d.getDay()]}, ${d.getDate()} ${MONTHS_SHORT[d.getMonth()]}`;
 }
