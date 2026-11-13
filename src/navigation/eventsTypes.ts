@@ -6,4 +6,6 @@ export type EventsStackParamList = {
   RateEvent: { eventId: string };
   /** Profilul altei persoane (tag-urile primite și numărul de rapoarte). */
   PersonProfile: { personId: string };
+  /** Formularul „Propune un grupuleț” pentru un eveniment. */
+  ProposeGroup: { eventId: string };
 };

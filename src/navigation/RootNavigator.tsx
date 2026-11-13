@@ -32,7 +32,7 @@ const theme: Theme = {
 };
 
 /** Ecranele care se deschid peste tab-uri și ascund bara de jos (vezi docs/layout-guide.md). */
-const FULLSCREEN_ROUTES = ['ChatRoom', 'EventDetails', 'RateEvent', 'PersonProfile', 'EditProfile'];
+const FULLSCREEN_ROUTES = ['ChatRoom', 'EventDetails', 'RateEvent', 'PersonProfile', 'EditProfile', 'ProposeGroup'];
 
 /** Ordinea din ghidul de layout: Descoperă · Evenimente · Hartă · Chat · Profil. */
 const TABS: {
