@@ -14,7 +14,7 @@ import type { CategoryId, Event, EventPrice, LatLng } from '../types/events';
  * - Fără config: datele mock, așezate în jurul locației dispozitivului.
  */
 
-const CATEGORY_IDS: CategoryId[] = ['muzica', 'teatru', 'film', 'party', 'standup', 'ateliere', 'sport', 'social', 'studenti'];
+const CATEGORY_IDS: CategoryId[] = ['muzica', 'teatru', 'party', 'standup', 'ateliere', 'sport', 'social', 'studenti'];
 
 /** Când organizatorul nu anunță ora de final, considerăm că evenimentul durează atât. */
 const DEFAULT_DURATION_MINUTES = 180;

@@ -65,7 +65,7 @@ const PROFILE_TAG_BY_TYPE = {
 };
 
 /** Tag-urile de profil (Muzică, Hobby-uri) recunoscute în cuvintele-cheie ale evenimentului. */
-const PROFILE_TAGS = ['Rock', 'Electronică', 'Hip-hop', 'Jazz', 'Pop', 'Folk', 'Board games', 'Drumeții', 'Fotografie', 'Gaming', 'Sport', 'Gătit', 'Filme'];
+const PROFILE_TAGS = ['Rock', 'Electronică', 'Hip-hop', 'Jazz', 'Pop', 'Folk', 'Board games', 'Drumeții', 'Fotografie', 'Gaming', 'Sport', 'Gătit'];
 
 const normalize = (s) =>
   s

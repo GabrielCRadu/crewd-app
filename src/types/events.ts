@@ -14,7 +14,6 @@ export interface LatLng {
 export type CategoryId =
   | 'muzica'
   | 'teatru'
-  | 'film'
   | 'party'
   | 'standup'
   | 'ateliere'
@@ -51,7 +50,7 @@ export interface Category {
  */
 export interface Event {
   id: string;
-  /** Numele afișat mare: artistul/trupa, piesa de teatru, filmul etc. */
+  /** Numele afișat mare: artistul/trupa, piesa de teatru, petrecerea etc. */
   title: string;
   description: string;
   category: CategoryId;

@@ -36,7 +36,7 @@ De sus în jos:
 2. **Progres:** ambele bare sunt pline.
 3. **Titlu mare** „Ce îți place?” și un subtitlu de 2 rânduri.
 4. **Trei grupuri de tag-uri.** Fiecare are o etichetă mică, iar chip-urile de sub ea trec pe rândul următor când nu mai încap. Se pot alege mai multe.
-   - **Tipuri de evenimente:** Concerte, Party-uri, Filme, Teatru, Socializare
+   - **Tipuri de evenimente:** Concerte, Party-uri, Teatru, Socializare (fără filme: aplicația nu include filme)
    - **Muzică:** Rock, Electronică, Hip-hop, Jazz, Pop, Folk
    - **Hobby-uri:** Board games, Drumeții, Fotografie, Gaming, Sport, Gătit
 5. Spațiu liber.
@@ -61,7 +61,7 @@ De sus în jos:
 
 1. **Titlu mare** „Evenimente”.
 2. **Comutator** cu două segmente egale: **Listă | Hartă**.
-3. **Chip-uri de categorii** pe un singur rând, cu scroll orizontal: Toate, Concerte, Party-uri, Filme, Teatru…
+3. **Chip-uri de categorii** pe un singur rând, cu scroll orizontal: Toate, Concerte, Party-uri, Teatru… (fără Filme)
 4. **Card evidențiat „ACUM”**, pentru evenimentul în desfășurare, pe toată lățimea:
    - sus: badge-ul „ACUM” în stânga și distanța în dreapta;
    - titlul evenimentului, mare;

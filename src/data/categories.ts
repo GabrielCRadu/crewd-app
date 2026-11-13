@@ -4,7 +4,6 @@ import type { Category, CategoryId } from '../types/events';
 export const CATEGORIES: Category[] = [
   { id: 'muzica', label: 'Concerte', icon: 'musical-notes-outline' },
   { id: 'party', label: 'Party-uri', icon: 'sparkles-outline' },
-  { id: 'film', label: 'Filme', icon: 'film-outline' },
   { id: 'teatru', label: 'Teatru', icon: 'happy-outline' },
   { id: 'social', label: 'Socializare', icon: 'people-outline' },
   { id: 'standup', label: 'Stand-up', icon: 'mic-outline' },

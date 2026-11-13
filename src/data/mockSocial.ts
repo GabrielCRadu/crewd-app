@@ -11,7 +11,7 @@ export const MY_PROFILE: Profile = {
   age: 22,
   city: 'Orașul tău',
   chosenTags: {
-    events: ['Concerte', 'Filme', 'Socializare'],
+    events: ['Concerte', 'Party-uri', 'Socializare'],
     music: ['Electronică', 'Jazz'],
     hobbies: ['Board games'],
   },
@@ -32,7 +32,7 @@ export const PEOPLE: Person[] = [
     name: 'Maria',
     age: 21,
     distanceKm: 1.2,
-    tags: ['Board games', 'Concerte', 'Drumeții', 'Filme', 'Fotografie'],
+    tags: ['Board games', 'Concerte', 'Drumeții', 'Fotografie'],
     goingTo: { title: 'Open Mic: Stand-up Night', when: 'vineri' },
   },
   {
@@ -48,7 +48,7 @@ export const PEOPLE: Person[] = [
     name: 'Ioana',
     age: 20,
     distanceKm: 2.4,
-    tags: ['Teatru', 'Filme', 'Socializare', 'Gătit'],
+    tags: ['Teatru', 'Socializare', 'Gătit'],
     goingTo: { title: 'Hamlet', when: 'duminică' },
   },
   {
@@ -87,13 +87,13 @@ export const MY_GROUPS: ChatGroup[] = [
   },
   {
     id: 'g2',
-    name: 'Cinefilii din Botanica',
-    eventTitle: 'Interstellar',
+    name: 'Rockerii de cartier',
+    eventTitle: 'Concert rock: trupe locale',
     membersCount: 5,
     commonTagsCount: 2,
-    meetupWhen: 'duminică la 19:15',
-    meetupWhere: 'la casa de bilete',
-    lastMessage: { author: 'Andrei', text: 'luăm popcorn mare, nu discutăm', time: 'ieri' },
+    meetupWhen: 'sâmbătă la 19:15',
+    meetupWhere: 'la intrare',
+    lastMessage: { author: 'Andrei', text: 'luăm dopuri de urechi, nu discutăm', time: 'ieri' },
     unreadCount: 0,
   },
 ];
@@ -131,7 +131,7 @@ export const MESSAGES: Record<string, ChatMessage[]> = {
     { id: 'm4', author: 'Maria', text: 'Da, 19:45 în fața intrării. Aduc eu Dixit!' },
   ],
   g2: [
-    { id: 'm1', author: 'Andrei', text: 'luăm popcorn mare, nu discutăm' },
+    { id: 'm1', author: 'Andrei', text: 'luăm dopuri de urechi, nu discutăm' },
   ],
 };
 
