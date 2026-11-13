@@ -17,6 +17,7 @@ import { usePreferences } from '../hooks/usePreferences';
 import { useRatings } from '../hooks/useRatings';
 import { useUserLocation } from '../hooks/useUserLocation';
 import type { EventsStackParamList } from '../navigation/eventsTypes';
+import { findPersonByName } from '../services/peopleService';
 import { isJoined, joinEvent, leaveEvent } from '../services/preferencesService';
 import { hasRated } from '../services/ratingsService';
 import { colors } from '../theme/colors';
@@ -150,11 +151,21 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
           {event.friendsGoing.length > 0 ? (
             <View style={styles.friendsRow}>
               <View style={styles.avatars}>
-                {event.friendsGoing.slice(0, 3).map((name, i) => (
-                  <View key={name} style={[styles.avatarRing, i > 0 && styles.avatarOverlap]}>
-                    <Avatar name={name} size={36} />
-                  </View>
-                ))}
+                {/* Un avatar deschide profilul persoanei */}
+                {event.friendsGoing.slice(0, 3).map((name, i) => {
+                  const person = findPersonByName(name);
+                  return (
+                    <Pressable
+                      key={name}
+                      onPress={person ? () => navigation.navigate('PersonProfile', { personId: person.id }) : undefined}
+                      disabled={!person}
+                      hitSlop={4}
+                      style={[styles.avatarRing, i > 0 && styles.avatarOverlap]}
+                    >
+                      <Avatar name={name} size={36} />
+                    </Pressable>
+                  );
+                })}
               </View>
               <Text style={styles.friendsText}>
                 {ended ? formatWentWith(event.friendsGoing) : formatFriendsGoing(event.friendsGoing)}
