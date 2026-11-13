@@ -9,6 +9,7 @@ import Avatar from '../components/Avatar';
 import GlassIconButton from '../components/GlassIconButton';
 import { MESSAGES, getGroup } from '../data/mockSocial';
 import type { ChatsStackParamList } from '../navigation/chatsTypes';
+import { findPersonByName } from '../services/peopleService';
 import { colors } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
 import type { ChatMessage } from '../types/social';
@@ -69,11 +70,22 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
           renderItem={({ item, index }) => {
             const isMine = item.author === null;
             const showName = !isMine && messages[index - 1]?.author !== item.author;
+            // Numele sau avatarul autorului deschide profilul lui.
+            const person = isMine ? undefined : findPersonByName(item.author!);
+            const openAuthor = person ? () => navigation.navigate('PersonProfile', { personId: person.id }) : undefined;
             return (
               <View style={[styles.messageRow, isMine && styles.messageRowMine]}>
-                {!isMine ? <Avatar name={item.author!} size={30} /> : null}
+                {!isMine ? (
+                  <Pressable onPress={openAuthor} disabled={!openAuthor} hitSlop={4}>
+                    <Avatar name={item.author!} size={30} />
+                  </Pressable>
+                ) : null}
                 <View style={styles.messageBody}>
-                  {showName ? <Text style={styles.author}>{item.author}</Text> : null}
+                  {showName ? (
+                    <Pressable onPress={openAuthor} disabled={!openAuthor} hitSlop={4}>
+                      <Text style={styles.author}>{item.author}</Text>
+                    </Pressable>
+                  ) : null}
                   <View style={[styles.bubble, isMine ? styles.bubbleMine : styles.bubbleOther]}>
                     <Text style={[styles.bubbleText, isMine && styles.bubbleTextMine]}>{item.text}</Text>
                   </View>

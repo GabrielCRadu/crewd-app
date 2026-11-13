@@ -2,6 +2,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import ChatsScreen from '../screens/ChatsScreen';
 import ChatRoomScreen from '../screens/ChatRoomScreen';
+import PersonProfileScreen from '../screens/PersonProfileScreen';
 import { colors } from '../theme/colors';
 import type { ChatsStackParamList } from './chatsTypes';
 
@@ -13,6 +14,7 @@ export default function ChatsNavigator() {
     <Stack.Navigator screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
       <Stack.Screen name="ChatsHome" component={ChatsScreen} />
       <Stack.Screen name="ChatRoom" component={ChatRoomScreen} />
+      <Stack.Screen name="PersonProfile" component={PersonProfileScreen} />
     </Stack.Navigator>
   );
 }

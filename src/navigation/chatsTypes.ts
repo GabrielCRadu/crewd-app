@@ -2,4 +2,6 @@
 export type ChatsStackParamList = {
   ChatsHome: undefined;
   ChatRoom: { groupId: string };
+  /** Profilul autorului unui mesaj. */
+  PersonProfile: { personId: string };
 };
