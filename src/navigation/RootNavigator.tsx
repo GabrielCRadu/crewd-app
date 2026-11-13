@@ -1,5 +1,6 @@
 import type { ComponentProps, ComponentType } from 'react';
-import { DarkTheme, NavigationContainer } from '@react-navigation/native';
+import { StyleSheet, View } from 'react-native';
+import { DarkTheme, NavigationContainer, getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import type { Theme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,7 +8,8 @@ import { Ionicons } from '@expo/vector-icons';
 import DiscoverScreen from '../screens/DiscoverScreen';
 import EventsNavigator from './EventsNavigator';
 import FriendsMapScreen from '../screens/FriendsMapScreen';
-import ChatsScreen from '../screens/ChatsScreen';
+import ChatsNavigator from './ChatsNavigator';
+import ProfileScreen from '../screens/ProfileScreen';
 import { colors } from '../theme/colors';
 
 type IconName = ComponentProps<typeof Ionicons>['name'];
@@ -26,6 +28,10 @@ const theme: Theme = {
   },
 };
 
+/** Ecranele care se deschid peste tab-uri și ascund bara de jos (vezi docs/layout-guide.md). */
+const FULLSCREEN_ROUTES = ['ChatRoom'];
+
+/** Ordinea din ghidul de layout: Descoperă · Evenimente · Hartă · Chat · Profil. */
 const TABS: {
   name: string;
   title: string;
@@ -33,10 +39,11 @@ const TABS: {
   icon: IconName;
   iconActive: IconName;
 }[] = [
+  { name: 'Discover', title: 'Descoperă', component: DiscoverScreen, icon: 'albums-outline', iconActive: 'albums' },
   { name: 'Events', title: 'Evenimente', component: EventsNavigator, icon: 'calendar-outline', iconActive: 'calendar' },
-  { name: 'Discover', title: 'Descoperă', component: DiscoverScreen, icon: 'heart-outline', iconActive: 'heart' },
-  { name: 'Map', title: 'Hartă', component: FriendsMapScreen, icon: 'map-outline', iconActive: 'map' },
-  { name: 'Chats', title: 'Chat', component: ChatsScreen, icon: 'chatbubbles-outline', iconActive: 'chatbubbles' },
+  { name: 'Map', title: 'Hartă', component: FriendsMapScreen, icon: 'location-outline', iconActive: 'location' },
+  { name: 'Chats', title: 'Chat', component: ChatsNavigator, icon: 'chatbubble-outline', iconActive: 'chatbubble' },
+  { name: 'Profile', title: 'Profil', component: ProfileScreen, icon: 'person-outline', iconActive: 'person' },
 ];
 
 export default function RootNavigator() {
@@ -45,8 +52,9 @@ export default function RootNavigator() {
       <Tab.Navigator
         screenOptions={{
           headerShown: false,
-          tabBarActiveTintColor: colors.primary,
+          tabBarActiveTintColor: colors.text,
           tabBarInactiveTintColor: colors.muted,
+          tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
         }}
       >
         {TABS.map((t) => (
@@ -54,15 +62,25 @@ export default function RootNavigator() {
             key={t.name}
             name={t.name}
             component={t.component}
-            options={{
+            options={({ route }) => ({
               title: t.title,
-              tabBarIcon: ({ focused, color, size }) => (
-                <Ionicons name={focused ? t.iconActive : t.icon} size={size} color={color} />
+              tabBarStyle: FULLSCREEN_ROUTES.includes(getFocusedRouteNameFromRoute(route) ?? '')
+                ? { display: 'none' }
+                : undefined,
+              tabBarIcon: ({ focused, color }) => (
+                <View style={[styles.iconPill, focused && styles.iconPillActive]}>
+                  <Ionicons name={focused ? t.iconActive : t.icon} size={20} color={focused ? '#fff' : color} />
+                </View>
               ),
-            }}
+            })}
           />
         ))}
       </Tab.Navigator>
     </NavigationContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  iconPill: { width: 48, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  iconPillActive: { backgroundColor: colors.primary },
+});
