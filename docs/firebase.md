@@ -33,7 +33,7 @@ Evenimentele se scriu doar prin `scripts/import-events.mjs`, cu `firebase-admin`
    ```bash
    node scripts/import-events.mjs --dry-run
    ```
-   Scriptul află coordonatele locurilor prin Nominatim (OpenStreetMap, maxim o cerere pe secundă) și le păstrează în `scripts/data/geocode-cache.json`. Un loc greșit se corectează acolo, apoi rulezi din nou. Previzualizarea e în `scripts/data/events-preview.json`.
+   Dacă evenimentul are `geolocation` (latitude, longitude, precision, note), scriptul folosește direct acele coordonate. Altfel află coordonatele locurilor prin Nominatim (OpenStreetMap, maxim o cerere pe secundă) și le păstrează în `scripts/data/geocode-cache.json`. Un loc greșit se corectează acolo, apoi rulezi din nou. Previzualizarea e în `scripts/data/events-preview.json`.
 4. Importă:
    ```bash
    node scripts/import-events.mjs          # adaugă sau actualizează (id-ul documentului = id-ul evenimentului)
@@ -58,8 +58,10 @@ Evenimentele se scriu doar prin `scripts/import-events.mjs`, cu `firebase-admin`
 | `timeNote` | string \| null | ex. „Accesul de la 20:00” |
 | `durationMinutes`, `durationText` | number \| null, string \| null | |
 | `venueName`, `address`, `city` | string | |
-| `location` | GeoPoint | din geocodare |
-| `locationApproximate` | boolean | true = n-am găsit locul și am pus centrul orașului |
+| `location` | GeoPoint | din `geolocation` al evenimentului, altfel din geocodare |
+| `locationApproximate` | boolean | true = pinul poate fi la câteva sute de metri de intrare (precizie `street`/`area`/`locality`, sau centrul orașului când n-am găsit locul) |
+| `locationPrecision` | string \| null | `venue`, `address`, `building`, `landmark`, `street`, `area`, `locality`; null la geocodarea din script |
+| `locationNote` | string \| null | explicație pentru poziție (ex. „Aceeași clădire ca Opera”) |
 | `organizer` | string \| null | |
 | `price` | map \| null | `{ isFree, min, max, currency, label, soldOut }` |
 | `ageRestriction` | string \| null | |
