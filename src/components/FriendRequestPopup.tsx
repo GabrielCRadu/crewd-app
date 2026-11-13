@@ -4,8 +4,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import Avatar from './Avatar';
+import { useFriends } from '../hooks/useFriends';
 import {
   acceptFriendRequest,
+  idsWithStatus,
   scheduleDemoFriendRequest,
   subscribeToFriendRequests,
 } from '../services/friendsService';
@@ -17,20 +19,30 @@ import type { Person } from '../types/social';
 interface Props {
   /** Deschide profilul persoanei care a trimis cererea. */
   onOpenProfile: (personId: string) => void;
+  /** Deschide lista de prieteni (cu cererile primite sus). */
+  onOpenRequests: () => void;
+  /**
+   * Arată butonul mic cu numărul de cereri. Doar pe ecranele principale: pe celelalte, colțul
+   * din dreapta sus e ocupat de butoanele ecranului (ex. „Editează”, ⋯).
+   */
+  showPill: boolean;
 }
 
-/** Cât stă notificarea pe ecran dacă nu faci nimic. Cererea rămâne oricum în lista de prieteni. */
-const VISIBLE_MS = 10000;
+/** Cât stă notificarea mare pe ecran; apoi pleacă și rămâne butonul mic. */
+const VISIBLE_MS = 5000;
 const WIDTH = 300;
 
 /**
- * Notificarea din colțul din dreapta sus, peste orice ecran, când cineva îți trimite o cerere
- * de prietenie: poza și numele persoanei, „ți-a trimis o cerere de prietenie”, „Acceptă” și
- * „Vezi profilul”. Intră din dreapta și dispare singură după câteva secunde.
+ * Cererile de prietenie, în colțul din dreapta sus, peste orice ecran:
+ * 1. când sosește o cerere, intră din dreapta notificarea mare (poza, numele, „Acceptă”, „Vezi profilul”);
+ * 2. după câteva secunde pleacă, iar în colț rămâne un buton mic cu numărul de cereri primite,
+ *    cât timp ai cereri la care n-ai răspuns. Butonul deschide lista de prieteni.
  */
-export default function FriendRequestPopup({ onOpenProfile }: Props) {
+export default function FriendRequestPopup({ onOpenProfile, onOpenRequests, showPill }: Props) {
   const insets = useSafeAreaInsets();
   const { width: screenWidth } = useWindowDimensions();
+  const friends = useFriends();
+  const pendingCount = idsWithStatus(friends, 'incoming').length;
   const [person, setPerson] = useState<Person | null>(null);
   const slide = useRef(new Animated.Value(0)).current;
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -58,7 +70,22 @@ export default function FriendRequestPopup({ onOpenProfile }: Props) {
     };
   }, []);
 
-  if (!person) return null;
+  // Fără notificarea mare: butonul mic cu numărul de cereri, cât timp ai cereri nerezolvate.
+  if (!person) {
+    if (!showPill || pendingCount === 0) return null;
+    return (
+      <Pressable
+        onPress={onOpenRequests}
+        hitSlop={8}
+        accessibilityRole="button"
+        accessibilityLabel={`${pendingCount} ${pendingCount === 1 ? 'cerere' : 'cereri'} de prietenie`}
+        style={({ pressed }) => [styles.pill, { top: insets.top + 10 }, pressed && styles.pressed]}
+      >
+        <Ionicons name="person-add" size={14} color={colors.onLight} />
+        <Text style={styles.pillText}>{pendingCount}</Text>
+      </Pressable>
+    );
+  }
 
   const cardWidth = Math.min(WIDTH, screenWidth - 24);
   const translateX = slide.interpolate({ inputRange: [0, 1], outputRange: [cardWidth + 24, 0] });
@@ -141,4 +168,20 @@ const styles = StyleSheet.create({
   pressed: { opacity: 0.8 },
   buttonText: { color: colors.text, fontSize: 14, fontWeight: '600' },
   acceptText: { color: colors.onLight },
+  // Butonul mic: pastilă albă cu iconița și numărul de cereri.
+  pill: {
+    position: 'absolute',
+    right: 14,
+    zIndex: 100,
+    elevation: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    height: 30,
+    paddingHorizontal: 10,
+    borderRadius: radii.pill,
+    backgroundColor: colors.text,
+    boxShadow: '0 6px 16px rgba(0,0,0,0.5)',
+  },
+  pillText: { color: colors.onLight, fontSize: 13, fontWeight: '700' },
 });

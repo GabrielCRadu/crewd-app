@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { ComponentProps, ComponentType } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import {
@@ -63,19 +64,40 @@ function openPersonProfile(personId: string) {
   }
 }
 
+/** Deschide lista de prieteni (cererile primite sunt sus). */
+function openFriendRequests() {
+  if (navigationRef.isReady()) {
+    navigationRef.navigate('Profile', { screen: 'FriendsList', initial: false });
+  }
+}
+
+/**
+ * Ecranele pe care stă butonul mic cu cererile de prietenie: cele principale, unde colțul din
+ * dreapta sus e liber. (Pe Profil ai deja badge-ul de la „prieteni”.)
+ */
+const REQUESTS_PILL_ROUTES = ['EventsHome', 'Map', 'ChatsHome'];
+
 /**
  * Alege ce vede utilizatorul după starea sesiunii (src/context/AuthContext.tsx):
  * se verifică sesiunea → login / creare cont → onboarding → tab-uri.
  */
 export default function RootNavigator() {
   const { status, error, retry, signOut } = useAuth();
+  // Ecranul curent (pornim pe Evenimente, primul tab), ca să știm unde arătăm butonul de cereri.
+  const [routeName, setRouteName] = useState('EventsHome');
+  const updateRoute = () => setRouteName(navigationRef.getCurrentRoute()?.name ?? 'EventsHome');
+
   return (
-    <NavigationContainer theme={theme} ref={navigationRef}>
+    <NavigationContainer theme={theme} ref={navigationRef} onReady={updateRoute} onStateChange={updateRoute}>
       {status === 'ready' ? (
         <>
           <MainTabs />
-          {/* Notificarea „X ți-a trimis o cerere de prietenie”, peste orice ecran */}
-          <FriendRequestPopup onOpenProfile={openPersonProfile} />
+          {/* Cererile de prietenie: notificarea mare, apoi butonul mic cu numărul lor */}
+          <FriendRequestPopup
+            onOpenProfile={openPersonProfile}
+            onOpenRequests={openFriendRequests}
+            showPill={REQUESTS_PILL_ROUTES.includes(routeName)}
+          />
         </>
       ) : status === 'signedOut' ? (
         <AuthNavigator />
