@@ -33,7 +33,8 @@ export default function CategoryChips({ selected, onChange }: Props) {
 }
 
 const styles = StyleSheet.create({
-  // flexGrow: 0 = rândul ia doar înălțimea chip-urilor, nu tot spațiul liber.
-  scroll: { flexGrow: 0 },
-  row: { paddingHorizontal: 20, gap: 8 },
+  // ScrollView are implicit flexGrow/flexShrink 1: fără 0 aici, lista de dedesubt îl strivea pe înălțime
+  // (chip-urile apăreau tăiate pe jumătate). Așa rândul ia exact înălțimea chip-urilor.
+  scroll: { flexGrow: 0, flexShrink: 0 },
+  row: { paddingHorizontal: 20, paddingVertical: 2, gap: 8, alignItems: 'center' },
 });
