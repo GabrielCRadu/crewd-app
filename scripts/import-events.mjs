@@ -11,9 +11,10 @@
  *   --file <cale>   fișierul cu evenimente (implicit: evenimente-timisoara-verificate.json)
  *   --key <cale>    cheia contului de serviciu Firebase (implicit: service-account.json)
  *
- * Coordonatele locurilor se află o singură dată prin Nominatim (OpenStreetMap, max. 1 cerere/s)
+ * Coordonatele vin din câmpul `geolocation` al fiecărui eveniment, dacă există (latitude, longitude,
+ * precision, note). Altfel se află o singură dată prin Nominatim (OpenStreetMap, max. 1 cerere/s)
  * și se păstrează în scripts/data/geocode-cache.json. Dacă un loc e greșit, corectează-l acolo
- * (latitude/longitude) și rulează din nou: cache-ul are prioritate.
+ * (latitude/longitude) și rulează din nou: cache-ul are prioritate față de Nominatim.
  *
  * Schema documentelor e descrisă în docs/firebase.md.
  */
@@ -154,6 +155,22 @@ async function geocodeVenue(venueName, address, city, cache) {
   return cache[key];
 }
 
+/** Precizii la care pinul poate fi la câteva sute de metri de intrare (vezi meta.notes din fișier). */
+const APPROXIMATE_PRECISIONS = new Set(['street', 'area', 'locality']);
+
+/** Coordonatele date direct în fișier (`geolocation`), sau null dacă lipsesc. */
+function fileLocation(event) {
+  const g = event.geolocation;
+  if (!g || !Number.isFinite(g.latitude) || !Number.isFinite(g.longitude)) return null;
+  return {
+    latitude: g.latitude,
+    longitude: g.longitude,
+    approximate: APPROXIMATE_PRECISIONS.has(g.precision),
+    precision: g.precision ?? null,
+    note: g.note ?? null,
+  };
+}
+
 // ---------- main ----------
 
 async function main() {
@@ -170,8 +187,11 @@ async function main() {
 
   const docs = [];
   for (const e of events) {
-    const location = await geocodeVenue(e.venueName, e.address, e.city ?? 'Timișoara', cache);
-    writeFileSync(CACHE_FILE, JSON.stringify(cache, null, 2)); // salvăm pe parcurs, ca o întrerupere să nu piardă cererile făcute
+    let location = fileLocation(e);
+    if (!location) {
+      location = await geocodeVenue(e.venueName, e.address, e.city ?? 'Timișoara', cache);
+      writeFileSync(CACHE_FILE, JSON.stringify(cache, null, 2)); // salvăm pe parcurs, ca o întrerupere să nu piardă cererile făcute
+    }
     docs.push({
       id: e.id,
       data: {
@@ -192,6 +212,8 @@ async function main() {
         city: e.city ?? 'Timișoara',
         location: { latitude: location.latitude, longitude: location.longitude },
         locationApproximate: location.approximate,
+        locationPrecision: location.precision ?? null,
+        locationNote: location.note ?? null,
         organizer: e.organizer ?? null,
         price: e.price ?? null,
         ageRestriction: e.ageRestriction ?? null,
@@ -205,7 +227,8 @@ async function main() {
   }
 
   const approximate = docs.filter((d) => d.data.locationApproximate).length;
-  console.log(`Coordonate: ${docs.length - approximate} găsite, ${approximate} aproximate (centrul orașului).`);
+  const fromFile = events.filter((e) => fileLocation(e)).length;
+  console.log(`Coordonate: ${fromFile} din fișier, ${docs.length - fromFile} geocodate; ${approximate} aproximative.`);
 
   if (DRY_RUN) {
     writeFileSync(PREVIEW_FILE, JSON.stringify(docs, null, 2));
