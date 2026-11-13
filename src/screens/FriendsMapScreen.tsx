@@ -2,6 +2,9 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 
 import Avatar from '../components/Avatar';
 import GradientButton from '../components/GradientButton';
@@ -10,6 +13,7 @@ import { useEvents } from '../hooks/useEvents';
 import { isUpcomingOrLive } from '../utils/eventFilters';
 import { FRIENDS, placeAround } from '../data/mockSocial';
 import { useUserLocation } from '../hooks/useUserLocation';
+import { findPersonByName } from '../services/peopleService';
 import { colors } from '../theme/colors';
 import { cardShadow } from '../theme/shadows';
 import { darkMapStyle } from '../theme/mapStyle';
@@ -41,6 +45,13 @@ export default function FriendsMapScreen() {
   // Aceleași evenimente ca în tab-ul Evenimente (Firestore, sau mock fără config); doar cele încă neterminate.
   const { events: allEvents } = useEvents(location.coords);
   const events = useMemo(() => allEvents.filter((e) => isUpcomingOrLive(e)), [allEvents]);
+
+  // Tab-ul Hartă nu are stivă proprie: profilul prietenului se deschide în stiva tab-ului Profil.
+  const navigation = useNavigation<BottomTabNavigationProp<Record<string, object | undefined>>>();
+  const openFriendProfile = (name: string) => {
+    const person = findPersonByName(name);
+    if (person) navigation.navigate('Profile', { screen: 'PersonProfile', params: { personId: person.id }, initial: false });
+  };
 
   // Când aflăm locația reală, mutăm harta acolo.
   useEffect(() => {
@@ -94,7 +105,11 @@ export default function FriendsMapScreen() {
 
         {mode === 'friends' && selected ? (
           <View style={styles.card}>
-            <View style={styles.cardTop}>
+            {/* Avatarul și numele deschid profilul prietenului */}
+            <Pressable
+              onPress={() => openFriendProfile(selected.name)}
+              style={({ pressed }) => [styles.cardTop, pressed && styles.cardTopPressed]}
+            >
               <Avatar name={selected.name} size={44} />
               <View style={styles.cardText}>
                 <Text style={styles.cardName}>
@@ -102,7 +117,8 @@ export default function FriendsMapScreen() {
                 </Text>
                 <Text style={styles.cardStatus}>{selected.status}</Text>
               </View>
-            </View>
+              <Ionicons name="chevron-forward" size={18} color={colors.faint} />
+            </Pressable>
             <View style={styles.cardButtons}>
               <Pressable style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}>
                 <Text style={styles.buttonText}>Scrie-i</Text>
@@ -156,6 +172,7 @@ const styles = StyleSheet.create({
     ...cardShadow,
   },
   cardTop: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  cardTopPressed: { opacity: 0.7 },
   cardText: { flex: 1, gap: 2 },
   cardName: { color: colors.text, fontSize: 17, fontWeight: '600' },
   cardStatus: { color: colors.muted, fontSize: 13 },

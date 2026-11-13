@@ -3,4 +3,8 @@ export type ProfileStackParamList = {
   ProfileHome: undefined;
   /** Poză, nume, vârstă, oraș, descriere și preferințe. */
   EditProfile: undefined;
+  /** Prietenii tăi și cererile de prietenie. */
+  FriendsList: undefined;
+  /** Profilul altei persoane (din lista de prieteni). */
+  PersonProfile: { personId: string };
 };

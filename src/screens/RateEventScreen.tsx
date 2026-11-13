@@ -112,7 +112,7 @@ export default function RateEventScreen({ navigation, route }: Props) {
                   onPress={() => navigation.navigate('PersonProfile', { personId: person.id })}
                   style={({ pressed }) => [styles.personRow, pressed && styles.pressed]}
                 >
-                  <Avatar name={person.name} size={44} />
+                  <Avatar name={person.name} size={44} photoUrl={person.photoUrl} />
                   <View style={styles.personText}>
                     <Text style={styles.personName}>{person.name}</Text>
                     <Text style={styles.muted}>Vezi profilul</Text>

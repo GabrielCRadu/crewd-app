@@ -15,11 +15,12 @@ import GradientBorderCard from '../components/GradientBorderCard';
 import EventHistoryCarousel from '../components/events/EventHistoryCarousel';
 import { useAuth } from '../context/AuthContext';
 import { ME_ID } from '../data/mockRatings';
-import { FRIENDS } from '../data/mockSocial';
 import { useMyGroups } from '../hooks/useMyGroups';
 import { TAG_GROUPS } from '../data/tags';
+import { useFriends } from '../hooks/useFriends';
 import { usePastEvents } from '../hooks/usePastEvents';
 import { useRatings } from '../hooks/useRatings';
+import { idsWithStatus } from '../services/friendsService';
 import { getReputation } from '../services/ratingsService';
 import { TAG_GROUP_STYLE as GROUP_STYLE } from '../data/tagGroupStyle';
 import type { ProfileStackParamList } from '../navigation/profileTypes';
@@ -34,6 +35,7 @@ import { glass, radii } from '../theme/shape';
 export default function ProfileScreen() {
   const { profile, user, updateBio, removeLearnedTag, signOut } = useAuth();
   const pastEvents = usePastEvents();
+  const friends = useFriends();
   const { groups: myGroups } = useMyGroups();
   // Reputația e încă mock (ratingsService); cu Firebase va fi pe uid-ul din Auth.
   const reputation = getReputation(useRatings(), ME_ID);
@@ -48,8 +50,10 @@ export default function ProfileScreen() {
   // Tab-urile apar doar cu profil încărcat (RootNavigator), deci aici profile există.
   if (!profile) return null;
 
+  // „prieteni” deschide lista de prieteni; badge-ul arată câte cereri noi ai primit.
+  const incomingCount = idsWithStatus(friends, 'incoming').length;
   const stats = [
-    { value: FRIENDS.length, label: 'prieteni' },
+    { value: idsWithStatus(friends, 'friends').length, label: 'prieteni', onPress: () => navigation.navigate('FriendsList'), badge: incomingCount },
     { value: myGroups.length, label: 'grupuri' },
     { value: pastEvents.length, label: 'evenimente' },
   ];
@@ -103,10 +107,24 @@ export default function ProfileScreen() {
             {stats.map((s, i) => (
               <Fragment key={s.label}>
                 {i > 0 ? <View style={styles.statDivider} /> : null}
-                <View style={styles.stat}>
-                  <Text style={styles.statValue}>{s.value}</Text>
-                  <Text style={styles.statLabel}>{s.label}</Text>
-                </View>
+                <Pressable
+                  onPress={s.onPress}
+                  disabled={!s.onPress}
+                  style={({ pressed }) => [styles.stat, pressed && styles.statPressed]}
+                >
+                  <View style={styles.statValueRow}>
+                    <Text style={styles.statValue}>{s.value}</Text>
+                    {s.badge ? (
+                      <View style={styles.badge}>
+                        <Text style={styles.badgeText}>{s.badge}</Text>
+                      </View>
+                    ) : null}
+                  </View>
+                  <Text style={styles.statLabel}>
+                    {s.label}
+                    {s.onPress ? ' ›' : ''}
+                  </Text>
+                </Pressable>
               </Fragment>
             ))}
           </View>
@@ -202,8 +220,20 @@ const styles = StyleSheet.create({
     borderRadius: radii.inner,
     backgroundColor: colors.cardStrong,
   },
-  stat: { flex: 1, alignItems: 'center', gap: 2 },
+  stat: { flex: 1, alignItems: 'center', gap: 2, borderRadius: radii.inner },
+  statPressed: { opacity: 0.7 },
+  statValueRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   statValue: { fontSize: 20, fontWeight: '600', color: colors.text },
+  badge: {
+    minWidth: 18,
+    height: 18,
+    paddingHorizontal: 5,
+    borderRadius: radii.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primary,
+  },
+  badgeText: { color: colors.text, fontSize: 11, fontWeight: '700' },
   statLabel: { fontSize: 12, color: colors.muted },
   statDivider: { width: 1, alignSelf: 'stretch', backgroundColor: colors.border },
   section: { gap: 10 },
