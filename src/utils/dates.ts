@@ -34,6 +34,16 @@ export function isLive(event: Event, now = Date.now()): boolean {
   return event.startsAt.getTime() <= now && now <= event.endsAt.getTime();
 }
 
+/** Evenimentul s-a terminat? (de aici încolo apare în istoric și poți evalua oamenii) */
+export function hasEnded(event: Event, now = Date.now()): boolean {
+  return event.endsAt.getTime() < now;
+}
+
+/** Ex: „13 nov”. */
+export function formatShortDate(d: Date): string {
+  return `${d.getDate()} ${MONTHS_SHORT[d.getMonth()]}`;
+}
+
 /** Ex: „20:00”. */
 export function formatTime(d: Date): string {
   return `${pad(d.getHours())}:${pad(d.getMinutes())}`;

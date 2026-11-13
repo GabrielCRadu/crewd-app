@@ -7,6 +7,7 @@ import Avatar from '../components/Avatar';
 import GradientButton from '../components/GradientButton';
 import SegmentedControl from '../components/SegmentedControl';
 import { placeMockEvents } from '../data/mockEvents';
+import { isUpcomingOrLive } from '../utils/eventFilters';
 import { FRIENDS, placeAround } from '../data/mockSocial';
 import { useUserLocation } from '../hooks/useUserLocation';
 import { colors } from '../theme/colors';
@@ -38,7 +39,7 @@ export default function FriendsMapScreen() {
   );
   const selected = friends.find((f) => f.id === selectedId) ?? null;
   // Evenimentele mock stau și ele în jurul locației dispozitivului.
-  const events = useMemo(() => placeMockEvents(location.coords), [location.coords]);
+  const events = useMemo(() => placeMockEvents(location.coords).filter((e) => isUpcomingOrLive(e)), [location.coords]);
 
   // Când aflăm locația reală, mutăm harta acolo.
   useEffect(() => {

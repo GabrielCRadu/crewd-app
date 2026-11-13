@@ -14,17 +14,19 @@ import { getCategory } from '../data/categories';
 import { MY_GROUPS, SUGGESTED_GROUPS } from '../data/mockSocial';
 import { useEvents } from '../hooks/useEvents';
 import { usePreferences } from '../hooks/usePreferences';
+import { useRatings } from '../hooks/useRatings';
 import { useUserLocation } from '../hooks/useUserLocation';
 import type { EventsStackParamList } from '../navigation/eventsTypes';
 import { isJoined, joinEvent, leaveEvent } from '../services/preferencesService';
+import { hasRated } from '../services/ratingsService';
 import { colors } from '../theme/colors';
 import { gradients } from '../theme/gradients';
 import { glass, radii } from '../theme/shape';
 import type { IconName } from '../types/events';
 import type { ChatGroup } from '../types/social';
-import { formatLongDay, formatTime, isLive } from '../utils/dates';
+import { formatLongDay, formatTime, hasEnded, isLive } from '../utils/dates';
 import { formatDistance, haversineKm } from '../utils/distance';
-import { formatFriendsGoing } from '../utils/format';
+import { formatFriendsGoing, formatWentWith } from '../utils/format';
 
 type Props = NativeStackScreenProps<EventsStackParamList, 'EventDetails'>;
 
@@ -37,6 +39,7 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
   const location = useUserLocation();
   const { events, loading } = useEvents(location.coords);
   const preferences = usePreferences();
+  const myRatings = useRatings();
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
 
@@ -57,8 +60,11 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
   const category = getCategory(event.category);
   const distanceKm = haversineKm(location.coords, event.location);
   const joined = isJoined(preferences, event.id);
+  const ended = hasEnded(event);
+  const rated = hasRated(myRatings, event.id);
   // Grupurile de chat pentru acest eveniment (mock: potrivite după titlu, din mockSocial.ts).
   const groups = [...MY_GROUPS, ...SUGGESTED_GROUPS].filter((g) => g.eventTitle === event.title);
+  const openRating = () => navigation.navigate('RateEvent', { eventId: event.id });
 
   // „Intră” deschide conversația grupului în tab-ul Chat (cu lista de chat-uri dedesubt, pentru „înapoi”).
   const openGroup = (group: ChatGroup) => {
@@ -81,6 +87,7 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
           <View style={styles.heroBadges}>
             <GlassBadge icon={category.icon} label={category.label} />
             {isLive(event) ? <GlassBadge icon="radio-button-on" label="ACUM" /> : null}
+            {ended ? <GlassBadge icon="checkmark-done" label="S-A TERMINAT" /> : null}
           </View>
         </View>
 
@@ -107,13 +114,15 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
                   </View>
                 ))}
               </View>
-              <Text style={styles.friendsText}>{formatFriendsGoing(event.friendsGoing)}</Text>
+              <Text style={styles.friendsText}>
+                {ended ? formatWentWith(event.friendsGoing) : formatFriendsGoing(event.friendsGoing)}
+              </Text>
             </View>
           ) : null}
 
-          {/* 6. Grupuri pe gustul tău */}
-          <Text style={styles.sectionTitle}>Grupuri pe gustul tău</Text>
-          {groups.length === 0 ? (
+          {/* 6. Grupuri pe gustul tău (doar înainte de eveniment) */}
+          {ended ? null : <Text style={styles.sectionTitle}>Grupuri pe gustul tău</Text>}
+          {ended ? null : groups.length === 0 ? (
             <Text style={styles.muted}>Încă nu s-a format niciun grup pentru acest eveniment.</Text>
           ) : (
             groups.map((g) => (
@@ -136,9 +145,26 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
         </View>
       </ScrollView>
 
-      {/* 7. „Înscrie-te”, fix jos */}
+      {/* 7. „Înscrie-te” fix jos; după eveniment devine „Evaluează oamenii” */}
       <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 12 }]}>
-        {joined ? (
+        {ended ? (
+          !joined ? (
+            <View style={styles.joinedPill}>
+              <Text style={styles.endedText}>Evenimentul s-a terminat</Text>
+            </View>
+          ) : rated ? (
+            <View style={styles.joinedRow}>
+              <View style={styles.joinedPill}>
+                <Text style={styles.joinedText}>Evaluat ✓</Text>
+              </View>
+              <Pressable onPress={openRating} hitSlop={8}>
+                <Text style={styles.cancel}>Modifică</Text>
+              </Pressable>
+            </View>
+          ) : (
+            <GradientButton label="Evaluează oamenii" icon="people" onPress={openRating} />
+          )
+        ) : joined ? (
           <View style={styles.joinedRow}>
             <View style={styles.joinedPill}>
               <Text style={styles.joinedText}>Înscris ✓</Text>
@@ -225,5 +251,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   joinedText: { color: colors.text, fontSize: 17, fontWeight: '600' },
+  endedText: { color: colors.muted, fontSize: 16, fontWeight: '500' },
   cancel: { color: colors.muted, fontSize: 15, fontWeight: '500', textDecorationLine: 'underline' },
 });

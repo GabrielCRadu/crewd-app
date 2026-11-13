@@ -272,7 +272,57 @@ const MOCK_EVENTS: MockEvent[] = [
     friendsGoing: ['Ioana', 'Maria'],
     lookingForCompanyCount: 11,
   },
+
+  // ---------- Evenimente trecute (la care ai fost; apar în istoricul din Profil) ----------
+  {
+    id: 'e16',
+    title: 'Concert de jazz în pivniță',
+    description: 'Un trio de jazz într-o pivniță mică, cu lumânări pe mese. Set lung, cu improvizații.',
+    category: 'muzica',
+    tags: ['Concerte', 'Jazz'],
+    ...timing(at(-1, 20), 3),
+    venueName: 'Pivnița de jazz',
+    address: 'Centru',
+    offset: { latitude: 0.004, longitude: -0.006 },
+    imageUrl: poster('e16'),
+    price: 30,
+    friendsGoing: ['Maria', 'Andrei'],
+    lookingForCompanyCount: 0,
+  },
+  {
+    id: 'e17',
+    title: 'Seară de karaoke',
+    description: 'Karaoke cu playlist uriaș, de la manele ironice la rock clasic. Cântă cine are curaj.',
+    category: 'social',
+    tags: ['Socializare'],
+    ...timing(at(-3, 21), 3),
+    venueName: 'Bar Refren',
+    address: 'Centru',
+    offset: { latitude: -0.005, longitude: 0.007 },
+    imageUrl: poster('e17'),
+    price: 0,
+    friendsGoing: ['Ioana', 'Victor', 'Maria'],
+    lookingForCompanyCount: 0,
+  },
+  {
+    id: 'e18',
+    title: 'Drumeție pe dealuri',
+    description: 'Traseu de 12 km prin pădure, cu prânz la stână. Ritm lejer.',
+    category: 'sport',
+    tags: ['Sport', 'Drumeții'],
+    ...timing(at(-8, 9), 6),
+    venueName: 'Dealurile de lângă oraș',
+    address: 'În afara orașului',
+    offset: { latitude: -0.05, longitude: -0.04 },
+    imageUrl: poster('e18'),
+    price: 0,
+    friendsGoing: ['Victor'],
+    lookingForCompanyCount: 0,
+  },
 ];
+
+/** Evenimentele trecute la care erai înscris la pornirea aplicației (pentru istoric). */
+export const PAST_JOINED_EVENT_IDS = ['e16', 'e17', 'e18'];
 
 /** Evenimentele mock așezate în jurul locației date (de obicei, locația dispozitivului). */
 export function placeMockEvents(center: LatLng): Event[] {
