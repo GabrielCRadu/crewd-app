@@ -1,5 +1,8 @@
 import {
+  EmailAuthProvider,
   createUserWithEmailAndPassword,
+  deleteUser,
+  reauthenticateWithCredential,
   onAuthStateChanged,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
@@ -52,6 +55,31 @@ export async function signOut(): Promise<void> {
   await firebaseSignOut(requireAuth());
 }
 
+/**
+ * Confirmă parola utilizatorului logat (Firebase o cere înainte de ștergerea contului).
+ * Aruncă eroare cu mesaj pentru utilizator dacă parola e greșită.
+ */
+export async function confirmPassword(password: string): Promise<void> {
+  const user = requireAuth().currentUser;
+  if (!user?.email) throw new Error('Nu ești logat.');
+  try {
+    await reauthenticateWithCredential(user, EmailAuthProvider.credential(user.email, password));
+  } catch (e) {
+    throw new Error(toMessage(e));
+  }
+}
+
+/** Șterge contul din Firebase Auth (după confirmPassword și după ce datele au fost șterse). */
+export async function deleteCurrentUser(): Promise<void> {
+  const user = requireAuth().currentUser;
+  if (!user) throw new Error('Nu ești logat.');
+  try {
+    await deleteUser(user);
+  } catch (e) {
+    throw new Error(toMessage(e));
+  }
+}
+
 /** Ascultă schimbările de sesiune. Returnează funcția de dezabonare. */
 export function subscribeToAuth(listener: (user: AuthUser | null) => void): () => void {
   if (!auth) {
@@ -84,6 +112,10 @@ function toMessage(e: unknown): string {
       return 'Prea multe încercări. Așteaptă puțin și încearcă din nou.';
     case 'auth/network-request-failed':
       return 'Nu există conexiune la internet.';
+    case 'auth/requires-recent-login':
+      return 'Din motive de siguranță, confirmă din nou parola.';
+    case 'auth/missing-password':
+      return 'Introdu parola.';
     case 'auth/operation-not-allowed':
       return 'Autentificarea cu email nu e activată în Firebase.';
     default:

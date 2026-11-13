@@ -20,6 +20,10 @@ Actualizează lista când rezolvi ceva sau adaugi un mock nou.
 - [ ] **Profil demo** fără Firebase (`DEMO_PROFILE` / `MY_PROFILE`): fallback doar când lipsește `.env.local`.
 - [ ] **Evenimente mock** (`src/data/mockEvents.ts`): fallback doar când lipsește `.env.local`.
 
+## Erori cunoscute
+
+- [ ] **Centrul de rezervă e Chișinău** (`CITY_CENTER` în `src/hooks/useUserLocation.ts`): fără acces la locație, distanțele se calculează din Chișinău, deși evenimentele sunt în Timișoara (~500 km); mesajul spune tot „centrul Chișinăului”.
+
 ## Stare care nu se salvează (se pierde la repornire)
 
 - [x] ~~Înscrierile la evenimente și scorurile tag-urilor~~: salvate în `users/{uid}` la apăsarea butonului (`joinedEventIds`, `tagScores`).
@@ -40,6 +44,8 @@ Actualizează lista când rezolvi ceva sau adaugi un mock nou.
 - [ ] **Build nativ pe Windows**: `ninja` din CMake 3.22.1 nu suportă căi lungi (vezi istoricul din conversație). Necesar pentru Google, push și release.
 
 ## Date și drepturi
+
+- [ ] **ÎNAINTE DE PREZENTARE: șterge pozele de test de pe Unsplash** (`photoUrl` din `src/data/mockSocial.ts`, profilurile persoanelor de test): se încarcă direct de pe images.unsplash.com.
 
 - [ ] **Evenimentele din Firestore** (din `evenimente-timisoara-verificate.json`) sunt doar pentru **demo intern**. Înainte de o lansare publică trebuie acordul surselor (iaBilet, Zile și Nopți, OnEvent etc.) sau o sursă cu licență (ex. acord scris de la OMD Timișoara / Visit Timișoara).
 - [ ] **Imaginile evenimentelor** sunt încărcate direct de pe site-urile organizatorilor (cu „Foto: …”). Pentru producție: acordul organizatorilor sau imagini proprii.

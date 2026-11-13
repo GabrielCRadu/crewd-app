@@ -10,6 +10,7 @@ import AboutCard from '../components/AboutCard';
 import Aurora from '../components/Aurora';
 import Avatar from '../components/Avatar';
 import Chip from '../components/Chip';
+import DeleteAccount from '../components/DeleteAccount';
 import ReputationStats from '../components/ReputationStats';
 import GradientBorderCard from '../components/GradientBorderCard';
 import EventHistoryCarousel from '../components/events/EventHistoryCarousel';
@@ -190,6 +191,8 @@ export default function ProfileScreen() {
             <Ionicons name="log-out-outline" size={18} color={colors.text} />
             <Text style={styles.signOutText}>Ieși din cont</Text>
           </Pressable>
+          {/* Ștergerea definitivă a contului (cere parola) */}
+          <DeleteAccount />
         </View>
       </ScrollView>
       </KeyboardAvoidingView>

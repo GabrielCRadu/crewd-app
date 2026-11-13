@@ -437,5 +437,18 @@ export async function leaveGroupForEvent(eventId: string, uid: string): Promise<
   });
 }
 
+/** Ieși din toate grupulețele (la ștergerea contului), ca să nu rămâi membru-fantomă. */
+export async function leaveAllGroups(uid: string): Promise<void> {
+  if (!db) {
+    for (const [eventId, groupId] of Object.entries(myGroupByEvent)) await leaveGroup(eventId, groupId, uid);
+    return;
+  }
+  await guard(async () => {
+    const snap = await getDoc(userRef(uid));
+    const byEvent: Record<string, string> = snap.data()?.groupByEvent ?? {};
+    for (const [eventId, groupId] of Object.entries(byEvent)) await firestoreLeave(eventId, groupId, uid);
+  });
+}
+
 /** Uid-ul folosit fără Firebase (profilul demo). */
 export const MOCK_UID = DEMO_UID;
