@@ -41,10 +41,6 @@ export const colors = {
   emberGlass: 'rgba(228,82,27,0.12)',
   /** Conturul cardurilor „ember”. */
   emberBorder: 'rgba(228,82,27,0.35)',
-  /** Sticlă închisă peste lumina portocalie (ex. locul pozei de profil fără poză). */
-  heroGlass: 'rgba(11,10,16,0.28)',
-  /** Contur alb discret peste lumina portocalie. */
-  heroBorder: 'rgba(255,255,255,0.22)',
 };
 
 /** Tag-uri colorate (fundal ușor + contur în culoarea accentului), ex. în cardul „Ce îți place”. */

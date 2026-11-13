@@ -31,8 +31,8 @@ import { isUpcomingOrLive, sortByDate } from '../utils/eventFilters';
 type PersonProfileParams = { PersonProfile: { personId: string } };
 
 /**
- * Profilul altei persoane. Aspect „ember”, fără degrade: sus un card portocaliu plin
- * (identitatea și prietenia), dedesubt negru curat, text mare și carduri de sticlă portocalie.
+ * Profilul altei persoane. Fundal negru simplu, text mare și curat; portocaliul apare doar
+ * în carduri și în tag-urile comune.
  * Conținut: identitate, prietenie, „Despre”, ce aveți în comun, ce a strâns după evenimente
  * (totaluri anonime), evenimentele la care ați fost împreună și, doar pentru prieteni, unde merge.
  */
@@ -118,11 +118,11 @@ export default function PersonProfileScreen() {
   return (
     <View style={styles.screen}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Cardul de sus: portocaliu plin, fără degrade, de la marginea ecranului; colțurile de jos rotunjite */}
-        <View style={[styles.heroCard, { paddingTop: insets.top + 8 }]}>
+        {/* Partea de sus, direct pe fundalul negru: butoanele, identitatea și prietenia */}
+        <View style={[styles.top, { paddingTop: insets.top + 8 }]}>
           <View style={styles.header}>
-            <GlassIconButton icon="chevron-back" onPress={() => navigation.goBack()} style={styles.heroButton} />
-            <GlassIconButton icon="ellipsis-horizontal" onPress={openMenu} style={styles.heroButton} />
+            <GlassIconButton icon="chevron-back" onPress={() => navigation.goBack()} />
+            <GlassIconButton icon="ellipsis-horizontal" onPress={openMenu} />
           </View>
 
           {/* Identitatea: poza, numele mare, vârsta și orașul */}
@@ -138,10 +138,10 @@ export default function PersonProfileScreen() {
             </View>
           </View>
 
-          <FriendButton personId={person.id} name={person.name} status={status} onEmber />
+          <FriendButton personId={person.id} name={person.name} status={status} />
         </View>
 
-        {/* Restul paginii, pe negru curat */}
+        {/* Restul paginii */}
         <View style={styles.content}>
           {blocked ? (
             <Text style={styles.muted}>
@@ -252,17 +252,8 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
   flex: { flex: 1 },
-  // Portocaliu plin, de la marginea de sus a ecranului; doar colțurile de jos sunt rotunjite.
-  heroCard: {
-    backgroundColor: colors.ember,
-    paddingHorizontal: 20,
-    paddingBottom: 24,
-    gap: 20,
-    borderBottomLeftRadius: 32,
-    borderBottomRightRadius: 32,
-  },
+  top: { paddingHorizontal: 20, gap: 20 },
   header: { flexDirection: 'row', justifyContent: 'space-between' },
-  heroButton: { backgroundColor: colors.heroGlass, borderColor: colors.heroBorder },
   content: { padding: 20, paddingTop: 28, paddingBottom: 40, gap: 28 },
   identity: { gap: 10 },
   photo: {
@@ -271,9 +262,9 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.heroGlass,
+    backgroundColor: colors.card,
     borderWidth: 1,
-    borderColor: colors.heroBorder,
+    borderColor: colors.border,
   },
   photoInitial: { fontSize: 40, fontWeight: '700', color: colors.text },
   name: { fontSize: 46, lineHeight: 50, fontWeight: '800', letterSpacing: -1.5, color: colors.text, marginTop: 10 },

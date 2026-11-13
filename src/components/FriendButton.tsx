@@ -17,11 +17,6 @@ interface Props {
   personId: string;
   name: string;
   status: FriendStatus;
-  /**
-   * Butonul stă pe un fundal portocaliu plin (cardul de sus din profilul unei persoane):
-   * acțiunea principală devine neagră, iar pastilele secundare, sticlă închisă.
-   */
-  onEmber?: boolean;
 }
 
 /**
@@ -29,13 +24,12 @@ interface Props {
  * „Adaugă prieten” → „Cerere trimisă” (Anulează) → „Prieteni ✓” (apăsat: Elimină prietenul).
  * Dacă ea ți-a trimis cerere: „Acceptă” / „Refuză”. Dacă ai blocat-o: „Deblochează”.
  */
-export default function FriendButton({ personId, name, status, onEmber = false }: Props) {
-  // Acțiunea principală: albă pe fundal închis, neagră pe portocaliu.
-  const primary = onEmber ? styles.primaryOnEmber : styles.primary;
-  const primaryColor = onEmber ? colors.text : colors.onLight;
-  // Pastilele secundare: sticlă deschisă pe negru, sticlă închisă pe portocaliu.
-  const secondary = onEmber ? styles.secondaryOnEmber : styles.secondary;
-  const linkStyle = [styles.link, onEmber && styles.linkOnEmber];
+export default function FriendButton({ personId, name, status }: Props) {
+  // Acțiunea principală e o pastilă albă; restul, sticlă.
+  const primary = styles.primary;
+  const primaryColor = colors.onLight;
+  const secondary = styles.secondary;
+  const linkStyle = styles.link;
 
   if (status === 'none') {
     return (
@@ -96,7 +90,7 @@ export default function FriendButton({ personId, name, status, onEmber = false }
       <Pressable onPress={confirmRemove} style={({ pressed }) => [styles.pill, secondary, pressed && styles.pressed]}>
         <Ionicons name="people" size={18} color={colors.text} />
         <Text style={styles.pillText}>Prieteni ✓</Text>
-        <Ionicons name="chevron-down" size={16} color={onEmber ? colors.text : colors.muted} />
+        <Ionicons name="chevron-down" size={16} color={colors.muted} />
       </Pressable>
     );
   }
@@ -105,7 +99,7 @@ export default function FriendButton({ personId, name, status, onEmber = false }
   return (
     <View style={styles.row}>
       <View style={[styles.pill, secondary, styles.flex]}>
-        <Ionicons name="ban" size={18} color={onEmber ? colors.text : colors.nope} />
+        <Ionicons name="ban" size={18} color={colors.nope} />
         <Text style={styles.pillText}>Blocat</Text>
       </View>
       <Pressable onPress={() => unblockPerson(personId)} hitSlop={8}>
@@ -130,12 +124,9 @@ const styles = StyleSheet.create({
   },
   pillText: { color: colors.text, fontSize: 16, fontWeight: '600' },
   primary: { backgroundColor: colors.text, borderColor: colors.text },
-  primaryOnEmber: { backgroundColor: colors.background, borderColor: colors.background },
   secondary: { ...glass },
-  secondaryOnEmber: { backgroundColor: colors.heroGlass, borderColor: colors.heroBorder },
   pressed: { opacity: 0.8 },
   link: { color: colors.muted, fontSize: 15, fontWeight: '500', textDecorationLine: 'underline' },
-  linkOnEmber: { color: colors.text },
   incoming: { gap: 10 },
   incomingText: { color: colors.text, fontSize: 14, fontWeight: '500' },
 });
