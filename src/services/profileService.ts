@@ -1,7 +1,7 @@
 import { doc, getDoc, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
 
 import { db } from '../lib/firebase';
-import type { ProfileDraft, UserProfile } from '../types/user';
+import type { ProfileChanges, ProfileDraft, UserProfile } from '../types/user';
 
 /*
  * Profilul utilizatorului în Firestore: users/{uid}.
@@ -25,6 +25,7 @@ export async function getProfile(uid: string): Promise<UserProfile | null> {
     city: d.city ?? '',
     gender: d.gender ?? 'other',
     bio: d.bio ?? '',
+    photoUrl: d.photoUrl ?? null,
     chosenTags: {
       events: d.chosenTags?.events ?? [],
       music: d.chosenTags?.music ?? [],
@@ -36,7 +37,7 @@ export async function getProfile(uid: string): Promise<UserProfile | null> {
 
 /** Creează profilul la finalul onboarding-ului. */
 export async function createProfile(uid: string, draft: ProfileDraft): Promise<UserProfile> {
-  const profile: UserProfile = { uid, ...draft, bio: '', learnedTags: [] };
+  const profile: UserProfile = { uid, ...draft, bio: '', photoUrl: null, learnedTags: [] };
   const { uid: _uid, ...data } = profile;
   await setDoc(doc(requireDb(), 'users', uid), { ...data, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
   return profile;
@@ -45,6 +46,11 @@ export async function createProfile(uid: string, draft: ProfileDraft): Promise<U
 /** Salvează „Despre mine”. */
 export async function setBio(uid: string, bio: string): Promise<void> {
   await updateDoc(doc(requireDb(), 'users', uid), { bio, updatedAt: serverTimestamp() });
+}
+
+/** Salvează modificările din „Editează profilul” (doar câmpurile trimise). */
+export async function updateProfileFields(uid: string, changes: ProfileChanges): Promise<void> {
+  await updateDoc(doc(requireDb(), 'users', uid), { ...changes, updatedAt: serverTimestamp() });
 }
 
 /** Scoate un tag învățat (din cardul „Învățate din evenimentele tale”). */

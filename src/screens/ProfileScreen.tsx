@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import AboutCard from '../components/AboutCard';
 import Aurora from '../components/Aurora';
@@ -19,17 +20,10 @@ import { TAG_GROUPS } from '../data/tags';
 import { usePastEvents } from '../hooks/usePastEvents';
 import { useRatings } from '../hooks/useRatings';
 import { getReputation } from '../services/ratingsService';
+import { TAG_GROUP_STYLE as GROUP_STYLE } from '../data/tagGroupStyle';
+import type { ProfileStackParamList } from '../navigation/profileTypes';
 import { colors, tagTints } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
-import type { IconName } from '../types/events';
-import type { TagGroup } from '../types/social';
-
-/** Iconița și culoarea tag-urilor fiecărui grup din cardul „Ce îți place”. */
-const GROUP_STYLE: Record<TagGroup['id'], { icon: IconName; tint: keyof typeof tagTints }> = {
-  events: { icon: 'ticket-outline', tint: 'orange' },
-  music: { icon: 'musical-notes-outline', tint: 'magenta' },
-  hobbies: { icon: 'color-palette-outline', tint: 'pink' },
-};
 
 /**
  * Tab-ul Profil (vezi docs/layout-guide.md): identitate cu statistici, „Despre mine”,
@@ -42,10 +36,12 @@ export default function ProfileScreen() {
   // Reputația e încă mock (ratingsService); cu Firebase va fi pe uid-ul din Auth.
   const reputation = getReputation(useRatings(), ME_ID);
 
-  const navigation = useNavigation<BottomTabNavigationProp<Record<string, object | undefined>>>();
+  const navigation = useNavigation<NativeStackNavigationProp<ProfileStackParamList, 'ProfileHome'>>();
   // Detaliile sunt în tab-ul Evenimente; `initial: false` lasă lista dedesubt, pentru „înapoi”.
   const openPastEvent = (eventId: string) =>
-    navigation.navigate('Events', { screen: 'EventDetails', params: { eventId }, initial: false });
+    navigation
+      .getParent<BottomTabNavigationProp<Record<string, object | undefined>>>()
+      ?.navigate('Events', { screen: 'EventDetails', params: { eventId }, initial: false });
 
   // Tab-urile apar doar cu profil încărcat (RootNavigator), deci aici profile există.
   if (!profile) return null;
@@ -76,7 +72,10 @@ export default function ProfileScreen() {
       >
         <View style={styles.header}>
           <Text style={styles.title}>Profil</Text>
-          <Pressable style={({ pressed }) => [styles.editButton, pressed && styles.pressed]}>
+          <Pressable
+            onPress={() => navigation.navigate('EditProfile')}
+            style={({ pressed }) => [styles.editButton, pressed && styles.pressed]}
+          >
             <Text style={styles.editText}>Editează</Text>
           </Pressable>
         </View>
@@ -85,7 +84,7 @@ export default function ProfileScreen() {
         <View style={styles.identity}>
           <Aurora style={StyleSheet.absoluteFill} />
           <View style={styles.identityRow}>
-            <Avatar name={profile.name} size={84} square />
+            <Avatar name={profile.name} size={84} square photoUrl={profile.photoUrl} />
             <View style={styles.identityText}>
               <Text style={styles.name}>
                 {profile.name}, {profile.age}

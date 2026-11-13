@@ -6,8 +6,8 @@ import { isFirebaseConfigured } from '../lib/firebase';
 import { signOut as authSignOut, subscribeToAuth } from '../services/authService';
 import type { AuthUser } from '../services/authService';
 import { seedTagScores } from '../services/preferencesService';
-import { createProfile, getProfile, setBio, setLearnedTags } from '../services/profileService';
-import type { ProfileDraft, UserProfile } from '../types/user';
+import { createProfile, getProfile, setBio, setLearnedTags, updateProfileFields } from '../services/profileService';
+import type { ProfileChanges, ProfileDraft, UserProfile } from '../types/user';
 
 /*
  * Starea de autentificare pentru toată aplicația:
@@ -27,6 +27,8 @@ interface AuthContextValue {
   error: string | null;
   completeOnboarding: (draft: ProfileDraft) => Promise<void>;
   updateBio: (bio: string) => Promise<void>;
+  /** Salvează modificările din „Editează profilul”. */
+  updateProfile: (changes: ProfileChanges) => Promise<void>;
   removeLearnedTag: (tag: string) => Promise<void>;
   signOut: () => Promise<void>;
   retry: () => void;
@@ -39,6 +41,7 @@ const DEMO_PROFILE: UserProfile = {
   city: MY_PROFILE.city,
   gender: 'other',
   bio: MY_PROFILE.bio,
+  photoUrl: null,
   chosenTags: MY_PROFILE.chosenTags,
   learnedTags: MY_PROFILE.learnedTags,
 };
@@ -119,6 +122,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [profile],
   );
 
+  // „Editează profilul”: actualizăm imediat pe ecran; dacă salvarea în Firestore eșuează, revenim.
+  const updateProfile = useCallback(
+    async (changes: ProfileChanges) => {
+      if (!profile) return;
+      const previous = profile;
+      setProfile({ ...profile, ...changes });
+      if (!isFirebaseConfigured) return;
+      try {
+        await updateProfileFields(profile.uid, changes);
+      } catch (e) {
+        setProfile(previous);
+        throw e;
+      }
+    },
+    [profile],
+  );
+
   const removeLearnedTag = useCallback(
     async (tag: string) => {
       if (!profile) return;
@@ -136,8 +156,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const retry = useCallback(() => setAttempt((n) => n + 1), []);
 
   const value = useMemo(
-    () => ({ status, user, profile, error, completeOnboarding, updateBio, removeLearnedTag, signOut, retry }),
-    [status, user, profile, error, completeOnboarding, updateBio, removeLearnedTag, signOut, retry],
+    () => ({ status, user, profile, error, completeOnboarding, updateBio, updateProfile, removeLearnedTag, signOut, retry }),
+    [status, user, profile, error, completeOnboarding, updateBio, updateProfile, removeLearnedTag, signOut, retry],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

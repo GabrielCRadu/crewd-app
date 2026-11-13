@@ -9,7 +9,7 @@ import DiscoverScreen from '../screens/DiscoverScreen';
 import EventsNavigator from './EventsNavigator';
 import FriendsMapScreen from '../screens/FriendsMapScreen';
 import ChatsNavigator from './ChatsNavigator';
-import ProfileScreen from '../screens/ProfileScreen';
+import ProfileNavigator from './ProfileNavigator';
 import GradientButton from '../components/GradientButton';
 import { useAuth } from '../context/AuthContext';
 import { colors } from '../theme/colors';
@@ -32,7 +32,7 @@ const theme: Theme = {
 };
 
 /** Ecranele care se deschid peste tab-uri și ascund bara de jos (vezi docs/layout-guide.md). */
-const FULLSCREEN_ROUTES = ['ChatRoom', 'EventDetails', 'RateEvent', 'PersonProfile'];
+const FULLSCREEN_ROUTES = ['ChatRoom', 'EventDetails', 'RateEvent', 'PersonProfile', 'EditProfile'];
 
 /** Ordinea din ghidul de layout: Descoperă · Evenimente · Hartă · Chat · Profil. */
 const TABS: {
@@ -46,7 +46,7 @@ const TABS: {
   { name: 'Events', title: 'Evenimente', component: EventsNavigator, icon: 'calendar-outline', iconActive: 'calendar' },
   { name: 'Map', title: 'Hartă', component: FriendsMapScreen, icon: 'location-outline', iconActive: 'location' },
   { name: 'Chats', title: 'Chat', component: ChatsNavigator, icon: 'chatbubble-outline', iconActive: 'chatbubble' },
-  { name: 'Profile', title: 'Profil', component: ProfileScreen, icon: 'person-outline', iconActive: 'person' },
+  { name: 'Profile', title: 'Profil', component: ProfileNavigator, icon: 'person-outline', iconActive: 'person' },
 ];
 
 /**
