@@ -10,4 +10,14 @@ export const gradients = {
   scrim: ['rgba(11,10,16,0)', 'rgba(11,10,16,0.85)'] as const,
   /** Avatare cu inițiale. */
   avatar: [colors.accentOrange, colors.accentMagenta] as const,
+  /**
+   * Nuanțe calde foarte discrete pentru cardurile de listă (mult mai slabe decât aurora):
+   * accentul la ~20% opacitate în stânga, care se stinge spre dreapta.
+   */
+  cardTints: [
+    ['rgba(255,122,61,0.22)', 'rgba(255,122,61,0.03)'], // portocaliu
+    ['rgba(255,77,141,0.22)', 'rgba(255,77,141,0.03)'], // roz
+    ['rgba(193,60,255,0.24)', 'rgba(193,60,255,0.03)'], // magenta
+    ['rgba(255,201,77,0.18)', 'rgba(255,201,77,0.03)'], // galben
+  ] as const,
 };
