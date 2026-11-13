@@ -23,7 +23,7 @@ Actualizează lista când rezolvi ceva sau adaugi un mock nou.
 
 ## Erori cunoscute
 
-- [ ] **Centrul de rezervă e Chișinău** (`CITY_CENTER` în `src/hooks/useUserLocation.ts`): fără acces la locație, distanțele se calculează din Chișinău, deși evenimentele sunt în Timișoara (~500 km); mesajul spune tot „centrul Chișinăului”.
+- [x] ~~Centrul de rezervă e Chișinău~~: acum e Timișoara (Piața Victoriei), iar mesajele spun „centrul Timișoarei”.
 
 ## Stare care nu se salvează (se pierde la repornire)
 
@@ -46,7 +46,7 @@ Actualizează lista când rezolvi ceva sau adaugi un mock nou.
 
 ## Date și drepturi
 
-- [ ] **ÎNAINTE DE PREZENTARE: șterge pozele de test de pe Unsplash** (`photoUrl` din `src/data/mockSocial.ts`, profilurile persoanelor de test): se încarcă direct de pe images.unsplash.com.
+- [ ] **ÎNAINTE DE PREZENTARE: șterge pozele de test de pe Unsplash**: `photoUrl` din `src/data/mockSocial.ts` (profilurile persoanelor de test). Se încarcă direct de pe images.unsplash.com. (Afișele evenimentelor de test vin acum din baza de date.)
 
 - [ ] **Evenimentele din Firestore** (din `evenimente-timisoara-verificate.json`) sunt doar pentru **demo intern**. Înainte de o lansare publică trebuie acordul surselor (iaBilet, Zile și Nopți, OnEvent etc.) sau o sursă cu licență (ex. acord scris de la OMD Timișoara / Visit Timișoara).
 - [ ] **Imaginile evenimentelor** sunt încărcate direct de pe site-urile organizatorilor (cu „Foto: …”). Pentru producție: acordul organizatorilor sau imagini proprii.
