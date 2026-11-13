@@ -10,7 +10,8 @@ import { placeAround } from './mockSocial';
  * - Datele sunt calculate față de ziua de azi, ca demo-ul să aibă mereu
  *   evenimente „acum”, în weekend și în săptămânile următoare.
  * - Titlurile se potrivesc cu mockSocial.ts (grupurile de chat, prietenii de pe hartă).
- * - Afișele sunt imagini placeholder de pe picsum.photos; înlocuiește `imageUrl`.
+ * - Afișele sunt luate din baza de date (afișele reale ale evenimentelor importate, de la organizatori),
+ *   alese după categorie; creditul e în `imageCredit`. Doar pentru demo, ca și datele importate.
  */
 
 /** Câmpurile pe care datele mock nu le au (vin doar din Firestore). */
@@ -57,10 +58,7 @@ function hoursFromNow(hours: number): Date {
 const SAT = (6 - now.getDay() + 7) % 7;
 const SUN = SAT + 1;
 
-const poster = (id: string) => `https://picsum.photos/seed/crewd-${id}/800/600`;
 
-/** O fotografie de pe Unsplash (licență gratuită), potrivită cu evenimentul. */
-const unsplash = (photoId: string) => `https://images.unsplash.com/${photoId}?w=800&q=70&auto=format&fit=crop`;
 
 /** Un eveniment care începe la `start` și durează `hours` ore. */
 function timing(start: Date, hours: number) {
@@ -80,7 +78,8 @@ const MOCK_EVENTS: MockEvent[] = [
     venueName: 'Piața centrală',
     address: 'Piața centrală',
     offset: { latitude: 0.002, longitude: -0.003 },
-    imageUrl: poster('e1'),
+    imageUrl: "https://imgcdn3.iabilet.ro/m_N3H9dSX2Y-ZzAe1_3pM8rOZXk=/fit-in/1200x1200/https%3A%2F%2Fstatic3.iabilet.ro%2Fimg%2Fdb%2Fevent%2F01%2Ffe%2Fbd%2F00000439252-ff08.png",
+    imageCredit: "iaBilet.ro",
     price: 0,
     friendsGoing: ['Andrei', 'Maria'],
     lookingForCompanyCount: 5,
@@ -96,7 +95,8 @@ const MOCK_EVENTS: MockEvent[] = [
     venueName: 'Board Game Café',
     address: 'Centru',
     offset: { latitude: 0.007, longitude: 0.006 },
-    imageUrl: poster('e2'),
+    imageUrl: "https://zilesinopti.ro/wp-content/uploads/2026/11/b486fb80-6e59-477a-b27c-43fb62157617.jpg",
+    imageCredit: "Zile \u0219i Nop\u021bi",
     price: 20,
     friendsGoing: ['Maria', 'Andrei', 'Ioana'],
     lookingForCompanyCount: 4,
@@ -111,7 +111,8 @@ const MOCK_EVENTS: MockEvent[] = [
     venueName: 'Teatrul independent',
     address: 'Cartierul vechi',
     offset: { latitude: -0.015, longitude: 0.018 },
-    imageUrl: poster('e3'),
+    imageUrl: "https://zilesinopti.ro/wp-content/uploads/2026/10/a5df90af-f44b-4e64-b970-486d52329bc1.png",
+    imageCredit: "Zile \u0219i Nop\u021bi",
     price: 40,
     friendsGoing: ['Ioana'],
     lookingForCompanyCount: 3,
@@ -126,7 +127,8 @@ const MOCK_EVENTS: MockEvent[] = [
     venueName: 'Teatrul Național',
     address: 'Centru',
     offset: { latitude: 0.0075, longitude: -0.0095 }, // unde e Ioana pe hartă
-    imageUrl: poster('e4'),
+    imageUrl: "https://imgcdn3.iabilet.ro/hiV4vW257elytnSOgODBRe5PC5U=/fit-in/1200x1200/https%3A%2F%2Fstatic3.iabilet.ro%2Fimg%2Fdb%2Fevent%2F01%2Ff8%2F3a%2F00000416160-43d8.png",
+    imageCredit: "iaBilet.ro",
     price: 60,
     friendsGoing: ['Ioana'],
     lookingForCompanyCount: 2,
@@ -141,7 +143,8 @@ const MOCK_EVENTS: MockEvent[] = [
     venueName: 'Hala industrială',
     address: 'Zona industrială',
     offset: { latitude: 0.045, longitude: 0.03 },
-    imageUrl: poster('e7'),
+    imageUrl: "https://zilesinopti.ro/wp-content/uploads/2026/10/ec833ad9-c735-47d5-abf5-8cf42bb47980.jpg",
+    imageCredit: "Zile \u0219i Nop\u021bi",
     price: 70,
     friendsGoing: ['Andrei'],
     lookingForCompanyCount: 8,
@@ -157,7 +160,8 @@ const MOCK_EVENTS: MockEvent[] = [
     venueName: 'Parcul central',
     address: 'Parcul central',
     offset: { latitude: 0.0035, longitude: 0.0045 }, // unde e Andrei pe hartă
-    imageUrl: poster('e8'),
+    imageUrl: "https://zilesinopti.ro/wp-content/uploads/2026/10/34998d55-bf14-4933-ad85-174091d1e299-1024x536.jpg",
+    imageCredit: "Zile \u0219i Nop\u021bi",
     price: 35,
     friendsGoing: ['Andrei', 'Maria'],
     lookingForCompanyCount: 7,
@@ -172,7 +176,8 @@ const MOCK_EVENTS: MockEvent[] = [
     venueName: 'Bar Microfonul',
     address: 'Centru',
     offset: { latitude: 0.009, longitude: -0.004 },
-    imageUrl: poster('e9'),
+    imageUrl: "https://imgcdn3.iabilet.ro/eR4inIu_SO6XI8FK0ugb7AO3hSk=/fit-in/1200x1200/https%3A%2F%2Fstatic3.iabilet.ro%2Fimg%2Fdb%2Fevent%2F01%2Ff0%2F50%2F00000430810-2422.png",
+    imageCredit: "iaBilet.ro",
     price: 25,
     friendsGoing: ['Maria', 'Andrei'],
     lookingForCompanyCount: 4,
@@ -187,7 +192,8 @@ const MOCK_EVENTS: MockEvent[] = [
     venueName: 'Clubul de rock',
     address: 'Centru vechi',
     offset: { latitude: 0.025, longitude: 0.03 },
-    imageUrl: poster('e10'),
+    imageUrl: "https://imgcdn3.iabilet.ro/tL9lLkIr5WPEJh6Iqk9_AUIa1S4=/fit-in/1200x1200/https%3A%2F%2Fstatic3.iabilet.ro%2Fimg%2Fdb%2Fevent%2F01%2Ffd%2Fca%2F00000442841-56b9.png",
+    imageCredit: "iaBilet.ro",
     price: 40,
     friendsGoing: ['Victor'],
     lookingForCompanyCount: 3,
@@ -202,7 +208,8 @@ const MOCK_EVENTS: MockEvent[] = [
     venueName: 'Lacul de la marginea orașului',
     address: 'În afara orașului',
     offset: { latitude: -0.06, longitude: 0.02 },
-    imageUrl: poster('e11'),
+    imageUrl: "https://www.onevent.ro/wp-content/uploads/2026/11/231911-4565063417061887.jpg",
+    imageCredit: "OnEvent.ro",
     price: 0,
     friendsGoing: ['Victor'],
     lookingForCompanyCount: 5,
@@ -217,7 +224,8 @@ const MOCK_EVENTS: MockEvent[] = [
     venueName: 'Terenul universității',
     address: 'Campus',
     offset: { latitude: 0.02, longitude: -0.025 },
-    imageUrl: poster('e12'),
+    imageUrl: "https://www.onevent.ro/wp-content/uploads/2026/11/231914-1107024135506105.jpg",
+    imageCredit: "OnEvent.ro",
     price: 15,
     friendsGoing: ['Victor', 'Andrei'],
     lookingForCompanyCount: 6,
@@ -232,7 +240,8 @@ const MOCK_EVENTS: MockEvent[] = [
     venueName: 'Piața mare',
     address: 'Centru',
     offset: { latitude: 0.001, longitude: 0.0015 },
-    imageUrl: poster('e13'),
+    imageUrl: "https://zilesinopti.ro/wp-content/uploads/2026/10/2dcf1b63-d7ab-40be-b27b-27fd81cd6da0.jpg",
+    imageCredit: "Zile \u0219i Nop\u021bi",
     price: 0,
     friendsGoing: ['Maria', 'Andrei', 'Ioana'],
     lookingForCompanyCount: 9,
@@ -247,7 +256,8 @@ const MOCK_EVENTS: MockEvent[] = [
     venueName: 'Crama din afara orașului',
     address: 'În afara orașului',
     offset: { latitude: 0.09, longitude: 0.06 },
-    imageUrl: poster('e14'),
+    imageUrl: "https://www.onevent.ro/wp-content/uploads/2026/11/231943-1588871713010575.jpg",
+    imageCredit: "OnEvent.ro",
     price: 150,
     friendsGoing: [],
     lookingForCompanyCount: 4,
@@ -262,7 +272,8 @@ const MOCK_EVENTS: MockEvent[] = [
     venueName: 'Universitatea',
     address: 'Campus',
     offset: { latitude: -0.012, longitude: 0.004 },
-    imageUrl: poster('e15'),
+    imageUrl: "https://www.onevent.ro/wp-content/uploads/2026/11/231953-1579241447533932.jpg",
+    imageCredit: "OnEvent.ro",
     price: 0,
     friendsGoing: ['Ioana', 'Maria'],
     lookingForCompanyCount: 11,
@@ -279,8 +290,8 @@ const MOCK_EVENTS: MockEvent[] = [
     venueName: 'Pivnița de jazz',
     address: 'Centru',
     offset: { latitude: 0.004, longitude: -0.006 },
-    imageUrl: unsplash('photo-1415201364774-f6f0bb35f28f'),
-    imageCredit: 'Unsplash',
+    imageUrl: "https://zilesinopti.ro/wp-content/uploads/2026/11/05a8d86c-7e07-419b-9286-8cd2be39f830.jpg",
+    imageCredit: "Zile \u0219i Nop\u021bi",
     price: 30,
     // Bianca nu e încă prietenă: v-ați cunoscut aici și ți-a trimis cerere (vezi friendsService).
     friendsGoing: ['Maria', 'Andrei', 'Bianca'],
@@ -296,8 +307,8 @@ const MOCK_EVENTS: MockEvent[] = [
     venueName: 'Bar Refren',
     address: 'Centru',
     offset: { latitude: -0.005, longitude: 0.007 },
-    imageUrl: unsplash('photo-1516450360452-9312f5e86fc7'),
-    imageCredit: 'Unsplash',
+    imageUrl: "https://cdn.sanity.io/images/hbw6hd0s/production/389e67f86bfe3271beef388ef85a75d435d33e31-1920x1005.png?w=1200&fit=max&auto=format",
+    imageCredit: "FITT",
     price: 0,
     friendsGoing: ['Ioana', 'Victor', 'Maria'],
     lookingForCompanyCount: 0,
@@ -312,8 +323,8 @@ const MOCK_EVENTS: MockEvent[] = [
     venueName: 'Dealurile de lângă oraș',
     address: 'În afara orașului',
     offset: { latitude: -0.05, longitude: -0.04 },
-    imageUrl: unsplash('photo-1551632811-561732d1e306'),
-    imageCredit: 'Unsplash',
+    imageUrl: "https://imgcdn3.iabilet.ro/DuXuL6qz8WeGM1U5jto5hLBq6C4=/fit-in/1200x1200/https%3A%2F%2Fstatic3.iabilet.ro%2Fimg%2Fdb%2Fevent%2F02%2F08%2Fa6%2F00000436693-5812.jpg",
+    imageCredit: "iaBilet.ro",
     price: 0,
     friendsGoing: ['Victor'],
     lookingForCompanyCount: 0,

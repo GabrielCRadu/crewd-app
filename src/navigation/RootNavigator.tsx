@@ -10,6 +10,7 @@ import {
 import type { Theme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import EventsNavigator from './EventsNavigator';
 import FriendsMapScreen from '../screens/FriendsMapScreen';
@@ -131,7 +132,13 @@ function LoadingScreen({ error, onRetry, onSignOut }: { error: string | null; on
 }
 
 /** Cele 5 tab-uri ale aplicației (după login și onboarding). */
+/** Înălțimea barei de jos, fără zona de siguranță a telefonului (standardul React Navigation e ~49). */
+const TAB_BAR_HEIGHT = 64;
+
 function MainTabs() {
+  const insets = useSafeAreaInsets();
+  // Bara de jos mai înaltă: înălțimea noastră + zona de siguranță (bara de gesturi / butoanele telefonului).
+  const tabBarStyle = [styles.tabBar, { height: TAB_BAR_HEIGHT + insets.bottom, paddingBottom: insets.bottom + 6 }];
   return (
     <Tab.Navigator
         screenOptions={{
@@ -139,7 +146,8 @@ function MainTabs() {
           tabBarActiveTintColor: colors.text,
           tabBarInactiveTintColor: colors.faint,
           tabBarLabelStyle: { fontSize: 11, fontWeight: '500' },
-          tabBarStyle: styles.tabBar,
+          tabBarStyle,
+          tabBarItemStyle: styles.tabBarItem,
         }}
       >
         {TABS.map((t) => (
@@ -151,7 +159,7 @@ function MainTabs() {
               title: t.title,
               tabBarStyle: FULLSCREEN_ROUTES.includes(getFocusedRouteNameFromRoute(route) ?? '')
                 ? { display: 'none' }
-                : styles.tabBar,
+                : tabBarStyle,
               tabBarIcon: ({ focused, color }) => (
                 <View style={[styles.iconPill, focused && styles.iconPillActive]}>
                   <Ionicons name={focused ? t.iconActive : t.icon} size={20} color={color} />
@@ -170,7 +178,8 @@ const styles = StyleSheet.create({
   loadingError: { alignItems: 'center', gap: 16 },
   loadingText: { color: colors.muted, fontSize: 15, textAlign: 'center' },
   loadingLink: { color: colors.faint, fontSize: 13, textDecorationLine: 'underline' },
-  tabBar: { backgroundColor: colors.background, borderTopColor: colors.border },
+  tabBar: { backgroundColor: colors.background, borderTopColor: colors.border, paddingTop: 8 },
+  tabBarItem: { gap: 4 },
   iconPill: { width: 48, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   iconPillActive: { backgroundColor: colors.cardStrong },
 });
