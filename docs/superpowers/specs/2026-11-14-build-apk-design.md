@@ -50,7 +50,8 @@ Până acum aplicația rulează doar în Expo Go, pe un singur telefon legat pri
 ## Decizii luate de mine (de verificat)
 
 - **Pachetul Android:** `com.crewd.app` (se adaugă în `app.json`, fișier comun; e o adăugire). Nu se mai poate schimba ușor după ce testerii instalează aplicația.
-- **Semnătura:** APK-ul de release e semnat cu cheia de debug a acestui PC (`~/.android/debug.keystore`), ca update-urile să se instaleze peste versiunea veche cât timp se construiește pe acest PC. Pentru Play Store va trebui o cheie de upload separată.
+- **Semnătura:** APK-ul de release e semnat cu cheia de debug pe care o pune șablonul Expo la `prebuild` (`android/app/debug.keystore`, aceeași la fiecare build), ca update-urile să se instaleze peste versiunea veche. Pentru Play Store va trebui o cheie de upload separată.
+- **Numele afișat** al aplicației devine „Crewd” (acum e „meet-up-app”), iar `userInterfaceStyle` devine `dark`, ca APK-ul să arate ca în Expo Go (bara de sistem închisă la culoare).
 - **Folderul de build:** `C:\crewd-build` (cod) și **folderul cu APK-uri:** `C:\crewd-build\apk\`.
 - **Cheia Google Maps:** se citește din `.env.local` (ex. `GOOGLE_MAPS_API_KEY`) printr-un `app.config` care o pune în `android.config.googleMaps.apiKey`; fără cheie, build-ul se oprește cu un mesaj clar.
 - Scriptul refuză să pornească dacă lipsesc Java/SDK/`.env.local`, și afișează la final calea APK-ului și versiunea.
