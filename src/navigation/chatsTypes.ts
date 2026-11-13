@@ -3,4 +3,6 @@ export type ChatsStackParamList = {
   ChatsHome: undefined;
   /** Conversația unui grupuleț de la un eveniment. */
   ChatRoom: { eventId: string; groupId: string };
+  /** Profilul autorului unui mesaj. */
+  PersonProfile: { personId: string };
 };

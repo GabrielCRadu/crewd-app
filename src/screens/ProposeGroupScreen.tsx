@@ -16,6 +16,7 @@ import { useUserLocation } from '../hooks/useUserLocation';
 import type { EventsStackParamList } from '../navigation/eventsTypes';
 import { proposeGroup } from '../services/groupsService';
 import { colors } from '../theme/colors';
+import { type } from '../theme/typography';
 import { glass, radii } from '../theme/shape';
 import type { ProposalDraft } from '../types/groups';
 import { formatLongDay, formatTime } from '../utils/dates';
@@ -248,11 +249,11 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   header: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 20, paddingTop: 8, paddingBottom: 12 },
   headerText: { flex: 1 },
-  title: { fontSize: 24, fontWeight: '600', letterSpacing: -0.5, color: colors.text },
+  title: { ...type.screenTitle, fontSize: 24 },
   subtitle: { fontSize: 13, color: colors.muted },
   content: { padding: 20, paddingTop: 8, paddingBottom: 32, gap: 20 },
   block: { gap: 8 },
-  label: { color: colors.muted, fontSize: 13, fontWeight: '500' },
+  label: { ...type.label },
   field: {
     ...glass,
     flexDirection: 'row',

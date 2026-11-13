@@ -16,6 +16,12 @@ export interface Person {
   tags: string[];
   /** Evenimentul la care merge și ea/el, dacă există. */
   goingTo: { title: string; when: string } | null;
+  /** Orașul, afișat pe profilul persoanei. */
+  city?: string;
+  /** „Despre”, scris de persoană. */
+  bio?: string;
+  /** Fotografia de profil (URL). Lipsă = se afișează inițiala. */
+  photoUrl?: string;
 }
 
 /** Un prieten afișat pe hartă. */

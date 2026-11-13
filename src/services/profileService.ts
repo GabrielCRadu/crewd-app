@@ -1,4 +1,4 @@
-import { Timestamp, doc, getDoc, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
+import { Timestamp, deleteDoc, doc, getDoc, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
 
 import { db } from '../lib/firebase';
 import type { UserPreferences } from '../types/events';
@@ -94,6 +94,11 @@ export async function updateProfileFields(uid: string, changes: ProfileChanges):
 /** Scoate un tag învățat (din cardul „Învățate din evenimentele tale”). */
 export async function setLearnedTags(uid: string, learnedTags: string[]): Promise<void> {
   await updateDoc(doc(requireDb(), 'users', uid), { learnedTags, updatedAt: serverTimestamp() });
+}
+
+/** Șterge profilul (la ștergerea contului). */
+export async function deleteProfile(uid: string): Promise<void> {
+  await deleteDoc(doc(requireDb(), 'users', uid));
 }
 
 /** Înscrierile și scorurile tag-urilor salvate (null dacă nu există încă). */

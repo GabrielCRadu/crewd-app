@@ -10,13 +10,19 @@ Actualizează lista când rezolvi ceva sau adaugi un mock nou.
 - [x] ~~Grupuri pe gustul tău (mock)~~: înlocuite de grupulețele reale (`EventGroupsSection`, `groupsService`).
 - [ ] **Blocarea după raportări** la grupulețe folosește reputația mock (`ratingsService`, `ME_ID`); se verifică doar în aplicație, nu în regulile Firestore.
 - [ ] **Anunțul „grupulețul nu s-a format”**: grupulețele expirate doar dispar din listă; nu există încă un mesaj/notificare pentru membri.
-- [ ] **Prietenii**: `FRIENDS` (Hartă, statisticile din Profil, „merg și ei”). Pozițiile sunt decalaje față de locația dispozitivului. Nu există încă o listă de prieteni.
+- [ ] **Prietenii**: `FRIENDS` (Hartă, „merg și ei”). Pozițiile sunt decalaje față de locația dispozitivului.
+- [ ] **Prietenii și cererile de prietenie** (Cami): `src/services/friendsService.ts`, doar în memorie (adaugă, acceptă, refuză, elimină, blochează). Profilul altei persoane și lista de prieteni folosesc `PEOPLE` prin `src/services/peopleService.ts`. Pentru Firestore trebuie un profil public separat (`users/{uid}` e privat) și o colecție de prietenii, cu reguli noi.
+- [ ] **Raportarea din profilul cuiva** (meniul ⋯): se adună la totalul de rapoarte din `ratingsService`, doar în memorie.
 - [ ] **Cine merge / câți caută companie** la un eveniment: generate stabil din id (`demoSocial` în `src/services/eventsService.ts`). Trebuie calculate din înscrierile reale.
 - [ ] **Evenimente trecute pentru istoric**: `e16`–`e18` (`PAST_JOINED_EVENT_IDS` în `src/data/mockEvents.ts`), adăugate peste datele din Firestore ca să meargă istoricul și evaluările.
 - [ ] **Evaluări și reputație**: `src/data/mockRatings.ts` + `src/services/ratingsService.ts`, doar în memorie. `ME_ID` trebuie înlocuit cu uid-ul din Auth. Raportările nu blochează încă pe nimeni.
 - [ ] **Persoanele** (`PEOPLE`) din profilul altei persoane (`PersonProfileScreen`), folosite la evaluări și la grupulețele demo fără Firebase. (Descoperă a fost scos.)
 - [ ] **Profil demo** fără Firebase (`DEMO_PROFILE` / `MY_PROFILE`): fallback doar când lipsește `.env.local`.
 - [ ] **Evenimente mock** (`src/data/mockEvents.ts`): fallback doar când lipsește `.env.local`.
+
+## Erori cunoscute
+
+- [ ] **Centrul de rezervă e Chișinău** (`CITY_CENTER` în `src/hooks/useUserLocation.ts`): fără acces la locație, distanțele se calculează din Chișinău, deși evenimentele sunt în Timișoara (~500 km); mesajul spune tot „centrul Chișinăului”.
 
 ## Stare care nu se salvează (se pierde la repornire)
 
@@ -38,6 +44,8 @@ Actualizează lista când rezolvi ceva sau adaugi un mock nou.
 - [ ] **Build nativ pe Windows**: `ninja` din CMake 3.22.1 nu suportă căi lungi (vezi istoricul din conversație). Necesar pentru Google, push și release.
 
 ## Date și drepturi
+
+- [ ] **ÎNAINTE DE PREZENTARE: șterge pozele de test de pe Unsplash** (`photoUrl` din `src/data/mockSocial.ts`, profilurile persoanelor de test): se încarcă direct de pe images.unsplash.com.
 
 - [ ] **Evenimentele din Firestore** (din `evenimente-timisoara-verificate.json`) sunt doar pentru **demo intern**. Înainte de o lansare publică trebuie acordul surselor (iaBilet, Zile și Nopți, OnEvent etc.) sau o sursă cu licență (ex. acord scris de la OMD Timișoara / Visit Timișoara).
 - [ ] **Imaginile evenimentelor** sunt încărcate direct de pe site-urile organizatorilor (cu „Foto: …”). Pentru producție: acordul organizatorilor sau imagini proprii.

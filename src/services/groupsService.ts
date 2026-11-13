@@ -10,7 +10,7 @@ import {
 } from 'firebase/firestore';
 import type { DocumentData, DocumentSnapshot, Transaction } from 'firebase/firestore';
 
-import { allProfileTags } from '../context/AuthContext';
+import { allProfileTags } from '../utils/profileTags';
 import { placeMockEvents } from '../data/mockEvents';
 import { ME_ID } from '../data/mockRatings';
 import { PEOPLE } from '../data/mockSocial';
@@ -434,6 +434,19 @@ export async function leaveGroupForEvent(eventId: string, uid: string): Promise<
     const snap = await getDoc(userRef(uid));
     const groupId: string | undefined = snap.data()?.groupByEvent?.[eventId];
     if (groupId) await firestoreLeave(eventId, groupId, uid);
+  });
+}
+
+/** Ieși din toate grupulețele (la ștergerea contului), ca să nu rămâi membru-fantomă. */
+export async function leaveAllGroups(uid: string): Promise<void> {
+  if (!db) {
+    for (const [eventId, groupId] of Object.entries(myGroupByEvent)) await leaveGroup(eventId, groupId, uid);
+    return;
+  }
+  await guard(async () => {
+    const snap = await getDoc(userRef(uid));
+    const byEvent: Record<string, string> = snap.data()?.groupByEvent ?? {};
+    for (const [eventId, groupId] of Object.entries(byEvent)) await firestoreLeave(eventId, groupId, uid);
   });
 }
 

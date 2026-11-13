@@ -12,6 +12,7 @@ import { useAuth } from '../../context/AuthContext';
 import { TAG_GROUPS } from '../../data/tags';
 import type { OnboardingStackParamList } from '../../navigation/authTypes';
 import { colors } from '../../theme/colors';
+import { type } from '../../theme/typography';
 import type { TagGroup } from '../../types/social';
 
 type Props = NativeStackScreenProps<OnboardingStackParamList, 'OnboardingTags'>;
@@ -103,10 +104,10 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   content: { flexGrow: 1, padding: 24, gap: 22 },
   heading: { gap: 8 },
-  title: { fontSize: 36, fontWeight: '600', letterSpacing: -0.8, color: colors.text },
+  title: { ...type.screenTitle, fontSize: 36 },
   subtitle: { fontSize: 15, lineHeight: 22, color: colors.muted },
   group: { gap: 10 },
-  label: { color: colors.muted, fontSize: 13, fontWeight: '500' },
+  label: { ...type.label },
   tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   bottom: { marginTop: 'auto', gap: 12 },
   counter: { alignSelf: 'center', color: colors.faint, fontSize: 13 },

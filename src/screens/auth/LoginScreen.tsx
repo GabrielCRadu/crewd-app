@@ -11,6 +11,7 @@ import TextField from '../../components/TextField';
 import type { AuthStackParamList } from '../../navigation/authTypes';
 import { isValidEmail, resetPassword, signIn } from '../../services/authService';
 import { colors } from '../../theme/colors';
+import { type } from '../../theme/typography';
 import { radii } from '../../theme/shape';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>;
@@ -126,10 +127,10 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   content: { flexGrow: 1, padding: 24, gap: 28, justifyContent: 'space-between' },
   brand: { marginTop: 48, gap: 6 },
-  logo: { fontSize: 44, fontWeight: '600', letterSpacing: -1.5, color: colors.text },
+  logo: { ...type.screenTitle, fontSize: 44 },
   tagline: { fontSize: 17, color: colors.text, opacity: 0.85 },
   form: { gap: 16 },
-  title: { fontSize: 28, fontWeight: '600', letterSpacing: -0.5, color: colors.text },
+  title: { ...type.screenTitle, fontSize: 28 },
   forgot: { alignSelf: 'flex-end', marginTop: -6 },
   link: { color: colors.muted, fontSize: 14, textDecorationLine: 'underline' },
   footer: { flexDirection: 'row', justifyContent: 'center', gap: 6, paddingBottom: 8 },

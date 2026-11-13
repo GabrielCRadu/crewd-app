@@ -3,11 +3,13 @@ import type { ReactNode } from 'react';
 
 import { MY_PROFILE } from '../data/mockSocial';
 import { isFirebaseConfigured } from '../lib/firebase';
-import { signOut as authSignOut, subscribeToAuth } from '../services/authService';
+import { confirmPassword, deleteCurrentUser, signOut as authSignOut, subscribeToAuth } from '../services/authService';
+import { leaveAllGroups } from '../services/groupsService';
 import type { AuthUser } from '../services/authService';
 import { loadUserPreferences, seedTagScores } from '../services/preferencesService';
 import {
   createProfile,
+  deleteProfile,
   getProfile,
   getSavedPreferences,
   setBio,
@@ -15,6 +17,7 @@ import {
   updateProfileFields,
 } from '../services/profileService';
 import type { ProfileChanges, ProfileDraft, UserProfile } from '../types/user';
+import { allProfileTags } from '../utils/profileTags';
 
 /*
  * Starea de autentificare pentru toată aplicația:
@@ -38,6 +41,8 @@ interface AuthContextValue {
   updateProfile: (changes: ProfileChanges) => Promise<void>;
   removeLearnedTag: (tag: string) => Promise<void>;
   signOut: () => Promise<void>;
+  /** Șterge definitiv contul: confirmă parola, iese din grupulețe, șterge profilul și contul. */
+  deleteAccount: (password: string) => Promise<void>;
   retry: () => void;
 }
 
@@ -54,12 +59,8 @@ const DEMO_PROFILE: UserProfile = {
   learnedTags: MY_PROFILE.learnedTags,
 };
 
-/** Toate tag-urile profilului (alese + învățate), ca listă. */
-export function allProfileTags(profile: UserProfile | null): string[] {
-  if (!profile) return [];
-  const { events, music, hobbies } = profile.chosenTags;
-  return [...events, ...music, ...hobbies, ...profile.learnedTags];
-}
+/** Re-exportat de aici pentru ecranele care îl importă din context (definit în utils/profileTags.ts). */
+export { allProfileTags };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
@@ -166,11 +167,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (isFirebaseConfigured) await authSignOut();
   }, []);
 
+  const deleteAccount = useCallback(
+    async (password: string) => {
+      if (!isFirebaseConfigured || !user) throw new Error('Ștergerea contului merge doar cu un cont real.');
+      // Întâi parola: dacă e greșită, nu se șterge nimic.
+      await confirmPassword(password);
+      await leaveAllGroups(user.uid);
+      await deleteProfile(user.uid);
+      // Ultimul pas: contul din Firebase Auth. După el, sesiunea se închide și apare ecranul de login.
+      await deleteCurrentUser();
+    },
+    [user],
+  );
+
   const retry = useCallback(() => setAttempt((n) => n + 1), []);
 
   const value = useMemo(
-    () => ({ status, user, profile, error, completeOnboarding, updateBio, updateProfile, removeLearnedTag, signOut, retry }),
-    [status, user, profile, error, completeOnboarding, updateBio, updateProfile, removeLearnedTag, signOut, retry],
+    () => ({ status, user, profile, error, completeOnboarding, updateBio, updateProfile, removeLearnedTag, signOut, deleteAccount, retry }),
+    [status, user, profile, error, completeOnboarding, updateBio, updateProfile, removeLearnedTag, signOut, deleteAccount, retry],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -4,6 +4,7 @@ import type { StyleProp, TextInputInstance, TextInputProps, ViewStyle } from 're
 import { Ionicons } from '@expo/vector-icons';
 
 import { colors } from '../theme/colors';
+import { type } from '../theme/typography';
 import { glass, radii } from '../theme/shape';
 
 interface Props extends TextInputProps {
@@ -63,7 +64,7 @@ export default TextField;
 
 const styles = StyleSheet.create({
   container: { gap: 8 },
-  label: { color: colors.muted, fontSize: 13, fontWeight: '500' },
+  label: { ...type.label },
   field: {
     ...glass,
     flexDirection: 'row',
