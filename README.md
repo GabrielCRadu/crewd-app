@@ -1,8 +1,7 @@
 A meet-up app built around 3 main features:
-1. A way to find people with preferences/tastes similar to yours. (Recommendations are based on tags assigned automatically from the events you sign up for, plus a few starter tags selected when you create your profile. Age group and gender are also taken into account.)
 
-2. A dedicated tab with upcoming and ongoing events nearby (list view + map view). Users can sign up for events here (this affects their preference tags).
+1. **Events nearby.** A tab with upcoming and ongoing events around you (list view + map view). Users sign up for events here, and every sign-up shapes their preference tags (starter tags are picked when creating the profile).
 
-3. A map with your friends.
+2. **Small groups at each event.** After signing up for an event, you see the small groups of people going to it, ordered by how well they match you (shared tags and age). You join one or propose your own; a group forms once 3 people are in. Each group has one chat, plus a meet-up time and location.
 
-4. Group chats (suggested groups of similar people) for people attending the same event at the same time + meet-up time and location.
+3. **A map with your friends.**
