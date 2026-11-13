@@ -7,8 +7,8 @@ import Aurora from '../components/Aurora';
 import Avatar from '../components/Avatar';
 import Chip from '../components/Chip';
 import GlassIconButton from '../components/GlassIconButton';
+import ReputationStats from '../components/ReputationStats';
 import { PEOPLE } from '../data/mockSocial';
-import { RATING_TAGS } from '../data/ratingTags';
 import { useRatings } from '../hooks/useRatings';
 import type { EventsStackParamList } from '../navigation/eventsTypes';
 import { getReputation } from '../services/ratingsService';
@@ -54,15 +54,8 @@ export default function PersonProfileScreen({ navigation, route }: Props) {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>După evenimente</Text>
+          <ReputationStats reputation={reputation} />
           <View style={styles.statsCard}>
-            {RATING_TAGS.map((tag) => (
-              <View key={tag.id} style={styles.statRow}>
-                <Ionicons name={tag.icon} size={18} color={colors.text} />
-                <Text style={styles.statLabel}>{tag.label}</Text>
-                <Text style={styles.statValue}>{reputation.tagCounts[tag.id]}</Text>
-              </View>
-            ))}
-            <View style={styles.divider} />
             <View style={styles.statRow}>
               <Ionicons
                 name={reputation.reportsCount > 0 ? 'flag' : 'flag-outline'}
@@ -101,12 +94,11 @@ const styles = StyleSheet.create({
   name: { flex: 1, fontSize: 28, fontWeight: '600', letterSpacing: -0.5, color: colors.text },
   section: { gap: 10 },
   sectionTitle: { fontSize: 18, fontWeight: '600', color: colors.text },
-  statsCard: { ...glass, padding: 16, gap: 14, borderRadius: radii.card },
+  statsCard: { ...glass, paddingHorizontal: 16, paddingVertical: 14, borderRadius: radii.inner },
   statRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   statLabel: { flex: 1, fontSize: 15, color: colors.text },
   statValue: { fontSize: 17, fontWeight: '600', color: colors.text },
   reports: { color: colors.nope },
-  divider: { height: 1, backgroundColor: colors.border },
   tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   muted: { fontSize: 13, color: colors.muted },
 });

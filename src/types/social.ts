@@ -36,6 +36,8 @@ export interface Profile {
   name: string;
   age: number;
   city: string;
+  /** Descrierea scrisă de utilizator („Despre mine”). Poate fi goală. */
+  bio: string;
   /** Tag-urile alese la onboarding, pe grupuri. */
   chosenTags: Record<TagGroup['id'], string[]>;
   /** Tag-uri adăugate automat din evenimentele la care s-a înscris. */
