@@ -7,7 +7,9 @@ Actualizează lista când rezolvi ceva sau adaugi un mock nou.
 
 - [ ] **Chat**: grupurile (`MY_GROUPS`, `SUGGESTED_GROUPS`) și mesajele (`MESSAGES`) din `src/data/mockSocial.ts`. Mesajele trimise rămân doar local, în ecranul deschis (`ChatRoomScreen`).
 - [ ] **Grupuri pe gustul tău** în detaliile evenimentului: mock, potrivite după titlu (`EventDetailsScreen`). Se înlocuiesc cu grupulețele reale (vezi designul din `docs/superpowers/specs/`).
-- [ ] **Prietenii**: `FRIENDS` (Hartă, statisticile din Profil, „merg și ei”). Pozițiile sunt decalaje față de locația dispozitivului. Nu există încă o listă de prieteni.
+- [ ] **Prietenii**: `FRIENDS` (Hartă, „merg și ei”). Pozițiile sunt decalaje față de locația dispozitivului.
+- [ ] **Prietenii și cererile de prietenie** (Cami): `src/services/friendsService.ts`, doar în memorie (adaugă, acceptă, refuză, elimină, blochează). Profilul altei persoane și lista de prieteni folosesc `PEOPLE` prin `src/services/peopleService.ts`. Pentru Firestore trebuie un profil public separat (`users/{uid}` e privat) și o colecție de prietenii, cu reguli noi.
+- [ ] **Raportarea din profilul cuiva** (meniul ⋯): se adună la totalul de rapoarte din `ratingsService`, doar în memorie.
 - [ ] **Cine merge / câți caută companie** la un eveniment: generate stabil din id (`demoSocial` în `src/services/eventsService.ts`). Trebuie calculate din înscrierile reale.
 - [ ] **Evenimente trecute pentru istoric**: `e16`–`e18` (`PAST_JOINED_EVENT_IDS` în `src/data/mockEvents.ts`), adăugate peste datele din Firestore ca să meargă istoricul și evaluările.
 - [ ] **Evaluări și reputație**: `src/data/mockRatings.ts` + `src/services/ratingsService.ts`, doar în memorie. `ME_ID` trebuie înlocuit cu uid-ul din Auth. Raportările nu blochează încă pe nimeni.
