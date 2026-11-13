@@ -2,10 +2,13 @@ import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 
 import Aurora from '../components/Aurora';
 import Avatar from '../components/Avatar';
 import Chip from '../components/Chip';
+import EventHistoryCard from '../components/events/EventHistoryCard';
 import { MY_PROFILE } from '../data/mockSocial';
 import { TAG_GROUPS } from '../data/tags';
 import { colors } from '../theme/colors';
@@ -15,6 +18,10 @@ import { glass, radii } from '../theme/shape';
 export default function ProfileScreen() {
   const profile = MY_PROFILE;
   const [learned, setLearned] = useState(profile.learnedTags);
+  const navigation = useNavigation<BottomTabNavigationProp<Record<string, object | undefined>>>();
+  // Detaliile sunt în tab-ul Evenimente; `initial: false` lasă lista dedesubt, pentru „înapoi”.
+  const openPastEvent = (eventId: string) =>
+    navigation.navigate('Events', { screen: 'EventDetails', params: { eventId }, initial: false });
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -63,6 +70,9 @@ export default function ProfileScreen() {
             {learned.length === 0 ? <Text style={styles.learnedHint}>Niciun tag învățat încă.</Text> : null}
           </View>
         </View>
+
+        {/* Istoricul evenimentelor trecute (privat); un rând deschide detaliile, de unde poți evalua */}
+        <EventHistoryCard onOpen={openPastEvent} />
       </ScrollView>
     </SafeAreaView>
   );

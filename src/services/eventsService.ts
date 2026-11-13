@@ -1,7 +1,7 @@
 import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import type { DocumentData, QueryDocumentSnapshot } from 'firebase/firestore';
 
-import { placeMockEvents } from '../data/mockEvents';
+import { PAST_JOINED_EVENT_IDS, placeMockEvents } from '../data/mockEvents';
 import { FRIENDS } from '../data/mockSocial';
 import { db } from '../lib/firebase';
 import type { CategoryId, Event, EventPrice, LatLng } from '../types/events';
@@ -32,7 +32,11 @@ export async function getEvents(near: LatLng): Promise<Event[]> {
       throw error;
     });
   }
-  return firestoreCache;
+  const events = await firestoreCache;
+  // DEMO: Firestore are doar evenimente viitoare. Istoricul din Profil și evaluările au nevoie de
+  // evenimente trecute la care „ai fost”, așa că le adăugăm pe cele mock până avem înscrieri reale.
+  const pastDemo = placeMockEvents(near).filter((e) => PAST_JOINED_EVENT_IDS.includes(e.id));
+  return [...events, ...pastDemo];
 }
 
 async function loadFromFirestore(): Promise<Event[]> {

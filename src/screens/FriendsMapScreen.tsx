@@ -7,6 +7,7 @@ import Avatar from '../components/Avatar';
 import GradientButton from '../components/GradientButton';
 import SegmentedControl from '../components/SegmentedControl';
 import { useEvents } from '../hooks/useEvents';
+import { isUpcomingOrLive } from '../utils/eventFilters';
 import { FRIENDS, placeAround } from '../data/mockSocial';
 import { useUserLocation } from '../hooks/useUserLocation';
 import { colors } from '../theme/colors';
@@ -37,8 +38,9 @@ export default function FriendsMapScreen() {
     [location.coords],
   );
   const selected = friends.find((f) => f.id === selectedId) ?? null;
-  // Aceleași evenimente ca în tab-ul Evenimente (Firestore, sau mock fără config).
-  const { events } = useEvents(location.coords);
+  // Aceleași evenimente ca în tab-ul Evenimente (Firestore, sau mock fără config); doar cele încă neterminate.
+  const { events: allEvents } = useEvents(location.coords);
+  const events = useMemo(() => allEvents.filter((e) => isUpcomingOrLive(e)), [allEvents]);
 
   // Când aflăm locația reală, mutăm harta acolo.
   useEffect(() => {
