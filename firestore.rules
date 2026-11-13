@@ -9,6 +9,87 @@ service cloud.firestore {
     match /events/{eventId} {
       allow read: if true;
       allow write: if false;
+
+      // Grupulețele unui eveniment (docs/superpowers/specs/2026-11-13-grupulete-design.md).
+      // Aceleași limite ca în src/utils/groupRules.ts; scrierile vin din tranzacțiile din groupsService.ts,
+      // care actualizează în același timp users/{uid}.groupByEvent.
+      match /groups/{groupId} {
+        function me() {
+          return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+        }
+        function meAfter() {
+          return getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+        }
+        // Vârsta din data nașterii (sau `age` la profilurile vechi) e în [minAge, maxAge].
+        function ageFits(u, minAge, maxAge) {
+          return ('birthDate' in u
+              && math.floor((request.time - u.birthDate).seconds() / 31557600) >= minAge
+              && math.floor((request.time - u.birthDate).seconds() / 31557600) <= maxAge)
+            || (!('birthDate' in u) && 'age' in u && u.age >= minAge && u.age <= maxAge);
+        }
+        function isRegistered() {
+          return eventId in me().get('joinedEventIds', []);
+        }
+        function pointsHere() {
+          return meAfter().get('groupByEvent', {}).get(eventId, null) == groupId;
+        }
+        // Termenul de formare: 2 h înainte de întâlnire, sau 30 min pentru grupulețele propuse după acel moment.
+        function beforeFormationDeadline(g) {
+          return (g.createdAt <= g.meetupAt - duration.value(2, 'h') && request.time <= g.meetupAt - duration.value(2, 'h'))
+            || (g.createdAt > g.meetupAt - duration.value(2, 'h') && request.time <= g.meetupAt - duration.value(30, 'm'));
+        }
+
+        allow read: if request.auth != null;
+
+        // Propunere: cel care propune e singurul membru, criteriile sunt valide, iar profilul lui arată spre grupuleț.
+        allow create: if request.auth != null
+          && request.resource.data.eventId == eventId
+          && request.resource.data.proposerUid == request.auth.uid
+          && request.resource.data.memberUids == [request.auth.uid]
+          && request.resource.data.members.keys().hasOnly([request.auth.uid])
+          && request.resource.data.formedAt == null
+          && request.resource.data.createdAt == request.time
+          && request.resource.data.maxSize is int
+          && request.resource.data.maxSize >= 3 && request.resource.data.maxSize <= 10
+          && request.resource.data.minAge is int && request.resource.data.minAge >= 18
+          && request.resource.data.maxAge is int
+          && request.resource.data.maxAge >= request.resource.data.minAge && request.resource.data.maxAge <= 99
+          && request.resource.data.meetupAt is timestamp
+          && request.resource.data.meetupAt > request.time + duration.value(30, 'm')
+          && request.resource.data.vibe is string
+          && request.resource.data.vibe.size() > 0 && request.resource.data.vibe.size() <= 120
+          && request.resource.data.meetupPlace is string
+          && request.resource.data.meetupPlace.size() > 0 && request.resource.data.meetupPlace.size() <= 80
+          && request.resource.data.tags is list
+          && ageFits(me(), request.resource.data.minAge, request.resource.data.maxAge)
+          && isRegistered()
+          && pointsHere();
+
+        // Intrare: se adaugă doar utilizatorul curent, în limita locurilor, înainte de întâlnire (și de termen, dacă nu e format).
+        allow update: if request.auth != null
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberUids', 'members', 'formedAt'])
+          && !(request.auth.uid in resource.data.memberUids)
+          && request.resource.data.memberUids == resource.data.memberUids.concat([request.auth.uid])
+          && request.resource.data.memberUids.size() <= resource.data.maxSize
+          && request.resource.data.members.diff(resource.data.members).affectedKeys().hasOnly([request.auth.uid])
+          && request.time < resource.data.meetupAt
+          && (resource.data.formedAt != null || beforeFormationDeadline(resource.data))
+          && ((resource.data.formedAt == null && request.resource.data.memberUids.size() >= 3)
+              ? request.resource.data.formedAt == request.time
+              : request.resource.data.formedAt == resource.data.formedAt)
+          && ageFits(me(), resource.data.minAge, resource.data.maxAge)
+          && isRegistered()
+          && pointsHere();
+
+        // Ieșire: se scoate doar utilizatorul curent; restul rămâne neschimbat.
+        allow update: if request.auth != null
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberUids', 'members'])
+          && request.auth.uid in resource.data.memberUids
+          && request.resource.data.memberUids == resource.data.memberUids.removeAll([request.auth.uid])
+          && request.resource.data.members.diff(resource.data.members).affectedKeys().hasOnly([request.auth.uid]);
+
+        allow delete: if false;
+      }
     }
 
     // Informații despre import (data colectării, numărul de evenimente).
@@ -33,6 +114,7 @@ service cloud.firestore {
           // Poza e un data URI JPEG mic (~400px); limita ține documentul mult sub 1 MB.
           && (!('photoUrl' in d) || d.photoUrl == null || (d.photoUrl is string && d.photoUrl.size() <= 300000))
           && (!('joinedEventIds' in d) || (d.joinedEventIds is list && d.joinedEventIds.size() <= 500))
+          && (!('groupByEvent' in d) || d.groupByEvent is map)
           && (!('tagScores' in d) || d.tagScores is map);
       }
 
