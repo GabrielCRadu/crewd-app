@@ -7,4 +7,6 @@ export type ProfileStackParamList = {
   FriendsList: undefined;
   /** Profilul altei persoane (din lista de prieteni). */
   PersonProfile: { personId: string };
+  /** Prietenii unei persoane (toți sau doar cei comuni). */
+  PersonFriends: { personId: string };
 };
