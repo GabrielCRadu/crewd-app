@@ -10,8 +10,6 @@ import { radii } from '../../theme/shape';
 interface Props {
   /** Toate evenimentele în desfășurare (cel mai apropiat primul). */
   events: EventWithDistance[];
-  isJoined: (eventId: string) => boolean;
-  onJoin: (event: EventWithDistance) => void;
   onOpen: (eventId: string) => void;
 }
 
@@ -23,7 +21,7 @@ const GAP = 12;
  * Cardurile „ACUM” într-un carusel: dai swipe stânga/dreapta între evenimentele în desfășurare.
  * Sub carusel, punctele arată pe ce card ești (doar dacă sunt mai multe).
  */
-export default function NowCarousel({ events, isJoined, onJoin, onOpen }: Props) {
+export default function NowCarousel({ events, onOpen }: Props) {
   const { width } = useWindowDimensions();
   const cardWidth = width - SIDE * 2;
   const [index, setIndex] = useState(0);
@@ -50,12 +48,7 @@ export default function NowCarousel({ events, isJoined, onJoin, onOpen }: Props)
         scrollEventThrottle={16}
         renderItem={({ item }) => (
           <View style={{ width: cardWidth }}>
-            <NowCard
-              event={item}
-              joined={isJoined(item.id)}
-              onJoin={() => onJoin(item)}
-              onOpen={() => onOpen(item.id)}
-            />
+            <NowCard event={item} onOpen={() => onOpen(item.id)} />
           </View>
         )}
       />
