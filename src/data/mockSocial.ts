@@ -35,6 +35,8 @@ export const PEOPLE: Person[] = [
     distanceKm: 1.2,
     tags: ['Board games', 'Concerte', 'Drumeții', 'Fotografie'],
     goingTo: { title: 'Open Mic: Stand-up Night', when: 'vineri' },
+    city: 'Timișoara',
+    bio: 'Fotografiez tot ce prind la concerte. Mereu am un joc de Dixit în rucsac.',
   },
   {
     id: 'p2',
@@ -43,6 +45,8 @@ export const PEOPLE: Person[] = [
     distanceKm: 0.6,
     tags: ['Jazz', 'Electronică', 'Party-uri', 'Gaming'],
     goingTo: { title: 'Warehouse Techno Night', when: 'sâmbătă' },
+    city: 'Timișoara',
+    bio: 'Jazz în timpul săptămânii, techno în weekend. Caut oameni care nu pleacă primii acasă.',
   },
   {
     id: 'p3',
@@ -51,6 +55,8 @@ export const PEOPLE: Person[] = [
     distanceKm: 2.4,
     tags: ['Teatru', 'Socializare', 'Gătit'],
     goingTo: { title: 'Hamlet', when: 'duminică' },
+    city: 'Timișoara',
+    bio: 'Studentă la litere, prinsă de teatru independent. Gătesc pentru toată lumea după spectacole.',
   },
   {
     id: 'p4',
@@ -59,6 +65,28 @@ export const PEOPLE: Person[] = [
     distanceKm: 3.1,
     tags: ['Rock', 'Sport', 'Drumeții'],
     goingTo: null,
+    city: 'Arad',
+    bio: 'Drumeții în weekend, concerte rock când prind. Nou în oraș, caut gașcă.',
+  },
+  {
+    id: 'p5',
+    name: 'Bianca',
+    age: 22,
+    distanceKm: 1.8,
+    tags: ['Concerte', 'Jazz', 'Board games', 'Pop'],
+    goingTo: null,
+    city: 'Timișoara',
+    bio: 'Ne-am văzut la concertul de jazz! Îmi plac serile liniștite cu muzică live.',
+  },
+  {
+    id: 'p6',
+    name: 'Tudor',
+    age: 25,
+    distanceKm: 4.2,
+    tags: ['Electronică', 'Party-uri', 'Fotografie'],
+    goingTo: null,
+    city: 'Timișoara',
+    bio: '',
   },
 ];
 

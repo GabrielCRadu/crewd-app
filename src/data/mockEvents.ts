@@ -282,7 +282,8 @@ const MOCK_EVENTS: MockEvent[] = [
     imageUrl: unsplash('photo-1415201364774-f6f0bb35f28f'),
     imageCredit: 'Unsplash',
     price: 30,
-    friendsGoing: ['Maria', 'Andrei'],
+    // Bianca nu e încă prietenă: v-ați cunoscut aici și ți-a trimis cerere (vezi friendsService).
+    friendsGoing: ['Maria', 'Andrei', 'Bianca'],
     lookingForCompanyCount: 0,
   },
   {

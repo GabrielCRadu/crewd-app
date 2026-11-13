@@ -46,6 +46,23 @@ export async function saveEventRatings(eventId: string, ratings: EventRatings): 
 }
 
 /**
+ * Rapoartele date direct din profilul cuiva (meniul ⋯), nu după un eveniment.
+ * Stau sub o cheie separată, ca să intre în aceleași totaluri anonime din getReputation.
+ */
+const PROFILE_REPORTS_KEY = '__profile__';
+
+/** Raportează o persoană din profilul ei (anonim; se adună la numărul ei de rapoarte). */
+export async function reportPerson(personId: string): Promise<void> {
+  const current = myRatings[PROFILE_REPORTS_KEY] ?? {};
+  await saveEventRatings(PROFILE_REPORTS_KEY, { ...current, [personId]: { tags: [], reported: true } });
+}
+
+/** Ai raportat deja persoana din profilul ei? */
+export function hasReportedPerson(ratings: MyRatings, personId: string): boolean {
+  return ratings[PROFILE_REPORTS_KEY]?.[personId]?.reported === true;
+}
+
+/**
  * Oamenii cu care ai fost la eveniment.
  * Mock: persoanele din mockSocial.ts care apar la „merg și ei”. Cu date reale: membrii grupului de chat.
  */
