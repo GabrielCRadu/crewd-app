@@ -39,9 +39,10 @@ Run lint and typecheck before declaring any task done.
 
 ## Visual style (design language)
 
-- `docs/design-language.md` is the source of truth for **how the app looks**: dark near-black backgrounds, soft warm "aurora" gradients (orange → pink → magenta), frosted-glass surfaces with thin translucent borders, large rounded corners and pill-shaped controls, white text, a light white-to-pink gradient pill for the single primary CTA.
-- Implement it only through tokens in `src/theme/` (colors, gradients, glass surfaces, radii). Screens must not hard-code colors.
-- The reference images it was extracted from are private (`UI_design_language/`, git-ignored). Never commit them, and do not ask for them: everything needed is in `docs/design-language.md`.
+- `docs/design-language.md` is the source of truth for **how the app looks**: a **monochrome** style — black background, dark grey cards with a thin border, white text, heavy screen titles, small uppercase letter-spaced labels, white pill for the single primary button. Colour comes from photos, not from the UI. Only exceptions: red for errors/reports, green for confirmation, distance colours on the map.
+- Implement it only through tokens in `src/theme/` (colors, typography, gradients, shape). Screens must not hard-code colors.
+- No warm gradients, "aurora" glow, tinted cards or coloured borders.
+- The reference images it was originally extracted from are private (`UI_design_language/`, git-ignored). Never commit them.
 - Layout comes from `docs/layout-guide.md`, look comes from `docs/design-language.md`. Never mix them up.
 
 ## Data (Firebase)

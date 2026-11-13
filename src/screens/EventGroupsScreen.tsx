@@ -16,6 +16,7 @@ import type { EventsStackParamList } from '../navigation/eventsTypes';
 import { leaveGroup } from '../services/groupsService';
 import { isJoined } from '../services/preferencesService';
 import { colors } from '../theme/colors';
+import { type } from '../theme/typography';
 import { glass, radii } from '../theme/shape';
 import { formatDay, formatTime } from '../utils/dates';
 import { MIN_FORM_MEMBERS, canOpenChat, groupStatus } from '../utils/groupRules';
@@ -138,7 +139,7 @@ const styles = StyleSheet.create({
   center: { alignItems: 'center', justifyContent: 'center' },
   header: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 20, paddingTop: 8, paddingBottom: 12 },
   headerText: { flex: 1 },
-  title: { fontSize: 26, fontWeight: '600', letterSpacing: -0.5, color: colors.text },
+  title: { ...type.screenTitle, fontSize: 26 },
   subtitle: { fontSize: 13, color: colors.muted },
   content: { padding: 20, paddingTop: 8, paddingBottom: 32, gap: 16 },
   mine: { ...glass, gap: 10, padding: 16, borderRadius: radii.card, borderColor: colors.text },

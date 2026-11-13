@@ -28,6 +28,7 @@ import type { ProfileStackParamList } from '../navigation/profileTypes';
 import { PhotoPermissionError, pickProfilePhoto } from '../services/photoService';
 import type { PhotoSource } from '../services/photoService';
 import { colors, tagTints } from '../theme/colors';
+import { type } from '../theme/typography';
 import { glass, radii } from '../theme/shape';
 import type { TagGroup } from '../types/social';
 import type { Gender, UserProfile } from '../types/user';
@@ -302,7 +303,7 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   flex: { flex: 1 },
   header: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 20, paddingTop: 8, paddingBottom: 12 },
-  title: { flex: 1, fontSize: 26, fontWeight: '600', letterSpacing: -0.5, color: colors.text },
+  title: { ...type.screenTitle, flex: 1, fontSize: 26 },
   content: { padding: 20, paddingTop: 8, paddingBottom: 32, gap: 20 },
   photoBlock: { alignItems: 'center', gap: 12 },
   photoActions: { flexDirection: 'row', gap: 10 },
@@ -329,7 +330,7 @@ const styles = StyleSheet.create({
   lockedHint: { flex: 1, color: colors.faint, fontSize: 12 },
   block: { gap: 10 },
   labelRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  label: { color: colors.muted, fontSize: 13, fontWeight: '500' },
+  label: { ...type.label },
   counter: { color: colors.faint, fontSize: 12 },
   bioInput: {
     ...glass,
@@ -341,7 +342,7 @@ const styles = StyleSheet.create({
     color: colors.text,
     textAlignVertical: 'top',
   },
-  sectionTitle: { fontSize: 18, fontWeight: '600', color: colors.text },
+  sectionTitle: { ...type.label },
   tagGroup: { gap: 10, marginTop: 4 },
   tagGroupHeader: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   tagGroupLabel: { fontSize: 13, fontWeight: '600', color: colors.text },

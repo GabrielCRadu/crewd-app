@@ -15,6 +15,7 @@ import { FRIENDS, placeAround } from '../data/mockSocial';
 import { useUserLocation } from '../hooks/useUserLocation';
 import { findPersonByName } from '../services/peopleService';
 import { colors } from '../theme/colors';
+import { type } from '../theme/typography';
 import { cardShadow } from '../theme/shadows';
 import { darkMapStyle } from '../theme/mapStyle';
 import { glass, radii } from '../theme/shape';
@@ -145,7 +146,7 @@ export default function FriendsMapScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   header: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 12, gap: 12 },
-  title: { fontSize: 32, fontWeight: '600', letterSpacing: -0.5, color: colors.text },
+  title: { ...type.screenTitle, fontSize: 32 },
   mapWrap: { flex: 1, backgroundColor: colors.backgroundAlt },
   friendMarker: { alignItems: 'center', gap: 2 },
   friendLabel: {

@@ -16,6 +16,7 @@ import { useUserLocation } from '../hooks/useUserLocation';
 import type { EventsStackParamList } from '../navigation/eventsTypes';
 import { getCompanions, saveEventRatings } from '../services/ratingsService';
 import { colors } from '../theme/colors';
+import { type } from '../theme/typography';
 import { glass, radii } from '../theme/shape';
 import type { EventRatings, PersonRating, RatingTag } from '../types/ratings';
 import type { Person } from '../types/social';
@@ -164,7 +165,7 @@ const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
   header: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 20, paddingTop: 8, paddingBottom: 12 },
   headerText: { flex: 1, gap: 2 },
-  title: { fontSize: 28, fontWeight: '600', letterSpacing: -0.5, color: colors.text },
+  title: { ...type.screenTitle, fontSize: 28 },
   subtitle: { fontSize: 14, color: colors.muted },
   content: { padding: 20, paddingTop: 8, paddingBottom: 32, gap: 12 },
   notice: {

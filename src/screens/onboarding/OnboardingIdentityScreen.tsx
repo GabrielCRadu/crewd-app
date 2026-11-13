@@ -13,6 +13,7 @@ import TextField from '../../components/TextField';
 import { useAuth } from '../../context/AuthContext';
 import type { OnboardingStackParamList } from '../../navigation/authTypes';
 import { colors } from '../../theme/colors';
+import { type } from '../../theme/typography';
 import { glass, radii } from '../../theme/shape';
 import type { Gender } from '../../types/user';
 import { MAX_AGE, MIN_AGE, ageFromBirthDate } from '../../utils/birthDate';
@@ -152,7 +153,7 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   content: { flexGrow: 1, padding: 24, gap: 22 },
   heading: { gap: 8 },
-  title: { fontSize: 36, fontWeight: '600', letterSpacing: -0.8, color: colors.text },
+  title: { ...type.screenTitle, fontSize: 36 },
   subtitle: { fontSize: 15, lineHeight: 22, color: colors.muted },
   row: { flexDirection: 'row', gap: 12, alignItems: 'flex-start' },
   ageField: { flex: 3 },
@@ -160,7 +161,7 @@ const styles = StyleSheet.create({
   hintRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginLeft: 6 },
   hint: { flex: 1, color: colors.faint, fontSize: 12 },
   genderBlock: { gap: 8 },
-  label: { color: colors.muted, fontSize: 13, fontWeight: '500' },
+  label: { ...type.label },
   genderRow: { flexDirection: 'row', gap: 10 },
   genderOption: { ...glass, flex: 1, height: 50, alignItems: 'center', justifyContent: 'center', borderRadius: radii.pill },
   genderActive: { backgroundColor: colors.text, borderColor: colors.text },

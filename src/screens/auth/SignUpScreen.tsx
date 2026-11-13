@@ -12,6 +12,7 @@ import TextField from '../../components/TextField';
 import type { AuthStackParamList } from '../../navigation/authTypes';
 import { MIN_PASSWORD_LENGTH, isValidEmail, signUp } from '../../services/authService';
 import { colors } from '../../theme/colors';
+import { type } from '../../theme/typography';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'SignUp'>;
 
@@ -129,7 +130,7 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   content: { flexGrow: 1, padding: 24, gap: 24 },
   heading: { gap: 8 },
-  title: { fontSize: 34, fontWeight: '600', letterSpacing: -0.5, color: colors.text },
+  title: { ...type.screenTitle, fontSize: 34 },
   subtitle: { fontSize: 15, lineHeight: 22, color: colors.muted },
   form: { gap: 16 },
   bottom: { marginTop: 'auto', gap: 16 },

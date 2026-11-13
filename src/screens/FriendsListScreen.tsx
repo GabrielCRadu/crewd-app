@@ -17,6 +17,7 @@ import {
 } from '../services/friendsService';
 import { commonTags, getPerson } from '../services/peopleService';
 import { colors } from '../theme/colors';
+import { type } from '../theme/typography';
 import { glass, radii } from '../theme/shape';
 import type { Person } from '../types/social';
 
@@ -139,10 +140,10 @@ function PersonInfo({ person, subtitle, onPress }: { person: Person; subtitle: s
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   header: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 20, paddingTop: 8, paddingBottom: 12 },
-  title: { flex: 1, fontSize: 28, fontWeight: '600', letterSpacing: -0.5, color: colors.text },
+  title: { ...type.screenTitle, flex: 1, fontSize: 28 },
   content: { padding: 20, paddingTop: 8, paddingBottom: 32, gap: 24 },
   section: { gap: 10 },
-  sectionTitle: { fontSize: 18, fontWeight: '600', color: colors.text },
+  sectionTitle: { ...type.label },
   row: {
     ...glass,
     flexDirection: 'row',

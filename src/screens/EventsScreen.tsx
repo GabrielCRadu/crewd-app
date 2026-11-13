@@ -16,6 +16,7 @@ import { getLocationNotice, useUserLocation } from '../hooks/useUserLocation';
 import type { EventsStackParamList } from '../navigation/eventsTypes';
 import { isJoined } from '../services/preferencesService';
 import { colors } from '../theme/colors';
+import { type } from '../theme/typography';
 import { glass, radii } from '../theme/shape';
 import type { CategoryId } from '../types/events';
 import { isLive } from '../utils/dates';
@@ -126,7 +127,7 @@ export default function EventsScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   header: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 14, gap: 14 },
-  title: { fontSize: 32, fontWeight: '600', letterSpacing: -0.5, color: colors.text },
+  title: { ...type.screenTitle, fontSize: 32 },
   notice: {
     ...glass,
     flexDirection: 'row',
@@ -140,7 +141,7 @@ const styles = StyleSheet.create({
   },
   noticeText: { flex: 1, fontSize: 13, lineHeight: 18, color: colors.text },
   content: { padding: 20, paddingTop: 16, paddingBottom: 32, gap: 12 },
-  sectionTitle: { fontSize: 18, fontWeight: '600', color: colors.text, marginTop: 10 },
+  sectionTitle: { ...type.label, marginTop: 10 },
   empty: { fontSize: 14, color: colors.muted },
   loader: { marginTop: 24 },
 });

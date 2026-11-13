@@ -9,6 +9,7 @@ import { useNow } from '../hooks/useNow';
 import { useUserLocation } from '../hooks/useUserLocation';
 import type { ChatsStackParamList } from '../navigation/chatsTypes';
 import { colors } from '../theme/colors';
+import { type } from '../theme/typography';
 import { glass, radii } from '../theme/shape';
 import type { CrewGroup } from '../types/groups';
 import { formatDay, formatTime } from '../utils/dates';
@@ -93,8 +94,8 @@ export default function ChatsScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   content: { padding: 20, paddingBottom: 32, gap: 12 },
-  title: { fontSize: 32, fontWeight: '600', letterSpacing: -0.5, color: colors.text, marginBottom: 4 },
-  sectionTitle: { fontSize: 18, fontWeight: '600', color: colors.text, marginTop: 12 },
+  title: { ...type.screenTitle, fontSize: 32, marginBottom: 4 },
+  sectionTitle: { ...type.label, marginTop: 12 },
   empty: { fontSize: 14, color: colors.muted },
   card: { ...glass, padding: 14, gap: 12, borderRadius: radii.card },
   pressed: { opacity: 0.8 },

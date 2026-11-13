@@ -6,6 +6,7 @@ import type { DateTimePickerEvent } from '@react-native-community/datetimepicker
 import { Ionicons } from '@expo/vector-icons';
 
 import { colors } from '../theme/colors';
+import { type } from '../theme/typography';
 import { glass, radii } from '../theme/shape';
 import {
   earliestAllowedBirthDate,
@@ -115,7 +116,7 @@ export default function BirthDateField({ label, value, onChange, error, hint, co
 
 const styles = StyleSheet.create({
   container: { gap: 8 },
-  label: { color: colors.muted, fontSize: 13, fontWeight: '500' },
+  label: { ...type.label },
   field: {
     ...glass,
     flexDirection: 'row',

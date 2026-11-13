@@ -3,6 +3,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 import GlassIconButton from './GlassIconButton';
 import { colors } from '../theme/colors';
+import { type } from '../theme/typography';
 import { gradients } from '../theme/gradients';
 import { radii } from '../theme/shape';
 
@@ -36,7 +37,7 @@ export default function OnboardingHeader({ step, onBack }: Props) {
 const styles = StyleSheet.create({
   container: { gap: 18 },
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 44 },
-  logo: { fontSize: 26, fontWeight: '600', letterSpacing: -1, color: colors.text },
+  logo: { ...type.screenTitle, fontSize: 26 },
   step: { fontSize: 13, fontWeight: '500', color: colors.muted },
   bars: { flexDirection: 'row', gap: 8 },
   bar: { flex: 1, height: 6, borderRadius: radii.pill },

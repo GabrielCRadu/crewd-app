@@ -25,6 +25,7 @@ import { findPersonByName } from '../services/peopleService';
 import { isJoined, joinEvent, leaveEvent } from '../services/preferencesService';
 import { hasRated } from '../services/ratingsService';
 import { colors } from '../theme/colors';
+import { type } from '../theme/typography';
 import { gradients } from '../theme/gradients';
 import { glass, radii } from '../theme/shape';
 import type { IconName } from '../types/events';
@@ -326,7 +327,7 @@ const styles = StyleSheet.create({
   back: { position: 'absolute', left: 20 },
   heroBadges: { position: 'absolute', left: 20, bottom: 16, flexDirection: 'row', gap: 8 },
   body: { padding: 20, gap: 16 },
-  title: { fontSize: 30, fontWeight: '600', letterSpacing: -0.5, color: colors.text },
+  title: { ...type.screenTitle, fontSize: 30 },
   infoRow: { flexDirection: 'row', gap: 12 },
   infoBox: { ...glass, flex: 1, padding: 14, gap: 6, borderRadius: radii.inner },
   infoLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
@@ -341,7 +342,7 @@ const styles = StyleSheet.create({
   avatarRing: { borderRadius: radii.pill, borderWidth: 2, borderColor: colors.background },
   avatarOverlap: { marginLeft: -12 },
   friendsText: { flex: 1, fontSize: 14, fontWeight: '500', color: colors.text },
-  sectionTitle: { fontSize: 18, fontWeight: '600', color: colors.text, marginTop: 8 },
+  sectionTitle: { ...type.label, marginTop: 8 },
   pressed: { opacity: 0.8 },
   bottomBar: {
     paddingHorizontal: 20,

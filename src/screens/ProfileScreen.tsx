@@ -25,6 +25,7 @@ import { getReputation } from '../services/ratingsService';
 import { TAG_GROUP_STYLE as GROUP_STYLE } from '../data/tagGroupStyle';
 import type { ProfileStackParamList } from '../navigation/profileTypes';
 import { colors, tagTints } from '../theme/colors';
+import { type } from '../theme/typography';
 import { glass, radii } from '../theme/shape';
 
 /**
@@ -201,7 +202,7 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   content: { padding: 20, paddingBottom: 32, gap: 22 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  title: { fontSize: 32, fontWeight: '600', letterSpacing: -0.5, color: colors.text },
+  title: { ...type.screenTitle, fontSize: 32 },
   editButton: { ...glass, paddingHorizontal: 18, paddingVertical: 10, borderRadius: radii.pill },
   editText: { color: colors.text, fontWeight: '500' },
   pressed: { backgroundColor: colors.cardStrong },
@@ -237,7 +238,7 @@ const styles = StyleSheet.create({
   statLabel: { fontSize: 12, color: colors.muted },
   statDivider: { width: 1, alignSelf: 'stretch', backgroundColor: colors.border },
   section: { gap: 10 },
-  sectionTitle: { fontSize: 18, fontWeight: '600', color: colors.text },
+  sectionTitle: { ...type.label },
   card: { ...glass, padding: 18, borderRadius: radii.card },
   cardTitle: { fontSize: 16, fontWeight: '600', color: colors.text },
   tagGroup: { gap: 10 },
