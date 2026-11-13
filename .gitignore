@@ -40,3 +40,6 @@ yarn-error.*
 /ios
 /android
 .claude/
+
+# Referințe vizuale private (aspectul e extras în docs/design-language.md)
+UI_design_language/
