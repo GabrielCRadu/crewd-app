@@ -4,23 +4,23 @@ import Aurora from '../Aurora';
 import GradientButton from '../GradientButton';
 import GlassBadge from './GlassBadge';
 import type { EventWithDistance } from '../../types/events';
-import { getCategory } from '../../data/categories';
 import { colors } from '../../theme/colors';
-import { glass, radii } from '../../theme/shape';
-import { formatTime } from '../../utils/dates';
+import { radii } from '../../theme/shape';
 import { formatDistance } from '../../utils/distance';
 
 interface Props {
   event: EventWithDistance;
-  joined: boolean;
-  onJoin: () => void;
   onOpen: () => void;
 }
 
-/** Cardul evidențiat „ACUM” (docs/layout-guide.md), desenat ca hero cu lumină aurora. */
-export default function NowCard({ event, joined, onJoin, onOpen }: Props) {
+/**
+ * Cardul „ACUM”: sus badge-ul și distanța, la mijloc loc liber pentru imaginea evenimentului
+ * (acum provizoriu: lumina aurora), jos numele evenimentului și „Vezi detalii”.
+ */
+export default function NowCard({ event, onOpen }: Props) {
   return (
     <Pressable onPress={onOpen} style={({ pressed }) => [styles.card, pressed && styles.pressed]}>
+      {/* Locul imaginii: deocamdată aurora; mai târziu aici vine poza evenimentului. */}
       <Aurora style={StyleSheet.absoluteFill} withScrim />
 
       {/* Sus: badge-ul „ACUM” și distanța */}
@@ -29,22 +29,12 @@ export default function NowCard({ event, joined, onJoin, onOpen }: Props) {
         <Text style={styles.distance}>la {formatDistance(event.distanceKm)}</Text>
       </View>
 
-      <Text style={styles.title} numberOfLines={2}>
-        {event.title}
-      </Text>
-
-      {/* Jos: „Categorie · până la HH:MM” și „Vin și eu” */}
+      {/* Jos: numele evenimentului (stânga) și „Vezi detalii” (dreapta) */}
       <View style={styles.bottom}>
-        <Text style={styles.meta} numberOfLines={1}>
-          {getCategory(event.category).label} · până la {formatTime(event.endsAt)}
+        <Text style={styles.name} numberOfLines={2}>
+          {event.title}
         </Text>
-        {joined ? (
-          <View style={styles.joined}>
-            <Text style={styles.joinedText}>Înscris ✓</Text>
-          </View>
-        ) : (
-          <GradientButton label="Vin și eu" compact onPress={onJoin} />
-        )}
+        <GradientButton label="Vezi detalii" icon="arrow-forward" compact onPress={onOpen} />
       </View>
     </Pressable>
   );
@@ -52,9 +42,8 @@ export default function NowCard({ event, joined, onJoin, onOpen }: Props) {
 
 const styles = StyleSheet.create({
   card: {
-    minHeight: 180,
+    minHeight: 200,
     justifyContent: 'space-between',
-    gap: 14,
     padding: 18,
     borderRadius: radii.card,
     borderWidth: 1,
@@ -64,9 +53,6 @@ const styles = StyleSheet.create({
   pressed: { opacity: 0.9 },
   top: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   distance: { color: colors.text, fontSize: 14, fontWeight: '600' },
-  title: { color: colors.text, fontSize: 26, fontWeight: '600', letterSpacing: -0.5 },
   bottom: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
-  meta: { flex: 1, color: colors.muted, fontSize: 14 },
-  joined: { ...glass, backgroundColor: colors.cardStrong, borderRadius: radii.pill, paddingHorizontal: 16, height: 42, justifyContent: 'center' },
-  joinedText: { color: colors.text, fontWeight: '600' },
+  name: { flex: 1, color: colors.text, fontSize: 18, fontWeight: '600', letterSpacing: -0.3 },
 });

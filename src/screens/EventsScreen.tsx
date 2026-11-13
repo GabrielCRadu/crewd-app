@@ -14,7 +14,7 @@ import { useEvents } from '../hooks/useEvents';
 import { usePreferences } from '../hooks/usePreferences';
 import { getLocationNotice, useUserLocation } from '../hooks/useUserLocation';
 import type { EventsStackParamList } from '../navigation/eventsTypes';
-import { isJoined, joinEvent } from '../services/preferencesService';
+import { isJoined } from '../services/preferencesService';
 import { colors } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
 import type { CategoryId } from '../types/events';
@@ -92,12 +92,7 @@ export default function EventsScreen({ navigation }: Props) {
       ) : (
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           {liveNow.length > 0 ? (
-            <NowCarousel
-              events={liveNow}
-              isJoined={(id) => isJoined(preferences, id)}
-              onJoin={(e) => joinEvent(e)}
-              onOpen={openEvent}
-            />
+            <NowCarousel events={liveNow} onOpen={openEvent} />
           ) : null}
 
           <Text style={styles.sectionTitle}>Urmează</Text>
