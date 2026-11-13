@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
+import ScreenGlow from '../components/ScreenGlow';
 import SegmentedControl from '../components/SegmentedControl';
 import CategoryChips from '../components/events/CategoryChips';
 import EventsMap from '../components/events/EventsMap';
@@ -56,6 +57,9 @@ export default function EventsScreen({ navigation }: Props) {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
+      {/* Lumina caldă de sus, ca în referințele de design */}
+      <ScreenGlow />
+
       <View style={styles.header}>
         <Text style={styles.title}>Evenimente</Text>
         <SegmentedControl

@@ -11,6 +11,12 @@ export const gradients = {
   /** Avatare cu inițiale. */
   avatar: [colors.accentOrange, colors.accentMagenta] as const,
   /**
+   * Lumina caldă din partea de sus a ecranelor, care se stinge în fundalul negru.
+   * Două straturi diagonale: portocaliu din stânga sus, roz-magenta din dreapta sus.
+   */
+  screenGlowWarm: ['rgba(255,122,61,0.55)', 'rgba(255,77,141,0.18)', 'rgba(11,10,16,0)'] as const,
+  screenGlowCool: ['rgba(193,60,255,0.45)', 'rgba(255,77,141,0.15)', 'rgba(11,10,16,0)'] as const,
+  /**
    * Nuanțe calde foarte discrete pentru cardurile de listă (mult mai slabe decât aurora):
    * accentul la ~20% opacitate în stânga, care se stinge spre dreapta.
    */
