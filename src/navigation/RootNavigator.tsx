@@ -16,6 +16,7 @@ import EventsNavigator from './EventsNavigator';
 import FriendsMapScreen from '../screens/FriendsMapScreen';
 import ChatsNavigator from './ChatsNavigator';
 import ProfileNavigator from './ProfileNavigator';
+import EventReminders from '../components/EventReminders';
 import FriendRequestPopup from '../components/FriendRequestPopup';
 import GradientButton from '../components/GradientButton';
 import { useAuth } from '../context/AuthContext';
@@ -65,6 +66,13 @@ function openPersonProfile(personId: string) {
   }
 }
 
+/** Deschide un eveniment (ex. din reamintire), cu lista de evenimente dedesubt pentru „înapoi”. */
+function openEvent(eventId: string) {
+  if (navigationRef.isReady()) {
+    navigationRef.navigate('Events', { screen: 'EventDetails', params: { eventId }, initial: false });
+  }
+}
+
 /** Deschide lista de prieteni (cererile primite sunt sus). */
 function openFriendRequests() {
   if (navigationRef.isReady()) {
@@ -99,6 +107,8 @@ export default function RootNavigator() {
             onOpenRequests={openFriendRequests}
             showPill={REQUESTS_PILL_ROUTES.includes(routeName)}
           />
+          {/* Reamintirile cu o oră înainte de evenimentele la care ești înscris */}
+          <EventReminders onOpenEvent={openEvent} />
         </>
       ) : status === 'signedOut' ? (
         <AuthNavigator />
