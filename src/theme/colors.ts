@@ -1,10 +1,10 @@
 export const colors = {
-  primary: '#6C5CE7',
-  background: '#F7F7FB',
-  card: '#FFFFFF',
-  text: '#1B1B2F',
-  muted: '#8A8AA0',
-  border: '#E6E6EF',
+  primary: '#8B7CF6',
+  background: '#0F0F17',
+  card: '#1B1B27',
+  text: '#F2F2F7',
+  muted: '#8E8EA3',
+  border: '#2A2A3A',
   like: '#2ECC71',
-  nope: '#E74C3C',
+  nope: '#FF5C5C',
 };

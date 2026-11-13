@@ -1,5 +1,6 @@
 import type { ComponentProps, ComponentType } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { DarkTheme, NavigationContainer } from '@react-navigation/native';
+import type { Theme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -12,6 +13,18 @@ import { colors } from '../theme/colors';
 type IconName = ComponentProps<typeof Ionicons>['name'];
 
 const Tab = createBottomTabNavigator();
+
+const theme: Theme = {
+  ...DarkTheme,
+  colors: {
+    ...DarkTheme.colors,
+    primary: colors.primary,
+    background: colors.background,
+    card: colors.card,
+    text: colors.text,
+    border: colors.border,
+  },
+};
 
 const TABS: {
   name: string;
@@ -28,7 +41,7 @@ const TABS: {
 
 export default function RootNavigator() {
   return (
-    <NavigationContainer>
+    <NavigationContainer theme={theme}>
       <Tab.Navigator
         screenOptions={{
           headerShown: false,
