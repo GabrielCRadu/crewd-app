@@ -76,16 +76,42 @@ export async function unblockPerson(personId: string): Promise<void> {
   setStatus(personId, 'none');
 }
 
-// ---------- Cereri noi (pentru notificarea din colțul ecranului) ----------
+// ---------- Noutăți (pentru notificarea din colțul ecranului) ----------
 
-const requestListeners = new Set<(personId: string) => void>();
+/**
+ * Ce anunță notificarea din colț:
+ * - request: cineva ți-a trimis o cerere de prietenie;
+ * - match: „Vă potriviți”, v-ați dat unul altuia „Aș mai ieși” după un eveniment.
+ */
+export type FriendNotice = { kind: 'request' | 'match'; personId: string };
 
-/** Abonare la cererile de prietenie care sosesc acum. Returnează o funcție de dezabonare. */
-export function subscribeToFriendRequests(listener: (personId: string) => void): () => void {
-  requestListeners.add(listener);
+const noticeListeners = new Set<(notice: FriendNotice) => void>();
+
+function announce(notice: FriendNotice) {
+  noticeListeners.forEach((listener) => listener(notice));
+}
+
+/** Abonare la noutățile de prietenie care sosesc acum. Returnează o funcție de dezabonare. */
+export function subscribeToFriendNotices(listener: (notice: FriendNotice) => void): () => void {
+  noticeListeners.add(listener);
   return () => {
-    requestListeners.delete(listener);
+    noticeListeners.delete(listener);
   };
+}
+
+/**
+ * „Vă potriviți”: și tu, și persoana v-ați dat „Aș mai ieși”. Nu se anunță dacă sunteți deja
+ * prieteni sau dacă ai blocat-o. Cu Firestore, ambele telefoane ar primi notificarea.
+ */
+export function announceMatch(personId: string): void {
+  const current = statusOf(state, personId);
+  if (current === 'friends' || current === 'blocked') return;
+  announce({ kind: 'match', personId });
+}
+
+/** Acceptarea unei potriviri: deveniți prieteni direct (amândoi ați vrut). */
+export async function acceptMatch(personId: string): Promise<void> {
+  setStatus(personId, 'friends');
 }
 
 /**
@@ -97,7 +123,7 @@ export function receiveFriendRequest(personId: string): void {
   const current = statusOf(state, personId);
   if (current === 'blocked' || current === 'friends' || current === 'incoming') return;
   setStatus(personId, 'incoming');
-  requestListeners.forEach((listener) => listener(personId));
+  announce({ kind: 'request', personId });
 }
 
 /** DEMO: după cât timp de la pornire îți trimite Tudor o cerere, ca să se vadă notificarea. */

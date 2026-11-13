@@ -2,6 +2,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import EditProfileScreen from '../screens/EditProfileScreen';
 import FriendsListScreen from '../screens/FriendsListScreen';
+import PersonFriendsScreen from '../screens/PersonFriendsScreen';
 import PersonProfileScreen from '../screens/PersonProfileScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import { colors } from '../theme/colors';
@@ -17,6 +18,7 @@ export default function ProfileNavigator() {
       <Stack.Screen name="EditProfile" component={EditProfileScreen} />
       <Stack.Screen name="FriendsList" component={FriendsListScreen} />
       <Stack.Screen name="PersonProfile" component={PersonProfileScreen} />
+      <Stack.Screen name="PersonFriends" component={PersonFriendsScreen} />
     </Stack.Navigator>
   );
 }

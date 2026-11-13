@@ -19,8 +19,8 @@ import { usePastEvents } from '../hooks/usePastEvents';
 import { useRatings } from '../hooks/useRatings';
 import { useUserLocation } from '../hooks/useUserLocation';
 import { getAutoBadges, getVotedBadges } from '../services/badgesService';
-import { blockPerson, statusOf, unblockPerson } from '../services/friendsService';
-import { commonTags, getPerson } from '../services/peopleService';
+import { blockPerson, idsWithStatus, statusOf, unblockPerson } from '../services/friendsService';
+import { commonTags, friendsOfPerson, getPerson, mutualFriends } from '../services/peopleService';
 import { getReputation, hasReportedPerson, reportPerson } from '../services/ratingsService';
 import { colors } from '../theme/colors';
 import { radii } from '../theme/shape';
@@ -76,6 +76,8 @@ export default function PersonProfileScreen() {
   const blocked = status === 'blocked';
   const reputation = getReputation(myRatings, person.id);
   const shared = commonTags(person, myTags);
+  const personFriends = friendsOfPerson(person.id);
+  const mutualCount = mutualFriends(person.id, idsWithStatus(friends, 'friends')).length;
   const others = person.tags.filter((t) => !shared.includes(t));
 
   // Evenimentele se deschid în tab-ul Evenimente, cu lista dedesubt pentru „înapoi”.
@@ -144,6 +146,19 @@ export default function PersonProfileScreen() {
               <Ionicons name="location-outline" size={15} color={colors.text} />
               <Text style={styles.meta}>{meta}</Text>
             </View>
+            {/* Prietenii ei: apeși și vezi lista (toți sau doar cei comuni) */}
+            <Pressable
+              onPress={() => navigation.navigate('PersonFriends', { personId: person.id })}
+              hitSlop={6}
+              style={({ pressed }) => [styles.friendsLink, pressed && styles.pressed]}
+            >
+              <Ionicons name="people-outline" size={15} color={colors.text} />
+              <Text style={styles.friendsLinkText}>
+                {personFriends.length} {personFriends.length === 1 ? 'prieten' : 'prieteni'}
+                <Text style={styles.friendsLinkMuted}> · {mutualCount} comuni</Text>
+              </Text>
+              <Ionicons name="chevron-forward" size={14} color={colors.muted} />
+            </Pressable>
           </View>
 
           <FriendButton personId={person.id} name={person.name} status={status} />
@@ -288,6 +303,9 @@ const styles = StyleSheet.create({
   name: { fontSize: 46, lineHeight: 50, fontWeight: '800', letterSpacing: -1.5, color: colors.text, marginTop: 10 },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   meta: { fontSize: 15, fontWeight: '500', color: colors.text },
+  friendsLink: { flexDirection: 'row', alignItems: 'center', gap: 5, alignSelf: 'flex-start' },
+  friendsLinkText: { fontSize: 15, fontWeight: '600', color: colors.text },
+  friendsLinkMuted: { fontWeight: '500', color: colors.muted },
   section: { gap: 12 },
   // Etichete mici, cu majuscule și spațiere: aspect editorial, sobru.
   label: { fontSize: 12, fontWeight: '700', letterSpacing: 1.6, color: colors.muted },

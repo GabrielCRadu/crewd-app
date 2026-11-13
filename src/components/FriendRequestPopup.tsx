@@ -7,10 +7,12 @@ import Avatar from './Avatar';
 import { useFriends } from '../hooks/useFriends';
 import {
   acceptFriendRequest,
+  acceptMatch,
   idsWithStatus,
   scheduleDemoFriendRequest,
-  subscribeToFriendRequests,
+  subscribeToFriendNotices,
 } from '../services/friendsService';
+import type { FriendNotice } from '../services/friendsService';
 import { getPerson } from '../services/peopleService';
 import { colors } from '../theme/colors';
 import { radii } from '../theme/shape';
@@ -33,8 +35,9 @@ const VISIBLE_MS = 5000;
 const WIDTH = 300;
 
 /**
- * Cererile de prietenie, în colțul din dreapta sus, peste orice ecran:
+ * Noutățile de prietenie, în colțul din dreapta sus, peste orice ecran:
  * 1. când sosește o cerere, intră din dreapta notificarea mare (poza, numele, „Acceptă”, „Vezi profilul”);
+ *    la „Vă potriviți” (v-ați dat unul altuia „Aș mai ieși”): „Adăugați-vă” sau „Mai târziu”;
  * 2. după câteva secunde pleacă, iar în colț rămâne un buton mic cu numărul de cereri primite,
  *    cât timp ai cereri la care n-ai răspuns. Butonul deschide lista de prieteni.
  */
@@ -44,6 +47,7 @@ export default function FriendRequestPopup({ onOpenProfile, onOpenRequests, show
   const friends = useFriends();
   const pendingCount = idsWithStatus(friends, 'incoming').length;
   const [person, setPerson] = useState<Person | null>(null);
+  const [kind, setKind] = useState<FriendNotice['kind']>('request');
   const slide = useRef(new Animated.Value(0)).current;
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -53,10 +57,11 @@ export default function FriendRequestPopup({ onOpenProfile, onOpenRequests, show
   };
 
   useEffect(() => {
-    const unsubscribe = subscribeToFriendRequests((personId) => {
-      const sender = getPerson(personId);
+    const unsubscribe = subscribeToFriendNotices((notice) => {
+      const sender = getPerson(notice.personId);
       if (!sender) return;
       setPerson(sender);
+      setKind(notice.kind);
       slide.setValue(0);
       Animated.spring(slide, { toValue: 1, useNativeDriver: true, friction: 8 }).start();
       if (hideTimer.current) clearTimeout(hideTimer.current);
@@ -94,8 +99,9 @@ export default function FriendRequestPopup({ onOpenProfile, onOpenRequests, show
     hide();
     onOpenProfile(person.id);
   };
+  const isMatch = kind === 'match';
   const accept = () => {
-    void acceptFriendRequest(person.id);
+    void (isMatch ? acceptMatch(person.id) : acceptFriendRequest(person.id));
     hide();
   };
 
@@ -103,16 +109,31 @@ export default function FriendRequestPopup({ onOpenProfile, onOpenRequests, show
     <Animated.View
       style={[styles.card, { top: insets.top + 8, width: cardWidth, opacity: slide, transform: [{ translateX }] }]}
       accessibilityRole="alert"
-      accessibilityLabel={`${person.name} ți-a trimis o cerere de prietenie`}
+      accessibilityLabel={
+        isMatch
+          ? `Vă potriviți. Și ${person.name} ar mai ieși cu tine.`
+          : `${person.name} ți-a trimis o cerere de prietenie`
+      }
     >
       <Pressable onPress={openProfile} style={styles.body}>
         <Avatar name={person.name} size={48} square photoUrl={person.photoUrl} />
         <View style={styles.text}>
-          <Text style={styles.name} numberOfLines={1}>
-            {person.name}
-            {person.age ? <Text style={styles.age}>, {person.age}</Text> : null}
-          </Text>
-          <Text style={styles.message}>ți-a trimis o cerere de prietenie</Text>
+          {isMatch ? (
+            <>
+              <Text style={styles.eyebrow}>VĂ POTRIVIȚI</Text>
+              <Text style={styles.message}>
+                Și <Text style={styles.inlineName}>{person.name}</Text> ar mai ieși cu tine. Vă adăugați ca prieteni?
+              </Text>
+            </>
+          ) : (
+            <>
+              <Text style={styles.name} numberOfLines={1}>
+                {person.name}
+                {person.age ? <Text style={styles.age}>, {person.age}</Text> : null}
+              </Text>
+              <Text style={styles.message}>ți-a trimis o cerere de prietenie</Text>
+            </>
+          )}
         </View>
         <Pressable onPress={hide} hitSlop={10} accessibilityLabel="Închide" style={styles.close}>
           <Ionicons name="close" size={18} color={colors.muted} />
@@ -121,11 +142,14 @@ export default function FriendRequestPopup({ onOpenProfile, onOpenRequests, show
 
       <View style={styles.actions}>
         <Pressable onPress={accept} style={({ pressed }) => [styles.button, styles.accept, pressed && styles.pressed]}>
-          <Ionicons name="checkmark" size={16} color={colors.onLight} />
-          <Text style={[styles.buttonText, styles.acceptText]}>Acceptă</Text>
+          <Ionicons name={isMatch ? 'people' : 'checkmark'} size={16} color={colors.onLight} />
+          <Text style={[styles.buttonText, styles.acceptText]}>{isMatch ? 'Adăugați-vă' : 'Acceptă'}</Text>
         </Pressable>
-        <Pressable onPress={openProfile} style={({ pressed }) => [styles.button, styles.secondary, pressed && styles.pressed]}>
-          <Text style={styles.buttonText}>Vezi profilul</Text>
+        <Pressable
+          onPress={isMatch ? hide : openProfile}
+          style={({ pressed }) => [styles.button, styles.secondary, pressed && styles.pressed]}
+        >
+          <Text style={styles.buttonText}>{isMatch ? 'Mai târziu' : 'Vezi profilul'}</Text>
         </Pressable>
       </View>
     </Animated.View>
@@ -148,6 +172,8 @@ const styles = StyleSheet.create({
   },
   body: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   text: { flex: 1, gap: 2 },
+  eyebrow: { color: colors.muted, fontSize: 11, fontWeight: '700', letterSpacing: 1.4 },
+  inlineName: { color: colors.text, fontWeight: '700' },
   name: { color: colors.text, fontSize: 16, fontWeight: '700' },
   age: { color: colors.muted, fontWeight: '500' },
   message: { color: colors.muted, fontSize: 13 },

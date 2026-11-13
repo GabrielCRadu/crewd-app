@@ -2,6 +2,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import EventsScreen from '../screens/EventsScreen';
 import EventDetailsScreen from '../screens/EventDetailsScreen';
+import PersonFriendsScreen from '../screens/PersonFriendsScreen';
 import PersonProfileScreen from '../screens/PersonProfileScreen';
 import RateEventScreen from '../screens/RateEventScreen';
 import ProposeGroupScreen from '../screens/ProposeGroupScreen';
@@ -22,6 +23,7 @@ export default function EventsNavigator() {
       <Stack.Screen name="EventDetails" component={EventDetailsScreen} />
       <Stack.Screen name="RateEvent" component={RateEventScreen} />
       <Stack.Screen name="PersonProfile" component={PersonProfileScreen} />
+      <Stack.Screen name="PersonFriends" component={PersonFriendsScreen} />
       <Stack.Screen name="EventGroups" component={EventGroupsScreen} />
       <Stack.Screen name="ProposeGroup" component={ProposeGroupScreen} />
     </Stack.Navigator>

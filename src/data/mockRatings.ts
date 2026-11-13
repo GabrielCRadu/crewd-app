@@ -17,6 +17,15 @@ export const INITIAL_REPUTATION: Record<string, Reputation> = {
   p4: { tagCounts: { friendly: 5, punctual: 6, again: 3 }, reportsCount: 2 },
 };
 
+/**
+ * Cine ți-a dat deja „Aș mai ieși” după un eveniment (eventId → personId-uri).
+ * Dacă și tu le dai „Aș mai ieși”, vă potriviți (vezi ratingsService.saveEventRatings).
+ */
+export const THEY_WOULD_GO_AGAIN: Record<string, string[]> = {
+  e16: ['p5', 'p1'],
+  e17: ['p4'],
+};
+
 /** eventId → evaluările tale. Drumeția (e18) e deja evaluată. */
 export const INITIAL_MY_RATINGS: Record<string, EventRatings> = {
   e18: { p4: { tags: ['friendly', 'punctual'], reported: false } },
