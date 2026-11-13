@@ -6,7 +6,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NavigationProp, RouteProp } from '@react-navigation/native';
 
-import Avatar from '../components/Avatar';
 import Chip from '../components/Chip';
 import FriendButton from '../components/FriendButton';
 import GlassIconButton from '../components/GlassIconButton';
@@ -124,9 +123,9 @@ export default function PersonProfileScreen() {
       <LinearGradient
         colors={gradients.emberHero}
         locations={gradients.emberHeroLocations}
-        start={{ x: 0.3, y: 0 }}
+        start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
-        style={[styles.hero, { height: height * 0.62 }]}
+        style={[styles.hero, { height: height * 0.8 }]}
         pointerEvents="none"
       />
 
@@ -139,7 +138,10 @@ export default function PersonProfileScreen() {
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           {/* Identitatea: poza, numele mare, vârsta și orașul */}
           <View style={styles.identity}>
-            <Avatar name={person.name} size={96} square />
+            {/* Locul pozei: sticlă închisă cu inițiala, în tonul paginii (fără gradientul colorat) */}
+            <View style={styles.photo}>
+              <Text style={styles.photoInitial}>{person.name.slice(0, 1).toUpperCase()}</Text>
+            </View>
             <Text style={styles.name}>{person.name}</Text>
             <View style={styles.metaRow}>
               <Ionicons name="location-outline" size={15} color={colors.text} />
@@ -263,6 +265,17 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 8, paddingBottom: 8 },
   content: { padding: 20, paddingTop: 12, paddingBottom: 40, gap: 28 },
   identity: { gap: 10, paddingTop: 8 },
+  photo: {
+    width: 96,
+    height: 96,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.heroGlass,
+    borderWidth: 1,
+    borderColor: colors.heroBorder,
+  },
+  photoInitial: { fontSize: 40, fontWeight: '700', color: colors.text },
   name: { fontSize: 46, lineHeight: 50, fontWeight: '800', letterSpacing: -1.5, color: colors.text, marginTop: 10 },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   meta: { fontSize: 15, fontWeight: '500', color: colors.text, opacity: 0.85 },
