@@ -4,24 +4,26 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-import ScreenHeader from '../components/ScreenHeader';
 import CategoryChips from '../components/events/CategoryChips';
 import EventsMap from '../components/events/EventsMap';
+import LiveNowCard from '../components/events/LiveNowCard';
 import PeriodPicker from '../components/events/PeriodPicker';
+import Raised from '../components/events/Raised';
 import RecommendedEvents from '../components/events/RecommendedEvents';
 import { useEvents } from '../hooks/useEvents';
 import { usePreferences } from '../hooks/usePreferences';
 import { getLocationNotice, useUserLocation } from '../hooks/useUserLocation';
 import type { EventsStackParamList } from '../navigation/eventsTypes';
-import { getRecommendedEvents } from '../services/preferencesService';
+import { getRecommendedEvents, isJoined, joinEvent } from '../services/preferencesService';
 import { colors } from '../theme/colors';
+import { fonts, ui } from '../theme/eventsTheme';
 import type { CategoryId, Period } from '../types/events';
-import { getCurrentWeekPeriod } from '../utils/dates';
+import { getCurrentWeekPeriod, isLive } from '../utils/dates';
 import { addDistance, filterEvents, isUpcomingOrLive } from '../utils/eventFilters';
 
 type Props = NativeStackScreenProps<EventsStackParamList, 'EventsHome'>;
 
-/** Pagina principală a tab-ului: perioadă → categorii → hartă → „Vezi toate” → recomandări. */
+/** Pagina principală a tab-ului: ACUM → perioadă → categorii → hartă → „Vezi toate” → recomandări. */
 export default function EventsScreen({ navigation }: Props) {
   const { events, loading } = useEvents();
   const location = useUserLocation();
@@ -42,6 +44,11 @@ export default function EventsScreen({ navigation }: Props) {
     () => getRecommendedEvents(withDistance.filter((e) => isUpcomingOrLive(e)), preferences),
     [withDistance, preferences],
   );
+  // Cel mai apropiat eveniment care are loc chiar acum (pentru cardul „ACUM”).
+  const liveNow = useMemo(
+    () => withDistance.filter((e) => isLive(e)).sort((a, b) => a.distanceKm - b.distanceKm)[0] ?? null,
+    [withDistance],
+  );
 
   const openEvent = (eventId: string) => navigation.navigate('EventDetails', { eventId });
   const locationNotice = getLocationNotice(location.status);
@@ -51,13 +58,26 @@ export default function EventsScreen({ navigation }: Props) {
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <ScreenHeader title="Evenimente" subtitle="Găsește unde să mergi, și cu cine" />
+        <View style={styles.header}>
+          <Text style={styles.title}>Evenimente</Text>
+          {loading || location.status === 'loading' ? <ActivityIndicator color={colors.primary} /> : null}
+        </View>
 
         {locationNotice ? (
           <View style={styles.notice}>
             <Ionicons name="information-circle-outline" size={16} color={colors.muted} />
             <Text style={styles.noticeText}>{locationNotice}</Text>
           </View>
+        ) : null}
+
+        {/* Cardul „ACUM” */}
+        {liveNow ? (
+          <LiveNowCard
+            event={liveNow}
+            joined={isJoined(preferences, liveNow.id)}
+            onJoin={() => joinEvent(liveNow)}
+            onOpen={() => openEvent(liveNow.id)}
+          />
         ) : null}
 
         {/* a) Perioada */}
@@ -69,10 +89,7 @@ export default function EventsScreen({ navigation }: Props) {
         <CategoryChips selected={categoryIds} onChange={setCategoryIds} />
 
         {/* c) Harta */}
-        <View style={styles.mapHeader}>
-          <Text style={[styles.sectionTitle, styles.inlineTitle]}>Pe hartă</Text>
-          {loading || location.status === 'loading' ? <ActivityIndicator color={colors.primary} /> : null}
-        </View>
+        <Text style={styles.sectionTitle}>Pe hartă</Text>
         <EventsMap
           events={filtered}
           userLocation={location.coords}
@@ -86,8 +103,10 @@ export default function EventsScreen({ navigation }: Props) {
           onPress={() => navigation.navigate('EventsList', { period, categoryIds })}
           style={({ pressed }) => [styles.allButton, pressed && styles.pressed]}
         >
-          <Text style={styles.allButtonText}>Vezi toate evenimentele ({filtered.length})</Text>
-          <Ionicons name="arrow-forward" size={18} color="#fff" />
+          <Raised color={ui.accent} radius={22} contentStyle={styles.allButtonInner}>
+            <Text style={styles.allButtonText}>Vezi toate evenimentele ({filtered.length})</Text>
+            <Ionicons name="arrow-forward" size={20} color={ui.onAccent} />
+          </Raised>
         </Pressable>
 
         {/* Recomandate, pe baza scorurilor din preferințe */}
@@ -105,39 +124,43 @@ export default function EventsScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   content: { paddingBottom: 32 },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 16,
+  },
+  title: { fontFamily: fonts.display, fontSize: 38, color: colors.text, letterSpacing: -0.5 },
   notice: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
     marginHorizontal: 20,
-    marginTop: 4,
+    marginBottom: 16,
     paddingHorizontal: 12,
     paddingVertical: 8,
-    borderRadius: 12,
-    backgroundColor: colors.border,
+    borderRadius: 14,
+    backgroundColor: colors.card,
   },
-  noticeText: { flex: 1, fontSize: 12, color: colors.muted },
+  noticeText: { flex: 1, fontSize: 12, fontFamily: fonts.semibold, color: colors.muted },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '800',
+    fontFamily: fonts.display,
+    fontSize: 22,
     color: colors.text,
     marginHorizontal: 20,
-    marginTop: 24,
+    marginTop: 26,
     marginBottom: 12,
   },
-  mapHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginRight: 20 },
-  inlineTitle: { marginRight: 0 },
-  allButton: {
+  allButton: { marginHorizontal: 20, marginTop: 18 },
+  allButtonInner: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-    marginHorizontal: 20,
-    marginTop: 16,
-    paddingVertical: 16,
-    borderRadius: 16,
-    backgroundColor: colors.primary,
+    gap: 10,
+    paddingVertical: 18,
   },
-  allButtonText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  allButtonText: { color: ui.onAccent, fontSize: 17, fontFamily: fonts.display },
   pressed: { opacity: 0.85 },
 });

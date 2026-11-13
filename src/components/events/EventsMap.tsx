@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import type { EventWithDistance, LatLng } from '../../types/events';
 import { colors } from '../../theme/colors';
-import { cardShadow } from '../../theme/shadows';
+import { fonts, ui } from '../../theme/eventsTheme';
 import { formatEventDate } from '../../utils/dates';
 import {
   DISTANCE_COLORS,
@@ -16,6 +16,7 @@ import {
   type DistanceLevel,
 } from '../../utils/distance';
 import DistanceDot from './DistanceDot';
+import Raised from './Raised';
 
 interface Props {
   events: EventWithDistance[];
@@ -52,7 +53,7 @@ export default function EventsMap({ events, userLocation, showUserLocation, heig
   };
 
   return (
-    <View style={[styles.container, { height }]}>
+    <Raised style={styles.outer} radius={24} contentStyle={{ height }}>
       <MapView
         ref={mapRef}
         style={StyleSheet.absoluteFill}
@@ -60,6 +61,7 @@ export default function EventsMap({ events, userLocation, showUserLocation, heig
         showsUserLocation={showUserLocation}
         showsMyLocationButton={false}
         toolbarEnabled={false}
+        userInterfaceStyle="dark"
       >
         {visible.map((e) => (
           <Marker
@@ -92,83 +94,78 @@ export default function EventsMap({ events, userLocation, showUserLocation, heig
 
       {/* Mini-card-ul pinului apăsat */}
       {selected ? (
-        <View style={styles.miniCard}>
-          <Image source={{ uri: selected.imageUrl }} style={styles.miniImage} />
-          <View style={styles.miniBody}>
-            <Text style={styles.miniTitle} numberOfLines={1}>
-              {selected.title}
-            </Text>
-            <Text style={styles.miniMeta}>{formatEventDate(selected.startsAt)}</Text>
-            <View style={styles.miniDistance}>
-              <DistanceDot km={selected.distanceKm} />
-              <Text style={styles.miniMeta}>{formatDistance(selected.distanceKm)}</Text>
+        <View style={styles.miniWrap}>
+          <Raised radius={18} contentStyle={styles.miniCard}>
+            <Image source={{ uri: selected.imageUrl }} style={styles.miniImage} />
+            <View style={styles.miniBody}>
+              <Text style={styles.miniTitle} numberOfLines={1}>
+                {selected.title}
+              </Text>
+              <Text style={styles.miniMeta}>{formatEventDate(selected.startsAt)}</Text>
+              <View style={styles.miniDistance}>
+                <DistanceDot km={selected.distanceKm} />
+                <Text style={styles.miniMeta}>{formatDistance(selected.distanceKm)}</Text>
+              </View>
             </View>
-          </View>
-          <View style={styles.miniActions}>
-            <Pressable onPress={() => setSelectedId(null)} hitSlop={10}>
-              <Ionicons name="close" size={18} color={colors.muted} />
-            </Pressable>
-            <Pressable onPress={() => onOpenEvent(selected.id)} style={styles.miniButton}>
-              <Text style={styles.miniButtonText}>Vezi detalii</Text>
-            </Pressable>
-          </View>
+            <View style={styles.miniActions}>
+              <Pressable onPress={() => setSelectedId(null)} hitSlop={10}>
+                <Ionicons name="close" size={18} color={colors.muted} />
+              </Pressable>
+              <Pressable onPress={() => onOpenEvent(selected.id)} style={styles.miniButton}>
+                <Text style={styles.miniButtonText}>Vezi detalii</Text>
+              </Pressable>
+            </View>
+          </Raised>
         </View>
       ) : null}
-    </View>
+    </Raised>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    marginHorizontal: 20,
-    borderRadius: 24,
-    overflow: 'hidden',
-    backgroundColor: colors.border,
-  },
+  outer: { marginLeft: 20, marginRight: 20 + ui.shadowOffset },
   legend: {
     position: 'absolute',
     top: 12,
     left: 12,
     flexDirection: 'row',
-    gap: 4,
+    gap: 2,
     backgroundColor: colors.card,
-    borderRadius: 14,
-    padding: 4,
+    borderRadius: 999,
+    borderWidth: ui.outlineWidth,
+    borderColor: ui.outline,
+    padding: 3,
   },
-  legendItem: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 8, paddingVertical: 5, borderRadius: 10 },
+  legendItem: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 999 },
   legendHidden: { opacity: 0.35 },
   legendDot: { width: 10, height: 10, borderRadius: 5 },
-  legendText: { fontSize: 12, fontWeight: '600', color: colors.text },
+  legendText: { fontSize: 12, fontFamily: fonts.bold, color: colors.text },
   legendTextHidden: { textDecorationLine: 'line-through' },
   emptyOverlay: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, alignItems: 'center', justifyContent: 'center' },
   emptyText: {
     backgroundColor: colors.card,
     color: colors.muted,
-    fontWeight: '600',
+    fontFamily: fonts.bold,
     paddingHorizontal: 14,
     paddingVertical: 8,
-    borderRadius: 12,
+    borderRadius: 999,
+    borderWidth: ui.outlineWidth,
+    borderColor: ui.outline,
     overflow: 'hidden',
   },
-  miniCard: {
-    position: 'absolute',
-    left: 12,
-    right: 12,
-    bottom: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    backgroundColor: colors.card,
-    borderRadius: 18,
-    padding: 10,
-    ...cardShadow,
-  },
+  miniWrap: { position: 'absolute', left: 12, right: 12, bottom: 12 },
+  miniCard: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 10 },
   miniImage: { width: 60, height: 60, borderRadius: 12, backgroundColor: colors.border },
   miniBody: { flex: 1, gap: 2 },
-  miniTitle: { fontSize: 15, fontWeight: '800', color: colors.text },
-  miniMeta: { fontSize: 12, color: colors.muted },
+  miniTitle: { fontSize: 16, fontFamily: fonts.display, color: colors.text },
+  miniMeta: { fontSize: 12, fontFamily: fonts.semibold, color: colors.muted },
   miniDistance: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   miniActions: { alignItems: 'flex-end', gap: 8 },
-  miniButton: { backgroundColor: colors.primary, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 10 },
-  miniButtonText: { color: '#fff', fontWeight: '700', fontSize: 12 },
+  miniButton: {
+    backgroundColor: ui.accent,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 12,
+  },
+  miniButtonText: { color: ui.onAccent, fontFamily: fonts.extrabold, fontSize: 12 },
 });

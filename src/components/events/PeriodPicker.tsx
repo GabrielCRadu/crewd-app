@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 
 import type { Period } from '../../types/events';
 import { colors } from '../../theme/colors';
+import { fonts, ui } from '../../theme/eventsTheme';
 import {
   getMonthPeriod,
   getNowPeriod,
@@ -13,6 +13,7 @@ import {
   getWeeksOfMonth,
   isSamePeriod,
 } from '../../utils/dates';
+import Pill from './Pill';
 
 interface Props {
   value: Period;
@@ -22,7 +23,7 @@ interface Props {
 /**
  * Alegerea perioadei, pe 3 rânduri:
  * 1. scurtături (Acum / Azi / Weekendul ăsta)
- * 2. lunile
+ * 2. lunile (comutator ca „Listă / Hartă” din machetă)
  * 3. săptămânile din luna aleasă (+ „Toată luna”)
  */
 export default function PeriodPicker({ value, onChange }: Props) {
@@ -43,24 +44,20 @@ export default function PeriodPicker({ value, onChange }: Props) {
   return (
     <View style={styles.container}>
       {/* 1. Scurtături */}
-      <View style={styles.shortcuts}>
-        {shortcuts.map((p) => {
-          const active = isSamePeriod(p, value);
-          return (
-            <Pressable
-              key={p.kind}
-              onPress={() => onChange(p)}
-              style={[styles.shortcut, active && styles.shortcutActive]}
-            >
-              {p.kind === 'now' ? <View style={[styles.liveDot, active && styles.liveDotActive]} /> : null}
-              <Text style={[styles.shortcutText, active && styles.textOnPrimary]}>{p.label}</Text>
-            </Pressable>
-          );
-        })}
+      <View style={styles.wrapRow}>
+        {shortcuts.map((p) => (
+          <Pill
+            key={p.kind}
+            label={p.label}
+            icon={p.kind === 'now' ? 'radio-button-on' : undefined}
+            active={isSamePeriod(p, value)}
+            onPress={() => onChange(p)}
+          />
+        ))}
       </View>
 
       {/* 2. Lunile */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.monthsTrack}>
         {months.map((m) => {
           const active = usesMonthRows && m.year === month.year && m.month === month.month;
           return (
@@ -71,10 +68,9 @@ export default function PeriodPicker({ value, onChange }: Props) {
                 setMonth({ year: m.year, month: m.month });
                 onChange(getMonthPeriod(m.year, m.month));
               }}
-              style={styles.monthItem}
+              style={[styles.month, active && styles.monthActive]}
             >
               <Text style={[styles.monthText, active && styles.monthTextActive]}>{m.label}</Text>
-              <View style={[styles.monthUnderline, active && styles.monthUnderlineActive]} />
             </Pressable>
           );
         })}
@@ -82,63 +78,36 @@ export default function PeriodPicker({ value, onChange }: Props) {
 
       {/* 3. Săptămânile din luna aleasă */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
-        {[monthPeriod, ...weeks].map((p) => {
-          const active = isSamePeriod(p, value);
-          return (
-            <Pressable
-              key={`${p.kind}-${p.start}`}
-              onPress={() => onChange(p)}
-              style={[styles.week, active && styles.weekActive]}
-            >
-              {p.kind === 'month' ? (
-                <Ionicons name="calendar-outline" size={14} color={active ? colors.primary : colors.muted} />
-              ) : null}
-              <Text style={[styles.weekText, active && styles.weekTextActive]}>
-                {p.kind === 'month' ? 'Toată luna' : p.label}
-              </Text>
-            </Pressable>
-          );
-        })}
+        {[monthPeriod, ...weeks].map((p) => (
+          <Pill
+            key={`${p.kind}-${p.start}`}
+            label={p.kind === 'month' ? 'Toată luna' : p.label}
+            icon={p.kind === 'month' ? 'calendar-outline' : undefined}
+            active={isSamePeriod(p, value)}
+            onPress={() => onChange(p)}
+          />
+        ))}
       </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { gap: 12 },
-  shortcuts: { flexDirection: 'row', gap: 8, paddingHorizontal: 20, flexWrap: 'wrap' },
-  shortcut: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: colors.card,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  shortcutActive: { backgroundColor: colors.primary, borderColor: colors.primary },
-  shortcutText: { fontWeight: '600', color: colors.text },
-  textOnPrimary: { color: '#fff' },
-  liveDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.nope },
-  liveDotActive: { backgroundColor: '#fff' },
+  container: { gap: 14 },
+  wrapRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingHorizontal: 20 },
   row: { paddingHorizontal: 20, gap: 8 },
-  monthItem: { paddingHorizontal: 6, paddingVertical: 4, alignItems: 'center' },
-  monthText: { fontSize: 16, fontWeight: '600', color: colors.muted },
-  monthTextActive: { color: colors.text, fontWeight: '800' },
-  monthUnderline: { height: 3, width: 20, borderRadius: 2, marginTop: 4, backgroundColor: 'transparent' },
-  monthUnderlineActive: { backgroundColor: colors.primary },
-  week: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 12,
-    backgroundColor: colors.border,
+  // Rândul de luni arată ca un comutator: o „șină” cu contur și luna activă umplută.
+  monthsTrack: {
+    marginHorizontal: 20,
+    padding: 4,
+    gap: 4,
+    borderRadius: 18,
+    borderWidth: ui.outlineWidth,
+    borderColor: ui.outline,
+    backgroundColor: colors.card,
   },
-  weekActive: { backgroundColor: `${colors.primary}1F`, borderWidth: 1, borderColor: colors.primary },
-  weekText: { fontWeight: '600', color: colors.muted },
-  weekTextActive: { color: colors.primary },
+  month: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 14, borderWidth: ui.outlineWidth, borderColor: 'transparent' },
+  monthActive: { backgroundColor: ui.accent, borderColor: ui.accent },
+  monthText: { fontFamily: fonts.extrabold, fontSize: 15, color: colors.muted },
+  monthTextActive: { color: ui.onAccent },
 });

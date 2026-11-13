@@ -1,9 +1,8 @@
-import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { ScrollView, StyleSheet } from 'react-native';
 
-import type { CategoryId, IconName } from '../../types/events';
+import type { CategoryId } from '../../types/events';
 import { CATEGORIES } from '../../data/categories';
-import { colors } from '../../theme/colors';
+import Pill from './Pill';
 
 interface Props {
   /** Categoriile selectate. Listă goală = „Toate”. */
@@ -20,9 +19,9 @@ export default function CategoryChips({ selected, onChange }: Props) {
 
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
-      <Chip label="Toate" icon="apps-outline" active={selected.length === 0} onPress={() => onChange([])} />
+      <Pill label="Toate" icon="apps-outline" active={selected.length === 0} onPress={() => onChange([])} />
       {CATEGORIES.map((c) => (
-        <Chip
+        <Pill
           key={c.id}
           label={c.label}
           icon={c.icon}
@@ -34,29 +33,6 @@ export default function CategoryChips({ selected, onChange }: Props) {
   );
 }
 
-function Chip({ label, icon, active, onPress }: { label: string; icon: IconName; active: boolean; onPress: () => void }) {
-  return (
-    <Pressable onPress={onPress} style={[styles.chip, active && styles.chipActive]}>
-      <Ionicons name={icon} size={16} color={active ? '#fff' : colors.primary} />
-      <Text style={[styles.label, active && styles.labelActive]}>{label}</Text>
-    </Pressable>
-  );
-}
-
 const styles = StyleSheet.create({
   row: { paddingHorizontal: 20, gap: 8 },
-  chip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 9,
-    borderRadius: 20,
-    backgroundColor: colors.card,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  chipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
-  label: { fontWeight: '600', color: colors.text },
-  labelActive: { color: '#fff' },
 });

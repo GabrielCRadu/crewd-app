@@ -1,5 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 
+import { colors } from '../../theme/colors';
 import { getDistanceColor } from '../../utils/distance';
 
 /** Bulina verde / galbenă / roșie în funcție de distanță. */
@@ -15,5 +16,5 @@ export default function DistanceDot({ km, size = 10 }: { km: number; size?: numb
 }
 
 const styles = StyleSheet.create({
-  dot: { borderWidth: 1.5, borderColor: '#fff' },
+  dot: { borderWidth: 1.5, borderColor: colors.background },
 });

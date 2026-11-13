@@ -2,10 +2,11 @@ import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-nati
 
 import type { EventWithDistance } from '../../types/events';
 import { colors } from '../../theme/colors';
-import { cardShadow } from '../../theme/shadows';
+import { fonts, ui } from '../../theme/eventsTheme';
 import { formatEventDate } from '../../utils/dates';
 import { formatDistance } from '../../utils/distance';
 import DistanceDot from './DistanceDot';
+import Raised from './Raised';
 
 interface Props {
   events: EventWithDistance[];
@@ -17,20 +18,22 @@ export default function RecommendedEvents({ events, onOpenEvent }: Props) {
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
       {events.map((e) => (
-        <Pressable key={e.id} onPress={() => onOpenEvent(e.id)} style={styles.card}>
-          <Image source={{ uri: e.imageUrl }} style={styles.image} />
-          <View style={styles.body}>
-            <Text style={styles.title} numberOfLines={1}>
-              {e.title}
-            </Text>
-            <Text style={styles.meta} numberOfLines={1}>
-              {formatEventDate(e.startsAt)}
-            </Text>
-            <View style={styles.distance}>
-              <DistanceDot km={e.distanceKm} size={8} />
-              <Text style={styles.meta}>{formatDistance(e.distanceKm)}</Text>
+        <Pressable key={e.id} onPress={() => onOpenEvent(e.id)} style={({ pressed }) => pressed && styles.pressed}>
+          <Raised radius={18} style={styles.card}>
+            <Image source={{ uri: e.imageUrl }} style={styles.image} />
+            <View style={styles.body}>
+              <Text style={styles.title} numberOfLines={1}>
+                {e.title}
+              </Text>
+              <Text style={styles.meta} numberOfLines={1}>
+                {formatEventDate(e.startsAt)}
+              </Text>
+              <View style={styles.distance}>
+                <DistanceDot km={e.distanceKm} size={8} />
+                <Text style={styles.meta}>{formatDistance(e.distanceKm)}</Text>
+              </View>
             </View>
-          </View>
+          </Raised>
         </Pressable>
       ))}
     </ScrollView>
@@ -38,12 +41,18 @@ export default function RecommendedEvents({ events, onOpenEvent }: Props) {
 }
 
 const styles = StyleSheet.create({
-  // paddingBottom lasă loc umbrei, să nu fie tăiată.
-  row: { paddingHorizontal: 20, gap: 12, paddingBottom: 8 },
-  card: { width: 170, backgroundColor: colors.card, borderRadius: 16, overflow: 'hidden', ...cardShadow },
-  image: { width: '100%', height: 110, backgroundColor: colors.border },
+  row: { paddingHorizontal: 20, gap: 10 },
+  pressed: { opacity: 0.85 },
+  card: { width: 176 },
+  image: {
+    width: '100%',
+    height: 110,
+    backgroundColor: colors.border,
+    borderBottomWidth: ui.outlineWidth,
+    borderBottomColor: ui.outline,
+  },
   body: { padding: 10, gap: 3 },
-  title: { fontSize: 15, fontWeight: '800', color: colors.text },
-  meta: { fontSize: 12, color: colors.muted },
+  title: { fontSize: 16, fontFamily: fonts.display, color: colors.text },
+  meta: { fontSize: 12, fontFamily: fonts.semibold, color: colors.muted },
   distance: { flexDirection: 'row', alignItems: 'center', gap: 5 },
 });
