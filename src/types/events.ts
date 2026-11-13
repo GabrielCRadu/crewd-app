@@ -37,7 +37,7 @@ export interface Event {
   title: string;
   description: string;
   category: CategoryId;
-  /** Tag-uri folosite pentru preferințe, ex. ["rock", "concert"]. */
+  /** Tag-uri folosite pentru preferințe; aceleași denumiri ca în profil (ex. „Concerte”, „Jazz”). */
   tags: string[];
   /** În Firestore vor fi Timestamp; le transformăm în Date cu `.toDate()`. */
   startsAt: Date;
@@ -65,22 +65,8 @@ export interface EventWithDistance extends Event {
  * Preferințele utilizatorului. În Firestore: câmpuri în documentul users/{uid}.
  */
 export interface UserPreferences {
-  /** Scor per tag, ex. { rock: 3, teatru: 1 }. Cu cât e mai mare, cu atât îi place mai mult. */
+  /** Scor per tag, ex. { Concerte: 3, Teatru: 1 }. Cu cât e mai mare, cu atât îi place mai mult. */
   tagScores: Record<string, number>;
   /** Id-urile evenimentelor la care s-a înscris. */
   joinedEventIds: string[];
-}
-
-/** Ce fel de perioadă e selectată în PeriodPicker. */
-export type PeriodKind = 'now' | 'today' | 'weekend' | 'week' | 'month';
-
-/**
- * O perioadă de timp. `start` și `end` sunt timestamp-uri (milisecunde),
- * ca să poată fi trimise ca parametri de navigare.
- */
-export interface Period {
-  kind: PeriodKind;
-  start: number;
-  end: number;
-  label: string;
 }

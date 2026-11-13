@@ -77,17 +77,3 @@ export async function leaveEvent(event: Event): Promise<void> {
 export function scoreEvent(event: Event, prefs: UserPreferences): number {
   return event.tags.reduce((sum, tag) => sum + (prefs.tagScores[tag] ?? 0), 0);
 }
-
-/**
- * „Recomandate pentru tine”: evenimentele cu cel mai mare scor,
- * fără cele la care ești deja înscris. Funcționează și cu EventWithDistance.
- */
-export function getRecommendedEvents<T extends Event>(events: T[], prefs: UserPreferences, limit = 6): T[] {
-  return events
-    .filter((e) => !isJoined(prefs, e.id))
-    .map((e) => ({ event: e, score: scoreEvent(e, prefs) }))
-    .filter((x) => x.score > 0)
-    .sort((a, b) => b.score - a.score || a.event.startsAt.getTime() - b.event.startsAt.getTime())
-    .slice(0, limit)
-    .map((x) => x.event);
-}

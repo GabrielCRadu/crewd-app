@@ -28,4 +28,8 @@ export const colors = {
   accentMagenta: '#C13CFF',
   like: '#2ECC71',
   nope: '#FF5C5C',
+  /** Distanța până la un eveniment (pini pe hartă, bulina din liste): aproape / mediu / departe. */
+  distanceNear: '#2ECC71',
+  distanceMedium: '#FFC94D',
+  distanceFar: '#FF5C5C',
 };

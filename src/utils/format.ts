@@ -1,24 +1,7 @@
-/** În română spunem „20 de prieteni”, dar „5 prieteni”. */
-function withDe(n: number): string {
-  const rest = n % 100;
-  return n >= 20 && (rest === 0 || rest >= 20) ? `${n} de` : `${n}`;
-}
-
-/** Ex: „150 lei”, „Gratuit” sau '' dacă nu știm prețul. */
-export function formatPrice(price: number | null): string {
-  if (price === null) return '';
-  if (price === 0) return 'Gratuit';
-  return `${price} lei`;
-}
-
-/** Ex: „3 prieteni merg · 5 caută cu cine să meargă”. */
-export function formatSocial(friendsCount: number, lookingCount: number): string {
-  const parts: string[] = [];
-  if (friendsCount === 1) parts.push('1 prieten merge');
-  else if (friendsCount > 1) parts.push(`${withDe(friendsCount)} prieteni merg`);
-
-  if (lookingCount === 1) parts.push('1 persoană caută companie');
-  else if (lookingCount > 1) parts.push(`${withDe(lookingCount)} caută cu cine să meargă`);
-
-  return parts.join(' · ');
+/** Ex: „Maria merge”, „Maria și Andrei merg și ei”, „Maria, Andrei și încă 2 merg și ei”. */
+export function formatFriendsGoing(names: string[]): string {
+  if (names.length === 0) return '';
+  if (names.length === 1) return `${names[0]} merge`;
+  if (names.length <= 3) return `${names.slice(0, -1).join(', ')} și ${names[names.length - 1]} merg și ei`;
+  return `${names.slice(0, 2).join(', ')} și încă ${names.length - 2} merg și ei`;
 }

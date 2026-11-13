@@ -1,52 +1,50 @@
 import { useMemo } from 'react';
-import { ActivityIndicator, Image, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import MapView, { Marker, Polyline } from 'react-native-maps';
-import { Ionicons } from '@expo/vector-icons';
+import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-import BackButton from '../components/events/BackButton';
-import LiveBadge from '../components/events/LiveBadge';
-import Pill from '../components/events/Pill';
-import Raised from '../components/events/Raised';
+import Aurora from '../components/Aurora';
+import Avatar from '../components/Avatar';
+import GlassIconButton from '../components/GlassIconButton';
+import GradientButton from '../components/GradientButton';
+import GlassBadge from '../components/events/GlassBadge';
 import { getCategory } from '../data/categories';
+import { MY_GROUPS, SUGGESTED_GROUPS } from '../data/mockSocial';
 import { useEvents } from '../hooks/useEvents';
 import { usePreferences } from '../hooks/usePreferences';
 import { useUserLocation } from '../hooks/useUserLocation';
 import type { EventsStackParamList } from '../navigation/eventsTypes';
 import { isJoined, joinEvent, leaveEvent } from '../services/preferencesService';
-import { fonts, palette, ui } from '../theme/eventsTheme';
-import { formatEventDateRange, isLive } from '../utils/dates';
-import { formatDistance, getDistanceColor, haversineKm, regionForPoints } from '../utils/distance';
-import { formatPrice } from '../utils/format';
+import { colors } from '../theme/colors';
+import { gradients } from '../theme/gradients';
+import { glass, radii } from '../theme/shape';
+import type { ChatGroup } from '../types/social';
+import { formatLongDate, isLive } from '../utils/dates';
+import { formatDistance, haversineKm } from '../utils/distance';
+import { formatFriendsGoing } from '../utils/format';
 
 type Props = NativeStackScreenProps<EventsStackParamList, 'EventDetails'>;
 
-/** Culori pentru avatarele prietenilor, ca în machetă: galben, alb, coral (se repetă dacă sunt mulți). */
-const AVATAR_COLORS = [palette.yellow, palette.card, palette.coral];
-
-/** „Ana merge”, „Ana și Mihai merg și ei”, „Ana, Mihai și încă 3 merg și ei”. */
-function friendsText(names: string[]): string {
-  if (names.length === 1) return `${names[0]} merge`;
-  if (names.length <= 3) return `${names.slice(0, -1).join(', ')} și ${names[names.length - 1]} merg și ei`;
-  return `${names.slice(0, 2).join(', ')} și încă ${names.length - 2} merg și ei`;
-}
-
-/** Pagina de detalii a unui eveniment + înscrierea. */
+/**
+ * Detaliile unui eveniment (docs/layout-guide.md → Detalii eveniment):
+ * zona foto → titlu → Când | Unde → descriere → cine merge → „Grupuri pe gustul tău” → „Înscrie-te” jos.
+ */
 export default function EventDetailsScreen({ navigation, route }: Props) {
   const { eventId } = route.params;
-  const { events, loading } = useEvents();
   const location = useUserLocation();
+  const { events, loading } = useEvents(location.coords);
   const preferences = usePreferences();
   const insets = useSafeAreaInsets();
+  const { height } = useWindowDimensions();
 
   const event = useMemo(() => events.find((e) => e.id === eventId) ?? null, [events, eventId]);
 
-  if (loading || !event) {
+  if (!event) {
     return (
       <View style={styles.center}>
         {loading ? (
-          <ActivityIndicator color={palette.ink} />
+          <ActivityIndicator color={colors.text} />
         ) : (
           <Text style={styles.muted}>Evenimentul nu a fost găsit.</Text>
         )}
@@ -57,146 +55,106 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
   const category = getCategory(event.category);
   const distanceKm = haversineKm(location.coords, event.location);
   const joined = isJoined(preferences, event.id);
-  const price = formatPrice(event.price);
+  // Grupurile de chat pentru acest eveniment (mock: potrivite după titlu, din mockSocial.ts).
+  const groups = [...MY_GROUPS, ...SUGGESTED_GROUPS].filter((g) => g.eventTitle === event.title);
 
-  // Deschide Google Maps (aplicația sau browserul) cu traseul până la eveniment.
-  const openDirections = () => {
-    const { latitude, longitude } = event.location;
-    Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`);
+  // „Intră” deschide conversația grupului în tab-ul Chat (cu lista de chat-uri dedesubt, pentru „înapoi”).
+  const openGroup = (group: ChatGroup) => {
+    navigation.getParent()?.navigate('Chats', { screen: 'ChatRoom', params: { groupId: group.id }, initial: false });
   };
 
   return (
     <View style={styles.screen}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Afișul, cu butonul „înapoi” și categoria peste el */}
-        <View style={styles.hero}>
-          <Image source={{ uri: event.imageUrl }} style={styles.poster} />
-          <View style={[styles.back, { top: insets.top + 8 }]}>
-            <BackButton onPress={() => navigation.goBack()} />
-          </View>
-          <View style={styles.heroBottom}>
-            <Pill label={category.label} icon={category.icon} active size="sm" />
-            {isLive(event) ? <LiveBadge /> : null}
+        {/* 1. Zona foto (~1/4 din ecran): aurora sub poză, umbrire jos, butonul „înapoi” și categoria */}
+        <View style={[styles.hero, { height: Math.max(200, height * 0.28) }]}>
+          <Aurora style={StyleSheet.absoluteFill} />
+          <Image source={{ uri: event.imageUrl }} style={StyleSheet.absoluteFill} />
+          <LinearGradient colors={gradients.scrim} style={styles.scrim} />
+          <GlassIconButton
+            icon="chevron-back"
+            onPress={() => navigation.goBack()}
+            style={[styles.back, { top: insets.top + 8 }]}
+          />
+          <View style={styles.heroBadges}>
+            <GlassBadge icon={category.icon} label={category.label} />
+            {isLive(event) ? <GlassBadge icon="radio-button-on" label="ACUM" /> : null}
           </View>
         </View>
 
         <View style={styles.body}>
+          {/* 2. Titlul */}
           <Text style={styles.title}>{event.title}</Text>
 
-          {/* Când / Unde */}
+          {/* 3. Când | Unde */}
           <View style={styles.infoRow}>
-            <Raised style={styles.flex} radius={18} offset={0} contentStyle={styles.infoBox}>
+            <View style={styles.infoBox}>
               <Text style={styles.infoLabel}>Când</Text>
-              <Text style={styles.infoValue}>{formatEventDateRange(event.startsAt, event.endsAt)}</Text>
-            </Raised>
-            <Raised style={styles.flex} radius={18} offset={0} contentStyle={styles.infoBox}>
+              <Text style={styles.infoValue}>{formatLongDate(event.startsAt)}</Text>
+            </View>
+            <View style={styles.infoBox}>
               <Text style={styles.infoLabel}>Unde</Text>
-              <Text style={styles.infoValue} numberOfLines={2}>
-                {event.venueName}
+              <Text style={styles.infoValue}>
+                {event.venueName} · {formatDistance(distanceKm)}
               </Text>
-              <Text style={styles.muted}>{formatDistance(distanceKm)} de tine</Text>
-            </Raised>
+            </View>
           </View>
 
+          {/* 4. Descrierea */}
           <Text style={styles.description}>{event.description}</Text>
 
-          {/* Tag-uri */}
-          <View style={styles.tags}>
-            {event.tags.map((t) => (
-              <Pill key={t} label={`#${t}`} size="sm" />
-            ))}
-          </View>
-          {joined ? (
-            <Text style={styles.prefsNote}>✓ Tag-urile acestui eveniment au fost adăugate la preferințele tale.</Text>
-          ) : null}
-
-          {/* Cine merge */}
+          {/* 5. Cine merge */}
           {event.friendsGoing.length > 0 ? (
             <View style={styles.friendsRow}>
               <View style={styles.avatars}>
-                {event.friendsGoing.slice(0, 4).map((name, i) => {
-                  const bg = AVATAR_COLORS[i % AVATAR_COLORS.length];
-                  return (
-                    <View key={name} style={[styles.avatar, { backgroundColor: bg, marginLeft: i === 0 ? 0 : -12 }]}>
-                      <Text style={styles.avatarText}>{name[0]}</Text>
-                    </View>
-                  );
-                })}
+                {event.friendsGoing.slice(0, 3).map((name, i) => (
+                  <View key={name} style={[styles.avatarRing, i > 0 && styles.avatarOverlap]}>
+                    <Avatar name={name} size={36} />
+                  </View>
+                ))}
               </View>
-              <Text style={styles.friendsText}>{friendsText(event.friendsGoing)}</Text>
+              <Text style={styles.friendsText}>{formatFriendsGoing(event.friendsGoing)}</Text>
             </View>
-          ) : (
-            <Text style={styles.muted}>Niciun prieten nu s-a înscris încă. Fii primul!</Text>
-          )}
-          {event.lookingForCompanyCount > 0 ? (
-            <Raised radius={18} offset={0} contentStyle={styles.looking}>
-              <Ionicons name="people" size={20} color={palette.ink} />
-              <Text style={styles.lookingText}>
-                {event.lookingForCompanyCount}{' '}
-                {event.lookingForCompanyCount === 1 ? 'persoană caută' : 'persoane caută'} cu cine să meargă
-              </Text>
-            </Raised>
           ) : null}
 
-          {/* Harta mică: tu → eveniment */}
-          <Text style={styles.sectionTitle}>Locație</Text>
-          <Raised radius={22}>
-            <MapView
-              // `key` re-creează harta când aflăm locația reală, ca să se centreze pe ambele puncte.
-              key={`${location.coords.latitude},${location.coords.longitude}`}
-              style={styles.miniMap}
-              initialRegion={regionForPoints(location.coords, event.location)}
-              scrollEnabled={false}
-              zoomEnabled={false}
-              rotateEnabled={false}
-              pitchEnabled={false}
-              toolbarEnabled={false}
-              userInterfaceStyle="light"
-            >
-              <Polyline
-                coordinates={[location.coords, event.location]}
-                strokeColor={palette.ink}
-                strokeWidth={3}
-                lineDashPattern={[6, 6]}
-              />
-              <Marker coordinate={event.location} pinColor={getDistanceColor(distanceKm)} title={event.venueName} />
-              <Marker coordinate={location.coords} anchor={{ x: 0.5, y: 0.5 }} title="Tu">
-                <View style={styles.userDot} />
-              </Marker>
-            </MapView>
-            <View style={styles.mapFooter}>
-              <View style={styles.flex}>
-                <Text style={styles.infoValue}>{formatDistance(distanceKm)} de tine</Text>
-                <Text style={styles.muted} numberOfLines={1}>
-                  {event.address}
-                </Text>
+          {/* 6. Grupuri pe gustul tău */}
+          <Text style={styles.sectionTitle}>Grupuri pe gustul tău</Text>
+          {groups.length === 0 ? (
+            <Text style={styles.muted}>Încă nu s-a format niciun grup pentru acest eveniment.</Text>
+          ) : (
+            groups.map((g) => (
+              <View key={g.id} style={styles.groupCard}>
+                <View style={styles.groupText}>
+                  <Text style={styles.groupName}>{g.name}</Text>
+                  <Text style={styles.muted}>
+                    {g.membersCount} persoane · {g.commonTagsCount} tag-uri comune
+                  </Text>
+                  <Text style={styles.groupMeetup}>
+                    Se văd {g.meetupWhen}, {g.meetupWhere}
+                  </Text>
+                </View>
+                <Pressable onPress={() => openGroup(g)} style={({ pressed }) => [styles.joinGroup, pressed && styles.pressed]}>
+                  <Text style={styles.joinGroupText}>Intră</Text>
+                </Pressable>
               </View>
-              <Pressable onPress={openDirections} style={styles.directions}>
-                <Ionicons name="navigate" size={14} color={palette.ink} />
-                <Text style={styles.directionsText}>Google Maps</Text>
-              </Pressable>
-            </View>
-          </Raised>
+            ))
+          )}
         </View>
       </ScrollView>
 
-      {/* Bara de jos: înscriere */}
-      <View style={styles.bottomBar}>
+      {/* 7. „Înscrie-te”, fix jos */}
+      <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 12 }]}>
         {joined ? (
           <View style={styles.joinedRow}>
-            <Raised color={palette.yellow} radius={22} style={styles.flex} contentStyle={styles.ctaInner}>
-              <Text style={styles.ctaText}>Înscris ✓</Text>
-            </Raised>
+            <View style={styles.joinedPill}>
+              <Text style={styles.joinedText}>Înscris ✓</Text>
+            </View>
             <Pressable onPress={() => leaveEvent(event)} hitSlop={8}>
               <Text style={styles.cancel}>Anulează</Text>
             </Pressable>
           </View>
         ) : (
-          <Pressable onPress={() => joinEvent(event)} style={({ pressed }) => pressed && styles.pressed}>
-            <Raised color={ui.cta} radius={22} contentStyle={styles.ctaInner}>
-              <Text style={styles.ctaText}>Mă înscriu{price ? ` · ${price}` : ''}</Text>
-            </Raised>
-          </Pressable>
+          <GradientButton label="Înscrie-te" icon="arrow-forward" onPress={() => joinEvent(event)} />
         )}
       </View>
     </View>
@@ -204,72 +162,51 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: palette.background },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: palette.background },
+  screen: { flex: 1, backgroundColor: colors.background },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
   content: { paddingBottom: 24 },
-  flex: { flex: 1 },
-  hero: { borderBottomWidth: ui.outlineWidth, borderBottomColor: ui.outline },
-  poster: { width: '100%', aspectRatio: 4 / 3, backgroundColor: ui.placeholder },
+  hero: { overflow: 'hidden', backgroundColor: colors.backgroundAlt },
+  scrim: { position: 'absolute', left: 0, right: 0, bottom: 0, height: '60%' },
   back: { position: 'absolute', left: 20 },
-  heroBottom: { position: 'absolute', left: 20, bottom: 16, flexDirection: 'row', gap: 8, alignItems: 'center' },
-  body: { padding: 20, gap: 14 },
-  title: { fontFamily: fonts.display, fontSize: 34, lineHeight: 38, color: palette.ink, letterSpacing: -0.5 },
+  heroBadges: { position: 'absolute', left: 20, bottom: 16, flexDirection: 'row', gap: 8 },
+  body: { padding: 20, gap: 16 },
+  title: { fontSize: 30, fontWeight: '600', letterSpacing: -0.5, color: colors.text },
   infoRow: { flexDirection: 'row', gap: 12 },
-  infoBox: { padding: 14, gap: 2, flexGrow: 1 },
-  infoLabel: { fontFamily: fonts.bold, fontSize: 13, color: palette.muted },
-  infoValue: { fontFamily: fonts.extrabold, fontSize: 15, color: palette.ink },
-  muted: { fontFamily: fonts.semibold, fontSize: 13, color: palette.muted },
-  description: { fontFamily: fonts.semibold, fontSize: 16, lineHeight: 23, color: palette.muted },
-  tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  prefsNote: { fontFamily: fonts.bold, fontSize: 12, color: palette.green },
+  infoBox: { ...glass, flex: 1, padding: 14, gap: 4, borderRadius: radii.inner },
+  infoLabel: { fontSize: 12, color: colors.faint },
+  infoValue: { fontSize: 15, fontWeight: '600', color: colors.text },
+  description: { fontSize: 15, lineHeight: 22, color: colors.muted },
+  muted: { fontSize: 13, color: colors.muted },
   friendsRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   avatars: { flexDirection: 'row' },
-  avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    borderWidth: ui.outlineWidth,
-    borderColor: ui.outline,
+  // Inel în culoarea fundalului, ca avatarele suprapuse să se despartă vizual.
+  avatarRing: { borderRadius: radii.pill, borderWidth: 2, borderColor: colors.background },
+  avatarOverlap: { marginLeft: -12 },
+  friendsText: { flex: 1, fontSize: 14, fontWeight: '500', color: colors.text },
+  sectionTitle: { fontSize: 18, fontWeight: '600', color: colors.text, marginTop: 8 },
+  groupCard: { ...glass, flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, borderRadius: radii.card },
+  groupText: { flex: 1, gap: 3 },
+  groupName: { fontSize: 16, fontWeight: '600', color: colors.text },
+  groupMeetup: { fontSize: 13, fontWeight: '500', color: colors.text },
+  joinGroup: { paddingHorizontal: 20, paddingVertical: 11, borderRadius: radii.pill, backgroundColor: colors.text },
+  joinGroupText: { color: colors.onLight, fontWeight: '600' },
+  pressed: { opacity: 0.8 },
+  bottomBar: {
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    backgroundColor: colors.background,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+  joinedRow: { flexDirection: 'row', alignItems: 'center', gap: 16 },
+  joinedPill: {
+    ...glass,
+    flex: 1,
+    height: 58,
+    borderRadius: radii.pill,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  avatarText: { fontFamily: fonts.extrabold, fontSize: 17, color: palette.ink },
-  friendsText: { flex: 1, fontFamily: fonts.extrabold, fontSize: 14, color: palette.ink },
-  looking: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 14 },
-  lookingText: { flex: 1, fontFamily: fonts.bold, fontSize: 14, color: palette.ink },
-  sectionTitle: { fontFamily: fonts.display, fontSize: 22, color: palette.ink, marginTop: 8 },
-  miniMap: { width: '100%', height: 180 },
-  mapFooter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    padding: 14,
-    borderTopWidth: ui.outlineWidth,
-    borderTopColor: ui.outline,
-  },
-  directions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 12,
-    borderWidth: ui.outlineWidth,
-    borderColor: ui.outline,
-  },
-  directionsText: { fontFamily: fonts.extrabold, fontSize: 13, color: palette.ink },
-  userDot: { width: 16, height: 16, borderRadius: 8, backgroundColor: '#2D7FF9', borderWidth: 3, borderColor: '#fff' },
-  bottomBar: {
-    paddingHorizontal: 20,
-    paddingTop: 14,
-    paddingBottom: 14,
-    backgroundColor: palette.background,
-    borderTopWidth: ui.outlineWidth,
-    borderTopColor: ui.outline,
-  },
-  joinedRow: { flexDirection: 'row', alignItems: 'center', gap: 16 },
-  ctaInner: { alignItems: 'center', justifyContent: 'center', paddingVertical: 18 },
-  ctaText: { fontFamily: fonts.display, fontSize: 20, color: palette.ink },
-  cancel: { fontFamily: fonts.extrabold, fontSize: 15, color: '#D93A3A', textDecorationLine: 'underline' },
-  pressed: { opacity: 0.85 },
+  joinedText: { color: colors.text, fontSize: 17, fontWeight: '600' },
+  cancel: { color: colors.muted, fontSize: 15, fontWeight: '500', textDecorationLine: 'underline' },
 });

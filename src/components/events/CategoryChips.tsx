@@ -1,8 +1,8 @@
 import { ScrollView, StyleSheet } from 'react-native';
 
+import Chip from '../Chip';
 import type { CategoryId } from '../../types/events';
 import { CATEGORIES } from '../../data/categories';
-import Pill from './Pill';
 
 interface Props {
   /** Categoriile selectate. Listă goală = „Toate”. */
@@ -10,7 +10,7 @@ interface Props {
   onChange: (selected: CategoryId[]) => void;
 }
 
-/** Chip-uri cu categorii; se pot selecta mai multe deodată. */
+/** Chip-urile de categorii pe un singur rând, cu scroll orizontal. Se pot alege mai multe. */
 export default function CategoryChips({ selected, onChange }: Props) {
   // Apăsare pe o categorie: o adaugă dacă nu era selectată, altfel o scoate.
   const toggle = (id: CategoryId) => {
@@ -18,21 +18,22 @@ export default function CategoryChips({ selected, onChange }: Props) {
   };
 
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
-      <Pill label="Toate" icon="apps-outline" active={selected.length === 0} onPress={() => onChange([])} />
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      style={styles.scroll}
+      contentContainerStyle={styles.row}
+    >
+      <Chip label="Toate" active={selected.length === 0} onPress={() => onChange([])} />
       {CATEGORIES.map((c) => (
-        <Pill
-          key={c.id}
-          label={c.label}
-          icon={c.icon}
-          active={selected.includes(c.id)}
-          onPress={() => toggle(c.id)}
-        />
+        <Chip key={c.id} label={c.label} active={selected.includes(c.id)} onPress={() => toggle(c.id)} />
       ))}
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  // flexGrow: 0 = rândul ia doar înălțimea chip-urilor, nu tot spațiul liber.
+  scroll: { flexGrow: 0 },
   row: { paddingHorizontal: 20, gap: 8 },
 });

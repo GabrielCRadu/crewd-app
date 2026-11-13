@@ -1,11 +1,11 @@
 import type { UserPreferences } from '../types/events';
+import { MY_TAGS } from './mockSocial';
 
 /**
- * Preferințele de start ale utilizatorului (tag-urile alese la crearea profilului,
- * ca în macheta: Concerte, Filme, Socializare, Electronică, Jazz, Board games).
+ * Preferințele de start: tag-urile din profil (src/data/mockSocial.ts), fiecare cu scorul 1.
  * Mai târziu vor veni din documentul users/{uid} din Firestore.
  */
 export const INITIAL_PREFERENCES: UserPreferences = {
-  tagScores: { concerte: 1, filme: 1, socializare: 1, electronica: 1, jazz: 1, 'board-games': 1 },
+  tagScores: Object.fromEntries(MY_TAGS.map((tag) => [tag, 1])),
   joinedEventIds: [],
 };
