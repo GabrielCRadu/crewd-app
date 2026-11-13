@@ -10,7 +10,8 @@ Textele din ghid („Maria”, „Seara de board games” etc.) sunt date de exe
 
 ## Navigare
 
-- Bara de tab-uri de jos are **5 tab-uri**, în ordinea: **Descoperă · Evenimente · Hartă · Chat · Profil**.
+- Bara de tab-uri de jos are **4 tab-uri**, în ordinea: **Evenimente · Hartă · Chat · Profil**. Evenimente se deschide implicit.
+- **Descoperă a fost scos** (decizie de produs, 2026-11-13): recomandările de oameni sunt acum grupulețele din detaliile fiecărui eveniment (vezi `docs/superpowers/specs/2026-11-13-grupulete-design.md`).
 - Fiecare tab are o iconiță deasupra etichetei. Tab-ul activ are iconița evidențiată într-o „pastilă”.
 - Ecranele de detaliu (detalii eveniment, conversație) se deschid peste tab și au un buton „înapoi” în stânga sus.
 - Onboarding-ul (2 pași) apare înaintea tab-urilor și nu are bara de jos.
@@ -42,7 +43,9 @@ De sus în jos:
 5. Spațiu liber.
 6. **Buton principal** „Gata, hai în Crewd” pe toată lățimea, jos.
 
-## Tab Descoperă (swipe)
+## Tab Descoperă (swipe) — ELIMINAT
+
+> Păstrat doar ca referință istorică; ecranul nu mai există în aplicație.
 
 1. **Antet:** logo „crewd” în stânga și un buton pătrat de filtre în dreapta.
 2. **Card mare de profil**, care ocupă cea mai mare parte a ecranului:

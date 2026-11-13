@@ -5,15 +5,18 @@ Actualizează lista când rezolvi ceva sau adaugi un mock nou.
 
 ## Date mock (de înlocuit cu Firestore / date reale)
 
-- [ ] **Chat**: grupurile (`MY_GROUPS`, `SUGGESTED_GROUPS`) și mesajele (`MESSAGES`) din `src/data/mockSocial.ts`. Mesajele trimise rămân doar local, în ecranul deschis (`ChatRoomScreen`).
-- [ ] **Grupuri pe gustul tău** în detaliile evenimentului: mock, potrivite după titlu (`EventDetailsScreen`). Se înlocuiesc cu grupulețele reale (vezi designul din `docs/superpowers/specs/`).
+- [x] ~~Chat: grupurile mock~~: Chat arată grupulețele reale (`useMyGroups`).
+- [ ] **Mesajele din chat** (`MESSAGES` din `src/data/mockSocial.ts`): mock; mesajele trimise rămân doar local, în ecranul deschis (`ChatRoomScreen`).
+- [x] ~~Grupuri pe gustul tău (mock)~~: înlocuite de grupulețele reale (`EventGroupsSection`, `groupsService`).
+- [ ] **Blocarea după raportări** la grupulețe folosește reputația mock (`ratingsService`, `ME_ID`); se verifică doar în aplicație, nu în regulile Firestore.
+- [ ] **Anunțul „grupulețul nu s-a format”**: grupulețele expirate doar dispar din listă; nu există încă un mesaj/notificare pentru membri.
 - [ ] **Prietenii**: `FRIENDS` (Hartă, „merg și ei”). Pozițiile sunt decalaje față de locația dispozitivului.
 - [ ] **Prietenii și cererile de prietenie** (Cami): `src/services/friendsService.ts`, doar în memorie (adaugă, acceptă, refuză, elimină, blochează). Profilul altei persoane și lista de prieteni folosesc `PEOPLE` prin `src/services/peopleService.ts`. Pentru Firestore trebuie un profil public separat (`users/{uid}` e privat) și o colecție de prietenii, cu reguli noi.
 - [ ] **Raportarea din profilul cuiva** (meniul ⋯): se adună la totalul de rapoarte din `ratingsService`, doar în memorie.
 - [ ] **Cine merge / câți caută companie** la un eveniment: generate stabil din id (`demoSocial` în `src/services/eventsService.ts`). Trebuie calculate din înscrierile reale.
 - [ ] **Evenimente trecute pentru istoric**: `e16`–`e18` (`PAST_JOINED_EVENT_IDS` în `src/data/mockEvents.ts`), adăugate peste datele din Firestore ca să meargă istoricul și evaluările.
 - [ ] **Evaluări și reputație**: `src/data/mockRatings.ts` + `src/services/ratingsService.ts`, doar în memorie. `ME_ID` trebuie înlocuit cu uid-ul din Auth. Raportările nu blochează încă pe nimeni.
-- [ ] **Persoanele** (`PEOPLE`) din Descoperă și din profilul altei persoane (`PersonProfileScreen`), folosite și la evaluări. Descoperă dispare (vezi designul grupulețelor).
+- [ ] **Persoanele** (`PEOPLE`) din profilul altei persoane (`PersonProfileScreen`), folosite la evaluări și la grupulețele demo fără Firebase. (Descoperă a fost scos.)
 - [ ] **Profil demo** fără Firebase (`DEMO_PROFILE` / `MY_PROFILE`): fallback doar când lipsește `.env.local`.
 - [ ] **Evenimente mock** (`src/data/mockEvents.ts`): fallback doar când lipsește `.env.local`.
 
@@ -28,7 +31,6 @@ Actualizează lista când rezolvi ceva sau adaugi un mock nou.
 - [x] ~~Profil → Editează~~: făcut de Cami (poză, nume, oraș, bio, preferințe). Data nașterii și genul sunt blocate după onboarding.
 - [ ] Hartă → **Scrie-i** și **Vezi evenimentul** (cardul prietenului).
 - [ ] Conversație → **Pe hartă** (bannerul „Ne vedem”).
-- [ ] Descoperă → butonul de **filtre** (ecranul dispare oricum).
 
 ## Neimplementat
 

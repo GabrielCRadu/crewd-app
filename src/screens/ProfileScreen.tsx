@@ -1,5 +1,5 @@
 import { Fragment } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -15,7 +15,7 @@ import GradientBorderCard from '../components/GradientBorderCard';
 import EventHistoryCarousel from '../components/events/EventHistoryCarousel';
 import { useAuth } from '../context/AuthContext';
 import { ME_ID } from '../data/mockRatings';
-import { MY_GROUPS } from '../data/mockSocial';
+import { useMyGroups } from '../hooks/useMyGroups';
 import { TAG_GROUPS } from '../data/tags';
 import { useFriends } from '../hooks/useFriends';
 import { usePastEvents } from '../hooks/usePastEvents';
@@ -36,6 +36,7 @@ export default function ProfileScreen() {
   const { profile, user, updateBio, removeLearnedTag, signOut } = useAuth();
   const pastEvents = usePastEvents();
   const friends = useFriends();
+  const { groups: myGroups } = useMyGroups();
   // Reputația e încă mock (ratingsService); cu Firebase va fi pe uid-ul din Auth.
   const reputation = getReputation(useRatings(), ME_ID);
 
@@ -53,7 +54,7 @@ export default function ProfileScreen() {
   const incomingCount = idsWithStatus(friends, 'incoming').length;
   const stats = [
     { value: idsWithStatus(friends, 'friends').length, label: 'prieteni', onPress: () => navigation.navigate('FriendsList'), badge: incomingCount },
-    { value: MY_GROUPS.length, label: 'grupuri' },
+    { value: myGroups.length, label: 'grupuri' },
     { value: pastEvents.length, label: 'evenimente' },
   ];
 
@@ -70,6 +71,8 @@ export default function ProfileScreen() {
   return (
     // Fundal complet negru; culoarea apare doar în câteva carduri (identitate, „Despre mine”, conturul „Ce îți place”).
     <SafeAreaView style={styles.safe} edges={['top']}>
+      {/* „Despre mine” se editează direct aici: tastatura nu trebuie să acopere câmpul (edge-to-edge pe Android) */}
+      <KeyboardAvoidingView style={styles.flex} behavior="padding">
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
@@ -188,12 +191,14 @@ export default function ProfileScreen() {
           </Pressable>
         </View>
       </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
+  flex: { flex: 1 },
   content: { padding: 20, paddingBottom: 32, gap: 22 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   title: { fontSize: 32, fontWeight: '600', letterSpacing: -0.5, color: colors.text },

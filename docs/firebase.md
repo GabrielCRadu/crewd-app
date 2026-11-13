@@ -88,6 +88,28 @@ Creat la finalul onboarding-ului (`src/services/profileService.ts`).
 | `learnedTags` | string[] | tag-uri adăugate automat din înscrieri; se pot scoate din Profil |
 | `createdAt`, `updatedAt` | Timestamp | |
 
+În plus, `groupByEvent` (map `eventId → groupId`): grupulețul în care e utilizatorul la fiecare eveniment. Se scrie în aceeași tranzacție cu grupulețul (`src/services/groupsService.ts`).
+
+### `events/{eventId}/groups/{groupId}`
+
+Grupulețele unui eveniment (`docs/superpowers/specs/2026-11-13-grupulete-design.md`). Le citește orice utilizator logat. Le scriu doar tranzacțiile din `groupsService.ts`, iar regulile verifică aceleași limite ca `src/utils/groupRules.ts`.
+
+| Câmp | Tip | Note |
+| --- | --- | --- |
+| `eventId`, `proposerUid` | string | |
+| `meetupAt` | Timestamp | ora întâlnirii; propunerea trebuie făcută cu cel puțin 30 min înainte |
+| `meetupPlace` | string | 1–80 caractere |
+| `minAge`, `maxAge` | number (int) | interval de vârstă; minim 18; cel care intră trebuie să se încadreze (vârsta din `users.birthDate`) |
+| `maxSize` | number (int) | 3–10 |
+| `vibe` | string | 1–120 caractere |
+| `tags` | string[] | tag-urile comune ale celui care propune cu evenimentul |
+| `memberUids` | string[] | membrii; maxim `maxSize` |
+| `members` | map | `uid → { name, age, tags }`, copiat de fiecare membru la intrare (fără email, fără poză) |
+| `createdAt` | Timestamp | |
+| `formedAt` | Timestamp \| null | când a ajuns prima dată la 3 membri; odată setat, grupul rămâne format |
+
+Starea (în formare, format, complet, expirat, închis) nu e salvată: se calculează din aceste câmpuri și din oră (`groupStatus`).
+
 ### `meta/eventsImport`
 
 Data colectării, intervalul de date, numărul de evenimente, notele sursei și data importului.

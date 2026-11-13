@@ -145,7 +145,7 @@ export default function EditProfileScreen({ navigation }: Props) {
         <Text style={styles.title}>Editează profilul</Text>
       </View>
 
-      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <KeyboardAvoidingView style={styles.flex} behavior="padding">
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
           {/* Fotografia */}
           <View style={styles.photoBlock}>
