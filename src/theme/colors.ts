@@ -33,3 +33,12 @@ export const colors = {
   distanceMedium: '#FFC94D',
   distanceFar: '#FF5C5C',
 };
+
+/** Tag-uri colorate (fundal ușor + contur în culoarea accentului), ex. în cardul „Ce îți place”. */
+export const tagTints = {
+  orange: { background: 'rgba(255,122,61,0.16)', border: 'rgba(255,122,61,0.6)' },
+  pink: { background: 'rgba(255,77,141,0.16)', border: 'rgba(255,77,141,0.6)' },
+  magenta: { background: 'rgba(193,60,255,0.18)', border: 'rgba(193,60,255,0.65)' },
+};
+
+export type TagTint = (typeof tagTints)[keyof typeof tagTints];

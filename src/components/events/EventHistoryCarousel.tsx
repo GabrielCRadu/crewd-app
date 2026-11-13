@@ -1,7 +1,6 @@
 import { FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import Aurora from '../Aurora';
 import GlassBadge from './GlassBadge';
 import { useRatings } from '../../hooks/useRatings';
 import { hasRated } from '../../services/ratingsService';
@@ -21,7 +20,7 @@ const SIDE = 20;
 const GAP = 12;
 
 /**
- * Istoricul din Profil ca un carusel de cărți mici: poza evenimentului (sau aurora, dacă lipsește),
+ * Istoricul din Profil ca un carusel de cărți mici: poza evenimentului,
  * data sus, numele și pastila „Evaluează” / „Evaluat ✓” jos.
  */
 export default function EventHistoryCarousel({ events, onOpen }: Props) {
@@ -46,8 +45,10 @@ export default function EventHistoryCarousel({ events, onOpen }: Props) {
         const rated = hasRated(myRatings, item.id);
         return (
           <Pressable onPress={() => onOpen(item.id)} style={({ pressed }) => [styles.card, pressed && styles.pressed]}>
-            <Aurora style={StyleSheet.absoluteFill} />
-            {item.imageUrl ? <Image source={{ uri: item.imageUrl }} style={StyleSheet.absoluteFill} /> : null}
+            {/* Poza evenimentului; până se încarcă (sau dacă lipsește) cardul rămâne închis la culoare */}
+            {item.imageUrl ? (
+              <Image source={{ uri: item.imageUrl }} style={StyleSheet.absoluteFill} resizeMode="cover" />
+            ) : null}
             <LinearGradient colors={gradients.scrim} style={styles.scrim} />
 
             <View style={styles.top}>
@@ -83,6 +84,7 @@ const styles = StyleSheet.create({
     borderRadius: radii.card,
     borderWidth: 1,
     borderColor: colors.border,
+    backgroundColor: colors.surface,
     overflow: 'hidden',
   },
   pressed: { opacity: 0.85 },

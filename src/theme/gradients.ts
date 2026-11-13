@@ -32,4 +32,6 @@ export const gradients = {
    */
   tintWarm: ['rgba(255,122,61,0.38)', 'rgba(255,77,141,0.16)', 'rgba(255,77,141,0.04)'] as const,
   tintCool: ['rgba(193,60,255,0.36)', 'rgba(255,77,141,0.14)', 'rgba(255,77,141,0.04)'] as const,
+  /** Conturul colorat al cardurilor cu interior negru (GradientBorderCard). */
+  cardBorder: [colors.accentOrange, colors.accentPink, colors.accentMagenta] as const,
 };

@@ -1,4 +1,4 @@
-import { StyleSheet, Text } from 'react-native';
+import { Image, StyleSheet, Text } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { colors } from '../theme/colors';
@@ -11,6 +11,8 @@ interface Props {
   /** Pătrat cu colțuri rotunjite în loc de cerc (grupuri, poză de profil). */
   square?: boolean;
   initials?: 1 | 2;
+  /** Fotografia, dacă există; altfel se afișează inițialele. */
+  photoUrl?: string | null;
 }
 
 function getInitials(name: string, count: 1 | 2): string {
@@ -20,13 +22,17 @@ function getInitials(name: string, count: 1 | 2): string {
 }
 
 /** Avatar cu inițiale pe gradient cald, până avem poze reale. */
-export default function Avatar({ name, size = 40, square = false, initials = 1 }: Props) {
+export default function Avatar({ name, size = 40, square = false, initials = 1, photoUrl }: Props) {
+  const borderRadius = square ? size * 0.3 : size / 2;
+  if (photoUrl) {
+    return <Image source={{ uri: photoUrl }} style={{ width: size, height: size, borderRadius }} />;
+  }
   return (
     <LinearGradient
       colors={gradients.avatar}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
-      style={[styles.base, { width: size, height: size, borderRadius: square ? size * 0.3 : size / 2 }]}
+      style={[styles.base, { width: size, height: size, borderRadius }]}
     >
       <Text style={[styles.text, { fontSize: size * 0.4 }]}>{getInitials(name, initials)}</Text>
     </LinearGradient>

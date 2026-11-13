@@ -4,13 +4,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import AboutCard from '../components/AboutCard';
 import Aurora from '../components/Aurora';
 import Avatar from '../components/Avatar';
 import Chip from '../components/Chip';
 import ReputationStats from '../components/ReputationStats';
-import TintedCard from '../components/TintedCard';
+import GradientBorderCard from '../components/GradientBorderCard';
 import EventHistoryCarousel from '../components/events/EventHistoryCarousel';
 import { useAuth } from '../context/AuthContext';
 import { ME_ID } from '../data/mockRatings';
@@ -19,18 +20,10 @@ import { TAG_GROUPS } from '../data/tags';
 import { usePastEvents } from '../hooks/usePastEvents';
 import { useRatings } from '../hooks/useRatings';
 import { getReputation } from '../services/ratingsService';
-import { colors } from '../theme/colors';
-import { gradients } from '../theme/gradients';
+import { TAG_GROUP_STYLE as GROUP_STYLE } from '../data/tagGroupStyle';
+import type { ProfileStackParamList } from '../navigation/profileTypes';
+import { colors, tagTints } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
-import type { IconName } from '../types/events';
-import type { TagGroup } from '../types/social';
-
-/** Iconița fiecărui grup de tag-uri din cardul „Ce îți place”. */
-const GROUP_ICONS: Record<TagGroup['id'], IconName> = {
-  events: 'ticket-outline',
-  music: 'musical-notes-outline',
-  hobbies: 'color-palette-outline',
-};
 
 /**
  * Tab-ul Profil (vezi docs/layout-guide.md): identitate cu statistici, „Despre mine”,
@@ -43,10 +36,12 @@ export default function ProfileScreen() {
   // Reputația e încă mock (ratingsService); cu Firebase va fi pe uid-ul din Auth.
   const reputation = getReputation(useRatings(), ME_ID);
 
-  const navigation = useNavigation<BottomTabNavigationProp<Record<string, object | undefined>>>();
+  const navigation = useNavigation<NativeStackNavigationProp<ProfileStackParamList, 'ProfileHome'>>();
   // Detaliile sunt în tab-ul Evenimente; `initial: false` lasă lista dedesubt, pentru „înapoi”.
   const openPastEvent = (eventId: string) =>
-    navigation.navigate('Events', { screen: 'EventDetails', params: { eventId }, initial: false });
+    navigation
+      .getParent<BottomTabNavigationProp<Record<string, object | undefined>>>()
+      ?.navigate('Events', { screen: 'EventDetails', params: { eventId }, initial: false });
 
   // Tab-urile apar doar cu profil încărcat (RootNavigator), deci aici profile există.
   if (!profile) return null;
@@ -68,7 +63,7 @@ export default function ProfileScreen() {
     ]);
 
   return (
-    // Fundal complet negru; culoarea apare doar în câteva carduri (identitate, „Despre mine”, „Ce îți place”).
+    // Fundal complet negru; culoarea apare doar în câteva carduri (identitate, „Despre mine”, conturul „Ce îți place”).
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScrollView
         contentContainerStyle={styles.content}
@@ -77,7 +72,10 @@ export default function ProfileScreen() {
       >
         <View style={styles.header}>
           <Text style={styles.title}>Profil</Text>
-          <Pressable style={({ pressed }) => [styles.editButton, pressed && styles.pressed]}>
+          <Pressable
+            onPress={() => navigation.navigate('EditProfile')}
+            style={({ pressed }) => [styles.editButton, pressed && styles.pressed]}
+          >
             <Text style={styles.editText}>Editează</Text>
           </Pressable>
         </View>
@@ -86,7 +84,7 @@ export default function ProfileScreen() {
         <View style={styles.identity}>
           <Aurora style={StyleSheet.absoluteFill} />
           <View style={styles.identityRow}>
-            <Avatar name={profile.name} size={84} square />
+            <Avatar name={profile.name} size={84} square photoUrl={profile.photoUrl} />
             <View style={styles.identityText}>
               <Text style={styles.name}>
                 {profile.name}, {profile.age}
@@ -121,22 +119,22 @@ export default function ProfileScreen() {
         {/* Tag-urile alese, într-un singur card, pe grupuri */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Ce îți place</Text>
-          <TintedCard tint={gradients.tintCool}>
+          <GradientBorderCard>
             {TAG_GROUPS.map((group, i) => (
               <View key={group.id} style={[styles.tagGroup, i > 0 && styles.tagGroupDivided]}>
                 <View style={styles.tagGroupHeader}>
-                  <Ionicons name={GROUP_ICONS[group.id]} size={16} color={colors.text} />
+                  <Ionicons name={GROUP_STYLE[group.id].icon} size={16} color={colors.text} />
                   <Text style={styles.tagGroupLabel}>{group.label}</Text>
                 </View>
                 <View style={styles.tags}>
                   {profile.chosenTags[group.id].map((t) => (
-                    <Chip key={t} label={t} active />
+                    <Chip key={t} label={t} tint={tagTints[GROUP_STYLE[group.id].tint]} />
                   ))}
                   {profile.chosenTags[group.id].length === 0 ? <Text style={styles.hint}>Nimic ales încă.</Text> : null}
                 </View>
               </View>
             ))}
-          </TintedCard>
+          </GradientBorderCard>
         </View>
 
         <View style={[styles.card, styles.learnedCard]}>
