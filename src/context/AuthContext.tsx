@@ -17,6 +17,7 @@ import {
   updateProfileFields,
 } from '../services/profileService';
 import type { ProfileChanges, ProfileDraft, UserProfile } from '../types/user';
+import { allProfileTags } from '../utils/profileTags';
 
 /*
  * Starea de autentificare pentru toată aplicația:
@@ -58,12 +59,8 @@ const DEMO_PROFILE: UserProfile = {
   learnedTags: MY_PROFILE.learnedTags,
 };
 
-/** Toate tag-urile profilului (alese + învățate), ca listă. */
-export function allProfileTags(profile: UserProfile | null): string[] {
-  if (!profile) return [];
-  const { events, music, hobbies } = profile.chosenTags;
-  return [...events, ...music, ...hobbies, ...profile.learnedTags];
-}
+/** Re-exportat de aici pentru ecranele care îl importă din context (definit în utils/profileTags.ts). */
+export { allProfileTags };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 

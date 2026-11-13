@@ -10,7 +10,7 @@ import {
 } from 'firebase/firestore';
 import type { DocumentData, DocumentSnapshot, Transaction } from 'firebase/firestore';
 
-import { allProfileTags } from '../context/AuthContext';
+import { allProfileTags } from '../utils/profileTags';
 import { placeMockEvents } from '../data/mockEvents';
 import { ME_ID } from '../data/mockRatings';
 import { PEOPLE } from '../data/mockSocial';
