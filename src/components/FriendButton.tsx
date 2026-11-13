@@ -1,7 +1,6 @@
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-import GradientButton from './GradientButton';
 import {
   acceptFriendRequest,
   cancelFriendRequest,
@@ -27,7 +26,16 @@ interface Props {
  */
 export default function FriendButton({ personId, name, status }: Props) {
   if (status === 'none') {
-    return <GradientButton label="Adaugă prieten" icon="person-add" iconFirst onPress={() => sendFriendRequest(personId)} />;
+    // Pastilă albă simplă (fără gradient), ca să rămână un singur ton pe ecran.
+    return (
+      <Pressable
+        onPress={() => sendFriendRequest(personId)}
+        style={({ pressed }) => [styles.pill, styles.accept, pressed && styles.pressed]}
+      >
+        <Ionicons name="person-add" size={18} color={colors.onLight} />
+        <Text style={[styles.pillText, styles.acceptText]}>Adaugă prieten</Text>
+      </Pressable>
+    );
   }
 
   if (status === 'outgoing') {

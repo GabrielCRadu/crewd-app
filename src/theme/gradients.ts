@@ -32,6 +32,13 @@ export const gradients = {
    */
   tintWarm: ['rgba(255,122,61,0.38)', 'rgba(255,77,141,0.16)', 'rgba(255,77,141,0.04)'] as const,
   tintCool: ['rgba(193,60,255,0.36)', 'rgba(255,77,141,0.14)', 'rgba(255,77,141,0.04)'] as const,
+  /**
+   * Fundalul de sus „ember”: portocaliu ars care se stinge lin în negru, un singur ton
+   * (ca o lumină reală, nu pete de culoare). Se pune pe toată lățimea, în spatele antetului.
+   */
+  emberHero: ['#E4521B', '#B63A12', '#5A1A07', '#0B0A10'] as const,
+  /** Pozițiile opririlor pentru emberHero (portocaliul ține mai mult sus, apoi se stinge). */
+  emberHeroLocations: [0, 0.32, 0.68, 1] as const,
   /** Conturul colorat al cardurilor cu interior negru (GradientBorderCard). */
   cardBorder: [colors.accentOrange, colors.accentPink, colors.accentMagenta] as const,
 };

@@ -1,19 +1,18 @@
-import { useMemo } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Fragment, useMemo } from 'react';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NavigationProp, RouteProp } from '@react-navigation/native';
 
-import Aurora from '../components/Aurora';
 import Avatar from '../components/Avatar';
 import Chip from '../components/Chip';
 import FriendButton from '../components/FriendButton';
 import GlassIconButton from '../components/GlassIconButton';
-import ReputationStats from '../components/ReputationStats';
-import TintedCard from '../components/TintedCard';
 import EventHistoryCarousel from '../components/events/EventHistoryCarousel';
 import { allProfileTags, useAuth } from '../context/AuthContext';
+import { RATING_TAGS } from '../data/ratingTags';
 import { useEvents } from '../hooks/useEvents';
 import { useFriends } from '../hooks/useFriends';
 import { usePastEvents } from '../hooks/usePastEvents';
@@ -24,7 +23,7 @@ import { commonTags, getPerson } from '../services/peopleService';
 import { getReputation, hasReportedPerson, reportPerson } from '../services/ratingsService';
 import { colors, tagTints } from '../theme/colors';
 import { gradients } from '../theme/gradients';
-import { glass, radii } from '../theme/shape';
+import { radii } from '../theme/shape';
 import { formatEventDate } from '../utils/dates';
 import { isUpcomingOrLive, sortByDate } from '../utils/eventFilters';
 
@@ -35,14 +34,16 @@ import { isUpcomingOrLive, sortByDate } from '../utils/eventFilters';
 type PersonProfileParams = { PersonProfile: { personId: string } };
 
 /**
- * Profilul altei persoane, arătând ca profilul tău: identitate, butonul de prietenie,
- * „Despre”, ce aveți în comun, ce a strâns după evenimente (doar totaluri, anonim),
- * evenimentele la care ați fost împreună și, doar pentru prieteni, unde merge.
+ * Profilul altei persoane. Aspect „ember”: un singur ton de portocaliu ars sus, care se stinge
+ * în negru, text mare și curat, carduri de sticlă portocalie. Fără pete de culoare.
+ * Conținut: identitate, prietenie, „Despre”, ce aveți în comun, ce a strâns după evenimente
+ * (totaluri anonime), evenimentele la care ați fost împreună și, doar pentru prieteni, unde merge.
  */
 export default function PersonProfileScreen() {
   const navigation = useNavigation<NavigationProp<Record<string, object | undefined>>>();
   const { personId } = useRoute<RouteProp<PersonProfileParams, 'PersonProfile'>>().params;
   const person = getPerson(personId);
+  const { height } = useWindowDimensions();
 
   const { profile } = useAuth();
   const myRatings = useRatings();
@@ -115,170 +116,188 @@ export default function PersonProfileScreen() {
       { text: 'Renunță', style: 'cancel' },
     ]);
 
-  return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
-      <View style={styles.header}>
-        <GlassIconButton icon="chevron-back" onPress={() => navigation.goBack()} />
-        <GlassIconButton icon="ellipsis-horizontal" onPress={openMenu} />
-      </View>
+  const meta = [`${person.age} ani`, person.city].filter(Boolean).join(' · ');
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Identitatea */}
-        <View style={styles.identity}>
-          <Aurora style={StyleSheet.absoluteFill} />
-          <View style={styles.identityRow}>
-            <Avatar name={person.name} size={84} square />
-            <View style={styles.identityText}>
-              <Text style={styles.name}>
-                {person.name}, {person.age}
-              </Text>
-              {person.city ? (
-                <View style={styles.cityRow}>
-                  <Ionicons name="location-outline" size={16} color={colors.text} />
-                  <Text style={styles.city}>{person.city}</Text>
-                </View>
-              ) : null}
-            </View>
-          </View>
+  return (
+    <View style={styles.screen}>
+      {/* Lumina portocalie de sus, un singur ton, care se stinge în negru */}
+      <LinearGradient
+        colors={gradients.emberHero}
+        locations={gradients.emberHeroLocations}
+        start={{ x: 0.3, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+        style={[styles.hero, { height: height * 0.62 }]}
+        pointerEvents="none"
+      />
+
+      <SafeAreaView style={styles.safe} edges={['top']}>
+        <View style={styles.header}>
+          <GlassIconButton icon="chevron-back" onPress={() => navigation.goBack()} />
+          <GlassIconButton icon="ellipsis-horizontal" onPress={openMenu} />
         </View>
 
-        <FriendButton personId={person.id} name={person.name} status={status} />
+        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+          {/* Identitatea: poza, numele mare, vârsta și orașul */}
+          <View style={styles.identity}>
+            <Avatar name={person.name} size={96} square />
+            <Text style={styles.name}>{person.name}</Text>
+            <View style={styles.metaRow}>
+              <Ionicons name="location-outline" size={15} color={colors.text} />
+              <Text style={styles.meta}>{meta}</Text>
+            </View>
+          </View>
 
-        {blocked ? (
-          <Text style={styles.muted}>Ai blocat această persoană. Nu te mai poate adăuga și nu vă vedeți activitatea.</Text>
-        ) : (
-          <>
-            {/* Despre */}
-            {person.bio ? (
-              <TintedCard tint={gradients.tintWarm} style={styles.aboutCard}>
-                <Text style={styles.cardTitle}>Despre</Text>
-                <Text style={styles.bio}>{person.bio}</Text>
-              </TintedCard>
-            ) : null}
+          <FriendButton personId={person.id} name={person.name} status={status} />
 
-            {/* Ce aveți în comun: tag-urile comune colorate, restul estompate */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Ce aveți în comun</Text>
-              <Text style={styles.muted}>
-                {shared.length === 0
-                  ? 'Niciun tag comun încă.'
-                  : `${shared.length} ${shared.length === 1 ? 'tag comun' : 'tag-uri comune'}: ${shared.join(', ')}`}
-              </Text>
-              <View style={styles.tags}>
-                {shared.map((t) => (
-                  <Chip key={t} label={t} tint={tagTints.pink} />
-                ))}
-                {others.map((t) => (
-                  <View key={t} style={styles.faded}>
-                    <Chip label={t} />
+          {blocked ? (
+            <Text style={styles.muted}>
+              Ai blocat această persoană. Nu te mai poate adăuga și nu vă vedeți activitatea.
+            </Text>
+          ) : (
+            <>
+              {/* Despre */}
+              {person.bio ? (
+                <View style={styles.section}>
+                  <Text style={styles.label}>DESPRE</Text>
+                  <View style={styles.emberCard}>
+                    <Text style={styles.bio}>{person.bio}</Text>
                   </View>
-                ))}
-              </View>
-            </View>
-
-            {/* După evenimente: totaluri anonime */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>După evenimente</Text>
-              <ReputationStats reputation={reputation} />
-              <View style={styles.reportsRow}>
-                <Ionicons
-                  name={reputation.reportsCount > 0 ? 'flag' : 'flag-outline'}
-                  size={18}
-                  color={reputation.reportsCount > 0 ? colors.nope : colors.muted}
-                />
-                <Text style={styles.reportsLabel}>Rapoarte</Text>
-                <Text style={[styles.reportsValue, reputation.reportsCount > 0 && styles.reports]}>
-                  {reputation.reportsCount}
-                </Text>
-              </View>
-              <Text style={styles.muted}>Evaluările sunt anonime: se văd doar totalurile.</Text>
-            </View>
-
-            {/* Ați fost împreună la… */}
-            {together.length > 0 ? (
-              <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Ați fost împreună la</Text>
-                <EventHistoryCarousel events={together} onOpen={openEvent} />
-              </View>
-            ) : null}
-
-            {/* Merge la… (doar prietenii văd) */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Merge la</Text>
-              {!isFriend ? (
-                <View style={styles.lockedRow}>
-                  <Ionicons name="lock-closed-outline" size={16} color={colors.muted} />
-                  <Text style={[styles.muted, styles.flex]}>Doar prietenii văd la ce evenimente merge.</Text>
                 </View>
-              ) : goingTo.length === 0 ? (
-                <Text style={styles.muted}>Nu e înscris(ă) la niciun eveniment acum.</Text>
-              ) : (
-                goingTo.map((e) => (
-                  <Pressable
-                    key={e.id}
-                    onPress={() => openEvent(e.id)}
-                    style={({ pressed }) => [styles.eventRow, pressed && styles.pressed]}
-                  >
-                    <View style={styles.flex}>
-                      <Text style={styles.eventTitle} numberOfLines={1}>
-                        {e.title}
-                      </Text>
-                      <Text style={styles.muted}>{formatEventDate(e.startsAt)}</Text>
+              ) : null}
+
+              {/* Ce aveți în comun: tag-urile comune în portocaliu, restul estompate */}
+              <View style={styles.section}>
+                <Text style={styles.label}>
+                  ÎN COMUN · {shared.length === 0 ? 'NICIUN TAG' : shared.length === 1 ? '1 TAG' : `${shared.length} TAG-URI`}
+                </Text>
+                <View style={styles.tags}>
+                  {shared.map((t) => (
+                    <Chip key={t} label={t} tint={tagTints.ember} />
+                  ))}
+                  {others.map((t) => (
+                    <View key={t} style={styles.faded}>
+                      <Chip label={t} />
                     </View>
-                    <Ionicons name="chevron-forward" size={18} color={colors.faint} />
-                  </Pressable>
-                ))
-              )}
-            </View>
-          </>
-        )}
-      </ScrollView>
-    </SafeAreaView>
+                  ))}
+                </View>
+              </View>
+
+              {/* După evenimente: totaluri anonime */}
+              <View style={styles.section}>
+                <Text style={styles.label}>DUPĂ EVENIMENTE</Text>
+                {/* Un singur card: trei tag-uri primite + rapoartele, despărțite de linii subțiri */}
+                <View style={[styles.emberCard, styles.statsCard]}>
+                  {[
+                    ...RATING_TAGS.map((t) => ({
+                      key: t.id,
+                      value: reputation.tagCounts[t.id],
+                      label: t.id === 'again' ? 'Aș mai ieși' : t.label,
+                      alert: false,
+                    })),
+                    { key: 'reports', value: reputation.reportsCount, label: 'Rapoarte', alert: reputation.reportsCount > 0 },
+                  ].map((s, i) => (
+                    <Fragment key={s.key}>
+                      {i > 0 ? <View style={styles.statDivider} /> : null}
+                      <View style={styles.stat}>
+                        <Text style={[styles.statValue, s.alert && styles.reports]}>{s.value}</Text>
+                        <Text style={styles.statLabel} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
+                          {s.label}
+                        </Text>
+                      </View>
+                    </Fragment>
+                  ))}
+                </View>
+                <Text style={styles.muted}>Anonim: se văd doar totalurile.</Text>
+              </View>
+
+              {/* Ați fost împreună la… */}
+              {together.length > 0 ? (
+                <View style={styles.section}>
+                  <Text style={styles.label}>AȚI FOST ÎMPREUNĂ LA</Text>
+                  <EventHistoryCarousel events={together} onOpen={openEvent} />
+                </View>
+              ) : null}
+
+              {/* Merge la… (doar prietenii văd) */}
+              <View style={styles.section}>
+                <Text style={styles.label}>MERGE LA</Text>
+                {!isFriend ? (
+                  <View style={styles.lockedRow}>
+                    <Ionicons name="lock-closed-outline" size={16} color={colors.muted} />
+                    <Text style={[styles.muted, styles.flex]}>Doar prietenii văd la ce evenimente merge.</Text>
+                  </View>
+                ) : goingTo.length === 0 ? (
+                  <Text style={styles.muted}>Nu e înscris(ă) la niciun eveniment acum.</Text>
+                ) : (
+                  goingTo.map((e) => (
+                    <Pressable
+                      key={e.id}
+                      onPress={() => openEvent(e.id)}
+                      style={({ pressed }) => [styles.eventRow, pressed && styles.pressed]}
+                    >
+                      <View style={styles.flex}>
+                        <Text style={styles.eventTitle} numberOfLines={1}>
+                          {e.title}
+                        </Text>
+                        <Text style={styles.muted}>{formatEventDate(e.startsAt)}</Text>
+                      </View>
+                      <Ionicons name="chevron-forward" size={18} color={colors.faint} />
+                    </Pressable>
+                  ))
+                )}
+              </View>
+            </>
+          )}
+        </ScrollView>
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
+  screen: { flex: 1, backgroundColor: colors.background },
+  hero: { position: 'absolute', top: 0, left: 0, right: 0 },
+  safe: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
   flex: { flex: 1 },
   header: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 8, paddingBottom: 8 },
-  content: { padding: 20, paddingTop: 8, paddingBottom: 32, gap: 22 },
-  identity: { ...glass, borderRadius: radii.card, overflow: 'hidden' },
-  identityRow: { flexDirection: 'row', alignItems: 'center', gap: 16, padding: 18 },
-  identityText: { flex: 1, gap: 6 },
-  name: { fontSize: 28, fontWeight: '600', letterSpacing: -0.5, color: colors.text },
-  cityRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  city: { color: colors.text, fontSize: 15, opacity: 0.85 },
-  aboutCard: { gap: 8 },
-  cardTitle: { fontSize: 16, fontWeight: '600', color: colors.text },
-  bio: { fontSize: 15, lineHeight: 22, color: colors.text },
-  section: { gap: 10 },
-  sectionTitle: { fontSize: 18, fontWeight: '600', color: colors.text },
+  content: { padding: 20, paddingTop: 12, paddingBottom: 40, gap: 28 },
+  identity: { gap: 10, paddingTop: 8 },
+  name: { fontSize: 46, lineHeight: 50, fontWeight: '800', letterSpacing: -1.5, color: colors.text, marginTop: 10 },
+  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  meta: { fontSize: 15, fontWeight: '500', color: colors.text, opacity: 0.85 },
+  section: { gap: 12 },
+  // Etichete mici, cu majuscule și spațiere: aspect editorial, sobru.
+  label: { fontSize: 12, fontWeight: '700', letterSpacing: 1.6, color: colors.muted },
+  emberCard: {
+    padding: 18,
+    borderRadius: radii.card,
+    borderWidth: 1,
+    borderColor: colors.emberBorder,
+    backgroundColor: colors.emberGlass,
+  },
+  bio: { fontSize: 16, lineHeight: 24, color: colors.text },
   tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   faded: { opacity: 0.4 },
-  reportsRow: {
-    ...glass,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderRadius: radii.inner,
-  },
-  reportsLabel: { flex: 1, fontSize: 15, color: colors.text },
-  reportsValue: { fontSize: 17, fontWeight: '600', color: colors.text },
+  statsCard: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, paddingVertical: 16 },
+  stat: { flex: 1, alignItems: 'center', gap: 4, paddingHorizontal: 4 },
+  statValue: { fontSize: 24, fontWeight: '700', color: colors.text },
+  statLabel: { fontSize: 12, color: colors.muted },
+  statDivider: { width: 1, alignSelf: 'stretch', backgroundColor: colors.emberBorder },
   reports: { color: colors.nope },
   lockedRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   eventRow: {
-    ...glass,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 14,
     borderRadius: radii.inner,
+    borderWidth: 1,
+    borderColor: colors.emberBorder,
+    backgroundColor: colors.emberGlass,
   },
   eventTitle: { fontSize: 15, fontWeight: '600', color: colors.text },
-  pressed: { backgroundColor: colors.cardStrong },
+  pressed: { opacity: 0.75 },
   muted: { fontSize: 13, color: colors.muted },
 });
