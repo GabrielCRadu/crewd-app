@@ -10,7 +10,7 @@ Actualizează lista când rezolvi ceva sau adaugi un mock nou.
 - [x] ~~Grupuri pe gustul tău (mock)~~: înlocuite de grupulețele reale (`EventGroupsSection`, `groupsService`).
 - [ ] **Blocarea după raportări** la grupulețe folosește reputația mock (`ratingsService`, `ME_ID`); se verifică doar în aplicație, nu în regulile Firestore.
 - [ ] **Anunțul „grupulețul nu s-a format”**: grupulețele expirate doar dispar din listă; nu există încă un mesaj/notificare pentru membri.
-- [ ] **Prietenii**: `FRIENDS` (Hartă, „merg și ei”). Pozițiile sunt decalaje față de locația dispozitivului.
+- [ ] **Prietenii**: `FRIENDS` (Hartă, statisticile din Profil, „merg și ei”). Pozițiile sunt decalaje față de locația dispozitivului. Harta îi citește prin `src/services/friendsMapService.ts` (statusul și „Vezi evenimentul” vin din `friendsGoing`); acolo se leagă datele reale.
 - [ ] **Prietenii și cererile de prietenie** (Cami): `src/services/friendsService.ts`, doar în memorie (adaugă, acceptă, refuză, elimină, blochează). Profilul altei persoane și lista de prieteni folosesc `PEOPLE` prin `src/services/peopleService.ts`. Pentru Firestore trebuie un profil public separat (`users/{uid}` e privat) și o colecție de prietenii, cu reguli noi.
 - [ ] **Notificarea de cerere de prietenie** (Cami, `FriendRequestPopup`): apare în colțul din dreapta sus. DEMO: Tudor îți trimite o cerere la 8 secunde după pornire (`scheduleDemoFriendRequest` în `friendsService`); de scos când cererile vin din Firestore (onSnapshot).
 - [ ] **Raportarea din profilul cuiva** (meniul ⋯): se adună la totalul de rapoarte din `ratingsService`, doar în memorie.
@@ -30,12 +30,13 @@ Actualizează lista când rezolvi ceva sau adaugi un mock nou.
 
 - [x] ~~Înscrierile la evenimente și scorurile tag-urilor~~: salvate în `users/{uid}` la apăsarea butonului (`joinedEventIds`, `tagScores`).
 - [ ] **Tag-uri învățate automat**: nu se adaugă încă nimic în `learnedTags` după înscrieri. Doar ștergerea funcționează.
-- [ ] **Vizibilitatea locației pentru prieteni** (switch-ul din Hartă): doar local.
+- [ ] **Vizibilitatea locației pentru prieteni** (switch-ul din Hartă): se ține minte pe dispozitiv (AsyncStorage, `friendsMapService`), dar nu ajunge în Firestore și locația nu se partajează încă nimănui.
 
 ## Butoane fără acțiune
 
 - [x] ~~Profil → Editează~~: făcut de Cami (poză, nume, oraș, bio, preferințe). Data nașterii și genul sunt blocate după onboarding.
-- [ ] Hartă → **Scrie-i** și **Vezi evenimentul** (cardul prietenului).
+- [x] ~~Hartă → **Vezi evenimentul**~~: deschide detaliile evenimentului la care merge prietenul (dezactivat dacă nu merge nicăieri).
+- [ ] Hartă → **Scrie-i**: deschide doar lista de chat-uri; nu există încă mesaje private.
 - [ ] Conversație → **Pe hartă** (bannerul „Ne vedem”).
 
 ## Neimplementat

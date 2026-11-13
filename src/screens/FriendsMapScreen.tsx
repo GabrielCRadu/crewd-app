@@ -11,7 +11,8 @@ import GradientButton from '../components/GradientButton';
 import SegmentedControl from '../components/SegmentedControl';
 import { useEvents } from '../hooks/useEvents';
 import { isUpcomingOrLive } from '../utils/eventFilters';
-import { FRIENDS, placeAround } from '../data/mockSocial';
+import { useFriendsOnMap } from '../hooks/useFriendsOnMap';
+import { useLocationVisibility } from '../hooks/useLocationVisibility';
 import { useUserLocation } from '../hooks/useUserLocation';
 import { findPersonByName } from '../services/peopleService';
 import { colors } from '../theme/colors';
@@ -30,25 +31,23 @@ export default function FriendsMapScreen() {
   const location = useUserLocation();
   const mapRef = useRef<MapView>(null);
   const [mode, setMode] = useState<Mode>('friends');
-  const [selectedId, setSelectedId] = useState<string>(FRIENDS[0]!.id);
-  const [isVisible, setIsVisible] = useState(true);
+  const navigation = useNavigation<BottomTabNavigationProp<Record<string, object | undefined>>>();
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [isVisible, setIsVisible] = useLocationVisibility();
 
-  // Prietenii mock stau în jurul locației dispozitivului; distanța se calculează de aici.
-  const friends = useMemo(
-    () =>
-      FRIENDS.map((f) => {
-        const coordinate = placeAround(location.coords, f.offset);
-        return { ...f, coordinate, distanceKm: haversineKm(location.coords, coordinate) };
-      }),
-    [location.coords],
-  );
-  const selected = friends.find((f) => f.id === selectedId) ?? null;
   // Aceleași evenimente ca în tab-ul Evenimente (Firestore, sau mock fără config); doar cele încă neterminate.
   const { events: allEvents } = useEvents(location.coords);
   const events = useMemo(() => allEvents.filter((e) => isUpcomingOrLive(e)), [allEvents]);
+  // Prietenii (încă mock, vezi src/services/friendsMapService.ts). Până alegi pe cineva, cardul îl arată pe primul.
+  const friends = useFriendsOnMap(location.coords, allEvents);
+  const selected = friends.find((f) => f.id === selectedId) ?? friends[0] ?? null;
+
+  // Nu există încă mesaje private: „Scrie-i” deschide lista de chat-uri.
+  const openChats = () => navigation.navigate('Chats', { screen: 'ChatsHome' });
+  const openEvent = (eventId: string) =>
+    navigation.navigate('Events', { screen: 'EventDetails', params: { eventId }, initial: false });
 
   // Tab-ul Hartă nu are stivă proprie: profilul prietenului se deschide în stiva tab-ului Profil.
-  const navigation = useNavigation<BottomTabNavigationProp<Record<string, object | undefined>>>();
   const openFriendProfile = (name: string) => {
     const person = findPersonByName(name);
     if (person) navigation.navigate('Profile', { screen: 'PersonProfile', params: { personId: person.id }, initial: false });
@@ -78,17 +77,26 @@ export default function FriendsMapScreen() {
           ref={mapRef}
           style={StyleSheet.absoluteFill}
           initialRegion={{ ...location.coords, latitudeDelta: ZOOM_DELTA, longitudeDelta: ZOOM_DELTA }}
-          showsUserLocation={location.status === 'granted'}
+          showsUserLocation={false}
           showsMyLocationButton={false}
           toolbarEnabled={false}
           userInterfaceStyle="dark"
           customMapStyle={darkMapStyle}
         >
+          {/* Poziția mea: doar când avem locația reală (altfel `coords` e centrul orașului). */}
+          {location.status === 'granted' ? (
+            <Marker coordinate={location.coords} anchor={{ x: 0.5, y: 0.5 }} zIndex={1}>
+              <View style={styles.meMarker}>
+                <View style={styles.meDot} />
+                <Text style={styles.friendLabel}>Tu</Text>
+              </View>
+            </Marker>
+          ) : null}
           {mode === 'friends'
             ? friends.map((f) => (
                 <Marker key={f.id} coordinate={f.coordinate} onPress={() => setSelectedId(f.id)}>
                   <View style={styles.friendMarker}>
-                    <Avatar name={f.name} size={selectedId === f.id ? 46 : 38} />
+                    <Avatar name={f.name} size={selected?.id === f.id ? 46 : 38} />
                     <Text style={styles.friendLabel}>{f.name}</Text>
                   </View>
                 </Marker>
@@ -121,10 +129,20 @@ export default function FriendsMapScreen() {
               <Ionicons name="chevron-forward" size={18} color={colors.faint} />
             </Pressable>
             <View style={styles.cardButtons}>
-              <Pressable style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}>
+              <Pressable
+                onPress={openChats}
+                accessibilityRole="button"
+                style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
+              >
                 <Text style={styles.buttonText}>Scrie-i</Text>
               </Pressable>
-              <GradientButton label="Vezi evenimentul" compact style={styles.buttonCta} />
+              <GradientButton
+                label="Vezi evenimentul"
+                compact
+                style={styles.buttonCta}
+                disabled={!selected.eventId}
+                onPress={selected.eventId ? () => openEvent(selected.eventId!) : undefined}
+              />
             </View>
             <View style={styles.separator} />
             <View style={styles.visibilityRow}>
@@ -149,6 +167,15 @@ const styles = StyleSheet.create({
   title: { ...type.screenTitle, fontSize: 32 },
   mapWrap: { flex: 1, backgroundColor: colors.backgroundAlt },
   friendMarker: { alignItems: 'center', gap: 2 },
+  meMarker: { alignItems: 'center', gap: 2 },
+  meDot: {
+    width: 18,
+    height: 18,
+    borderRadius: radii.pill,
+    backgroundColor: colors.primary,
+    borderWidth: 3,
+    borderColor: colors.text,
+  },
   friendLabel: {
     color: colors.text,
     backgroundColor: colors.surface,
