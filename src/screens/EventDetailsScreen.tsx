@@ -10,8 +10,13 @@ import Avatar from '../components/Avatar';
 import GlassIconButton from '../components/GlassIconButton';
 import GradientButton from '../components/GradientButton';
 import GlassBadge from '../components/events/GlassBadge';
+import EventGroupsSection from '../components/groups/EventGroupsSection';
+import { useAuth } from '../context/AuthContext';
+import { useMyGroups } from '../hooks/useMyGroups';
+import { useNow } from '../hooks/useNow';
+import { leaveGroupForEvent } from '../services/groupsService';
+import { MIN_FORM_MEMBERS, groupStatus } from '../utils/groupRules';
 import { getCategory } from '../data/categories';
-import { MY_GROUPS, SUGGESTED_GROUPS } from '../data/mockSocial';
 import { useEvents } from '../hooks/useEvents';
 import { usePreferences } from '../hooks/usePreferences';
 import { useRatings } from '../hooks/useRatings';
@@ -23,7 +28,6 @@ import { colors } from '../theme/colors';
 import { gradients } from '../theme/gradients';
 import { glass, radii } from '../theme/shape';
 import type { IconName } from '../types/events';
-import type { ChatGroup } from '../types/social';
 import { formatLongDay, formatTime, hasEnded, isLive } from '../utils/dates';
 import { formatDistance, haversineKm } from '../utils/distance';
 import { formatFriendsGoing, formatWentWith } from '../utils/format';
@@ -42,6 +46,9 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
   const myRatings = useRatings();
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
+  const { profile, user } = useAuth();
+  const { groups: myGroups } = useMyGroups();
+  const now = useNow();
 
   const event = useMemo(() => events.find((e) => e.id === eventId) ?? null, [events, eventId]);
 
@@ -62,17 +69,29 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
   const joined = isJoined(preferences, event.id);
   const ended = hasEnded(event);
   const rated = hasRated(myRatings, event.id);
-  // Grupurile de chat pentru acest eveniment (mock: potrivite după titlu, din mockSocial.ts).
-  const groups = [...MY_GROUPS, ...SUGGESTED_GROUPS].filter((g) => g.eventTitle === event.title);
+  // Grupulețul meu la acest eveniment (dacă sunt într-unul).
+  const myGroup = myGroups.find((g) => g.eventId === event.id) ?? null;
+  const myGroupStatus = myGroup ? groupStatus(myGroup, now) : null;
+  const missing = myGroup ? Math.max(0, MIN_FORM_MEMBERS - myGroup.memberUids.length) : 0;
   const openRating = () => navigation.navigate('RateEvent', { eventId: event.id });
   // Înscrierea se salvează imediat în contul tău; dacă nu merge (ex. fără internet), revine și te anunțăm.
   const saveJoin = (action: typeof joinEvent) => {
     action(event).catch((e: Error) => Alert.alert('Înscrierea nu s-a salvat', e.message));
   };
 
-  // „Intră” deschide conversația grupului în tab-ul Chat (cu lista de chat-uri dedesubt, pentru „înapoi”).
-  const openGroup = (group: ChatGroup) => {
-    navigation.getParent()?.navigate('Chats', { screen: 'ChatRoom', params: { groupId: group.id }, initial: false });
+  // Chat-ul grupulețului se deschide în tab-ul Chat (cu lista de chat-uri dedesubt, pentru „înapoi”).
+  const openChat = () => {
+    if (!myGroup) return;
+    navigation
+      .getParent()
+      ?.navigate('Chats', { screen: 'ChatRoom', params: { eventId: event.id, groupId: myGroup.id }, initial: false });
+  };
+  // „Anulează” te scoate întâi din grupuleț, apoi din eveniment (altfel ai rămâne membru-fantomă).
+  const cancelRegistration = () => {
+    const uid = user?.uid ?? profile?.uid;
+    (uid ? leaveGroupForEvent(event.id, uid) : Promise.resolve())
+      .then(() => leaveEvent(event))
+      .catch((e: Error) => Alert.alert('Înscrierea nu s-a anulat', e.message));
   };
 
   return (
@@ -162,27 +181,15 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
             </View>
           ) : null}
 
-          {/* 6. Grupuri pe gustul tău (doar înainte de eveniment) */}
-          {ended ? null : <Text style={styles.sectionTitle}>Grupuri pe gustul tău</Text>}
-          {ended ? null : groups.length === 0 ? (
-            <Text style={styles.muted}>Încă nu s-a format niciun grup pentru acest eveniment.</Text>
-          ) : (
-            groups.map((g) => (
-              <View key={g.id} style={styles.groupCard}>
-                <View style={styles.groupText}>
-                  <Text style={styles.groupName}>{g.name}</Text>
-                  <Text style={styles.muted}>
-                    {g.membersCount} persoane · {g.commonTagsCount} tag-uri comune
-                  </Text>
-                  <Text style={styles.groupMeetup}>
-                    Se văd {g.meetupWhen}, {g.meetupWhere}
-                  </Text>
-                </View>
-                <Pressable onPress={() => openGroup(g)} style={({ pressed }) => [styles.joinGroup, pressed && styles.pressed]}>
-                  <Text style={styles.joinGroupText}>Intră</Text>
-                </Pressable>
-              </View>
-            ))
+          {/* 6. Grupulețe (doar înainte de eveniment): apar după „Înscrie-te” */}
+          {ended ? null : <Text style={styles.sectionTitle}>Grupulețe pe gustul tău</Text>}
+          {ended ? null : (
+            <EventGroupsSection
+              event={event}
+              joined={joined}
+              myGroup={myGroup}
+              onPropose={() => navigation.navigate('ProposeGroup', { eventId: event.id })}
+            />
           )}
         </View>
       </ScrollView>
@@ -208,10 +215,18 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
           )
         ) : joined ? (
           <View style={styles.joinedRow}>
-            <View style={styles.joinedPill}>
-              <Text style={styles.joinedText}>Înscris ✓</Text>
-            </View>
-            <Pressable onPress={() => saveJoin(leaveEvent)} hitSlop={8}>
+            {myGroup && myGroupStatus !== 'forming' ? (
+              <GradientButton label="Deschide chat-ul" icon="chatbubbles" onPress={openChat} style={styles.ctaMain} />
+            ) : (
+              <View style={styles.joinedPill}>
+                <Text style={styles.joinedText}>
+                  {myGroup
+                    ? `Așteptăm încă ${missing} ${missing === 1 ? 'persoană' : 'persoane'}`
+                    : 'Înscris ✓ · alege un grupuleț'}
+                </Text>
+              </View>
+            )}
+            <Pressable onPress={cancelRegistration} hitSlop={8}>
               <Text style={styles.cancel}>Anulează</Text>
             </Pressable>
           </View>
@@ -309,12 +324,6 @@ const styles = StyleSheet.create({
   avatarOverlap: { marginLeft: -12 },
   friendsText: { flex: 1, fontSize: 14, fontWeight: '500', color: colors.text },
   sectionTitle: { fontSize: 18, fontWeight: '600', color: colors.text, marginTop: 8 },
-  groupCard: { ...glass, flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, borderRadius: radii.card },
-  groupText: { flex: 1, gap: 3 },
-  groupName: { fontSize: 16, fontWeight: '600', color: colors.text },
-  groupMeetup: { fontSize: 13, fontWeight: '500', color: colors.text },
-  joinGroup: { paddingHorizontal: 20, paddingVertical: 11, borderRadius: radii.pill, backgroundColor: colors.text },
-  joinGroupText: { color: colors.onLight, fontWeight: '600' },
   pressed: { opacity: 0.8 },
   bottomBar: {
     paddingHorizontal: 20,
