@@ -1,11 +1,15 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 
-import Aurora from '../Aurora';
-import GradientButton from '../GradientButton';
+import EventPoster from './EventPoster';
 import GlassBadge from './GlassBadge';
+import { getCategory } from '../../data/categories';
 import type { EventWithDistance } from '../../types/events';
 import { colors } from '../../theme/colors';
+import { gradients } from '../../theme/gradients';
 import { radii } from '../../theme/shape';
+import { formatTime } from '../../utils/dates';
 import { formatDistance } from '../../utils/distance';
 
 interface Props {
@@ -14,27 +18,41 @@ interface Props {
 }
 
 /**
- * Cardul „ACUM”: sus badge-ul și distanța, la mijloc loc liber pentru imaginea evenimentului
- * (acum provizoriu: lumina aurora), jos numele evenimentului și „Vezi detalii”.
+ * Cardul „ACUM”: afișul evenimentului pe tot cardul, cu informațiile puse peste el.
+ * Sus: „ACUM” și distanța. Jos: categoria și locul, numele mare, până la ce oră ține
+ * și „Vezi detalii”. Umbririle de sus și de jos țin textul lizibil pe orice poză.
  */
 export default function NowCard({ event, onOpen }: Props) {
+  const category = getCategory(event.category);
+
   return (
     <Pressable onPress={onOpen} style={({ pressed }) => [styles.card, pressed && styles.pressed]}>
-      {/* Locul imaginii: deocamdată aurora; mai târziu aici vine poza evenimentului. */}
-      <Aurora style={StyleSheet.absoluteFill} withScrim />
+      <EventPoster imageUrl={event.imageUrl} category={event.category} iconSize={40} style={StyleSheet.absoluteFill} />
+      <LinearGradient colors={gradients.scrimTop} style={styles.scrimTop} />
+      <LinearGradient colors={gradients.scrim} style={styles.scrimBottom} />
 
-      {/* Sus: badge-ul „ACUM” și distanța */}
+      {/* Sus: „ACUM” și distanța */}
       <View style={styles.top}>
         <GlassBadge icon="radio-button-on" label="ACUM" />
-        <Text style={styles.distance}>la {formatDistance(event.distanceKm)}</Text>
+        <GlassBadge icon="navigate-outline" label={`la ${formatDistance(event.distanceKm)}`} />
       </View>
 
-      {/* Jos: numele evenimentului (stânga) și „Vezi detalii” (dreapta) */}
+      {/* Jos: informațiile peste afiș */}
       <View style={styles.bottom}>
+        <Text style={styles.eyebrow} numberOfLines={1}>
+          {category.label.toUpperCase()} · {event.venueName}
+        </Text>
         <Text style={styles.name} numberOfLines={2}>
           {event.title}
         </Text>
-        <GradientButton label="Vezi detalii" icon="arrow-forward" compact onPress={onOpen} />
+        <View style={styles.footer}>
+          <Text style={styles.until}>Până la {formatTime(event.endsAt)}</Text>
+          <Pressable onPress={onOpen} style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}>
+            <Text style={styles.ctaText}>Vezi detalii</Text>
+            <Ionicons name="arrow-forward" size={16} color={colors.onLight} />
+          </Pressable>
+        </View>
+        {event.imageCredit ? <Text style={styles.credit}>Foto: {event.imageCredit}</Text> : null}
       </View>
     </Pressable>
   );
@@ -42,17 +60,35 @@ export default function NowCard({ event, onOpen }: Props) {
 
 const styles = StyleSheet.create({
   card: {
-    minHeight: 200,
+    minHeight: 280,
     justifyContent: 'space-between',
-    padding: 18,
+    padding: 16,
     borderRadius: radii.card,
     borderWidth: 1,
     borderColor: colors.border,
     overflow: 'hidden',
+    backgroundColor: colors.surface,
   },
-  pressed: { opacity: 0.9 },
+  pressed: { opacity: 0.92 },
+  scrimTop: { position: 'absolute', left: 0, right: 0, top: 0, height: '35%' },
+  scrimBottom: { position: 'absolute', left: 0, right: 0, bottom: 0, height: '75%' },
   top: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  distance: { color: colors.text, fontSize: 14, fontWeight: '600' },
-  bottom: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
-  name: { flex: 1, color: colors.text, fontSize: 18, fontWeight: '600', letterSpacing: -0.3 },
+  bottom: { gap: 6 },
+  eyebrow: { color: colors.text, opacity: 0.8, fontSize: 12, fontWeight: '700', letterSpacing: 1.2 },
+  name: { color: colors.text, fontSize: 26, lineHeight: 30, fontWeight: '700', letterSpacing: -0.6 },
+  footer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginTop: 6 },
+  until: { color: colors.text, opacity: 0.8, fontSize: 14, fontWeight: '500' },
+  // Pastilă albă simplă (fără gradient), ca afișul să rămână singura culoare.
+  cta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 16,
+    height: 40,
+    borderRadius: radii.pill,
+    backgroundColor: colors.text,
+  },
+  ctaPressed: { opacity: 0.85 },
+  ctaText: { color: colors.onLight, fontSize: 14, fontWeight: '600' },
+  credit: { color: colors.faint, fontSize: 10, marginTop: 2 },
 });

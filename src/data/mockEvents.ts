@@ -10,7 +10,7 @@ import { placeAround } from './mockSocial';
  * - Datele sunt calculate față de ziua de azi, ca demo-ul să aibă mereu
  *   evenimente „acum”, în weekend și în săptămânile următoare.
  * - Titlurile se potrivesc cu mockSocial.ts (grupurile de chat, prietenii de pe hartă).
- * - Afișele sunt imagini placeholder de pe picsum.photos; înlocuiește `imageUrl`.
+ * - Afișele sunt fotografii de pe Unsplash (licență gratuită), alese să se potrivească cu fiecare eveniment.
  */
 
 /** Câmpurile pe care datele mock nu le au (vin doar din Firestore). */
@@ -57,7 +57,6 @@ function hoursFromNow(hours: number): Date {
 const SAT = (6 - now.getDay() + 7) % 7;
 const SUN = SAT + 1;
 
-const poster = (id: string) => `https://picsum.photos/seed/crewd-${id}/800/600`;
 
 /** O fotografie de pe Unsplash (licență gratuită), potrivită cu evenimentul. */
 const unsplash = (photoId: string) => `https://images.unsplash.com/${photoId}?w=800&q=70&auto=format&fit=crop`;
@@ -80,7 +79,8 @@ const MOCK_EVENTS: MockEvent[] = [
     venueName: 'Piața centrală',
     address: 'Piața centrală',
     offset: { latitude: 0.002, longitude: -0.003 },
-    imageUrl: poster('e1'),
+    imageUrl: unsplash('photo-1511192336575-5a79af67a629'),
+    imageCredit: 'Unsplash',
     price: 0,
     friendsGoing: ['Andrei', 'Maria'],
     lookingForCompanyCount: 5,
@@ -96,7 +96,8 @@ const MOCK_EVENTS: MockEvent[] = [
     venueName: 'Board Game Café',
     address: 'Centru',
     offset: { latitude: 0.007, longitude: 0.006 },
-    imageUrl: poster('e2'),
+    imageUrl: unsplash('photo-1610890716171-6b1bb98ffd09'),
+    imageCredit: 'Unsplash',
     price: 20,
     friendsGoing: ['Maria', 'Andrei', 'Ioana'],
     lookingForCompanyCount: 4,
@@ -111,7 +112,8 @@ const MOCK_EVENTS: MockEvent[] = [
     venueName: 'Teatrul independent',
     address: 'Cartierul vechi',
     offset: { latitude: -0.015, longitude: 0.018 },
-    imageUrl: poster('e3'),
+    imageUrl: unsplash('photo-1503095396549-807759245b35'),
+    imageCredit: 'Unsplash',
     price: 40,
     friendsGoing: ['Ioana'],
     lookingForCompanyCount: 3,
@@ -126,7 +128,8 @@ const MOCK_EVENTS: MockEvent[] = [
     venueName: 'Teatrul Național',
     address: 'Centru',
     offset: { latitude: 0.0075, longitude: -0.0095 }, // unde e Ioana pe hartă
-    imageUrl: poster('e4'),
+    imageUrl: unsplash('photo-1507924538820-ede94a04019d'),
+    imageCredit: 'Unsplash',
     price: 60,
     friendsGoing: ['Ioana'],
     lookingForCompanyCount: 2,
@@ -141,7 +144,8 @@ const MOCK_EVENTS: MockEvent[] = [
     venueName: 'Hala industrială',
     address: 'Zona industrială',
     offset: { latitude: 0.045, longitude: 0.03 },
-    imageUrl: poster('e7'),
+    imageUrl: unsplash('photo-1470225620780-dba8ba36b745'),
+    imageCredit: 'Unsplash',
     price: 70,
     friendsGoing: ['Andrei'],
     lookingForCompanyCount: 8,
@@ -157,7 +161,8 @@ const MOCK_EVENTS: MockEvent[] = [
     venueName: 'Parcul central',
     address: 'Parcul central',
     offset: { latitude: 0.0035, longitude: 0.0045 }, // unde e Andrei pe hartă
-    imageUrl: poster('e8'),
+    imageUrl: unsplash('photo-1514525253161-7a46d19cd819'),
+    imageCredit: 'Unsplash',
     price: 35,
     friendsGoing: ['Andrei', 'Maria'],
     lookingForCompanyCount: 7,
@@ -172,7 +177,8 @@ const MOCK_EVENTS: MockEvent[] = [
     venueName: 'Bar Microfonul',
     address: 'Centru',
     offset: { latitude: 0.009, longitude: -0.004 },
-    imageUrl: poster('e9'),
+    imageUrl: unsplash('photo-1511671782779-c97d3d27a1d4'),
+    imageCredit: 'Unsplash',
     price: 25,
     friendsGoing: ['Maria', 'Andrei'],
     lookingForCompanyCount: 4,
@@ -187,7 +193,8 @@ const MOCK_EVENTS: MockEvent[] = [
     venueName: 'Clubul de rock',
     address: 'Centru vechi',
     offset: { latitude: 0.025, longitude: 0.03 },
-    imageUrl: poster('e10'),
+    imageUrl: unsplash('photo-1460723237483-7a6dc9d0b212'),
+    imageCredit: 'Unsplash',
     price: 40,
     friendsGoing: ['Victor'],
     lookingForCompanyCount: 3,
@@ -202,7 +209,8 @@ const MOCK_EVENTS: MockEvent[] = [
     venueName: 'Lacul de la marginea orașului',
     address: 'În afara orașului',
     offset: { latitude: -0.06, longitude: 0.02 },
-    imageUrl: poster('e11'),
+    imageUrl: unsplash('photo-1541625602330-2277a4c46182'),
+    imageCredit: 'Unsplash',
     price: 0,
     friendsGoing: ['Victor'],
     lookingForCompanyCount: 5,
@@ -217,7 +225,8 @@ const MOCK_EVENTS: MockEvent[] = [
     venueName: 'Terenul universității',
     address: 'Campus',
     offset: { latitude: 0.02, longitude: -0.025 },
-    imageUrl: poster('e12'),
+    imageUrl: unsplash('photo-1431324155629-1a6deb1dec8d'),
+    imageCredit: 'Unsplash',
     price: 15,
     friendsGoing: ['Victor', 'Andrei'],
     lookingForCompanyCount: 6,
@@ -232,7 +241,8 @@ const MOCK_EVENTS: MockEvent[] = [
     venueName: 'Piața mare',
     address: 'Centru',
     offset: { latitude: 0.001, longitude: 0.0015 },
-    imageUrl: poster('e13'),
+    imageUrl: unsplash('photo-1543589077-47d81606c1bf'),
+    imageCredit: 'Unsplash',
     price: 0,
     friendsGoing: ['Maria', 'Andrei', 'Ioana'],
     lookingForCompanyCount: 9,
@@ -247,7 +257,8 @@ const MOCK_EVENTS: MockEvent[] = [
     venueName: 'Crama din afara orașului',
     address: 'În afara orașului',
     offset: { latitude: 0.09, longitude: 0.06 },
-    imageUrl: poster('e14'),
+    imageUrl: unsplash('photo-1506377247377-2a5b3b417ebb'),
+    imageCredit: 'Unsplash',
     price: 150,
     friendsGoing: [],
     lookingForCompanyCount: 4,
@@ -262,7 +273,8 @@ const MOCK_EVENTS: MockEvent[] = [
     venueName: 'Universitatea',
     address: 'Campus',
     offset: { latitude: -0.012, longitude: 0.004 },
-    imageUrl: poster('e15'),
+    imageUrl: unsplash('photo-1515187029135-18ee286d815b'),
+    imageCredit: 'Unsplash',
     price: 0,
     friendsGoing: ['Ioana', 'Maria'],
     lookingForCompanyCount: 11,
