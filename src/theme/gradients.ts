@@ -14,6 +14,8 @@ export const gradients = {
   aurora: ['#1E1E1E', '#141414', '#0E0E0E', '#0A0A0A'] as const,
   /** Umbrire de jos în sus, ca textul peste poze să fie lizibil. */
   scrim: ['rgba(0,0,0,0)', 'rgba(0,0,0,0.85)'] as const,
+  /** Umbrire scurtă de sus în jos, ca badge-urile de deasupra unei poze să se citească (Cami). */
+  scrimTop: ['rgba(0,0,0,0.55)', 'rgba(0,0,0,0)'] as const,
   /** Avatare cu inițiale: gri. */
   avatar: ['#3A3A3A', '#242424'] as const,
   /** Fosta lumină caldă de sus: dezactivată (fundal negru simplu). */
