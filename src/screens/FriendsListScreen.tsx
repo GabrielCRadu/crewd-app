@@ -123,7 +123,7 @@ export default function FriendsListScreen({ navigation }: Props) {
 function PersonInfo({ person, subtitle, onPress }: { person: Person; subtitle: string; onPress?: () => void }) {
   return (
     <Pressable onPress={onPress} disabled={!onPress} style={styles.info}>
-      <Avatar name={person.name} size={46} />
+      <Avatar name={person.name} size={46} photoUrl={person.photoUrl} />
       <View style={styles.infoText}>
         <Text style={styles.name} numberOfLines={1}>
           {person.name}

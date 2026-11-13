@@ -1,5 +1,5 @@
 import { Fragment, useMemo } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -127,10 +127,14 @@ export default function PersonProfileScreen() {
 
           {/* Identitatea: poza, numele mare, vârsta și orașul */}
           <View style={styles.identity}>
-            {/* Locul pozei: sticlă închisă cu inițiala */}
-            <View style={styles.photo}>
-              <Text style={styles.photoInitial}>{person.name.slice(0, 1).toUpperCase()}</Text>
-            </View>
+            {/* Poza de profil; fără poză, un pătrat de sticlă cu inițiala */}
+            {person.photoUrl ? (
+              <Image source={{ uri: person.photoUrl }} style={styles.photo} />
+            ) : (
+              <View style={styles.photo}>
+                <Text style={styles.photoInitial}>{person.name.slice(0, 1).toUpperCase()}</Text>
+              </View>
+            )}
             <Text style={styles.name}>{person.name}</Text>
             <View style={styles.metaRow}>
               <Ionicons name="location-outline" size={15} color={colors.text} />

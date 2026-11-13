@@ -27,6 +27,12 @@ export const MY_TAGS = [
   ...MY_PROFILE.learnedTags,
 ];
 
+/**
+ * Poze de profil mock de pe Unsplash (licență gratuită): fără fețe, doar lucruri legate de pasiunea
+ * fiecăruia (aparat foto, pupitru de DJ, scenă...), ca să nu punem fața unui om real pe un profil inventat.
+ */
+const avatarPhoto = (photoId: string) => `https://images.unsplash.com/${photoId}?w=400&h=400&fit=crop&q=70`;
+
 export const PEOPLE: Person[] = [
   {
     id: 'p1',
@@ -37,6 +43,7 @@ export const PEOPLE: Person[] = [
     goingTo: { title: 'Open Mic: Stand-up Night', when: 'vineri' },
     city: 'Timișoara',
     bio: 'Fotografiez tot ce prind la concerte. Mereu am un joc de Dixit în rucsac.',
+    photoUrl: avatarPhoto('photo-1516035069371-29a1b244cc32'),
   },
   {
     id: 'p2',
@@ -47,6 +54,7 @@ export const PEOPLE: Person[] = [
     goingTo: { title: 'Warehouse Techno Night', when: 'sâmbătă' },
     city: 'Timișoara',
     bio: 'Jazz în timpul săptămânii, techno în weekend. Caut oameni care nu pleacă primii acasă.',
+    photoUrl: avatarPhoto('photo-1470225620780-dba8ba36b745'),
   },
   {
     id: 'p3',
@@ -57,6 +65,7 @@ export const PEOPLE: Person[] = [
     goingTo: { title: 'Hamlet', when: 'duminică' },
     city: 'Timișoara',
     bio: 'Studentă la litere, prinsă de teatru independent. Gătesc pentru toată lumea după spectacole.',
+    photoUrl: avatarPhoto('photo-1503095396549-807759245b35'),
   },
   {
     id: 'p4',
@@ -67,6 +76,7 @@ export const PEOPLE: Person[] = [
     goingTo: null,
     city: 'Arad',
     bio: 'Drumeții în weekend, concerte rock când prind. Nou în oraș, caut gașcă.',
+    photoUrl: avatarPhoto('photo-1506905925346-21bda4d32df4'),
   },
   {
     id: 'p5',
@@ -77,6 +87,7 @@ export const PEOPLE: Person[] = [
     goingTo: null,
     city: 'Timișoara',
     bio: 'Ne-am văzut la concertul de jazz! Îmi plac serile liniștite cu muzică live.',
+    photoUrl: avatarPhoto('photo-1511192336575-5a79af67a629'),
   },
   {
     id: 'p6',
@@ -87,6 +98,7 @@ export const PEOPLE: Person[] = [
     goingTo: null,
     city: 'Timișoara',
     bio: '',
+    photoUrl: avatarPhoto('photo-1493225457124-a3eb161ffa5f'),
   },
 ];
 

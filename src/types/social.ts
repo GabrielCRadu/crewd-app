@@ -20,6 +20,8 @@ export interface Person {
   city?: string;
   /** „Despre”, scris de persoană. */
   bio?: string;
+  /** Fotografia de profil (URL). Lipsă = se afișează inițiala. */
+  photoUrl?: string;
 }
 
 /** Un prieten afișat pe hartă. */
