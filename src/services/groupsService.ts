@@ -36,6 +36,7 @@ import { getMyRatings, getReputation } from './ratingsService';
 export class GroupActionError extends Error {}
 
 const NETWORK_MESSAGE = 'Nu am putut salva. Verifică conexiunea la internet și încearcă din nou.';
+const DENIED_MESSAGE = 'Nu s-a putut: între timp s-a schimbat ceva (locuri, termen sau înscriere). Reîncarcă și încearcă din nou.';
 
 function memberSummary(me: UserProfile, now: Date): MemberSummary {
   return { name: me.name, age: profileAge(me, now), tags: allProfileTags(me) };
@@ -52,6 +53,9 @@ async function guard<T>(action: () => Promise<T>): Promise<T> {
   } catch (e) {
     if (e instanceof GroupActionError) throw e;
     console.warn('Grupulețe: eroare Firestore', e);
+    // Serverul a refuzat (regulile): ceva s-a schimbat între timp (locuri, termen, înscriere), nu e o problemă de rețea.
+    const code = typeof e === 'object' && e !== null && 'code' in e ? String((e as { code: unknown }).code) : '';
+    if (code === 'permission-denied') throw new GroupActionError(DENIED_MESSAGE);
     throw new GroupActionError(NETWORK_MESSAGE);
   }
 }

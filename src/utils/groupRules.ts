@@ -25,6 +25,8 @@ export const FORMATION_LEAD_MS = 2 * 60 * MIN;
 export const LATE_FORMATION_LEAD_MS = 30 * MIN;
 /** Nu se mai pot propune grupulețe cu mai puțin de 30 de minute înainte de întâlnire. */
 export const PROPOSE_CUTOFF_MS = 30 * MIN;
+/** Marjă peste limita de 30 min: serverul cere strict mai mult de 30 min, la ora lui. */
+const PROPOSE_MARGIN_MS = MIN;
 /** De la câte raportări confirmate nu mai poți intra în grupulețe (reputația e încă mock). */
 export const REPORT_BLOCK_THRESHOLD = 2;
 
@@ -43,17 +45,28 @@ export function groupStatus(g: CrewGroup, now: Date): GroupStatus {
   return 'forming';
 }
 
-/** Vede grupulețul în lista evenimentului? Grupurile închise rămân vizibile doar membrilor. */
+/** Chat-ul se deschide doar pentru grupulețele care s-au format (au ajuns cândva la 3 membri). */
+export function canOpenChat(g: CrewGroup): boolean {
+  return g.formedAt !== null;
+}
+
+/**
+ * Vede grupulețul în lista evenimentului?
+ * - grupurile fără membri nu apar;
+ * - cele expirate și cele închise rămân vizibile doar membrilor (ca să afle ce s-a întâmplat);
+ * - restul, dacă vârsta se încadrează.
+ */
 export function isVisibleTo(g: CrewGroup, viewer: { uid: string; age: number }, now: Date): boolean {
+  if (g.memberUids.length === 0) return false;
   const status = groupStatus(g, now);
-  if (status === 'expired') return false;
-  if (status === 'closed') return g.memberUids.includes(viewer.uid);
+  if (status === 'expired' || status === 'closed') return g.memberUids.includes(viewer.uid);
   return viewer.age >= g.minAge && viewer.age <= g.maxAge;
 }
 
 /** De ce nu poate intra (mesaj pentru utilizator), sau null dacă poate. */
 export function joinBlockReason(g: CrewGroup, ctx: JoinContext, now: Date): string | null {
   if (ctx.currentGroupId === g.id) return 'Ești deja în acest grupuleț.';
+  if (g.memberUids.length === 0) return 'Grupulețul nu mai există.';
   if (!ctx.isRegistered) return 'Înscrie-te întâi la eveniment.';
   if (ctx.isBlocked) return 'Nu poți intra în grupulețe o perioadă, din cauza raportărilor.';
   const status = groupStatus(g, now);
@@ -103,7 +116,7 @@ export function proposalErrors(
 
   if (d.meetupAt.getTime() > eventStartsAt.getTime()) {
     errors.meetupAt = 'Întâlnirea trebuie să fie înainte de începutul evenimentului.';
-  } else if (d.meetupAt.getTime() - now.getTime() < PROPOSE_CUTOFF_MS) {
+  } else if (d.meetupAt.getTime() - now.getTime() <= PROPOSE_CUTOFF_MS + PROPOSE_MARGIN_MS) {
     errors.meetupAt = 'Întâlnirea e prea aproape: alege cu cel puțin 30 de minute înainte.';
   }
 

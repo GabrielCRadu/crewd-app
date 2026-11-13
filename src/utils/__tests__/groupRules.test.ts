@@ -2,6 +2,7 @@ import { describe, expect, it } from '@jest/globals';
 
 import type { CrewGroup, JoinContext, ProposalDraft } from '../../types/groups';
 import {
+  canOpenChat,
   defaultProposal,
   formationDeadline,
   groupStatus,
@@ -206,5 +207,34 @@ describe('profileAge', () => {
 
   it('computes the age from the birth date', () => {
     expect(profileAge({ birthDate: '2000-11-21', age: 0 }, new Date('2026-11-20T12:00:00'))).toBe(25);
+  });
+});
+
+describe('final review fixes', () => {
+  it('opens the chat only for groups that actually formed', () => {
+    expect(canOpenChat(group({ formedAt: at(-5 * HOUR) }))).toBe(true);
+    expect(canOpenChat(group())).toBe(false);
+  });
+
+  it('shows an expired group to its own members (so they learn it did not form), not to others', () => {
+    expect(isVisibleTo(group(), { uid: 'u1', age: 24 }, at(-HOUR))).toBe(true);
+    expect(isVisibleTo(group(), { uid: 'x', age: 24 }, at(-HOUR))).toBe(false);
+  });
+
+  it('hides groups that have no members left', () => {
+    expect(isVisibleTo(group({ memberUids: [] }), { uid: 'x', age: 24 }, at(-3 * HOUR))).toBe(false);
+    expect(isVisibleTo(group({ memberUids: [], formedAt: at(-5 * HOUR) }), { uid: 'x', age: 24 }, at(-3 * HOUR))).toBe(false);
+  });
+
+  it('does not allow joining a group with no members left', () => {
+    expect(joinBlockReason(group({ memberUids: [] }), okCtx, at(-3 * HOUR))).toBe('Grupulețul nu mai există.');
+  });
+
+  it('rejects a meetup exactly 30 minutes away (the server needs strictly more)', () => {
+    const now = new Date(eventStart.getTime() - 24 * HOUR);
+    const d = { ...defaultProposal(eventStart, 25), vibe: 'x' };
+    const exact = new Date(d.meetupAt.getTime() - 30 * 60_000);
+    expect(proposalErrors(d, 25, eventStart, exact).meetupAt).toBeDefined();
+    expect(proposalErrors(d, 25, eventStart, now)).toEqual({});
   });
 });
