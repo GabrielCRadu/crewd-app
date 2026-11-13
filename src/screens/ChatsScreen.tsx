@@ -3,6 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import Avatar from '../components/Avatar';
+import DirectThreadsSection from '../components/DirectThreadsSection';
 import { useEvents } from '../hooks/useEvents';
 import { useMyGroups } from '../hooks/useMyGroups';
 import { useNow } from '../hooks/useNow';
@@ -46,6 +47,8 @@ export default function ChatsScreen({ navigation }: Props) {
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Text style={styles.title}>Chat-uri</Text>
+        {/* Conversațiile doar cu un prieten (ex. un eveniment trimis) */}
+        <DirectThreadsSection onOpen={(personId) => navigation.navigate('DirectChat', { personId })} />
         <Text style={styles.sectionTitle}>Grupulețele tale</Text>
 
         {loading ? <ActivityIndicator color={colors.text} /> : null}

@@ -100,6 +100,28 @@ export const PEOPLE: Person[] = [
     bio: '',
     photoUrl: avatarPhoto('photo-1493225457124-a3eb161ffa5f'),
   },
+  {
+    id: 'p7',
+    name: 'Ana',
+    age: 23,
+    distanceKm: 2.9,
+    tags: ['Teatru', 'Concerte', 'Fotografie'],
+    goingTo: null,
+    city: 'Timișoara',
+    bio: 'Merg la orice concert din sală mică. Fac poze, nu filmări.',
+    photoUrl: avatarPhoto('photo-1459749411175-04bf5292ceea'),
+  },
+  {
+    id: 'p8',
+    name: 'Mihai',
+    age: 24,
+    distanceKm: 5.6,
+    tags: ['Sport', 'Drumeții', 'Rock'],
+    goingTo: null,
+    city: 'Arad',
+    bio: 'Munte în weekend, fotbal marțea. Caut oameni pentru ture lungi.',
+    photoUrl: avatarPhoto('photo-1464822759023-fed622ff2c3b'),
+  },
 ];
 
 /** Prietenii mock, așezați în jurul locației dispozitivului (0.01° ≈ 1 km). */

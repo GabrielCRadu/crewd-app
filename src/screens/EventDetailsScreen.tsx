@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Linking, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,6 +8,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import Aurora from '../components/Aurora';
 import Avatar from '../components/Avatar';
 import GlassIconButton from '../components/GlassIconButton';
+import ShareEventSheet from '../components/events/ShareEventSheet';
 import GradientButton from '../components/GradientButton';
 import GlassBadge from '../components/events/GlassBadge';
 import { useAuth } from '../context/AuthContext';
@@ -50,6 +51,7 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
   const { profile, user } = useAuth();
   const { groups: myGroups } = useMyGroups();
   const now = useNow();
+  const [shareOpen, setShareOpen] = useState(false);
 
   const event = useMemo(() => events.find((e) => e.id === eventId) ?? null, [events, eventId]);
 
@@ -122,6 +124,14 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
             onPress={() => navigation.goBack()}
             style={[styles.back, { top: insets.top + 8 }]}
           />
+          {/* Trimite evenimentul unui prieten, în conversația voastră directă */}
+          {!ended ? (
+            <GlassIconButton
+              icon="paper-plane-outline"
+              onPress={() => setShareOpen(true)}
+              style={[styles.share, { top: insets.top + 8 }]}
+            />
+          ) : null}
           <View style={styles.heroBadges}>
             <GlassBadge icon={category.icon} label={category.label} />
             {isLive(event) ? <GlassBadge icon="radio-button-on" label="ACUM" /> : null}
@@ -262,6 +272,17 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
           </View>
         )}
       </View>
+
+      {/* „Trimite unui prieten”: după trimitere, deschide conversația directă din tab-ul Chat */}
+      <ShareEventSheet
+        event={event}
+        visible={shareOpen}
+        onClose={() => setShareOpen(false)}
+        onSent={(personId) => {
+          setShareOpen(false);
+          navigation.getParent()?.navigate('Chats', { screen: 'DirectChat', params: { personId }, initial: false });
+        }}
+      />
     </View>
   );
 }
@@ -325,6 +346,7 @@ const styles = StyleSheet.create({
   hero: { overflow: 'hidden', backgroundColor: colors.backgroundAlt },
   scrim: { position: 'absolute', left: 0, right: 0, bottom: 0, height: '60%' },
   back: { position: 'absolute', left: 20 },
+  share: { position: 'absolute', right: 20 },
   heroBadges: { position: 'absolute', left: 20, bottom: 16, flexDirection: 'row', gap: 8 },
   body: { padding: 20, gap: 16 },
   title: { ...type.screenTitle, fontSize: 30 },

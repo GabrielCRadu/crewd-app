@@ -1,0 +1,2 @@
+# Sfârșit de linie LF în repo pentru toate fișierele text (evită conflictele pe tot fișierul între Windows și macOS/Linux).
+* text=auto eol=lf

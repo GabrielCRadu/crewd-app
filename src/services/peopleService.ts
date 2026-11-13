@@ -1,3 +1,4 @@
+import { MOCK_FRIENDSHIPS } from '../data/mockFriendships';
 import { PEOPLE } from '../data/mockSocial';
 import type { Person } from '../types/social';
 
@@ -19,4 +20,21 @@ export function findPersonByName(name: string): Person | undefined {
 /** Tag-urile pe care le aveți în comun, în ordinea din profilul persoanei. */
 export function commonTags(person: Person, myTags: string[]): string[] {
   return person.tags.filter((t) => myTags.includes(t));
+}
+
+/**
+ * Prietenii unei persoane (fără tine), ordonați după nume.
+ * Mock: din MOCK_FRIENDSHIPS. Cu Firebase: din colecția de prietenii, doar cele vizibile.
+ */
+export function friendsOfPerson(personId: string): Person[] {
+  const ids = MOCK_FRIENDSHIPS.flatMap(([a, b]) => (a === personId ? [b] : b === personId ? [a] : []));
+  return ids
+    .map(getPerson)
+    .filter((p): p is Person => p !== undefined)
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+/** Prietenii comuni: prietenii persoanei care sunt și prietenii tăi. */
+export function mutualFriends(personId: string, myFriendIds: string[]): Person[] {
+  return friendsOfPerson(personId).filter((p) => myFriendIds.includes(p.id));
 }

@@ -1,4 +1,5 @@
-import { INITIAL_MY_RATINGS, INITIAL_REPUTATION } from '../data/mockRatings';
+import { INITIAL_MY_RATINGS, INITIAL_REPUTATION, THEY_WOULD_GO_AGAIN } from '../data/mockRatings';
+import { announceMatch } from './friendsService';
 import { PEOPLE } from '../data/mockSocial';
 import type { Event } from '../types/events';
 import type { EventRatings, RatingTag, Reputation } from '../types/ratings';
@@ -39,10 +40,23 @@ export function hasRated(ratings: MyRatings, eventId: string): boolean {
   return eventId in ratings;
 }
 
-/** Salvează (sau înlocuiește) evaluările tale pentru un eveniment. */
+/**
+ * Salvează (sau înlocuiește) evaluările tale pentru un eveniment.
+ * „Vă potriviți”: dacă dai „Aș mai ieși” cuiva care ți-a dat și el „Aș mai ieși” la același
+ * eveniment, primiți amândoi propunerea să vă adăugați ca prieteni (notificarea din colț).
+ */
 export async function saveEventRatings(eventId: string, ratings: EventRatings): Promise<void> {
+  const before = myRatings[eventId] ?? {};
   myRatings = { ...myRatings, [eventId]: ratings };
   listeners.forEach((listener) => listener());
+
+  const theyWouldGoAgain = THEY_WOULD_GO_AGAIN[eventId] ?? [];
+  for (const [personId, rating] of Object.entries(ratings)) {
+    const nowAgain = rating.tags.includes('again') && !rating.reported;
+    const wasAgain = before[personId]?.tags.includes('again') ?? false;
+    // Doar la prima potrivire (nu la fiecare salvare) și doar dacă ți-a dat și el „Aș mai ieși”.
+    if (nowAgain && !wasAgain && theyWouldGoAgain.includes(personId)) announceMatch(personId);
+  }
 }
 
 /**

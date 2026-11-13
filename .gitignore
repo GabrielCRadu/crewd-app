@@ -53,3 +53,6 @@ service-account*.json
 # Datele de evenimente preluate din surse externe: doar pentru import în Firestore (demo intern), nu în repo
 evenimente-timisoara*.json
 scripts/data/
+
+# Schițe și jurnale locale ale uneltelor de lucru
+.superpowers/
