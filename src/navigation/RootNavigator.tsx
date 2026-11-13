@@ -1,6 +1,11 @@
 import type { ComponentProps, ComponentType } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
-import { DarkTheme, NavigationContainer, getFocusedRouteNameFromRoute } from '@react-navigation/native';
+import {
+  DarkTheme,
+  NavigationContainer,
+  createNavigationContainerRef,
+  getFocusedRouteNameFromRoute,
+} from '@react-navigation/native';
 import type { Theme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,6 +14,7 @@ import EventsNavigator from './EventsNavigator';
 import FriendsMapScreen from '../screens/FriendsMapScreen';
 import ChatsNavigator from './ChatsNavigator';
 import ProfileNavigator from './ProfileNavigator';
+import FriendRequestPopup from '../components/FriendRequestPopup';
 import GradientButton from '../components/GradientButton';
 import { useAuth } from '../context/AuthContext';
 import { colors } from '../theme/colors';
@@ -47,6 +53,16 @@ const TABS: {
   { name: 'Profile', title: 'Profil', component: ProfileNavigator, icon: 'person-outline', iconActive: 'person' },
 ];
 
+/** Navigarea din afara ecranelor (ex. notificarea de cerere de prietenie). */
+const navigationRef = createNavigationContainerRef<Record<string, object | undefined>>();
+
+/** Deschide profilul unei persoane în tab-ul Profil (cu profilul tău dedesubt, pentru „înapoi”). */
+function openPersonProfile(personId: string) {
+  if (navigationRef.isReady()) {
+    navigationRef.navigate('Profile', { screen: 'PersonProfile', params: { personId }, initial: false });
+  }
+}
+
 /**
  * Alege ce vede utilizatorul după starea sesiunii (src/context/AuthContext.tsx):
  * se verifică sesiunea → login / creare cont → onboarding → tab-uri.
@@ -54,9 +70,13 @@ const TABS: {
 export default function RootNavigator() {
   const { status, error, retry, signOut } = useAuth();
   return (
-    <NavigationContainer theme={theme}>
+    <NavigationContainer theme={theme} ref={navigationRef}>
       {status === 'ready' ? (
-        <MainTabs />
+        <>
+          <MainTabs />
+          {/* Notificarea „X ți-a trimis o cerere de prietenie”, peste orice ecran */}
+          <FriendRequestPopup onOpenProfile={openPersonProfile} />
+        </>
       ) : status === 'signedOut' ? (
         <AuthNavigator />
       ) : status === 'needsProfile' ? (
