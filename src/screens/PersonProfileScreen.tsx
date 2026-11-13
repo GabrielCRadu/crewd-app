@@ -1,8 +1,7 @@
 import { Fragment, useMemo } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NavigationProp, RouteProp } from '@react-navigation/native';
 
@@ -21,7 +20,6 @@ import { blockPerson, statusOf, unblockPerson } from '../services/friendsService
 import { commonTags, getPerson } from '../services/peopleService';
 import { getReputation, hasReportedPerson, reportPerson } from '../services/ratingsService';
 import { colors, tagTints } from '../theme/colors';
-import { gradients } from '../theme/gradients';
 import { radii } from '../theme/shape';
 import { formatEventDate } from '../utils/dates';
 import { isUpcomingOrLive, sortByDate } from '../utils/eventFilters';
@@ -33,8 +31,8 @@ import { isUpcomingOrLive, sortByDate } from '../utils/eventFilters';
 type PersonProfileParams = { PersonProfile: { personId: string } };
 
 /**
- * Profilul altei persoane. Aspect „ember”: un singur ton de portocaliu ars sus, care se stinge
- * în negru, text mare și curat, carduri de sticlă portocalie. Fără pete de culoare.
+ * Profilul altei persoane. Aspect „ember”, fără degrade: sus un card portocaliu plin
+ * (identitatea și prietenia), dedesubt negru curat, text mare și carduri de sticlă portocalie.
  * Conținut: identitate, prietenie, „Despre”, ce aveți în comun, ce a strâns după evenimente
  * (totaluri anonime), evenimentele la care ați fost împreună și, doar pentru prieteni, unde merge.
  */
@@ -42,7 +40,7 @@ export default function PersonProfileScreen() {
   const navigation = useNavigation<NavigationProp<Record<string, object | undefined>>>();
   const { personId } = useRoute<RouteProp<PersonProfileParams, 'PersonProfile'>>().params;
   const person = getPerson(personId);
-  const { height } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
 
   const { profile } = useAuth();
   const myRatings = useRatings();
@@ -119,26 +117,17 @@ export default function PersonProfileScreen() {
 
   return (
     <View style={styles.screen}>
-      {/* Lumina portocalie de sus, un singur ton, care se stinge în negru */}
-      <LinearGradient
-        colors={gradients.emberHero}
-        locations={gradients.emberHeroLocations}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 1 }}
-        style={[styles.hero, { height: height * 0.6 }]}
-        pointerEvents="none"
-      />
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Cardul de sus: portocaliu plin, fără degrade, de la marginea ecranului; colțurile de jos rotunjite */}
+        <View style={[styles.heroCard, { paddingTop: insets.top + 8 }]}>
+          <View style={styles.header}>
+            <GlassIconButton icon="chevron-back" onPress={() => navigation.goBack()} style={styles.heroButton} />
+            <GlassIconButton icon="ellipsis-horizontal" onPress={openMenu} style={styles.heroButton} />
+          </View>
 
-      <SafeAreaView style={styles.safe} edges={['top']}>
-        <View style={styles.header}>
-          <GlassIconButton icon="chevron-back" onPress={() => navigation.goBack()} />
-          <GlassIconButton icon="ellipsis-horizontal" onPress={openMenu} />
-        </View>
-
-        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           {/* Identitatea: poza, numele mare, vârsta și orașul */}
           <View style={styles.identity}>
-            {/* Locul pozei: sticlă închisă cu inițiala, în tonul paginii (fără gradientul colorat) */}
+            {/* Locul pozei: sticlă închisă cu inițiala */}
             <View style={styles.photo}>
               <Text style={styles.photoInitial}>{person.name.slice(0, 1).toUpperCase()}</Text>
             </View>
@@ -149,8 +138,11 @@ export default function PersonProfileScreen() {
             </View>
           </View>
 
-          <FriendButton personId={person.id} name={person.name} status={status} />
+          <FriendButton personId={person.id} name={person.name} status={status} onEmber />
+        </View>
 
+        {/* Restul paginii, pe negru curat */}
+        <View style={styles.content}>
           {blocked ? (
             <Text style={styles.muted}>
               Ai blocat această persoană. Nu te mai poate adăuga și nu vă vedeți activitatea.
@@ -250,21 +242,29 @@ export default function PersonProfileScreen() {
               </View>
             </>
           )}
-        </ScrollView>
-      </SafeAreaView>
+        </View>
+      </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
-  hero: { position: 'absolute', top: 0, left: 0, right: 0 },
-  safe: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
   flex: { flex: 1 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 8, paddingBottom: 8 },
-  content: { padding: 20, paddingTop: 12, paddingBottom: 40, gap: 28 },
-  identity: { gap: 10, paddingTop: 8 },
+  // Portocaliu plin, de la marginea de sus a ecranului; doar colțurile de jos sunt rotunjite.
+  heroCard: {
+    backgroundColor: colors.ember,
+    paddingHorizontal: 20,
+    paddingBottom: 24,
+    gap: 20,
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
+  },
+  header: { flexDirection: 'row', justifyContent: 'space-between' },
+  heroButton: { backgroundColor: colors.heroGlass, borderColor: colors.heroBorder },
+  content: { padding: 20, paddingTop: 28, paddingBottom: 40, gap: 28 },
+  identity: { gap: 10 },
   photo: {
     width: 96,
     height: 96,
@@ -278,7 +278,7 @@ const styles = StyleSheet.create({
   photoInitial: { fontSize: 40, fontWeight: '700', color: colors.text },
   name: { fontSize: 46, lineHeight: 50, fontWeight: '800', letterSpacing: -1.5, color: colors.text, marginTop: 10 },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  meta: { fontSize: 15, fontWeight: '500', color: colors.text, opacity: 0.85 },
+  meta: { fontSize: 15, fontWeight: '500', color: colors.text },
   section: { gap: 12 },
   // Etichete mici, cu majuscule și spațiere: aspect editorial, sobru.
   label: { fontSize: 12, fontWeight: '700', letterSpacing: 1.6, color: colors.muted },

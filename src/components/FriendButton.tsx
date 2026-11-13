@@ -17,6 +17,11 @@ interface Props {
   personId: string;
   name: string;
   status: FriendStatus;
+  /**
+   * Butonul stă pe un fundal portocaliu plin (cardul de sus din profilul unei persoane):
+   * acțiunea principală devine neagră, iar pastilele secundare, sticlă închisă.
+   */
+  onEmber?: boolean;
 }
 
 /**
@@ -24,16 +29,22 @@ interface Props {
  * „Adaugă prieten” → „Cerere trimisă” (Anulează) → „Prieteni ✓” (apăsat: Elimină prietenul).
  * Dacă ea ți-a trimis cerere: „Acceptă” / „Refuză”. Dacă ai blocat-o: „Deblochează”.
  */
-export default function FriendButton({ personId, name, status }: Props) {
+export default function FriendButton({ personId, name, status, onEmber = false }: Props) {
+  // Acțiunea principală: albă pe fundal închis, neagră pe portocaliu.
+  const primary = onEmber ? styles.primaryOnEmber : styles.primary;
+  const primaryColor = onEmber ? colors.text : colors.onLight;
+  // Pastilele secundare: sticlă deschisă pe negru, sticlă închisă pe portocaliu.
+  const secondary = onEmber ? styles.secondaryOnEmber : styles.secondary;
+  const linkStyle = [styles.link, onEmber && styles.linkOnEmber];
+
   if (status === 'none') {
-    // Pastilă albă simplă (fără gradient), ca să rămână un singur ton pe ecran.
     return (
       <Pressable
         onPress={() => sendFriendRequest(personId)}
-        style={({ pressed }) => [styles.pill, styles.accept, pressed && styles.pressed]}
+        style={({ pressed }) => [styles.pill, primary, pressed && styles.pressed]}
       >
-        <Ionicons name="person-add" size={18} color={colors.onLight} />
-        <Text style={[styles.pillText, styles.acceptText]}>Adaugă prieten</Text>
+        <Ionicons name="person-add" size={18} color={primaryColor} />
+        <Text style={[styles.pillText, { color: primaryColor }]}>Adaugă prieten</Text>
       </Pressable>
     );
   }
@@ -41,12 +52,12 @@ export default function FriendButton({ personId, name, status }: Props) {
   if (status === 'outgoing') {
     return (
       <View style={styles.row}>
-        <View style={[styles.pill, styles.flex]}>
+        <View style={[styles.pill, secondary, styles.flex]}>
           <Ionicons name="time-outline" size={18} color={colors.text} />
           <Text style={styles.pillText}>Cerere trimisă</Text>
         </View>
         <Pressable onPress={() => cancelFriendRequest(personId)} hitSlop={8}>
-          <Text style={styles.link}>Anulează</Text>
+          <Text style={linkStyle}>Anulează</Text>
         </Pressable>
       </View>
     );
@@ -59,14 +70,14 @@ export default function FriendButton({ personId, name, status }: Props) {
         <View style={styles.row}>
           <Pressable
             onPress={() => acceptFriendRequest(personId)}
-            style={({ pressed }) => [styles.pill, styles.accept, styles.flex, pressed && styles.pressed]}
+            style={({ pressed }) => [styles.pill, primary, styles.flex, pressed && styles.pressed]}
           >
-            <Ionicons name="checkmark" size={18} color={colors.onLight} />
-            <Text style={[styles.pillText, styles.acceptText]}>Acceptă</Text>
+            <Ionicons name="checkmark" size={18} color={primaryColor} />
+            <Text style={[styles.pillText, { color: primaryColor }]}>Acceptă</Text>
           </Pressable>
           <Pressable
             onPress={() => declineFriendRequest(personId)}
-            style={({ pressed }) => [styles.pill, styles.flex, pressed && styles.pressedGlass]}
+            style={({ pressed }) => [styles.pill, secondary, styles.flex, pressed && styles.pressed]}
           >
             <Text style={styles.pillText}>Refuză</Text>
           </Pressable>
@@ -82,10 +93,10 @@ export default function FriendButton({ personId, name, status }: Props) {
         { text: 'Elimină prietenul', style: 'destructive', onPress: () => void removeFriend(personId) },
       ]);
     return (
-      <Pressable onPress={confirmRemove} style={({ pressed }) => [styles.pill, pressed && styles.pressedGlass]}>
+      <Pressable onPress={confirmRemove} style={({ pressed }) => [styles.pill, secondary, pressed && styles.pressed]}>
         <Ionicons name="people" size={18} color={colors.text} />
         <Text style={styles.pillText}>Prieteni ✓</Text>
-        <Ionicons name="chevron-down" size={16} color={colors.muted} />
+        <Ionicons name="chevron-down" size={16} color={onEmber ? colors.text : colors.muted} />
       </Pressable>
     );
   }
@@ -93,12 +104,12 @@ export default function FriendButton({ personId, name, status }: Props) {
   // Blocat
   return (
     <View style={styles.row}>
-      <View style={[styles.pill, styles.flex]}>
-        <Ionicons name="ban" size={18} color={colors.nope} />
+      <View style={[styles.pill, secondary, styles.flex]}>
+        <Ionicons name="ban" size={18} color={onEmber ? colors.text : colors.nope} />
         <Text style={styles.pillText}>Blocat</Text>
       </View>
       <Pressable onPress={() => unblockPerson(personId)} hitSlop={8}>
-        <Text style={styles.link}>Deblochează</Text>
+        <Text style={linkStyle}>Deblochează</Text>
       </Pressable>
     </View>
   );
@@ -108,7 +119,6 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   pill: {
-    ...glass,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -116,13 +126,16 @@ const styles = StyleSheet.create({
     height: 52,
     paddingHorizontal: 20,
     borderRadius: radii.pill,
+    borderWidth: 1,
   },
   pillText: { color: colors.text, fontSize: 16, fontWeight: '600' },
-  accept: { backgroundColor: colors.text, borderColor: colors.text },
-  acceptText: { color: colors.onLight },
-  pressed: { opacity: 0.85 },
-  pressedGlass: { backgroundColor: colors.cardStrong },
+  primary: { backgroundColor: colors.text, borderColor: colors.text },
+  primaryOnEmber: { backgroundColor: colors.background, borderColor: colors.background },
+  secondary: { ...glass },
+  secondaryOnEmber: { backgroundColor: colors.heroGlass, borderColor: colors.heroBorder },
+  pressed: { opacity: 0.8 },
   link: { color: colors.muted, fontSize: 15, fontWeight: '500', textDecorationLine: 'underline' },
+  linkOnEmber: { color: colors.text },
   incoming: { gap: 10 },
-  incomingText: { color: colors.text, fontSize: 14 },
+  incomingText: { color: colors.text, fontSize: 14, fontWeight: '500' },
 });
