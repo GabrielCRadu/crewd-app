@@ -5,8 +5,15 @@ import { MY_PROFILE } from '../data/mockSocial';
 import { isFirebaseConfigured } from '../lib/firebase';
 import { signOut as authSignOut, subscribeToAuth } from '../services/authService';
 import type { AuthUser } from '../services/authService';
-import { seedTagScores } from '../services/preferencesService';
-import { createProfile, getProfile, setBio, setLearnedTags, updateProfileFields } from '../services/profileService';
+import { loadUserPreferences, seedTagScores } from '../services/preferencesService';
+import {
+  createProfile,
+  getProfile,
+  getSavedPreferences,
+  setBio,
+  setLearnedTags,
+  updateProfileFields,
+} from '../services/profileService';
 import type { ProfileChanges, ProfileDraft, UserProfile } from '../types/user';
 
 /*
@@ -37,6 +44,7 @@ interface AuthContextValue {
 const DEMO_PROFILE: UserProfile = {
   uid: 'demo',
   name: MY_PROFILE.name,
+  birthDate: null,
   age: MY_PROFILE.age,
   city: MY_PROFILE.city,
   gender: 'other',
@@ -71,13 +79,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setError(null);
       if (!nextUser) {
         setProfile(null);
+        loadUserPreferences(null, null, []);
         setStatus('signedOut');
         return;
       }
       setStatus('loading');
       try {
         const loaded = await getProfile(nextUser.uid);
+        // Înscrierile și scorurile salvate se încarcă o singură dată, la login.
+        const saved = loaded ? await getSavedPreferences(nextUser.uid) : null;
         if (!active) return;
+        if (loaded) loadUserPreferences(nextUser.uid, saved, allProfileTags(loaded));
         setProfile(loaded);
         setStatus(loaded ? 'ready' : 'needsProfile');
       } catch (e) {
@@ -91,15 +103,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [attempt]);
 
-  // Preferințele (scorurile tag-urilor) pornesc de la tag-urile din profil.
+  // Fără Firebase (profil demo): scorurile pornesc o dată de la tag-urile profilului demo.
   useEffect(() => {
-    if (profile) seedTagScores(allProfileTags(profile));
-  }, [profile]);
+    if (!isFirebaseConfigured) seedTagScores(allProfileTags(DEMO_PROFILE));
+  }, []);
 
   const completeOnboarding = useCallback(
     async (draft: ProfileDraft) => {
       if (!user) throw new Error('Nu ești logat.');
       const created = await createProfile(user.uid, draft);
+      loadUserPreferences(user.uid, null, allProfileTags(created));
       setProfile(created);
       setStatus('ready');
     },

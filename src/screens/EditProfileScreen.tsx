@@ -25,39 +25,39 @@ import { useAuth } from '../context/AuthContext';
 import { TAG_GROUP_STYLE } from '../data/tagGroupStyle';
 import { TAG_GROUPS } from '../data/tags';
 import type { ProfileStackParamList } from '../navigation/profileTypes';
-import { MIN_AGE } from './onboarding/OnboardingIdentityScreen';
 import { PhotoPermissionError, pickProfilePhoto } from '../services/photoService';
 import type { PhotoSource } from '../services/photoService';
 import { colors, tagTints } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
 import type { TagGroup } from '../types/social';
-import type { UserProfile } from '../types/user';
+import type { Gender, UserProfile } from '../types/user';
+import { formatBirthDate } from '../utils/birthDate';
 
 type Props = NativeStackScreenProps<ProfileStackParamList, 'EditProfile'>;
 
-const MAX_AGE = 99;
 const MAX_BIO = 200;
 /** La fel ca la onboarding: câteva tag-uri, ca recomandările să aibă de unde porni. */
 const MIN_TAGS = 3;
 
 type Selection = Record<TagGroup['id'], string[]>;
-type Errors = { name?: string; age?: string; city?: string };
+type Errors = { name?: string; city?: string };
+
+const GENDER_LABELS: Record<Gender, string> = { female: 'Femeie', male: 'Bărbat', other: 'Altul' };
 
 /**
- * „Editează profilul”: fotografia, numele, vârsta, orașul, descrierea și preferințele.
+ * „Editează profilul”: fotografia, numele, orașul, descrierea și preferințele.
+ * Data nașterii și genul se aleg doar la onboarding și nu se mai pot schimba (regulile Firestore): aici apar doar pentru citire.
  * Nimic nu se salvează până la „Salvează”; „înapoi” cu modificări nesalvate cere confirmare.
  */
 export default function EditProfileScreen({ navigation }: Props) {
   const { profile, updateProfile } = useAuth();
   const insets = useSafeAreaInsets();
-  const ageRef = useRef<TextInputInstance>(null);
   const cityRef = useRef<TextInputInstance>(null);
 
   // Ciorna pornește de la profilul curent (ecranul se deschide doar cu profil încărcat).
   const initial = profile as UserProfile;
   const [photoUrl, setPhotoUrl] = useState(initial.photoUrl);
   const [name, setName] = useState(initial.name);
-  const [age, setAge] = useState(String(initial.age));
   const [city, setCity] = useState(initial.city);
   const [bio, setBio] = useState(initial.bio);
   const [tags, setTags] = useState<Selection>(initial.chosenTags);
@@ -70,7 +70,6 @@ export default function EditProfileScreen({ navigation }: Props) {
   const dirty =
     photoUrl !== initial.photoUrl ||
     name !== initial.name ||
-    age !== String(initial.age) ||
     city !== initial.city ||
     bio !== initial.bio ||
     JSON.stringify(tags) !== JSON.stringify(initial.chosenTags);
@@ -107,13 +106,8 @@ export default function EditProfileScreen({ navigation }: Props) {
   };
 
   const save = async () => {
-    const ageNumber = Number(age);
     const nextErrors: Errors = {
       name: name.trim().length >= 2 ? undefined : 'Scrie-ți numele.',
-      age:
-        Number.isInteger(ageNumber) && ageNumber >= MIN_AGE && ageNumber <= MAX_AGE
-          ? undefined
-          : `Trebuie să ai cel puțin ${MIN_AGE} ani.`,
       city: city.trim().length >= 2 ? undefined : 'Scrie orașul.',
     };
     setErrors(nextErrors);
@@ -132,7 +126,6 @@ export default function EditProfileScreen({ navigation }: Props) {
       await updateProfile({
         photoUrl,
         name: name.trim(),
-        age: ageNumber,
         city: city.trim(),
         bio: bio.trim(),
         chosenTags: tags,
@@ -180,20 +173,9 @@ export default function EditProfileScreen({ navigation }: Props) {
             autoCapitalize="words"
             maxLength={50}
             returnKeyType="next"
-            onSubmitEditing={() => ageRef.current?.focus()}
+            onSubmitEditing={() => cityRef.current?.focus()}
           />
           <View style={styles.row}>
-            <TextField
-              ref={ageRef}
-              label="Vârstă"
-              value={age}
-              onChangeText={(t) => setAge(t.replace(/[^0-9]/g, '').slice(0, 2))}
-              error={errors.age}
-              keyboardType="number-pad"
-              returnKeyType="next"
-              onSubmitEditing={() => cityRef.current?.focus()}
-              containerStyle={styles.ageField}
-            />
             <TextField
               ref={cityRef}
               label="Locație"
@@ -204,6 +186,24 @@ export default function EditProfileScreen({ navigation }: Props) {
               autoCapitalize="words"
               containerStyle={styles.cityField}
             />
+          </View>
+
+          {/* Data nașterii și genul: doar pentru citire */}
+          <View style={styles.lockedCard}>
+            <View style={styles.lockedRow}>
+              <Text style={styles.label}>Data nașterii</Text>
+              <Text style={styles.lockedValue}>
+                {initial.birthDate ? formatBirthDate(initial.birthDate) : `${initial.age} ani`}
+              </Text>
+            </View>
+            <View style={styles.lockedRow}>
+              <Text style={styles.label}>Gen</Text>
+              <Text style={styles.lockedValue}>{GENDER_LABELS[initial.gender]}</Text>
+            </View>
+            <View style={styles.lockedHintRow}>
+              <Ionicons name="lock-closed-outline" size={12} color={colors.faint} />
+              <Text style={styles.lockedHint}>Data nașterii și genul nu mai pot fi modificate după crearea profilului.</Text>
+            </View>
           </View>
 
           {/* Descrierea */}
@@ -321,8 +321,12 @@ const styles = StyleSheet.create({
   removePhoto: { color: colors.muted, fontSize: 13, textDecorationLine: 'underline' },
   hint: { color: colors.faint, fontSize: 13 },
   row: { flexDirection: 'row', gap: 12, alignItems: 'flex-start' },
-  ageField: { flex: 1 },
-  cityField: { flex: 2 },
+  cityField: { flex: 1 },
+  lockedCard: { ...glass, gap: 10, padding: 16, borderRadius: radii.inner },
+  lockedRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  lockedValue: { color: colors.text, fontSize: 15, fontWeight: '500' },
+  lockedHintRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  lockedHint: { flex: 1, color: colors.faint, fontSize: 12 },
   block: { gap: 10 },
   labelRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   label: { color: colors.muted, fontSize: 13, fontWeight: '500' },

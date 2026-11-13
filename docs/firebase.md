@@ -21,7 +21,7 @@ Fără `.env.local`, aplicația merge în continuare, cu datele mock din `src/da
 
 ## Regulile Firestore
 
-Fișierul [`firestore.rules`](../firestore.rules) permite oricui să citească `events/` și `meta/`, și interzice scrierea lor din aplicație. Fiecare utilizator logat își poate citi și scrie doar propriul `users/{uid}`, cu o validare de bază (vârsta 18–99, genul dintr-o listă fixă). Se aplică din Firebase Console → Firestore Database → Rules (lipești tot fișierul și apeși *Publish*).
+Fișierul [`firestore.rules`](../firestore.rules) permite oricui să citească `events/` și `meta/`, și interzice scrierea lor din aplicație. Fiecare utilizator logat își poate citi și scrie doar propriul `users/{uid}`, cu validare: la creare, data nașterii trebuie să dea minimum 18 ani; la orice modificare, **data nașterii și genul trebuie să rămână neschimbate**. Se aplică din Firebase Console → Firestore Database → Rules (lipești tot fișierul și apeși *Publish*).
 
 ## Importul evenimentelor
 
@@ -77,9 +77,13 @@ Creat la finalul onboarding-ului (`src/services/profileService.ts`).
 | Câmp | Tip | Note |
 | --- | --- | --- |
 | `name` | string | 1–50 caractere |
-| `age` | number (întreg) | 18–99 |
+| `birthDate` | Timestamp | miezul nopții UTC din ziua nașterii; minim 18 ani (verificat de reguli). **Nu se poate schimba după onboarding.** Vârsta se calculează în aplicație. Profilurile vechi au în loc `age` (number). |
 | `city` | string | |
-| `gender` | string | `female`, `male` sau `other` |
+| `gender` | string | `female`, `male` sau `other`. **Nu se poate schimba după onboarding.** |
+| `bio` | string | „Despre mine”, maxim 500 de caractere |
+| `photoUrl` | string \| null | poza de profil ca data URI JPEG mic (maxim ~300 KB) |
+| `joinedEventIds` | string[] | evenimentele la care e înscris; se salvează la fiecare „Înscrie-te” / „Anulează” |
+| `tagScores` | map | scorul fiecărui tag (crește la înscriere, scade la anulare); pornește de la tag-urile din profil |
 | `chosenTags` | map | `{ events: string[], music: string[], hobbies: string[] }`, tag-urile din `src/data/tags.ts` |
 | `learnedTags` | string[] | tag-uri adăugate automat din înscrieri; se pot scoate din Profil |
 | `createdAt`, `updatedAt` | Timestamp | |

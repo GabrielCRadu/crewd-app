@@ -9,8 +9,15 @@ export type Gender = 'female' | 'male' | 'other';
 export interface UserProfile {
   uid: string;
   name: string;
+  /**
+   * Data nașterii, „AAAA-LL-ZZ”. Aleasă la onboarding și blocată după (regulile Firestore).
+   * null doar la profilurile vechi, create cu vârsta în loc de dată.
+   */
+  birthDate: string | null;
+  /** Vârsta în ani, calculată din `birthDate` (nu se salvează). */
   age: number;
   city: string;
+  /** Blocat după onboarding (regulile Firestore). */
   gender: Gender;
   /** „Despre mine”, scris de utilizator din Profil. Poate fi gol. */
   bio: string;
@@ -26,7 +33,8 @@ export interface UserProfile {
 }
 
 /** Ce se completează în onboarding (restul câmpurilor le pune aplicația). */
-export type ProfileDraft = Omit<UserProfile, 'uid' | 'learnedTags' | 'bio' | 'photoUrl'>;
+export type ProfileDraft = Omit<UserProfile, 'uid' | 'learnedTags' | 'bio' | 'photoUrl' | 'age'> & { birthDate: string };
 
 /** Ce se poate schimba din „Editează profilul”. */
-export type ProfileChanges = Partial<Pick<UserProfile, 'name' | 'age' | 'city' | 'bio' | 'photoUrl' | 'chosenTags'>>;
+/** Data nașterii și genul NU se pot schimba după onboarding. */
+export type ProfileChanges = Partial<Pick<UserProfile, 'name' | 'city' | 'bio' | 'photoUrl' | 'chosenTags'>>;

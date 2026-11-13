@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { ActivityIndicator, Image, Linking, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { ActivityIndicator, Alert, Image, Linking, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -65,6 +65,10 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
   // Grupurile de chat pentru acest eveniment (mock: potrivite după titlu, din mockSocial.ts).
   const groups = [...MY_GROUPS, ...SUGGESTED_GROUPS].filter((g) => g.eventTitle === event.title);
   const openRating = () => navigation.navigate('RateEvent', { eventId: event.id });
+  // Înscrierea se salvează imediat în contul tău; dacă nu merge (ex. fără internet), revine și te anunțăm.
+  const saveJoin = (action: typeof joinEvent) => {
+    action(event).catch((e: Error) => Alert.alert('Înscrierea nu s-a salvat', e.message));
+  };
 
   // „Intră” deschide conversația grupului în tab-ul Chat (cu lista de chat-uri dedesubt, pentru „înapoi”).
   const openGroup = (group: ChatGroup) => {
@@ -207,7 +211,7 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
             <View style={styles.joinedPill}>
               <Text style={styles.joinedText}>Înscris ✓</Text>
             </View>
-            <Pressable onPress={() => leaveEvent(event)} hitSlop={8}>
+            <Pressable onPress={() => saveJoin(leaveEvent)} hitSlop={8}>
               <Text style={styles.cancel}>Anulează</Text>
             </Pressable>
           </View>
@@ -222,7 +226,7 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
                 <Text style={styles.ticketText}>{event.priceInfo?.isFree ? 'Înscriere' : 'Bilete'}</Text>
               </Pressable>
             ) : null}
-            <GradientButton label="Înscrie-te" icon="arrow-forward" onPress={() => joinEvent(event)} style={styles.ctaMain} />
+            <GradientButton label="Înscrie-te" icon="arrow-forward" onPress={() => saveJoin(joinEvent)} style={styles.ctaMain} />
           </View>
         )}
       </View>

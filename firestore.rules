@@ -19,20 +19,43 @@ service cloud.firestore {
 
     // Profilul fiecărui utilizator: doar el îl poate citi și scrie, după login.
     match /users/{uid} {
-      allow read: if request.auth != null && request.auth.uid == uid;
-      allow create, update: if request.auth != null
-        && request.auth.uid == uid
-        && request.resource.data.name is string
-        && request.resource.data.name.size() > 0
-        && request.resource.data.name.size() <= 50
-        && request.resource.data.age is int
-        && request.resource.data.age >= 18
-        && request.resource.data.age <= 99
-        && request.resource.data.city is string
-        && request.resource.data.gender in ['female', 'male', 'other']
-        && request.resource.data.chosenTags is map
-        && request.resource.data.learnedTags is list;
-      allow delete: if request.auth != null && request.auth.uid == uid;
+      function isOwner() {
+        return request.auth != null && request.auth.uid == uid;
+      }
+
+      // Câmpurile care trebuie să fie valide la orice scriere.
+      function validProfile(d) {
+        return d.name is string && d.name.size() > 0 && d.name.size() <= 50
+          && d.city is string && d.city.size() <= 60
+          && d.chosenTags is map
+          && d.learnedTags is list
+          && (!('bio' in d) || (d.bio is string && d.bio.size() <= 500))
+          // Poza e un data URI JPEG mic (~400px); limita ține documentul mult sub 1 MB.
+          && (!('photoUrl' in d) || d.photoUrl == null || (d.photoUrl is string && d.photoUrl.size() <= 300000))
+          && (!('joinedEventIds' in d) || (d.joinedEventIds is list && d.joinedEventIds.size() <= 500))
+          && (!('tagScores' in d) || d.tagScores is map);
+      }
+
+      // Data nașterii e un Timestamp (miezul nopții UTC); cel puțin 18 ani împliniți (6574 de zile ≈ 18 ani cu 4 ani bisecți).
+      function isAdult(birthDate) {
+        return birthDate is timestamp && birthDate <= request.time - duration.value(6574, 'd');
+      }
+
+      allow read: if isOwner();
+
+      allow create: if isOwner()
+        && validProfile(request.resource.data)
+        && isAdult(request.resource.data.birthDate)
+        && request.resource.data.gender in ['female', 'male', 'other'];
+
+      // Data nașterii și genul (și `age` la profilurile vechi) NU se mai pot schimba după onboarding.
+      allow update: if isOwner()
+        && validProfile(request.resource.data)
+        && request.resource.data.get('birthDate', null) == resource.data.get('birthDate', null)
+        && request.resource.data.get('gender', null) == resource.data.get('gender', null)
+        && request.resource.data.get('age', null) == resource.data.get('age', null);
+
+      allow delete: if isOwner();
     }
 
     // Orice altceva e închis până adăugăm reguli explicite.

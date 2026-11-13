@@ -9,7 +9,8 @@ export type AuthStackParamList = {
 /** Ce se completează la pasul 1 din onboarding și se trimite la pasul 2. */
 export interface IdentityDraft {
   name: string;
-  age: number;
+  /** „AAAA-LL-ZZ” */
+  birthDate: string;
   city: string;
   gender: Gender;
 }

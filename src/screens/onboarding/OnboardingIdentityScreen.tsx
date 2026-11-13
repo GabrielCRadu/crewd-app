@@ -2,8 +2,10 @@ import { useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import type { TextInputInstance } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
+import BirthDateField from '../../components/BirthDateField';
 import GradientButton from '../../components/GradientButton';
 import OnboardingHeader from '../../components/OnboardingHeader';
 import ScreenGlow from '../../components/ScreenGlow';
@@ -13,12 +15,9 @@ import type { OnboardingStackParamList } from '../../navigation/authTypes';
 import { colors } from '../../theme/colors';
 import { glass, radii } from '../../theme/shape';
 import type { Gender } from '../../types/user';
+import { MAX_AGE, MIN_AGE, ageFromBirthDate } from '../../utils/birthDate';
 
 type Props = NativeStackScreenProps<OnboardingStackParamList, 'OnboardingIdentity'>;
-
-/** Aplicația pune oameni necunoscuți în legătură, așa că cerem vârsta minimă de 18 ani. */
-export const MIN_AGE = 18;
-const MAX_AGE = 99;
 
 const GENDERS: { value: Gender; label: string }[] = [
   { value: 'female', label: 'Femeie' },
@@ -26,37 +25,41 @@ const GENDERS: { value: Gender; label: string }[] = [
   { value: 'other', label: 'Altul' },
 ];
 
-type Errors = { name?: string; age?: string; city?: string; gender?: string };
+type Errors = { name?: string; birthDate?: string; city?: string; gender?: string };
+
+/** Mesajul de sub data nașterii și gen: nu se pot schimba după crearea profilului. */
+const LOCKED_HINT = 'Nu mai poate fi modificat după crearea profilului.';
 
 /**
  * Onboarding, pasul 1 din 2: „Salut, eu sunt…” (docs/layout-guide.md).
- * Nume pe toată lățimea → Vârstă (1/3) + Oraș pe un rând → Gen (3 butoane) → „Continuă” jos.
+ * Nume pe toată lățimea → Data nașterii + Oraș pe un rând → Gen (3 butoane) → „Continuă” jos.
+ * Data nașterii și genul se blochează după crearea profilului (regulile Firestore), așa că o spunem pe ecran.
  */
 export default function OnboardingIdentityScreen({ navigation }: Props) {
   const { signOut } = useAuth();
-  const ageRef = useRef<TextInputInstance>(null);
   const cityRef = useRef<TextInputInstance>(null);
   const [name, setName] = useState('');
-  const [age, setAge] = useState('');
+  const [birthDate, setBirthDate] = useState<string | null>(null);
   const [city, setCity] = useState('');
   const [gender, setGender] = useState<Gender | null>(null);
   const [errors, setErrors] = useState<Errors>({});
 
   const next = () => {
-    const ageNumber = Number(age);
+    const age = birthDate ? ageFromBirthDate(birthDate) : null;
     const nextErrors: Errors = {
       name: name.trim().length >= 2 ? undefined : 'Scrie-ți numele.',
-      age:
-        Number.isInteger(ageNumber) && ageNumber >= MIN_AGE && ageNumber <= MAX_AGE
+      birthDate: !birthDate
+        ? 'Alege data nașterii.'
+        : age !== null && age >= MIN_AGE && age <= MAX_AGE
           ? undefined
           : `Trebuie să ai cel puțin ${MIN_AGE} ani.`,
       city: city.trim().length >= 2 ? undefined : 'Scrie orașul.',
       gender: gender ? undefined : 'Alege o opțiune.',
     };
     setErrors(nextErrors);
-    if (Object.values(nextErrors).some(Boolean) || !gender) return;
+    if (Object.values(nextErrors).some(Boolean) || !gender || !birthDate) return;
     navigation.navigate('OnboardingTags', {
-      identity: { name: name.trim(), age: ageNumber, city: city.trim(), gender },
+      identity: { name: name.trim(), birthDate, city: city.trim(), gender },
     });
   };
 
@@ -82,20 +85,16 @@ export default function OnboardingIdentityScreen({ navigation }: Props) {
             autoComplete="given-name"
             textContentType="givenName"
             returnKeyType="next"
-            onSubmitEditing={() => ageRef.current?.focus()}
+            onSubmitEditing={() => cityRef.current?.focus()}
           />
 
           <View style={styles.row}>
-            <TextField
-              ref={ageRef}
-              label="Vârstă"
-              value={age}
-              onChangeText={(t) => setAge(t.replace(/[^0-9]/g, '').slice(0, 2))}
-              error={errors.age}
-              placeholder="21"
-              keyboardType="number-pad"
-              returnKeyType="next"
-              onSubmitEditing={() => cityRef.current?.focus()}
+            <BirthDateField
+              label="Data nașterii"
+              value={birthDate}
+              onChange={setBirthDate}
+              error={errors.birthDate}
+              hint={LOCKED_HINT}
               containerStyle={styles.ageField}
             />
             <TextField
@@ -130,6 +129,10 @@ export default function OnboardingIdentityScreen({ navigation }: Props) {
               })}
             </View>
             {errors.gender ? <Text style={styles.error}>{errors.gender}</Text> : null}
+            <View style={styles.hintRow}>
+              <Ionicons name="lock-closed-outline" size={12} color={colors.faint} />
+              <Text style={styles.hint}>{LOCKED_HINT}</Text>
+            </View>
           </View>
 
           <View style={styles.bottom}>
@@ -152,8 +155,10 @@ const styles = StyleSheet.create({
   title: { fontSize: 36, fontWeight: '600', letterSpacing: -0.8, color: colors.text },
   subtitle: { fontSize: 15, lineHeight: 22, color: colors.muted },
   row: { flexDirection: 'row', gap: 12, alignItems: 'flex-start' },
-  ageField: { flex: 1 },
+  ageField: { flex: 3 },
   cityField: { flex: 2 },
+  hintRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginLeft: 6 },
+  hint: { flex: 1, color: colors.faint, fontSize: 12 },
   genderBlock: { gap: 8 },
   label: { color: colors.muted, fontSize: 13, fontWeight: '500' },
   genderRow: { flexDirection: 'row', gap: 10 },
