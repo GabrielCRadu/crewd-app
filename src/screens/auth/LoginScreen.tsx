@@ -61,7 +61,7 @@ export default function LoginScreen({ navigation }: Props) {
     <View style={styles.screen}>
       <Aurora style={styles.hero} withScrim />
       <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
-        <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <KeyboardAvoidingView style={styles.flex} behavior="padding">
           <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
             <View style={styles.brand}>
               <Text style={styles.logo}>crewd</Text>

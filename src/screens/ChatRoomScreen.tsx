@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, KeyboardAvoidingView, Linking, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -7,7 +7,14 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import Aurora from '../components/Aurora';
 import Avatar from '../components/Avatar';
 import GlassIconButton from '../components/GlassIconButton';
-import { MESSAGES, getGroup } from '../data/mockSocial';
+import { MESSAGES } from '../data/mockSocial';
+import { useEvents } from '../hooks/useEvents';
+import { useMyGroups } from '../hooks/useMyGroups';
+import { useUserLocation } from '../hooks/useUserLocation';
+import { formatDay, formatTime } from '../utils/dates';
+import { canOpenChat } from '../utils/groupRules';
+import { useAuth } from '../context/AuthContext';
+import { leaveGroup } from '../services/groupsService';
 import type { ChatsStackParamList } from '../navigation/chatsTypes';
 import { colors } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
@@ -15,13 +22,65 @@ import type { ChatMessage } from '../types/social';
 
 type Props = NativeStackScreenProps<ChatsStackParamList, 'ChatRoom'>;
 
-/** Conversația unui grup: antet, banner „Ne vedem”, mesaje, bara de scriere (vezi docs/layout-guide.md). */
+/**
+ * Conversația unui grupuleț: antet, banner „Ne vedem” (ora și locul din grupuleț), mesaje, bara de scriere
+ * (docs/layout-guide.md). Mesajele sunt încă mock (vezi todo.md).
+ */
 export default function ChatRoomScreen({ navigation, route }: Props) {
-  const group = getGroup(route.params.groupId);
+  const { groups, loading } = useMyGroups();
+  const { user, profile } = useAuth();
+  const location = useUserLocation();
+  const { events } = useEvents(location.coords);
+  const group = groups.find((g) => g.id === route.params.groupId) ?? null;
+  const event = events.find((e) => e.id === route.params.eventId) ?? null;
   const [messages, setMessages] = useState<ChatMessage[]>(MESSAGES[route.params.groupId] ?? []);
   const [draft, setDraft] = useState('');
 
-  if (!group) return null;
+  // Încă se încarcă, nu mai ești în grupuleț, sau grupulețul nu s-a format: mesaj + „înapoi”, nu ecran gol.
+  if (!group || !canOpenChat(group)) {
+    return (
+      <SafeAreaView style={[styles.safe, styles.center]} edges={['top', 'bottom']}>
+        {loading ? (
+          <ActivityIndicator color={colors.text} />
+        ) : (
+          <>
+            <Text style={styles.emptyText}>
+              {group ? 'Chat-ul se deschide când grupulețul are cel puțin 3 persoane.' : 'Nu mai ești în acest grupuleț.'}
+            </Text>
+            <Pressable onPress={() => navigation.goBack()} style={styles.bannerButton}>
+              <Text style={styles.bannerButtonText}>Înapoi</Text>
+            </Pressable>
+          </>
+        )}
+      </SafeAreaView>
+    );
+  }
+
+  // Ieși din grupuleț din conversație: rămâi înscris la eveniment.
+  const confirmLeave = () => {
+    const uid = user?.uid ?? profile?.uid;
+    if (!uid) return;
+    Alert.alert('Ieși din grupuleț?', 'Ieși și din chat-ul lui (e același lucru). Rămâi înscris la eveniment și poți alege alt grupuleț.', [
+      { text: 'Rămân', style: 'cancel' },
+      {
+        text: 'Ies',
+        style: 'destructive',
+        onPress: () => {
+          leaveGroup(group.eventId, group.id, uid)
+            .then(() => navigation.goBack())
+            .catch((e: Error) => Alert.alert('Nu ai ieșit din grupuleț', e.message));
+        },
+      },
+    ]);
+  };
+
+  // „Pe hartă”: deschide locul evenimentului în aplicația de hărți (Google Maps / Apple Maps).
+  const openMap = () => {
+    const query = event
+      ? `${event.location.latitude},${event.location.longitude}`
+      : encodeURIComponent(group.meetupPlace);
+    void Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${query}`);
+  };
 
   const send = () => {
     const text = draft.trim();
@@ -36,12 +95,16 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
         <GlassIconButton icon="chevron-back" size={40} onPress={() => navigation.goBack()} />
         <View style={styles.headerText}>
           <Text style={styles.headerTitle} numberOfLines={1}>
-            {group.name}
+            {event?.title ?? 'Grupuleț'}
           </Text>
           <Text style={styles.headerSubtitle} numberOfLines={1}>
-            {group.membersCount} persoane · {group.eventTitle}
+            {group.memberUids.length} persoane ·{' '}
+            {Object.values(group.members)
+              .map((m) => m.name)
+              .join(', ')}
           </Text>
         </View>
+        <GlassIconButton icon="exit-outline" size={40} onPress={confirmLeave} />
       </View>
 
       <View style={styles.banner}>
@@ -51,15 +114,15 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
         <View style={styles.bannerText}>
           <Text style={styles.bannerLabel}>NE VEDEM</Text>
           <Text style={styles.bannerWhen}>
-            {group.meetupWhen} · {group.meetupWhere}
+            {formatDay(group.meetupAt)} la {formatTime(group.meetupAt)} · {group.meetupPlace}
           </Text>
         </View>
-        <Pressable style={styles.bannerButton}>
+        <Pressable onPress={openMap} style={styles.bannerButton}>
           <Text style={styles.bannerButtonText}>Pe hartă</Text>
         </Pressable>
       </View>
 
-      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <KeyboardAvoidingView style={styles.flex} behavior="padding">
         <FlatList
           style={styles.flex}
           contentContainerStyle={styles.messages}
@@ -104,6 +167,8 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
+  center: { alignItems: 'center', justifyContent: 'center', gap: 16, padding: 32 },
+  emptyText: { color: colors.muted, fontSize: 15, textAlign: 'center' },
   flex: { flex: 1 },
   header: {
     flexDirection: 'row',
