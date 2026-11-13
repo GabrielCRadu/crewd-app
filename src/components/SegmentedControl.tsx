@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { colors } from '../theme/colors';
+import { glass, radii } from '../theme/shape';
 
 interface Props<T extends string> {
   options: { value: T; label: string }[];
@@ -8,7 +9,7 @@ interface Props<T extends string> {
   onChange: (value: T) => void;
 }
 
-/** Comutator cu segmente egale (ex. „Prieteni | Evenimente”). */
+/** Comutator cu segmente egale: activul e pastilă albă, restul sticlă (vezi docs/design-language.md). */
 export default function SegmentedControl<T extends string>({ options, value, onChange }: Props<T>) {
   return (
     <View style={styles.container}>
@@ -25,16 +26,9 @@ export default function SegmentedControl<T extends string>({ options, value, onC
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    backgroundColor: colors.card,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: 4,
-  },
-  segment: { flex: 1, alignItems: 'center', paddingVertical: 10, borderRadius: 10 },
-  active: { backgroundColor: colors.primary },
-  label: { color: colors.muted, fontWeight: '700' },
-  labelActive: { color: '#fff' },
+  container: { ...glass, flexDirection: 'row', borderRadius: radii.pill, padding: 4 },
+  segment: { flex: 1, alignItems: 'center', paddingVertical: 10, borderRadius: radii.pill },
+  active: { backgroundColor: colors.text },
+  label: { color: colors.muted, fontWeight: '500' },
+  labelActive: { color: colors.onLight, fontWeight: '600' },
 });

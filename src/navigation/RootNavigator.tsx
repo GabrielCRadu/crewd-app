@@ -53,8 +53,9 @@ export default function RootNavigator() {
         screenOptions={{
           headerShown: false,
           tabBarActiveTintColor: colors.text,
-          tabBarInactiveTintColor: colors.muted,
-          tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
+          tabBarInactiveTintColor: colors.faint,
+          tabBarLabelStyle: { fontSize: 11, fontWeight: '500' },
+          tabBarStyle: styles.tabBar,
         }}
       >
         {TABS.map((t) => (
@@ -66,10 +67,10 @@ export default function RootNavigator() {
               title: t.title,
               tabBarStyle: FULLSCREEN_ROUTES.includes(getFocusedRouteNameFromRoute(route) ?? '')
                 ? { display: 'none' }
-                : undefined,
+                : styles.tabBar,
               tabBarIcon: ({ focused, color }) => (
                 <View style={[styles.iconPill, focused && styles.iconPillActive]}>
-                  <Ionicons name={focused ? t.iconActive : t.icon} size={20} color={focused ? '#fff' : color} />
+                  <Ionicons name={focused ? t.iconActive : t.icon} size={20} color={color} />
                 </View>
               ),
             })}
@@ -81,6 +82,7 @@ export default function RootNavigator() {
 }
 
 const styles = StyleSheet.create({
+  tabBar: { backgroundColor: colors.background, borderTopColor: colors.border },
   iconPill: { width: 48, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
-  iconPillActive: { backgroundColor: colors.primary },
+  iconPillActive: { backgroundColor: colors.cardStrong },
 });

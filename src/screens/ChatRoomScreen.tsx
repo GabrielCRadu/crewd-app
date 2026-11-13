@@ -4,10 +4,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
+import Aurora from '../components/Aurora';
 import Avatar from '../components/Avatar';
+import GlassIconButton from '../components/GlassIconButton';
 import { MESSAGES, getGroup } from '../data/mockSocial';
 import type { ChatsStackParamList } from '../navigation/chatsTypes';
 import { colors } from '../theme/colors';
+import { glass, radii } from '../theme/shape';
 import type { ChatMessage } from '../types/social';
 
 type Props = NativeStackScreenProps<ChatsStackParamList, 'ChatRoom'>;
@@ -30,9 +33,7 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <View style={styles.header}>
-        <Pressable onPress={() => navigation.goBack()} style={styles.backButton} hitSlop={8}>
-          <Ionicons name="chevron-back" size={22} color={colors.text} />
-        </Pressable>
+        <GlassIconButton icon="chevron-back" size={40} onPress={() => navigation.goBack()} />
         <View style={styles.headerText}>
           <Text style={styles.headerTitle} numberOfLines={1}>
             {group.name}
@@ -44,7 +45,9 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
       </View>
 
       <View style={styles.banner}>
-        <Ionicons name="location-outline" size={22} color="#fff" />
+        <Aurora style={StyleSheet.absoluteFill} />
+        <View style={styles.bannerScrim} />
+        <Ionicons name="location-outline" size={22} color={colors.text} />
         <View style={styles.bannerText}>
           <Text style={styles.bannerLabel}>NE VEDEM</Text>
           <Text style={styles.bannerWhen}>
@@ -90,8 +93,8 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
             onSubmitEditing={send}
             returnKeyType="send"
           />
-          <Pressable onPress={send} style={styles.sendButton}>
-            <Ionicons name="arrow-forward" size={22} color="#fff" />
+          <Pressable onPress={send} style={({ pressed }) => [styles.sendButton, pressed && styles.pressed]}>
+            <Ionicons name="arrow-up" size={22} color={colors.onLight} />
           </Pressable>
         </View>
       </KeyboardAvoidingView>
@@ -111,42 +114,36 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.card,
-  },
   headerText: { flex: 1 },
-  headerTitle: { fontSize: 18, fontWeight: '800', color: colors.text },
+  headerTitle: { fontSize: 18, fontWeight: '600', color: colors.text },
   headerSubtitle: { fontSize: 12, color: colors.muted },
   banner: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
     margin: 16,
-    padding: 14,
-    borderRadius: 16,
-    backgroundColor: colors.primary,
+    padding: 16,
+    borderRadius: radii.card,
+    overflow: 'hidden',
   },
+  bannerScrim: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, backgroundColor: 'rgba(11,10,16,0.35)' },
   bannerText: { flex: 1 },
-  bannerLabel: { color: '#fff', fontSize: 11, fontWeight: '800', letterSpacing: 0.5, opacity: 0.85 },
-  bannerWhen: { color: '#fff', fontSize: 15, fontWeight: '800' },
-  bannerButton: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, backgroundColor: colors.card },
-  bannerButtonText: { color: colors.text, fontWeight: '700', fontSize: 13 },
+  bannerLabel: { color: colors.text, fontSize: 11, fontWeight: '600', letterSpacing: 0.8, opacity: 0.8 },
+  bannerWhen: { color: colors.text, fontSize: 16, fontWeight: '600' },
+  bannerButton: { paddingHorizontal: 14, paddingVertical: 9, borderRadius: radii.pill, backgroundColor: colors.text },
+  bannerButtonText: { color: colors.onLight, fontWeight: '600', fontSize: 13 },
   messages: { paddingHorizontal: 16, paddingBottom: 12, gap: 10, flexGrow: 1, justifyContent: 'flex-end' },
-  day: { alignSelf: 'center', color: colors.muted, fontSize: 12, marginBottom: 4 },
+  day: { alignSelf: 'center', color: colors.faint, fontSize: 12, marginBottom: 4 },
   messageRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8, maxWidth: '85%' },
   messageRowMine: { alignSelf: 'flex-end' },
   messageBody: { flexShrink: 1, gap: 4 },
-  author: { color: colors.muted, fontSize: 12, fontWeight: '700' },
-  bubble: { paddingHorizontal: 14, paddingVertical: 10, borderRadius: 16 },
-  bubbleOther: { backgroundColor: colors.card, borderBottomLeftRadius: 4 },
-  bubbleMine: { backgroundColor: colors.primary, borderBottomRightRadius: 4 },
+  author: { color: colors.muted, fontSize: 12, fontWeight: '500' },
+  bubble: { paddingHorizontal: 14, paddingVertical: 10, borderRadius: 20 },
+  bubbleOther: { ...glass, borderBottomLeftRadius: 6 },
+  bubbleMine: { backgroundColor: colors.text, borderBottomRightRadius: 6 },
   bubbleText: { color: colors.text, fontSize: 15 },
-  bubbleTextMine: { color: '#fff' },
+  bubbleTextMine: { color: colors.onLight },
+  pressed: { opacity: 0.85 },
   composer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -157,20 +154,20 @@ const styles = StyleSheet.create({
     borderTopColor: colors.border,
   },
   input: {
+    ...glass,
     flex: 1,
     color: colors.text,
-    backgroundColor: colors.card,
-    borderRadius: 14,
-    paddingHorizontal: 14,
+    borderRadius: radii.pill,
+    paddingHorizontal: 18,
     paddingVertical: 12,
     fontSize: 15,
   },
   sendButton: {
     width: 48,
     height: 48,
-    borderRadius: 14,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.primary,
+    backgroundColor: colors.text,
   },
 });

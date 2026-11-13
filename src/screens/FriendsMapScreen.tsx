@@ -4,12 +4,15 @@ import MapView, { Marker } from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import Avatar from '../components/Avatar';
+import GradientButton from '../components/GradientButton';
 import SegmentedControl from '../components/SegmentedControl';
 import { MOCK_EVENTS } from '../data/mockEvents';
 import { FRIENDS, placeAround } from '../data/mockSocial';
 import { useUserLocation } from '../hooks/useUserLocation';
 import { colors } from '../theme/colors';
 import { cardShadow } from '../theme/shadows';
+import { darkMapStyle } from '../theme/mapStyle';
+import { glass, radii } from '../theme/shape';
 import { formatDistance, getDistanceColor, haversineKm } from '../utils/distance';
 
 type Mode = 'friends' | 'events';
@@ -63,6 +66,7 @@ export default function FriendsMapScreen() {
           showsMyLocationButton={false}
           toolbarEnabled={false}
           userInterfaceStyle="dark"
+          customMapStyle={darkMapStyle}
         >
           {mode === 'friends'
             ? friends.map((f) => (
@@ -96,12 +100,10 @@ export default function FriendsMapScreen() {
               </View>
             </View>
             <View style={styles.cardButtons}>
-              <Pressable style={[styles.button, styles.buttonOutline]}>
-                <Text style={styles.buttonOutlineText}>Scrie-i</Text>
+              <Pressable style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}>
+                <Text style={styles.buttonText}>Scrie-i</Text>
               </Pressable>
-              <Pressable style={[styles.button, styles.buttonPrimary]}>
-                <Text style={styles.buttonPrimaryText}>Vezi evenimentul</Text>
-              </Pressable>
+              <GradientButton label="Vezi evenimentul" compact style={styles.buttonCta} />
             </View>
             <View style={styles.separator} />
             <View style={styles.visibilityRow}>
@@ -109,8 +111,8 @@ export default function FriendsMapScreen() {
               <Switch
                 value={isVisible}
                 onValueChange={setIsVisible}
-                trackColor={{ true: colors.primary, false: colors.border }}
-                thumbColor="#fff"
+                trackColor={{ true: colors.primary, false: colors.cardStrong }}
+                thumbColor={colors.text}
               />
             </View>
           </View>
@@ -123,17 +125,17 @@ export default function FriendsMapScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   header: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 12, gap: 12 },
-  title: { fontSize: 32, fontWeight: '900', color: colors.text },
-  mapWrap: { flex: 1, backgroundColor: colors.border },
+  title: { fontSize: 32, fontWeight: '600', letterSpacing: -0.5, color: colors.text },
+  mapWrap: { flex: 1, backgroundColor: colors.backgroundAlt },
   friendMarker: { alignItems: 'center', gap: 2 },
   friendLabel: {
     color: colors.text,
-    backgroundColor: colors.card,
+    backgroundColor: colors.surface,
     fontSize: 11,
-    fontWeight: '700',
+    fontWeight: '600',
     paddingHorizontal: 8,
     paddingVertical: 2,
-    borderRadius: 999,
+    borderRadius: radii.pill,
     overflow: 'hidden',
   },
   card: {
@@ -143,21 +145,22 @@ const styles = StyleSheet.create({
     bottom: 16,
     padding: 16,
     gap: 14,
-    borderRadius: 20,
-    backgroundColor: colors.card,
+    borderRadius: radii.card,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
     ...cardShadow,
   },
   cardTop: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   cardText: { flex: 1, gap: 2 },
-  cardName: { color: colors.text, fontSize: 17, fontWeight: '800' },
+  cardName: { color: colors.text, fontSize: 17, fontWeight: '600' },
   cardStatus: { color: colors.muted, fontSize: 13 },
   cardButtons: { flexDirection: 'row', gap: 10 },
-  button: { flex: 1, alignItems: 'center', paddingVertical: 12, borderRadius: 12 },
-  buttonOutline: { borderWidth: 1, borderColor: colors.border },
-  buttonOutlineText: { color: colors.text, fontWeight: '700' },
-  buttonPrimary: { backgroundColor: colors.primary },
-  buttonPrimaryText: { color: '#fff', fontWeight: '700' },
+  button: { ...glass, flex: 1, alignItems: 'center', justifyContent: 'center', height: 42, borderRadius: radii.pill },
+  buttonPressed: { backgroundColor: colors.cardStrong },
+  buttonText: { color: colors.text, fontWeight: '500' },
+  buttonCta: { flex: 1 },
   separator: { height: 1, backgroundColor: colors.border },
   visibilityRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
-  visibilityText: { flex: 1, color: colors.text, fontSize: 13, fontWeight: '600' },
+  visibilityText: { flex: 1, color: colors.muted, fontSize: 13 },
 });

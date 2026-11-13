@@ -61,6 +61,26 @@ Regula de folosire a culorii: **culoarea vine din lumină, nu din suprafețe pla
 
 - Tranziții moi (fade sau slide scurt). Petele aurora pot avea o animație lentă de „respirație”, opțional.
 
+## Implementare în cod
+
+Stilul se aplică doar prin tokenii și componentele comune de mai jos. Ecranele nu scriu culori direct.
+
+| Ce | Unde |
+| --- | --- |
+| Culori (fundal, sticlă, text, accente) | `src/theme/colors.ts` |
+| Gradienturi (CTA, aurora, umbrire, avatar) | `src/theme/gradients.ts` (cu `expo-linear-gradient`) |
+| Raze de colț și stilul `glass` | `src/theme/shape.ts` |
+| Umbra moale | `src/theme/shadows.ts` |
+| Hartă întunecată (Google Maps, Android) | `src/theme/mapStyle.ts`, dat la `customMapStyle` |
+| Aurora (pete de lumină) | `src/components/Aurora.tsx` |
+| Buton principal (CTA) | `src/components/GradientButton.tsx` |
+| Buton-iconiță de sticlă | `src/components/GlassIconButton.tsx` |
+| Chip / tag | `src/components/Chip.tsx` |
+| Comutator cu segmente | `src/components/SegmentedControl.tsx` |
+| Avatar cu inițiale | `src/components/Avatar.tsx` |
+
+Sticla e implementată ca suprafață translucidă cu contur subțire, fără blur nativ. Blur-ul nu e necesar pentru aspect.
+
 ## Ce nu facem
 
 - Fundal crem sau deschis, contururi bleumarin groase, umbre tari decalate (stilul PDF-ului de layout).

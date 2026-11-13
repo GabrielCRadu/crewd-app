@@ -1,6 +1,8 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 
 import { colors } from '../theme/colors';
+import { gradients } from '../theme/gradients';
 
 interface Props {
   /** Numele din care luăm inițialele (1 literă, sau 2 pentru grupuri). */
@@ -9,7 +11,6 @@ interface Props {
   /** Pătrat cu colțuri rotunjite în loc de cerc (grupuri, poză de profil). */
   square?: boolean;
   initials?: 1 | 2;
-  color?: string;
 }
 
 function getInitials(name: string, count: 1 | 2): string {
@@ -18,21 +19,21 @@ function getInitials(name: string, count: 1 | 2): string {
   return (words[0]![0]! + words[1]![0]!).toUpperCase();
 }
 
-/** Avatar cu inițiale, până avem poze reale. */
-export default function Avatar({ name, size = 40, square = false, initials = 1, color = colors.primary }: Props) {
+/** Avatar cu inițiale pe gradient cald, până avem poze reale. */
+export default function Avatar({ name, size = 40, square = false, initials = 1 }: Props) {
   return (
-    <View
-      style={[
-        styles.base,
-        { width: size, height: size, borderRadius: square ? size * 0.25 : size / 2, backgroundColor: color },
-      ]}
+    <LinearGradient
+      colors={gradients.avatar}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={[styles.base, { width: size, height: size, borderRadius: square ? size * 0.3 : size / 2 }]}
     >
       <Text style={[styles.text, { fontSize: size * 0.4 }]}>{getInitials(name, initials)}</Text>
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   base: { alignItems: 'center', justifyContent: 'center' },
-  text: { color: '#fff', fontWeight: '800' },
+  text: { color: colors.text, fontWeight: '600' },
 });

@@ -6,6 +6,7 @@ import Avatar from '../components/Avatar';
 import { MY_GROUPS, SUGGESTED_GROUPS } from '../data/mockSocial';
 import type { ChatsStackParamList } from '../navigation/chatsTypes';
 import { colors } from '../theme/colors';
+import { glass, radii } from '../theme/shape';
 import type { ChatGroup } from '../types/social';
 
 type Props = NativeStackScreenProps<ChatsStackParamList, 'ChatsHome'>;
@@ -62,7 +63,7 @@ export default function ChatsScreen({ navigation }: Props) {
               </Text>
               <Text style={styles.common}>{g.commonTagsCount} tag-uri comune</Text>
             </View>
-            <Pressable onPress={() => open(g)} style={styles.joinButton}>
+            <Pressable onPress={() => open(g)} style={({ pressed }) => [styles.joinButton, pressed && styles.pressed]}>
               <Text style={styles.joinText}>Intră</Text>
             </Pressable>
           </View>
@@ -75,23 +76,16 @@ export default function ChatsScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   content: { padding: 20, paddingBottom: 32, gap: 12 },
-  title: { fontSize: 32, fontWeight: '900', color: colors.text, marginBottom: 4 },
-  sectionTitle: { fontSize: 18, fontWeight: '800', color: colors.text, marginTop: 12 },
+  title: { fontSize: 32, fontWeight: '600', letterSpacing: -0.5, color: colors.text, marginBottom: 4 },
+  sectionTitle: { fontSize: 18, fontWeight: '600', color: colors.text, marginTop: 12 },
   sectionHint: { fontSize: 13, color: colors.muted, marginTop: -6 },
-  card: {
-    padding: 14,
-    gap: 12,
-    borderRadius: 18,
-    backgroundColor: colors.card,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  pressed: { opacity: 0.85 },
+  card: { ...glass, padding: 14, gap: 12, borderRadius: radii.card },
+  pressed: { opacity: 0.8 },
   groupRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   groupText: { flex: 1, gap: 3 },
   lineBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
-  groupName: { flexShrink: 1, fontSize: 16, fontWeight: '800', color: colors.text },
-  time: { fontSize: 12, color: colors.muted },
+  groupName: { flexShrink: 1, fontSize: 16, fontWeight: '600', color: colors.text },
+  time: { fontSize: 12, color: colors.faint },
   lastMessage: { flexShrink: 1, fontSize: 13, color: colors.muted },
   unread: {
     minWidth: 20,
@@ -100,13 +94,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.nope,
+    backgroundColor: colors.primary,
   },
-  unreadText: { color: '#fff', fontSize: 11, fontWeight: '800' },
-  meetupBand: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, backgroundColor: colors.background },
-  meetupText: { fontSize: 12, fontWeight: '700', color: colors.text },
+  unreadText: { color: colors.text, fontSize: 11, fontWeight: '700' },
+  meetupBand: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: radii.inner, backgroundColor: colors.card },
+  meetupText: { fontSize: 12, fontWeight: '500', color: colors.text },
   suggestedRow: { flexDirection: 'row', alignItems: 'center' },
-  common: { fontSize: 12, fontWeight: '700', color: colors.text },
-  joinButton: { paddingHorizontal: 18, paddingVertical: 12, borderRadius: 12, backgroundColor: colors.primary },
-  joinText: { color: '#fff', fontWeight: '800' },
+  common: { fontSize: 12, fontWeight: '600', color: colors.text },
+  joinButton: { paddingHorizontal: 20, paddingVertical: 11, borderRadius: radii.pill, backgroundColor: colors.text },
+  joinText: { color: colors.onLight, fontWeight: '600' },
 });

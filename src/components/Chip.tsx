@@ -2,10 +2,11 @@ import { Pressable, StyleSheet, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { colors } from '../theme/colors';
+import { glass, radii } from '../theme/shape';
 
 interface Props {
   label: string;
-  /** Plin (ales / comun) sau doar contur. */
+  /** Pastilă albă (ales / comun) în loc de sticlă. */
   active?: boolean;
   /** Contur punctat: tag adăugat automat. */
   dashed?: boolean;
@@ -14,7 +15,7 @@ interface Props {
   onRemove?: () => void;
 }
 
-/** Un tag sub formă de pastilă. */
+/** Un tag sub formă de pastilă de sticlă (vezi docs/design-language.md). */
 export default function Chip({ label, active = false, dashed = false, onPress, onRemove }: Props) {
   return (
     <Pressable
@@ -30,18 +31,16 @@ export default function Chip({ label, active = false, dashed = false, onPress, o
 
 const styles = StyleSheet.create({
   chip: {
+    ...glass,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
     paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.card,
+    paddingVertical: 8,
+    borderRadius: radii.pill,
   },
-  active: { backgroundColor: colors.primary, borderColor: colors.primary },
-  dashed: { borderStyle: 'dashed', borderColor: colors.muted, backgroundColor: 'transparent' },
-  label: { color: colors.text, fontSize: 13, fontWeight: '600' },
-  labelActive: { color: '#fff' },
+  active: { backgroundColor: colors.text, borderColor: colors.text },
+  dashed: { borderStyle: 'dashed', borderColor: colors.faint, backgroundColor: 'transparent' },
+  label: { color: colors.text, fontSize: 13, fontWeight: '500' },
+  labelActive: { color: colors.onLight, fontWeight: '600' },
 });
