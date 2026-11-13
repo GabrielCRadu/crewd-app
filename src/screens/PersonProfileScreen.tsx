@@ -125,7 +125,7 @@ export default function PersonProfileScreen() {
         locations={gradients.emberHeroLocations}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
-        style={[styles.hero, { height: height * 0.8 }]}
+        style={[styles.hero, { height: height * 0.6 }]}
         pointerEvents="none"
       />
 

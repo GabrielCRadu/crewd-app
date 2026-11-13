@@ -41,7 +41,7 @@ export const gradients = {
    * Pozițiile opririlor pentru emberHero: multe trepte, pe o curbă lină, ca trecerea
    * spre negru să nu lase nicio linie vizibilă; ultima oprire e exact culoarea fundalului.
    */
-  emberHeroLocations: [0, 0.12, 0.28, 0.45, 0.62, 0.78, 0.9, 1] as const,
+  emberHeroLocations: [0, 0.07, 0.16, 0.28, 0.42, 0.58, 0.77, 1] as const,
   /** Conturul colorat al cardurilor cu interior negru (GradientBorderCard). */
   cardBorder: [colors.accentOrange, colors.accentPink, colors.accentMagenta] as const,
 };
