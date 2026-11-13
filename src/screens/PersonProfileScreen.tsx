@@ -19,7 +19,7 @@ import { useUserLocation } from '../hooks/useUserLocation';
 import { blockPerson, statusOf, unblockPerson } from '../services/friendsService';
 import { commonTags, getPerson } from '../services/peopleService';
 import { getReputation, hasReportedPerson, reportPerson } from '../services/ratingsService';
-import { colors, tagTints } from '../theme/colors';
+import { colors } from '../theme/colors';
 import { radii } from '../theme/shape';
 import { formatEventDate } from '../utils/dates';
 import { isUpcomingOrLive, sortByDate } from '../utils/eventFilters';
@@ -31,8 +31,8 @@ import { isUpcomingOrLive, sortByDate } from '../utils/eventFilters';
 type PersonProfileParams = { PersonProfile: { personId: string } };
 
 /**
- * Profilul altei persoane. Fundal negru simplu, text mare și curat; portocaliul apare doar
- * în carduri și în tag-urile comune.
+ * Profilul altei persoane. Doar negru, gri și alb (text mare și curat), ca să iasă în evidență
+ * pozele de profil și cele de la evenimente.
  * Conținut: identitate, prietenie, „Despre”, ce aveți în comun, ce a strâns după evenimente
  * (totaluri anonime), evenimentele la care ați fost împreună și, doar pentru prieteni, unde merge.
  */
@@ -157,20 +157,20 @@ export default function PersonProfileScreen() {
               {person.bio ? (
                 <View style={styles.section}>
                   <Text style={styles.label}>DESPRE</Text>
-                  <View style={styles.emberCard}>
+                  <View style={styles.card}>
                     <Text style={styles.bio}>{person.bio}</Text>
                   </View>
                 </View>
               ) : null}
 
-              {/* Ce aveți în comun: tag-urile comune în portocaliu, restul estompate */}
+              {/* Ce aveți în comun: tag-urile comune albe, restul estompate */}
               <View style={styles.section}>
                 <Text style={styles.label}>
                   ÎN COMUN · {shared.length === 0 ? 'NICIUN TAG' : shared.length === 1 ? '1 TAG' : `${shared.length} TAG-URI`}
                 </Text>
                 <View style={styles.tags}>
                   {shared.map((t) => (
-                    <Chip key={t} label={t} tint={tagTints.ember} />
+                    <Chip key={t} label={t} active />
                   ))}
                   {others.map((t) => (
                     <View key={t} style={styles.faded}>
@@ -184,7 +184,7 @@ export default function PersonProfileScreen() {
               <View style={styles.section}>
                 <Text style={styles.label}>DUPĂ EVENIMENTE</Text>
                 {/* Un singur card: trei tag-uri primite + rapoartele, despărțite de linii subțiri */}
-                <View style={[styles.emberCard, styles.statsCard]}>
+                <View style={[styles.card, styles.statsCard]}>
                   {[
                     ...RATING_TAGS.map((t) => ({
                       key: t.id,
@@ -277,12 +277,13 @@ const styles = StyleSheet.create({
   section: { gap: 12 },
   // Etichete mici, cu majuscule și spațiere: aspect editorial, sobru.
   label: { fontSize: 12, fontWeight: '700', letterSpacing: 1.6, color: colors.muted },
-  emberCard: {
+  // Carduri neutre (gri închis, contur fin): culoarea o dau pozele, nu interfața.
+  card: {
     padding: 18,
     borderRadius: radii.card,
     borderWidth: 1,
-    borderColor: colors.emberBorder,
-    backgroundColor: colors.emberGlass,
+    borderColor: colors.border,
+    backgroundColor: colors.card,
   },
   bio: { fontSize: 16, lineHeight: 24, color: colors.text },
   tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
@@ -291,7 +292,7 @@ const styles = StyleSheet.create({
   stat: { flex: 1, alignItems: 'center', gap: 4, paddingHorizontal: 4 },
   statValue: { fontSize: 24, fontWeight: '700', color: colors.text },
   statLabel: { fontSize: 12, color: colors.muted },
-  statDivider: { width: 1, alignSelf: 'stretch', backgroundColor: colors.emberBorder },
+  statDivider: { width: 1, alignSelf: 'stretch', backgroundColor: colors.border },
   reports: { color: colors.nope },
   lockedRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   eventRow: {
@@ -302,8 +303,8 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: radii.inner,
     borderWidth: 1,
-    borderColor: colors.emberBorder,
-    backgroundColor: colors.emberGlass,
+    borderColor: colors.border,
+    backgroundColor: colors.card,
   },
   eventTitle: { fontSize: 15, fontWeight: '600', color: colors.text },
   pressed: { opacity: 0.75 },

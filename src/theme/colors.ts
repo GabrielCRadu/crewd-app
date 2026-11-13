@@ -32,15 +32,6 @@ export const colors = {
   distanceNear: '#2ECC71',
   distanceMedium: '#FFC94D',
   distanceFar: '#FF5C5C',
-  /**
-   * „Ember”: un singur ton de portocaliu ars, folosit monocrom (fără petele aurora),
-   * pentru ecranele cu aspect mai sobru (ex. profilul unei persoane).
-   */
-  ember: '#E4521B',
-  /** Sticlă portocalie: fundalul cardurilor „ember”. */
-  emberGlass: 'rgba(228,82,27,0.12)',
-  /** Conturul cardurilor „ember”. */
-  emberBorder: 'rgba(228,82,27,0.35)',
 };
 
 /** Tag-uri colorate (fundal ușor + contur în culoarea accentului), ex. în cardul „Ce îți place”. */
@@ -48,7 +39,6 @@ export const tagTints = {
   orange: { background: 'rgba(255,122,61,0.16)', border: 'rgba(255,122,61,0.6)' },
   pink: { background: 'rgba(255,77,141,0.16)', border: 'rgba(255,77,141,0.6)' },
   magenta: { background: 'rgba(193,60,255,0.18)', border: 'rgba(193,60,255,0.65)' },
-  ember: { background: 'rgba(228,82,27,0.2)', border: 'rgba(228,82,27,0.75)' },
 };
 
 export type TagTint = (typeof tagTints)[keyof typeof tagTints];
