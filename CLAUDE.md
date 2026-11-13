@@ -12,9 +12,10 @@ Doi oameni lucrează în paralel pe acest repo, fiecare cu Claude Code. Înainte
 
 Abia după asta începe lucrul nou.
 
-## Branch-uri
+## Branch-uri și Pull Request-uri
 
-- Radu lucrează pe **`dev/radu`**: tot ce implementează Radu (și Claude pentru Radu) se comite acolo, nu direct pe `main`.
-- Cami lucrează pe **`feature/events-tab`**.
-- Pe **`main`** ajung doar **merge-uri** (`git merge --no-ff`), câte unul pentru fiecare funcționalitate terminată, din `dev/radu` sau din branch-ul lui Cami, doar când utilizatorul cere.
-- Când `main` se schimbă, adu-l în `dev/radu` (`git merge main`) înainte de lucru nou, ca să rămână la zi.
+- Nu lucra și nu face push pe `main`: `main` se schimbă doar prin Pull Request.
+- Un branch pe task, `<nume>/<task-scurt>` (ex. `radu/chat-firestore`), pornit din `main` la zi.
+- Push doar pe branch-ul propriu; niciodată commit/push/rebase/force-push pe branch-ul altcuiva.
+- PR draft după primul commit (`gh pr create --draft`); cel puțin zilnic `git merge origin/main` (nu rebase).
+- Fișiere comune (package.json, app.json, RootNavigator, *Types.ts, src/theme, src/components, src/types, src/services, firestore.rules, todo.md): modificări minime, doar adăugiri, anunțate echipei.
