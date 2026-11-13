@@ -34,10 +34,8 @@ async function loadLocation(): Promise<UserLocation> {
       (await Location.getLastKnownPositionAsync({ maxAge: 5 * 60 * 1000 })) ??
       (await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced }));
 
+    // Folosim locația dispozitivului oriunde ar fi; CITY_CENTER e doar fallback fără permisiune.
     const coords = { latitude: position.coords.latitude, longitude: position.coords.longitude };
-    if (haversineKm(coords, CITY_CENTER) > MAX_KM_FROM_CITY) {
-      return { coords: CITY_CENTER, status: 'outside-city' };
-    }
     return { coords, status: 'granted' };
   } catch {
     return { coords: CITY_CENTER, status: 'error' };
