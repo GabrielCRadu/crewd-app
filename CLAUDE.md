@@ -11,3 +11,11 @@ Doi oameni lucrează în paralel pe acest repo, fiecare cu Claude Code. Înainte
 5. Nu face merge la branch-urile altora fără acordul utilizatorului.
 
 Abia după asta începe lucrul nou.
+
+## Branch-uri și Pull Request-uri
+
+- Nu lucra și nu face push pe `main`: `main` se schimbă doar prin Pull Request.
+- Un branch pe task, `<nume>/<task-scurt>` (ex. `radu/chat-firestore`), pornit din `main` la zi.
+- Push doar pe branch-ul propriu; niciodată commit/push/rebase/force-push pe branch-ul altcuiva.
+- PR draft după primul commit (`gh pr create --draft`); cel puțin zilnic `git merge origin/main` (nu rebase).
+- Fișiere comune (package.json, app.json, RootNavigator, *Types.ts, src/theme, src/components, src/types, src/services, firestore.rules, todo.md): modificări minime, doar adăugiri, anunțate echipei.

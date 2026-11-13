@@ -1,8 +1,7 @@
-Aplicatie de tip meet-up care este formata din 3 mari functii:
-1. Interfata tip tinder care iti permite sa gasesti persoane care au preferinte/gusturi similare cu tine. (Recomandarile se bazeaza pe niste tag-uri asociate automat in functie de evenimentele la care te inscrii + cateva taguri de inceput care sunt selectate la crearea profilului. Age grup + gender sunt si ele luate in considerare).
+A meet-up app built around 3 main features:
 
-2. Tab special cu evenimente viitoare si in desfasurare in apropiere (afisare tip lista + tip harta). Aici utilizatorii se pot inscrie (afecteaza tagurile de preferinte)
+1. **Events nearby.** A tab with upcoming and ongoing events around you (list view + map view). Users sign up for events here, and every sign-up shapes their preference tags (starter tags are picked when creating the profile).
 
-3. Harta cu prietenii tai
+2. **Small groups at each event.** After signing up for an event, you see the small groups of people going to it, ordered by how well they match you (shared tags and age). You join one or propose your own; a group forms once 3 people are in. Each group has one chat, plus a meet-up time and location.
 
-4. Chaturi de grup (sugestie grupuri similare de persoane), care participa simultan la acelasi eveniment + Meet-up time and location
+3. **A map with your friends.**

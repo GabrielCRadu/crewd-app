@@ -52,7 +52,7 @@ export default function SignUpScreen({ navigation }: Props) {
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <ScreenGlow />
-      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <KeyboardAvoidingView style={styles.flex} behavior="padding">
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           <GlassIconButton icon="chevron-back" onPress={() => navigation.goBack()} />
 

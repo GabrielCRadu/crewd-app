@@ -4,6 +4,8 @@ import EventsScreen from '../screens/EventsScreen';
 import EventDetailsScreen from '../screens/EventDetailsScreen';
 import PersonProfileScreen from '../screens/PersonProfileScreen';
 import RateEventScreen from '../screens/RateEventScreen';
+import ProposeGroupScreen from '../screens/ProposeGroupScreen';
+import EventGroupsScreen from '../screens/EventGroupsScreen';
 import { colors } from '../theme/colors';
 import type { EventsStackParamList } from './eventsTypes';
 
@@ -20,6 +22,8 @@ export default function EventsNavigator() {
       <Stack.Screen name="EventDetails" component={EventDetailsScreen} />
       <Stack.Screen name="RateEvent" component={RateEventScreen} />
       <Stack.Screen name="PersonProfile" component={PersonProfileScreen} />
+      <Stack.Screen name="EventGroups" component={EventGroupsScreen} />
+      <Stack.Screen name="ProposeGroup" component={ProposeGroupScreen} />
     </Stack.Navigator>
   );
 }
