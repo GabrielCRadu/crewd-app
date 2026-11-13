@@ -10,7 +10,7 @@ import GradientButton from '../components/GradientButton';
 import SegmentedControl from '../components/SegmentedControl';
 import { useEvents } from '../hooks/useEvents';
 import { isUpcomingOrLive } from '../utils/eventFilters';
-import { useFriends } from '../hooks/useFriends';
+import { useFriendsOnMap } from '../hooks/useFriendsOnMap';
 import { useLocationVisibility } from '../hooks/useLocationVisibility';
 import { useUserLocation } from '../hooks/useUserLocation';
 import { colors } from '../theme/colors';
@@ -35,8 +35,8 @@ export default function FriendsMapScreen() {
   // Aceleași evenimente ca în tab-ul Evenimente (Firestore, sau mock fără config); doar cele încă neterminate.
   const { events: allEvents } = useEvents(location.coords);
   const events = useMemo(() => allEvents.filter((e) => isUpcomingOrLive(e)), [allEvents]);
-  // Prietenii (încă mock, vezi src/services/friendsService.ts). Până alegi pe cineva, cardul îl arată pe primul.
-  const friends = useFriends(location.coords, allEvents);
+  // Prietenii (încă mock, vezi src/services/friendsMapService.ts). Până alegi pe cineva, cardul îl arată pe primul.
+  const friends = useFriendsOnMap(location.coords, allEvents);
   const selected = friends.find((f) => f.id === selectedId) ?? friends[0] ?? null;
 
   // Nu există încă mesaje private: „Scrie-i” deschide lista de chat-uri.

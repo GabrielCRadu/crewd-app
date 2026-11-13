@@ -14,7 +14,7 @@ import { isUpcomingOrLive, sortByDate } from '../utils/eventFilters';
  * mock din mockSocial.ts, așezați în jurul locației dispozitivului, iar alegerea „Locația mea e
  * vizibilă pentru prieteni” se ține minte doar pe acest dispozitiv (AsyncStorage).
  * Când vin datele reale (Firestore), se schimbă doar acest fișier; ecranele folosesc
- * hook-urile din src/hooks/useFriends.ts și src/hooks/useLocationVisibility.ts.
+ * hook-urile din src/hooks/useFriendsOnMap.ts și src/hooks/useLocationVisibility.ts.
  */
 
 /** Un prieten gata de afișat pe hartă. */
