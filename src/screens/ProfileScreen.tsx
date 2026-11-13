@@ -15,7 +15,8 @@ import GradientBorderCard from '../components/GradientBorderCard';
 import EventHistoryCarousel from '../components/events/EventHistoryCarousel';
 import { useAuth } from '../context/AuthContext';
 import { ME_ID } from '../data/mockRatings';
-import { FRIENDS, MY_GROUPS } from '../data/mockSocial';
+import { FRIENDS } from '../data/mockSocial';
+import { useMyGroups } from '../hooks/useMyGroups';
 import { TAG_GROUPS } from '../data/tags';
 import { usePastEvents } from '../hooks/usePastEvents';
 import { useRatings } from '../hooks/useRatings';
@@ -33,6 +34,7 @@ import { glass, radii } from '../theme/shape';
 export default function ProfileScreen() {
   const { profile, user, updateBio, removeLearnedTag, signOut } = useAuth();
   const pastEvents = usePastEvents();
+  const { groups: myGroups } = useMyGroups();
   // Reputația e încă mock (ratingsService); cu Firebase va fi pe uid-ul din Auth.
   const reputation = getReputation(useRatings(), ME_ID);
 
@@ -48,7 +50,7 @@ export default function ProfileScreen() {
 
   const stats = [
     { value: FRIENDS.length, label: 'prieteni' },
-    { value: MY_GROUPS.length, label: 'grupuri' },
+    { value: myGroups.length, label: 'grupuri' },
     { value: pastEvents.length, label: 'evenimente' },
   ];
 

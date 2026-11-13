@@ -7,7 +7,11 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import Aurora from '../components/Aurora';
 import Avatar from '../components/Avatar';
 import GlassIconButton from '../components/GlassIconButton';
-import { MESSAGES, getGroup } from '../data/mockSocial';
+import { MESSAGES } from '../data/mockSocial';
+import { useEvents } from '../hooks/useEvents';
+import { useMyGroups } from '../hooks/useMyGroups';
+import { useUserLocation } from '../hooks/useUserLocation';
+import { formatDay, formatTime } from '../utils/dates';
 import type { ChatsStackParamList } from '../navigation/chatsTypes';
 import { colors } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
@@ -15,9 +19,16 @@ import type { ChatMessage } from '../types/social';
 
 type Props = NativeStackScreenProps<ChatsStackParamList, 'ChatRoom'>;
 
-/** Conversația unui grup: antet, banner „Ne vedem”, mesaje, bara de scriere (vezi docs/layout-guide.md). */
+/**
+ * Conversația unui grupuleț: antet, banner „Ne vedem” (ora și locul din grupuleț), mesaje, bara de scriere
+ * (docs/layout-guide.md). Mesajele sunt încă mock (vezi todo.md).
+ */
 export default function ChatRoomScreen({ navigation, route }: Props) {
-  const group = getGroup(route.params.groupId);
+  const { groups } = useMyGroups();
+  const location = useUserLocation();
+  const { events } = useEvents(location.coords);
+  const group = groups.find((g) => g.id === route.params.groupId) ?? null;
+  const event = events.find((e) => e.id === route.params.eventId) ?? null;
   const [messages, setMessages] = useState<ChatMessage[]>(MESSAGES[route.params.groupId] ?? []);
   const [draft, setDraft] = useState('');
 
@@ -36,10 +47,13 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
         <GlassIconButton icon="chevron-back" size={40} onPress={() => navigation.goBack()} />
         <View style={styles.headerText}>
           <Text style={styles.headerTitle} numberOfLines={1}>
-            {group.name}
+            {event?.title ?? 'Grupuleț'}
           </Text>
           <Text style={styles.headerSubtitle} numberOfLines={1}>
-            {group.membersCount} persoane · {group.eventTitle}
+            {group.memberUids.length} persoane ·{' '}
+            {Object.values(group.members)
+              .map((m) => m.name)
+              .join(', ')}
           </Text>
         </View>
       </View>
@@ -51,7 +65,7 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
         <View style={styles.bannerText}>
           <Text style={styles.bannerLabel}>NE VEDEM</Text>
           <Text style={styles.bannerWhen}>
-            {group.meetupWhen} · {group.meetupWhere}
+            {formatDay(group.meetupAt)} la {formatTime(group.meetupAt)} · {group.meetupPlace}
           </Text>
         </View>
         <Pressable style={styles.bannerButton}>
