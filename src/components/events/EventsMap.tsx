@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
     left: 12,
     flexDirection: 'row',
     gap: 4,
-    backgroundColor: 'rgba(255,255,255,0.95)',
+    backgroundColor: colors.card,
     borderRadius: 14,
     padding: 4,
   },
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
   legendTextHidden: { textDecorationLine: 'line-through' },
   emptyOverlay: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, alignItems: 'center', justifyContent: 'center' },
   emptyText: {
-    backgroundColor: 'rgba(255,255,255,0.95)',
+    backgroundColor: colors.card,
     color: colors.muted,
     fontWeight: '600',
     paddingHorizontal: 14,
