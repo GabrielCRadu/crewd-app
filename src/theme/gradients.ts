@@ -26,4 +26,10 @@ export const gradients = {
     ['rgba(193,60,255,0.24)', 'rgba(193,60,255,0.03)'], // magenta
     ['rgba(255,201,77,0.18)', 'rgba(255,201,77,0.03)'], // galben
   ] as const,
+  /**
+   * Nuanțe mai puternice, pentru câteva carduri evidențiate pe un ecran altfel complet negru
+   * (ex. „Despre mine” și „Ce îți place” din Profil). Diagonal, din stânga sus.
+   */
+  tintWarm: ['rgba(255,122,61,0.38)', 'rgba(255,77,141,0.16)', 'rgba(255,77,141,0.04)'] as const,
+  tintCool: ['rgba(193,60,255,0.36)', 'rgba(255,77,141,0.14)', 'rgba(255,77,141,0.04)'] as const,
 };

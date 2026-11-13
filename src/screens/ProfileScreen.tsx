@@ -10,7 +10,7 @@ import Aurora from '../components/Aurora';
 import Avatar from '../components/Avatar';
 import Chip from '../components/Chip';
 import ReputationStats from '../components/ReputationStats';
-import ScreenGlow from '../components/ScreenGlow';
+import TintedCard from '../components/TintedCard';
 import EventHistoryCarousel from '../components/events/EventHistoryCarousel';
 import { useAuth } from '../context/AuthContext';
 import { ME_ID } from '../data/mockRatings';
@@ -20,6 +20,7 @@ import { usePastEvents } from '../hooks/usePastEvents';
 import { useRatings } from '../hooks/useRatings';
 import { getReputation } from '../services/ratingsService';
 import { colors } from '../theme/colors';
+import { gradients } from '../theme/gradients';
 import { glass, radii } from '../theme/shape';
 import type { IconName } from '../types/events';
 import type { TagGroup } from '../types/social';
@@ -67,9 +68,8 @@ export default function ProfileScreen() {
     ]);
 
   return (
+    // Fundal complet negru; culoarea apare doar în câteva carduri (identitate, „Despre mine”, „Ce îți place”).
     <SafeAreaView style={styles.safe} edges={['top']}>
-      <ScreenGlow />
-
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
@@ -121,11 +121,11 @@ export default function ProfileScreen() {
         {/* Tag-urile alese, într-un singur card, pe grupuri */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Ce îți place</Text>
-          <View style={styles.card}>
+          <TintedCard tint={gradients.tintCool}>
             {TAG_GROUPS.map((group, i) => (
               <View key={group.id} style={[styles.tagGroup, i > 0 && styles.tagGroupDivided]}>
                 <View style={styles.tagGroupHeader}>
-                  <Ionicons name={GROUP_ICONS[group.id]} size={16} color={colors.muted} />
+                  <Ionicons name={GROUP_ICONS[group.id]} size={16} color={colors.text} />
                   <Text style={styles.tagGroupLabel}>{group.label}</Text>
                 </View>
                 <View style={styles.tags}>
@@ -136,7 +136,7 @@ export default function ProfileScreen() {
                 </View>
               </View>
             ))}
-          </View>
+          </TintedCard>
         </View>
 
         <View style={[styles.card, styles.learnedCard]}>
@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
   tagGroup: { gap: 10 },
   tagGroupDivided: { marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: colors.border },
   tagGroupHeader: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  tagGroupLabel: { fontSize: 13, fontWeight: '600', color: colors.muted },
+  tagGroupLabel: { fontSize: 13, fontWeight: '600', color: colors.text },
   tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   learnedCard: { gap: 10 },
   hint: { fontSize: 13, color: colors.muted },

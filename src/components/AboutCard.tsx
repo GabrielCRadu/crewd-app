@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import GlassIconButton from './GlassIconButton';
+import TintedCard from './TintedCard';
 import { colors } from '../theme/colors';
+import { gradients } from '../theme/gradients';
 import { glass, radii } from '../theme/shape';
 
 interface Props {
@@ -27,7 +29,7 @@ export default function AboutCard({ bio, onSave }: Props) {
   };
 
   return (
-    <View style={styles.card}>
+    <TintedCard tint={gradients.tintWarm} style={styles.card}>
       <View style={styles.header}>
         <Text style={styles.title}>Despre mine</Text>
         {editing ? null : <GlassIconButton icon="pencil" size={34} round onPress={startEditing} />}
@@ -65,12 +67,12 @@ export default function AboutCard({ bio, onSave }: Props) {
           <Text style={styles.placeholder}>Scrie câteva cuvinte despre tine, ca oamenii să știe cu cine merg.</Text>
         </Pressable>
       )}
-    </View>
+    </TintedCard>
   );
 }
 
 const styles = StyleSheet.create({
-  card: { ...glass, gap: 10, padding: 18, borderRadius: radii.card },
+  card: { gap: 10 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 34 },
   title: { fontSize: 16, fontWeight: '600', color: colors.text },
   bio: { fontSize: 15, lineHeight: 22, color: colors.text },
