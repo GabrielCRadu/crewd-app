@@ -2,14 +2,12 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 
-import DistanceDot from './DistanceDot';
 import type { CategoryId, EventWithDistance } from '../../types/events';
 import { CATEGORIES, getCategory } from '../../data/categories';
 import { colors } from '../../theme/colors';
 import { gradients } from '../../theme/gradients';
 import { glass, radii } from '../../theme/shape';
 import { formatTime, formatWeekdayShort } from '../../utils/dates';
-import { formatDistance } from '../../utils/distance';
 
 interface Props {
   event: EventWithDistance;
@@ -25,7 +23,7 @@ function tintFor(category: CategoryId) {
 
 /**
  * Un rând din secțiunea „Urmează” (docs/layout-guide.md):
- * caseta de dată | titlu, „HH:MM · Loc · distanță”, „Categorie (· Înscris)” | chevron.
+ * caseta de dată | titlu, ora, „Categorie (· Înscris)” | chevron.
  * Fundalul e sticlă cu o nuanță caldă discretă, în funcție de categorie.
  */
 export default function UpcomingEventRow({ event, joined, onPress }: Props) {
@@ -48,13 +46,8 @@ export default function UpcomingEventRow({ event, joined, onPress }: Props) {
         <Text style={styles.title} numberOfLines={1}>
           {event.title}
         </Text>
-        <View style={styles.metaRow}>
-          <Text style={styles.meta} numberOfLines={1}>
-            {formatTime(event.startsAt)} · {event.venueName} ·
-          </Text>
-          <DistanceDot km={event.distanceKm} />
-          <Text style={styles.meta}>{formatDistance(event.distanceKm)}</Text>
-        </View>
+        {/* Doar ora; locul și distanța apar în pagina de detalii */}
+        <Text style={styles.meta}>{formatTime(event.startsAt)}</Text>
         <Text style={styles.category}>
           {getCategory(event.category).label}
           {joined ? ' · Înscris' : ''}
@@ -84,7 +77,6 @@ const styles = StyleSheet.create({
   onLight: { color: colors.onLight },
   text: { flex: 1, gap: 3 },
   title: { color: colors.text, fontSize: 16, fontWeight: '600' },
-  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  meta: { flexShrink: 1, color: colors.muted, fontSize: 13 },
+  meta: { color: colors.muted, fontSize: 13 },
   category: { color: colors.muted, fontSize: 12, fontWeight: '500' },
 });
