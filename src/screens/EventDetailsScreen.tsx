@@ -6,7 +6,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import Aurora from '../components/Aurora';
-import Avatar from '../components/Avatar';
 import GlassIconButton from '../components/GlassIconButton';
 import ShareEventSheet from '../components/events/ShareEventSheet';
 import AddMemorySheet from '../components/memories/AddMemorySheet';
@@ -23,7 +22,6 @@ import { usePreferences } from '../hooks/usePreferences';
 import { useRatings } from '../hooks/useRatings';
 import { useUserLocation } from '../hooks/useUserLocation';
 import type { EventsStackParamList } from '../navigation/eventsTypes';
-import { findPersonByName } from '../services/peopleService';
 import { isJoined, joinEvent, leaveEvent } from '../services/preferencesService';
 import { hasRated } from '../services/ratingsService';
 import { colors } from '../theme/colors';
@@ -33,13 +31,12 @@ import { glass, radii } from '../theme/shape';
 import type { IconName } from '../types/events';
 import { formatLongDay, formatTime, hasEnded, isLive } from '../utils/dates';
 import { formatDistance, haversineKm } from '../utils/distance';
-import { formatFriendsGoing, formatWentWith } from '../utils/format';
 
 type Props = NativeStackScreenProps<EventsStackParamList, 'EventDetails'>;
 
 /**
  * Detaliile unui eveniment (docs/layout-guide.md → Detalii eveniment):
- * zona foto → titlu → Când | Unde → descriere → cine merge → „Grupuri pe gustul tău” → „Înscrie-te” jos.
+ * zona foto → titlu → Când | Unde → descriere → starea grupului tău (dacă ești înscris) → „Înscrie-te” jos.
  */
 export default function EventDetailsScreen({ navigation, route }: Props) {
   const { eventId } = route.params;
@@ -118,20 +115,22 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
           <Aurora style={StyleSheet.absoluteFill} />
           {event.imageUrl ? <Image source={{ uri: event.imageUrl }} style={StyleSheet.absoluteFill} /> : null}
           <LinearGradient colors={gradients.scrim} style={styles.scrim} />
+          {/* Umbrire sus, ca butoanele și bara telefonului să se vadă și pe afișe albe */}
+          <LinearGradient colors={gradients.scrimTop} style={[styles.scrimTop, { height: insets.top + 90 }]} />
           {event.imageUrl && event.imageCredit ? (
             <Text style={styles.imageCredit}>Foto: {event.imageCredit}</Text>
           ) : null}
           <GlassIconButton
             icon="chevron-back"
             onPress={() => navigation.goBack()}
-            style={[styles.back, { top: insets.top + 8 }]}
+            style={[styles.back, styles.onPhoto, { top: insets.top + 8 }]}
           />
           {/* Trimite evenimentul unui prieten, în conversația voastră directă */}
           {!ended ? (
             <GlassIconButton
               icon="paper-plane-outline"
               onPress={() => setShareOpen(true)}
-              style={[styles.share, { top: insets.top + 8 }]}
+              style={[styles.share, styles.onPhoto, { top: insets.top + 8 }]}
             />
           ) : null}
           <View style={styles.heroBadges}>
@@ -189,43 +188,11 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
             </Pressable>
           ) : null}
 
-          {/* 5. Cine merge */}
-          {event.friendsGoing.length > 0 ? (
-            <View style={styles.friendsRow}>
-              <View style={styles.avatars}>
-                {/* Un avatar deschide profilul persoanei */}
-                {event.friendsGoing.slice(0, 3).map((name, i) => {
-                  const person = findPersonByName(name);
-                  return (
-                    <Pressable
-                      key={name}
-                      onPress={person ? () => navigation.navigate('PersonProfile', { personId: person.id }) : undefined}
-                      disabled={!person}
-                      hitSlop={4}
-                      style={[styles.avatarRing, i > 0 && styles.avatarOverlap]}
-                    >
-                      <Avatar name={name} size={36} />
-                    </Pressable>
-                  );
-                })}
-              </View>
-              <Text style={styles.friendsText}>
-                {ended ? formatWentWith(event.friendsGoing) : formatFriendsGoing(event.friendsGoing)}
-              </Text>
-            </View>
-          ) : null}
-
           {/* 6. Grupulețele sunt pe un ecran separat („Vezi grupulețele”, după înscriere) */}
           {!ended && joined ? (
             <View style={styles.groupsHint}>
               <Ionicons name="people-outline" size={18} color={colors.muted} />
               <Text style={styles.groupsHintText}>{groupsHint}</Text>
-            </View>
-          ) : null}
-          {!ended && !joined ? (
-            <View style={styles.groupsHint}>
-              <Ionicons name="people-outline" size={18} color={colors.muted} />
-              <Text style={styles.groupsHintText}>Înscrie-te ca să vezi grupurile celor care merg.</Text>
             </View>
           ) : null}
         </View>
@@ -367,7 +334,10 @@ const styles = StyleSheet.create({
   content: { paddingBottom: 24 },
   hero: { overflow: 'hidden', backgroundColor: colors.backgroundAlt },
   scrim: { position: 'absolute', left: 0, right: 0, bottom: 0, height: '60%' },
+  scrimTop: { position: 'absolute', left: 0, right: 0, top: 0 },
   back: { position: 'absolute', left: 20 },
+  // Butoanele de pe poză: fundal închis (nu sticlă albă), ca să rămână vizibile pe afișe deschise la culoare.
+  onPhoto: { backgroundColor: colors.backdrop },
   share: { position: 'absolute', right: 20 },
   heroBadges: { position: 'absolute', left: 20, bottom: 16, flexDirection: 'row', gap: 8 },
   body: { padding: 20, gap: 16 },
@@ -380,12 +350,6 @@ const styles = StyleSheet.create({
   infoSecondary: { fontSize: 14, color: colors.muted },
   description: { fontSize: 15, lineHeight: 22, color: colors.muted },
   muted: { fontSize: 13, color: colors.muted },
-  friendsRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  avatars: { flexDirection: 'row' },
-  // Inel în culoarea fundalului, ca avatarele suprapuse să se despartă vizual.
-  avatarRing: { borderRadius: radii.pill, borderWidth: 2, borderColor: colors.background },
-  avatarOverlap: { marginLeft: -12 },
-  friendsText: { flex: 1, fontSize: 14, fontWeight: '500', color: colors.text },
   sectionTitle: { ...type.label, marginTop: 8 },
   pressed: { opacity: 0.8 },
   bottomBar: {
