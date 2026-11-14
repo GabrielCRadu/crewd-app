@@ -24,6 +24,7 @@ import { usernameFromName } from '../utils/usernameRules';
 import { claimUsername, releaseUsername, updatePublicCard } from '../services/usernamesService';
 import { deletePublicProfile, getPublicProfile, savePublicProfile } from '../services/publicProfileService';
 import { publicProfileKey, toPublicProfile } from '../utils/publicProfile';
+import { startFriendsSync, stopFriendsSync } from '../services/friendsService';
 import { allProfileTags } from '../utils/profileTags';
 import { tr } from '../i18n';
 
@@ -144,6 +145,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     })();
   }, [status, profile, user]);
+
+  // Prieteniile conturilor reale se ascultă live cât ești logat cu profilul complet (friendsService.ts).
+  const syncUid = isFirebaseConfigured && status === 'ready' && user ? user.uid : null;
+  useEffect(() => {
+    if (!syncUid) return;
+    startFriendsSync(syncUid);
+    return () => stopFriendsSync();
+  }, [syncUid]);
 
   // Fără Firebase (profil demo): scorurile pornesc o dată de la tag-urile profilului demo.
   useEffect(() => {

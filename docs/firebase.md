@@ -125,6 +125,14 @@ Username-urile unice (`docs/superpowers/specs/2026-11-14-username-parola-design.
 
 Profilul public (`docs/superpowers/specs/2026-11-14-profil-membru-tema-design.md`), deschis din lista de membri a unui grup, din chat și din codul QR. E o copie a câmpurilor publice din `users/{uid}`: `name`, `age` (calculată; fără data nașterii), `city`, `bio`, `photoUrl` (data URI JPEG), `username` (sau `null`; trebuie să fie al tău în `usernames/`), `tags` (doar cele alese, cel mult 60; cele învățate rămân private) și `updatedAt` (ora serverului). Orice utilizator logat poate citi un profil anume (`get`), dar nu poate lista colecția; scrie și șterge doar proprietarul. Îl ține la zi `src/context/AuthContext.tsx` (prin `src/services/publicProfileService.ts`) de câte ori se schimbă profilul, și o dată după login; la ștergerea contului se șterge.
 
+### `friendships/{pairId}`
+
+Prieteniile conturilor reale (`docs/superpowers/specs/2026-11-14-prieteni-amintiri-design.md`). Un document pe pereche; id-ul e format din cele două uid-uri sortate, unite cu `_`. Câmpuri: `users` (cele două uid-uri, sortate), `status` (`pending` = cerere, `friends` = prieteni), `requestedBy` (cine a trimis cererea), `createdAt`, `updatedAt`. Cei doi văd relația și o pot șterge (refuz, anulare, eliminare); doar cel care a primit cererea o poate accepta. Prietenii oricăruia dintre ei pot citi o prietenie acceptată (pentru „prieteni în comun”), dar nu și cererile. O cerere nouă e refuzată dacă unul l-a blocat pe celălalt. Scrie `src/services/friendshipsFirestore.ts` (prin `src/services/friendsService.ts`).
+
+### `blocks/{blocker_blocked}`
+
+Blocările: `blocker`, `blocked`, `createdAt`. Le vede și le șterge doar cine a blocat; blocarea șterge și prietenia sau cererea dintre cei doi (același batch). Cel blocat nu le poate citi; cererile lui sunt refuzate de reguli, iar aplicația îi arată un mesaj neutru.
+
 ### `meta/eventsImport`
 
 Data colectării, intervalul de date, numărul de evenimente, notele sursei și data importului.

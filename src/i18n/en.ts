@@ -567,4 +567,8 @@ export const EN: Record<string, string> = {
   'Tema s-a schimbat': 'Theme changed',
   'Tema': 'Theme',
   'Tema nouă se vede la următoarea pornire a aplicației.': 'The new theme shows the next time you open the app.',
+  // ---------- Prieteni și amintiri (conturi reale) ----------
+  'Nu am putut trimite cererea. Încearcă mai târziu.': "Couldn't send the request. Try again later.",
+  'Prietenie': 'Friendship',
+  'Nu a mers. Verifică conexiunea și încearcă din nou.': "That didn't work. Check your connection and try again.",
 };
