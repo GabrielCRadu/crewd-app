@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 
 import Logo from '../components/Logo';
@@ -37,6 +37,8 @@ const ZOOM_DELTA = 0.04;
  * - Evenimente: harta cu afișe mutată din tab-ul Evenimente (EventsMap), cu filtrul de categorii.
  */
 export default function FriendsMapScreen() {
+  // Tab-ul e preîncărcat (swipe între tab-uri): harta grea se montează doar cât e vizibil (audit).
+  const focused = useIsFocused();
   const location = useUserLocation();
   const mapRef = useRef<MapView>(null);
   const [mode, setMode] = useState<Mode>('events');
@@ -99,6 +101,8 @@ export default function FriendsMapScreen() {
             onOpenEvent={openEvent}
           />
         </>
+      ) : !focused ? (
+        <View style={styles.mapWrap} />
       ) : (
       <View style={styles.mapWrap}>
         <MapView
@@ -113,7 +117,7 @@ export default function FriendsMapScreen() {
         >
           {/* Poziția mea: doar când avem locația reală (altfel `coords` e centrul orașului). */}
           {location.status === 'granted' ? (
-            <Marker coordinate={location.coords} anchor={{ x: 0.5, y: 0.5 }} zIndex={1}>
+            <Marker coordinate={location.coords} anchor={{ x: 0.5, y: 0.5 }} zIndex={1} tracksViewChanges={false}>
               <View style={styles.meMarker}>
                 <View style={styles.meDot} />
                 <Text style={styles.friendLabel}>{tr('Tu')}</Text>
@@ -121,7 +125,13 @@ export default function FriendsMapScreen() {
             </Marker>
           ) : null}
           {friends.map((f) => (
-            <Marker key={f.id} coordinate={f.coordinate} onPress={() => setSelectedId(f.id)}>
+            // Fără redesenare continuă (audit: ~25/s); cheia include selecția, ca marcajul mărit să se refacă o dată.
+            <Marker
+              key={`${f.id}-${selected?.id === f.id ? 'on' : 'off'}`}
+              coordinate={f.coordinate}
+              onPress={() => setSelectedId(f.id)}
+              tracksViewChanges={false}
+            >
               <View style={styles.friendMarker}>
                 <Avatar name={f.name} size={selected?.id === f.id ? 46 : 38} />
                 <Text style={styles.friendLabel}>{f.name}</Text>

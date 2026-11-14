@@ -36,7 +36,7 @@ const NETWORK_MESSAGE = 'Verifică conexiunea la internet și încearcă din nou
 const EMPTY_MESSAGE = 'Mesajul e gol sau prea lung.';
 
 /** Câte mesaje (cele mai noi) încărcăm într-o conversație. */
-const MESSAGES_LIMIT = 200;
+const MESSAGES_LIMIT = 50;
 
 /** Mesajul pentru utilizator, din orice eroare a chatului. */
 export function chatErrorMessage(e: unknown): string {

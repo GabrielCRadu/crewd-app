@@ -1,4 +1,4 @@
-import { collection, getDocs, orderBy, query } from 'firebase/firestore';
+import { Timestamp, collection, getDocs, orderBy, query, where } from 'firebase/firestore';
 import type { DocumentData, QueryDocumentSnapshot } from 'firebase/firestore';
 
 import { PAST_JOINED_EVENT_IDS, placeMockEvents } from '../data/mockEvents';
@@ -41,7 +41,9 @@ export async function getEvents(near: LatLng): Promise<Event[]> {
 }
 
 async function loadFromFirestore(): Promise<Event[]> {
-  const snapshot = await getDocs(query(collection(db!, 'events'), orderBy('startsAt')));
+  // Doar evenimentele de acum 60 de zile încolo: istoricul recent + cele viitoare (audit: nu toată colecția).
+  const since = Timestamp.fromMillis(Date.now() - 60 * 24 * 60 * 60 * 1000);
+  const snapshot = await getDocs(query(collection(db!, 'events'), where('startsAt', '>=', since), orderBy('startsAt')));
   return snapshot.docs.map(fromDoc).filter((e): e is Event => e !== null);
 }
 
