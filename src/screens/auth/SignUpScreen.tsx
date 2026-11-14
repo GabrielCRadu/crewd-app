@@ -4,6 +4,7 @@ import type { TextInputInstance } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
+import ConsentCheckbox from '../../components/ConsentCheckbox';
 import FormMessage from '../../components/FormMessage';
 import PasswordChecklist from '../../components/PasswordChecklist';
 import GlassIconButton from '../../components/GlassIconButton';
@@ -19,9 +20,12 @@ import { tr } from '../../i18n';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'SignUp'>;
 
-type Errors = { email?: string; password?: string; confirm?: string };
+type Errors = { email?: string; password?: string; confirm?: string; consent?: string };
 
-/** Crearea contului: email, parolă, confirmare. După creare urmează onboarding-ul (automat). */
+/**
+ * Crearea contului: email, parolă, confirmare și acceptarea termenilor și a politicii de confidențialitate.
+ * După creare urmează onboarding-ul (automat).
+ */
 export default function SignUpScreen({ navigation }: Props) {
   const passwordRef = useRef<TextInputInstance>(null);
   const confirmRef = useRef<TextInputInstance>(null);
@@ -31,16 +35,19 @@ export default function SignUpScreen({ navigation }: Props) {
   const [errors, setErrors] = useState<Errors>({});
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  // Acceptarea termenilor și a politicii de confidențialitate (obligatorie pentru cont).
+  const [accepted, setAccepted] = useState(false);
 
   const submit = async () => {
     const nextErrors: Errors = {
       email: isValidEmail(email) ? undefined : tr('Introdu o adresă de email validă.'),
       password: isStrongPassword(password) ? undefined : tr('Parola nu îndeplinește cerințele de mai jos.'),
       confirm: confirm === password ? undefined : tr('Parolele nu coincid.'),
+      consent: accepted ? undefined : tr('Bifează că accepți termenii ca să-ți creezi contul.'),
     };
     setErrors(nextErrors);
     setMessage(null);
-    if (nextErrors.email || nextErrors.password || nextErrors.confirm) return;
+    if (nextErrors.email || nextErrors.password || nextErrors.confirm || nextErrors.consent) return;
 
     setLoading(true);
     try {
@@ -103,6 +110,17 @@ export default function SignUpScreen({ navigation }: Props) {
               textContentType="newPassword"
               returnKeyType="go"
               onSubmitEditing={submit}
+            />
+
+            <ConsentCheckbox
+              checked={accepted}
+              onChange={(value) => {
+                setAccepted(value);
+                if (value) setErrors((e) => ({ ...e, consent: undefined }));
+              }}
+              onOpenTerms={() => navigation.navigate('Terms')}
+              onOpenPrivacy={() => navigation.navigate('PrivacyPolicy')}
+              error={errors.consent}
             />
 
             {message ? <FormMessage text={message} /> : null}

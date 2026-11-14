@@ -44,9 +44,18 @@ export default function SettingsScreen() {
         <Text style={[styles.label, styles.sectionGap]}>{tr('LEGAL')}</Text>
         <View style={styles.card}>
           <Pressable
-            onPress={() => navigation.navigate('PrivacyPolicy')}
+            onPress={() => navigation.navigate('Terms')}
             accessibilityRole="button"
             style={({ pressed }) => [styles.row, pressed && styles.pressed]}
+          >
+            <Ionicons name="document-text-outline" size={18} color={colors.text} />
+            <Text style={styles.rowText}>{tr('Termeni și condiții')}</Text>
+            <Ionicons name="chevron-forward" size={16} color={colors.faint} />
+          </Pressable>
+          <Pressable
+            onPress={() => navigation.navigate('PrivacyPolicy')}
+            accessibilityRole="button"
+            style={({ pressed }) => [styles.row, styles.rowBorder, pressed && styles.pressed]}
           >
             <Ionicons name="shield-checkmark-outline" size={18} color={colors.text} />
             <Text style={styles.rowText}>{tr('Politica de confidențialitate')}</Text>

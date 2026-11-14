@@ -34,6 +34,11 @@ export const EN: Record<string, string> = {
   'CONT': 'ACCOUNT',
   'LEGAL': 'LEGAL',
   'Politica de confidențialitate': 'Privacy policy',
+  'Termeni și condiții': 'Terms and conditions',
+  'Documentul e disponibil deocamdată doar în română.': 'This document is available only in Romanian for now.',
+  'Am citit și accept termenii și condițiile și politica de confidențialitate. Am cel puțin 18 ani.':
+    'I have read and accept the terms and conditions and the privacy policy. I am at least 18 years old.',
+  'Bifează că accepți termenii ca să-ți creezi contul.': 'Tick the box to accept the terms and create your account.',
   'Politica de confidențialitate e disponibilă deocamdată doar în română.': 'The privacy policy is available only in Romanian for now.',
   'Meniu': 'Menu',
   'Închide meniul': 'Close menu',

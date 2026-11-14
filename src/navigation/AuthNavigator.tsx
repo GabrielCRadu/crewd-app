@@ -2,6 +2,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import LoginScreen from '../screens/auth/LoginScreen';
 import SignUpScreen from '../screens/auth/SignUpScreen';
+import PrivacyPolicyScreen from '../screens/PrivacyPolicyScreen';
+import TermsScreen from '../screens/TermsScreen';
 import OnboardingIdentityScreen from '../screens/onboarding/OnboardingIdentityScreen';
 import OnboardingPhotoScreen from '../screens/onboarding/OnboardingPhotoScreen';
 import OnboardingTagsScreen from '../screens/onboarding/OnboardingTagsScreen';
@@ -19,6 +21,8 @@ export function AuthNavigator() {
     <AuthStack.Navigator screenOptions={screenOptions}>
       <AuthStack.Screen name="Login" component={LoginScreen} />
       <AuthStack.Screen name="SignUp" component={SignUpScreen} />
+      <AuthStack.Screen name="Terms" component={TermsScreen} />
+      <AuthStack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
     </AuthStack.Navigator>
   );
 }

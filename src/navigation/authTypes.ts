@@ -4,6 +4,9 @@ import type { Gender } from '../types/user';
 export type AuthStackParamList = {
   Login: undefined;
   SignUp: undefined;
+  /** Documentele pe care le accepți la crearea contului. */
+  Terms: undefined;
+  PrivacyPolicy: undefined;
 };
 
 /** Ce se completează la pasul 1 din onboarding și se trimite la pasul 2. */

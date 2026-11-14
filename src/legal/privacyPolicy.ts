@@ -1,9 +1,9 @@
 /**
- * Politica de confidențialitate afișată în aplicație (Setări → Politica de confidențialitate).
- * Sursa e Crewd_Politica_de_Confidentialitate.md (fără anexa internă). Când schimbi politica,
- * schimb-o în ambele locuri. Câmpurile [__] trebuie completate înainte de publicare.
+ * Politica de confidențialitate afișat(e) în aplicație (Setări → Politica de confidențialitate).
+ * Sursa e Crewd_Politica_de_Confidentialitate.md (fără anexa internă). Când schimbi documentul, regenerează și acest fișier.
+ * Câmpurile [__] trebuie completate înainte de publicare.
  */
-export const PRIVACY_POLICY_RO = `# Politica de Confidențialitate – Crewd
+export const PRIVACY_POLICY_RO = `da nu imi# Politica de Confidențialitate – Crewd
 
 **Data intrării în vigoare:** [__]
 
@@ -29,20 +29,15 @@ Operatorul datelor tale este **[__]** („noi”), CUI [__], cu sediul în [__].
 
 ### 3.1 Datele pe care ni le dai tu
 
-- **Cont:** adresa de email și parola. Parola o gestionează furnizorul nostru de autentificare (Firebase Authentication) și nu o vedem.
-- **Profil:** numele sau pseudonimul, data nașterii, genul, orașul, descrierea („Despre mine”) și poza de profil (opțională).
+- **Cont:** adresa de email, parola și username-ul. Parola o gestionează furnizorul nostru de autentificare (Firebase Authentication) și nu o vedem. Username-ul e unic și apare în codul tău QR.
+- **Profil:** numele sau pseudonimul, data nașterii, genul, orașul, descrierea („Despre mine”) și poza de profil. Din poză facem și o miniatură, folosită în grupuri și pe fișa ta publică.
 - **Tag-uri de pornire:** interesele alese la crearea contului (de exemplu Concerte, Jazz, Drumeții).
-- **Grupuri:** grupurile pe care le propui sau în care intri (intervalul de vârstă, „vibe-ul”, locul și ora întâlnirii) și mesajele trimise în chatul grupului.
-- **Mesaje directe:** mesajele și evenimentele trimise prietenilor.
-- **Amintiri:** pozele adăugate de la evenimentele la care ai fost și cine le poate vedea (toți sau doar prietenii).
-- **Evaluări și raportări:** tag-urile acordate altora după un eveniment („De treabă”, „Punctual”, „Aș mai ieși”), badge-urile propuse și raportările.
+- **Grupuri:** grupurile pe care le propui sau în care intri (intervalul de vârstă, „vibe-ul”, locul și ora întâlnirii) și mesajele trimise în chatul grupului. Când intri într-un grup, în el se copiază numele, vârsta, tag-urile și miniatura pozei tale.
 
 ### 3.2 Datele care rezultă din folosirea aplicației
 
 - **Activitate:** evenimentele la care te-ai înscris și grupurile în care ai intrat sau din care ai ieșit.
 - **Preferințe învățate:** tag-urile și scorurile actualizate automat după înscrieri.
-- **Evaluări primite:** totalurile evaluărilor, badge-urile primite și numărul de raportări.
-- **Relații:** prietenii, cererile de prietenie și persoanele blocate.
 - **Date tehnice:** identificatorul contului și datele necesare ca aplicația să funcționeze (de exemplu ora la care s-a salvat o modificare). Nu folosim instrumente de statistici sau de publicitate.
 
 ### 3.3 Locația
@@ -55,7 +50,11 @@ Operatorul datelor tale este **[__]** („noi”), CUI [__], cu sediul în [__].
 
 Pe telefon se păstrează sesiunea de logare (ca să nu te loghezi la fiecare pornire), limba aleasă și setarea de vizibilitate a locației. Le poți șterge dezinstalând aplicația.
 
-### 3.5 Date pe care nu le cerem
+### 3.5 Funcții în testare
+
+Unele funcții sunt încă în testare și **nu trimit nimic pe serverele noastre**: prietenii și cererile de prietenie, mesajele directe, amintirile, evaluările de după evenimente, badge-urile, raportările și harta cu prieteni. În versiunea actuală, ce faci în ele rămâne doar pe telefonul tău și se pierde când închizi aplicația; persoanele și pozițiile din ele sunt date de test. Când aceste funcții vor salva date pe server, actualizăm politica și te anunțăm înainte (secțiunea 14).
+
+### 3.6 Date pe care nu le cerem
 
 Nu îți cerem date sensibile: sănătate, religie, orientare sexuală, opinii politice. Te rugăm să nu le scrii nici în profil, nici în chat. Unele tag-uri sau evenimente pot totuși sugera astfel de informații. Vezi secțiunea 5.3.
 
@@ -65,9 +64,8 @@ Nu îți cerem date sensibile: sănătate, religie, orientare sexuală, opinii p
 - **Afișarea evenimentelor și a distanțelor** (locația, doar pe telefon, și tag-urile): executarea contractului; permisiunea de localizare o dai din telefon.
 - **Înscrierea la evenimente, grupurile și chatul** (activitate, profil, mesaje): executarea contractului.
 - **Potrivirea:** ordonarea evenimentelor și a grupurilor după tag-uri comune și vârstă și actualizarea automată a tag-urilor (vârstă, tag-uri, activitate). Temei: executarea contractului [sau interes legitim, art. 6(1)(f); de confirmat cu un avocat].
-- **Prieteni, mesaje directe și amintiri:** executarea contractului.
-- **Evaluări, badge-uri și raportări:** interes legitim, pentru siguranța și încrederea în comunitate.
-- **Moderare și prevenirea abuzurilor** (conținut raportat, istoricul raportărilor): interes legitim; obligație legală (Regulamentul (UE) 2022/2065 privind serviciile digitale), art. 6(1)(c).
+- **Fișa publică și codul QR** (username, nume, miniatura pozei): executarea contractului, ca prietenii să te poată găsi.
+- **Moderare și prevenirea abuzurilor** (de exemplu verificarea vârstei minime la crearea contului): interes legitim; obligație legală (Regulamentul (UE) 2022/2065 privind serviciile digitale), art. 6(1)(c).
 - **Reamintiri înainte de evenimente:** notificări create direct pe telefon, cu permisiunea ta.
 - **Răspunsul la cererile autorităților și apărarea în litigii** (datele relevante): obligație legală; interes legitim.
 
@@ -83,9 +81,9 @@ Când ne bazăm pe interesul legitim, am verificat că acest interes nu trece î
 
 În GDPR, toate acestea se numesc **profilare**.
 
-### 5.2 Restricții după raportări
+### 5.2 Restricții după raportări (în testare)
 
-Dacă cineva adună mai multe raportări, aplicația îi poate opri automat, pentru o perioadă, intrarea în grupuri și propunerea de grupuri. Dacă ți se întâmplă și crezi că e o greșeală, scrie-ne la [__]: o persoană verifică situația și poate ridica restricția [ajustați după practica voastră].
+Raportările sunt încă în testare (secțiunea 3.5). Când vor funcționa pe server, cine adună mai multe raportări va putea fi oprit automat, pentru o perioadă, să intre în grupuri sau să propună grupuri. Dacă ți se întâmplă și crezi că e o greșeală, scrie-ne la [__]: o persoană verifică situația și poate ridica restricția [ajustați după practica voastră].
 
 ### 5.3 Tag-uri care pot dezvălui informații sensibile
 
@@ -99,15 +97,11 @@ Unele tag-uri sau evenimente pot sugera informații sensibile, de exemplu religi
 
 ## 6. Ce văd ceilalți utilizatori
 
-- **Numele, vârsta, orașul, poza, descrierea și tag-urile:** cine îți deschide profilul (de exemplu participanții la același eveniment sau la același grup). Tag-urile comune sunt evidențiate.
+- **Fișa ta publică** (username-ul, numele și miniatura pozei): orice utilizator logat care îți știe username-ul, de exemplu din codul tău QR sau din linkul de invitație. Nu se poate căuta în listă: trebuie să știi username-ul.
+- **În grupurile de la evenimente** (numele, vârsta, tag-urile și miniatura pozei tale): orice utilizator logat care se uită la grupurile acelui eveniment, ca să-și aleagă grupul.
 - **Mesajele din chatul de grup:** doar membrii grupului.
-- **Mesajele directe:** doar persoana cu care vorbești.
-- **Evenimentele la care mergi:** doar prietenii tăi.
-- **Amintirile:** toată lumea sau doar prietenii, cum alegi tu la fiecare poză.
-- **Evaluările pe care le dai:** nimeni nu află cine ce a dat. Pe profiluri apar doar totalurile și numărul de raportări. Un badge apare abia când l-au propus 3 persoane diferite.
-- **Codul QR și linkul de invitație:** conțin identificatorul contului tău; oricine le primește îți poate deschide profilul.
-
-**Anonimatul evaluărilor:** nu dezvăluim cine a dat o evaluare sau o raportare. Excepție fac cererile legale ale autorităților și situațiile în care trebuie să investigăm un abuz. Într-un grup mic, totuși, ceilalți pot uneori deduce cine a dat o evaluare.
+- **Restul profilului** (emailul, data nașterii, genul, orașul, descrierea, poza mare, înscrierile, tag-urile învățate): nu le vede nimeni altcineva.
+- **Funcțiile în testare** (prieteni, mesaje directe, amintiri, evaluări): acum nu se trimit altor utilizatori (secțiunea 3.5). Când vor funcționa, vor arăta astfel: mesajele directe doar persoanei cu care vorbești; evenimentele la care mergi doar prietenilor; amintirile tuturor sau doar prietenilor, cum alegi tu; evaluările anonim, pe profil apărând doar totalurile, iar un badge abia când l-au propus 3 persoane diferite. Într-un grup mic, ceilalți pot uneori deduce cine a dat o evaluare.
 
 ## 7. Cui transmitem datele
 
@@ -149,12 +143,11 @@ Ai dreptul:
 
 ## 10. Cât timp păstrăm datele
 
-- **Cont și profil:** cât timp ai cont. Când îți ștergi contul, se șterg contul, profilul, înscrierile și locul tău în grupuri.
+- **Cont și profil:** cât timp ai cont. Când îți ștergi contul (Setări → Șterge contul), se șterg contul, profilul, înscrierile și locul tău în grupuri, iar username-ul și fișa publică se eliberează.
 - **Mesajele din chatul de grup:** rămân vizibile celorlalți membri, cu numele tău, [__] (de exemplu până la ștergerea grupului), pentru că fac parte și din conversația lor.
 - **Locația:** nu se păstrează pe serverele noastre.
 - **Istoricul înscrierilor și tag-urile:** cât timp ai cont.
-- **Evaluări, badge-uri și raportări:** [__] luni.
-- **Restricții după raportări:** [__], pentru siguranța comunității și pentru eventuale litigii.
+- **Funcțiile în testare** (secțiunea 3.5): nimic pe server; pe telefon, până închizi aplicația.
 - **Copii de siguranță:** se suprascriu în [__] zile.
 
 ## 11. Securitatea datelor
