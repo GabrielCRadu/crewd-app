@@ -9,8 +9,9 @@ import {
   sendFriendRequest,
   unblockPerson,
 } from '../services/friendsService';
+import { showFriendActionError } from './friendActionError';
 import type { FriendStatus } from '../services/friendsService';
-import { colors } from '../theme/colors';
+import { colors, onThemeChange } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
 import type { Gender } from '../types/user';
 import { removeFriendWording } from '../utils/friendWording';
@@ -35,11 +36,15 @@ export default function FriendButton({ personId, name, status, gender }: Props) 
   const primaryColor = colors.onLight;
   const secondary = styles.secondary;
   const linkStyle = styles.link;
+  // Pentru conturile reale acțiunea scrie în Firestore; dacă nu merge, spunem (starea revine singură).
+  const run = (action: (id: string) => Promise<void>) => () => {
+    action(personId).catch(showFriendActionError);
+  };
 
   if (status === 'none') {
     return (
       <Pressable
-        onPress={() => sendFriendRequest(personId)}
+        onPress={run(sendFriendRequest)}
         style={({ pressed }) => [styles.pill, primary, pressed && styles.pressed]}
       >
         <Ionicons name="person-add" size={18} color={primaryColor} />
@@ -55,7 +60,7 @@ export default function FriendButton({ personId, name, status, gender }: Props) 
           <Ionicons name="time-outline" size={18} color={colors.text} />
           <Text style={styles.pillText}>{tr('Cerere trimisă')}</Text>
         </View>
-        <Pressable onPress={() => cancelFriendRequest(personId)} hitSlop={8}>
+        <Pressable onPress={run(cancelFriendRequest)} hitSlop={8}>
           <Text style={linkStyle}>{tr('Anulează')}</Text>
         </Pressable>
       </View>
@@ -65,17 +70,17 @@ export default function FriendButton({ personId, name, status, gender }: Props) 
   if (status === 'incoming') {
     return (
       <View style={styles.incoming}>
-        <Text style={styles.incomingText}>{name}{' '}{tr('ți-a trimis o cerere de prietenie.')}</Text>
+        <Text style={styles.incomingText}>{tr('{name} ți-a trimis o cerere de prietenie.', { name })}</Text>
         <View style={styles.row}>
           <Pressable
-            onPress={() => acceptFriendRequest(personId)}
+            onPress={run(acceptFriendRequest)}
             style={({ pressed }) => [styles.pill, primary, styles.flex, pressed && styles.pressed]}
           >
             <Ionicons name="checkmark" size={18} color={primaryColor} />
             <Text style={[styles.pillText, { color: primaryColor }]}>{tr('Acceptă')}</Text>
           </Pressable>
           <Pressable
-            onPress={() => declineFriendRequest(personId)}
+            onPress={run(declineFriendRequest)}
             style={({ pressed }) => [styles.pill, secondary, styles.flex, pressed && styles.pressed]}
           >
             <Text style={styles.pillText}>{tr('Refuză')}</Text>
@@ -90,7 +95,7 @@ export default function FriendButton({ personId, name, status, gender }: Props) 
     const confirmRemove = () =>
       Alert.alert(wording.title, wording.message, [
         { text: tr('Renunță'), style: 'cancel' },
-        { text: wording.confirm, style: 'destructive', onPress: () => void removeFriend(personId) },
+        { text: wording.confirm, style: 'destructive', onPress: run(removeFriend) },
       ]);
     return (
       <Pressable onPress={confirmRemove} style={({ pressed }) => [styles.pill, secondary, pressed && styles.pressed]}>
@@ -108,31 +113,37 @@ export default function FriendButton({ personId, name, status, gender }: Props) 
         <Ionicons name="ban" size={18} color={colors.nope} />
         <Text style={styles.pillText}>{tr('Blocat')}</Text>
       </View>
-      <Pressable onPress={() => unblockPerson(personId)} hitSlop={8}>
+      <Pressable onPress={run(unblockPerson)} hitSlop={8}>
         <Text style={linkStyle}>{tr('Deblochează')}</Text>
       </Pressable>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  flex: { flex: 1 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-  pill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    height: 52,
-    paddingHorizontal: 20,
-    borderRadius: radii.pill,
-    borderWidth: 1,
-  },
-  pillText: { color: colors.text, fontSize: 16, fontWeight: '600' },
-  primary: { backgroundColor: colors.text, borderColor: colors.text },
-  secondary: { ...glass },
-  pressed: { opacity: 0.8 },
-  link: { color: colors.muted, fontSize: 15, fontWeight: '500', textDecorationLine: 'underline' },
-  incoming: { gap: 10 },
-  incomingText: { color: colors.text, fontSize: 14, fontWeight: '500' },
+const makeStyles = () =>
+  StyleSheet.create({
+    flex: { flex: 1 },
+    row: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+    pill: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      height: 52,
+      paddingHorizontal: 20,
+      borderRadius: radii.pill,
+      borderWidth: 1,
+    },
+    pillText: { color: colors.text, fontSize: 16, fontWeight: '600' },
+    primary: { backgroundColor: colors.text, borderColor: colors.text },
+    secondary: { ...glass },
+    pressed: { opacity: 0.8 },
+    link: { color: colors.muted, fontSize: 15, fontWeight: '500', textDecorationLine: 'underline' },
+    incoming: { gap: 10 },
+    incomingText: { color: colors.text, fontSize: 14, fontWeight: '500' },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

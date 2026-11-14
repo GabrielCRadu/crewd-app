@@ -27,13 +27,13 @@ import { TAG_GROUPS } from '../data/tags';
 import type { ProfileStackParamList } from '../navigation/profileTypes';
 import { PhotoPermissionError, pickProfilePhoto } from '../services/photoService';
 import type { PhotoSource } from '../services/photoService';
-import { colors, tagTints } from '../theme/colors';
+import { colors, onThemeChange, tagTints } from '../theme/colors';
 import { type } from '../theme/typography';
 import { glass, radii } from '../theme/shape';
 import type { TagGroup } from '../types/social';
 import type { Gender, UserProfile } from '../types/user';
 import { formatBirthDate } from '../utils/birthDate';
-import { tr } from '../i18n';
+import { tr, trPlural } from '../i18n';
 
 type Props = NativeStackScreenProps<ProfileStackParamList, 'EditProfile'>;
 
@@ -227,7 +227,7 @@ export default function EditProfileScreen({ navigation }: Props) {
           <View style={styles.block}>
             <View style={styles.labelRow}>
               <Text style={styles.sectionTitle}>{tr('Preferințe')}</Text>
-              <Text style={styles.counter}>{totalTags}{' '}{tr('alese')}</Text>
+              <Text style={styles.counter}>{trPlural(totalTags, '{n} ales', '{n} alese')}</Text>
             </View>
             {TAG_GROUPS.map((group) => {
               const style = TAG_GROUP_STYLE[group.id];
@@ -295,58 +295,64 @@ function PhotoButton({
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  flex: { flex: 1 },
-  header: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 20, paddingTop: 8, paddingBottom: 12 },
-  title: { ...type.screenTitle, flex: 1, fontSize: 26 },
-  content: { padding: 20, paddingTop: 8, paddingBottom: 32, gap: 20 },
-  photoBlock: { alignItems: 'center', gap: 12 },
-  photoActions: { flexDirection: 'row', gap: 10 },
-  photoButton: {
-    ...glass,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 16,
-    paddingVertical: 9,
-    borderRadius: radii.pill,
-  },
-  photoButtonText: { color: colors.text, fontSize: 14, fontWeight: '500' },
-  pressed: { backgroundColor: colors.cardStrong },
-  disabled: { opacity: 0.5 },
-  hint: { color: colors.faint, fontSize: 13 },
-  row: { flexDirection: 'row', gap: 12, alignItems: 'flex-start' },
-  cityField: { flex: 1 },
-  lockedCard: { ...glass, gap: 10, padding: 16, borderRadius: radii.inner },
-  lockedRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  lockedValue: { color: colors.text, fontSize: 15, fontWeight: '500' },
-  lockedHintRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  lockedHint: { flex: 1, color: colors.faint, fontSize: 12 },
-  block: { gap: 10 },
-  labelRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  label: { ...type.label },
-  counter: { color: colors.faint, fontSize: 12 },
-  bioInput: {
-    ...glass,
-    minHeight: 110,
-    padding: 16,
-    borderRadius: radii.inner,
-    fontSize: 15,
-    lineHeight: 21,
-    color: colors.text,
-    textAlignVertical: 'top',
-  },
-  sectionTitle: { ...type.label },
-  tagGroup: { gap: 10, marginTop: 4 },
-  tagGroupHeader: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  tagGroupLabel: { fontSize: 13, fontWeight: '600', color: colors.text },
-  tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  bottomBar: {
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    backgroundColor: colors.background,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-  },
+const makeStyles = () =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    flex: { flex: 1 },
+    header: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 20, paddingTop: 8, paddingBottom: 12 },
+    title: { ...type.screenTitle, flex: 1, fontSize: 26 },
+    content: { padding: 20, paddingTop: 8, paddingBottom: 32, gap: 20 },
+    photoBlock: { alignItems: 'center', gap: 12 },
+    photoActions: { flexDirection: 'row', gap: 10 },
+    photoButton: {
+      ...glass,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      paddingHorizontal: 16,
+      paddingVertical: 9,
+      borderRadius: radii.pill,
+    },
+    photoButtonText: { color: colors.text, fontSize: 14, fontWeight: '500' },
+    pressed: { backgroundColor: colors.cardStrong },
+    disabled: { opacity: 0.5 },
+    hint: { color: colors.faint, fontSize: 13 },
+    row: { flexDirection: 'row', gap: 12, alignItems: 'flex-start' },
+    cityField: { flex: 1 },
+    lockedCard: { ...glass, gap: 10, padding: 16, borderRadius: radii.inner },
+    lockedRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    lockedValue: { color: colors.text, fontSize: 15, fontWeight: '500' },
+    lockedHintRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    lockedHint: { flex: 1, color: colors.faint, fontSize: 12 },
+    block: { gap: 10 },
+    labelRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    label: { ...type.label },
+    counter: { color: colors.faint, fontSize: 12 },
+    bioInput: {
+      ...glass,
+      minHeight: 110,
+      padding: 16,
+      borderRadius: radii.inner,
+      fontSize: 15,
+      lineHeight: 21,
+      color: colors.text,
+      textAlignVertical: 'top',
+    },
+    sectionTitle: { ...type.label },
+    tagGroup: { gap: 10, marginTop: 4 },
+    tagGroupHeader: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    tagGroupLabel: { fontSize: 13, fontWeight: '600', color: colors.text },
+    tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    bottomBar: {
+      paddingHorizontal: 20,
+      paddingTop: 12,
+      backgroundColor: colors.background,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+    },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

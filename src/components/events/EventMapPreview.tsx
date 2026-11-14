@@ -6,7 +6,7 @@ import DistanceDot from './DistanceDot';
 import EventPoster from './EventPoster';
 import { getCategory } from '../../data/categories';
 import type { EventWithDistance } from '../../types/events';
-import { colors } from '../../theme/colors';
+import { colors, onThemeChange } from '../../theme/colors';
 import { radii } from '../../theme/shape';
 import { cardShadow } from '../../theme/shadows';
 import { type } from '../../theme/typography';
@@ -54,34 +54,40 @@ export default function EventMapPreview({ event, onOpen, onClose }: Props) {
       <GradientButton label={tr('Vezi detalii')} icon="arrow-forward" compact onPress={onOpen} />
 
       {/* Atribuirea afișului (obligatorie pentru imaginile din surse externe) */}
-      {event.imageUrl && event.imageCredit ? <Text style={styles.credit}>{tr('Foto:')}{' '}{event.imageCredit}</Text> : null}
+      {event.imageUrl && event.imageCredit ? <Text style={styles.credit}>{tr('Foto: {credit}', { credit: event.imageCredit })}</Text> : null}
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  // Suprafață opacă (surface), ca pe tab-ul Hartă: cardul translucid nu se citește bine peste hartă.
-  card: {
-    position: 'absolute',
-    left: 16,
-    right: 16,
-    bottom: 16,
-    padding: 14,
-    gap: 12,
-    borderRadius: radii.card,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    ...cardShadow,
-  },
-  top: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
-  body: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 14 },
-  pressed: { opacity: 0.7 },
-  poster: { width: 84, height: 104, borderRadius: radii.inner },
-  text: { flex: 1, gap: 4 },
-  category: { ...type.label, fontSize: 11 },
-  title: { color: colors.text, fontSize: 17, fontWeight: '600' },
-  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  meta: { color: colors.muted, fontSize: 13 },
-  credit: { color: colors.faint, fontSize: 10, textAlign: 'right' },
+const makeStyles = () =>
+  StyleSheet.create({
+    // Suprafață opacă (surface), ca pe tab-ul Hartă: cardul translucid nu se citește bine peste hartă.
+    card: {
+      position: 'absolute',
+      left: 16,
+      right: 16,
+      bottom: 16,
+      padding: 14,
+      gap: 12,
+      borderRadius: radii.card,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      ...cardShadow,
+    },
+    top: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
+    body: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 14 },
+    pressed: { opacity: 0.7 },
+    poster: { width: 84, height: 104, borderRadius: radii.inner },
+    text: { flex: 1, gap: 4 },
+    category: { ...type.label, fontSize: 11 },
+    title: { color: colors.text, fontSize: 17, fontWeight: '600' },
+    metaRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+    meta: { color: colors.muted, fontSize: 13 },
+    credit: { color: colors.faint, fontSize: 10, textAlign: 'right' },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

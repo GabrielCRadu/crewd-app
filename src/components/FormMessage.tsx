@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-import { colors } from '../theme/colors';
+import { colors, onThemeChange } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
 
 /** Mesaj de eroare sau de confirmare sub un formular. */
@@ -18,9 +18,15 @@ export default function FormMessage({ text, tone = 'error' }: { text: string; to
   );
 }
 
-const styles = StyleSheet.create({
-  box: { ...glass, flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderRadius: radii.inner },
-  error: { borderColor: colors.nope },
-  success: { borderColor: colors.like },
-  text: { flex: 1, color: colors.text, fontSize: 14, lineHeight: 20 },
+const makeStyles = () =>
+  StyleSheet.create({
+    box: { ...glass, flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderRadius: radii.inner },
+    error: { borderColor: colors.nope },
+    success: { borderColor: colors.like },
+    text: { flex: 1, color: colors.text, fontSize: 14, lineHeight: 20 },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

@@ -7,7 +7,7 @@ import { allProfileTags, useAuth } from '../../context/AuthContext';
 import { useEventGroups } from '../../hooks/useEventGroups';
 import { useNow } from '../../hooks/useNow';
 import { joinGroup } from '../../services/groupsService';
-import { colors } from '../../theme/colors';
+import { colors, onThemeChange } from '../../theme/colors';
 import { glass, radii } from '../../theme/shape';
 import { type } from '../../theme/typography';
 import type { Event } from '../../types/events';
@@ -25,7 +25,7 @@ import {
 } from '../../utils/groupRules';
 import { getMyRatings, getReputation } from '../../services/ratingsService';
 import { ME_ID } from '../../data/mockRatings';
-import { tr } from '../../i18n';
+import { tr, trPlural } from '../../i18n';
 
 interface Props {
   event: Event;
@@ -81,7 +81,7 @@ export default function EventGroupsSection({ event, joined, myGroup, onPropose, 
     ? null
     : mineStatus === 'expired'
       ? tr('Nu s-au strâns 3 persoane la timp. Alege alt grup de mai jos sau propune unul.')
-      : tr('Așteptăm încă {missing} {p}. Chat-ul se deschide când sunteți cel puțin {MIN_FORM_MEMBERS}.', { missing: missing, p: missing === 1 ? 'persoană' : 'persoane', MIN_FORM_MEMBERS: MIN_FORM_MEMBERS });
+      : trPlural(missing, 'Așteptăm încă o persoană. Chat-ul se deschide când sunteți cel puțin {min}.', 'Așteptăm încă {n} persoane. Chat-ul se deschide când sunteți cel puțin {min}.', { min: MIN_FORM_MEMBERS });
 
   const cardFor = (g: CrewGroup) => (
     <GroupCard
@@ -135,7 +135,7 @@ export default function EventGroupsSection({ event, joined, myGroup, onPropose, 
             accessibilityRole="button"
             accessibilityState={{ expanded: othersOpen }}
           >
-            <Text style={type.label}>{tr('Alte grupuri ·')}{' '}{others.length}</Text>
+            <Text style={type.label}>{tr('Alte grupuri · {n}', { n: others.length })}</Text>
             <Ionicons name={othersOpen ? 'chevron-up' : 'chevron-down'} size={18} color={colors.muted} />
           </Pressable>
         </>
@@ -159,22 +159,28 @@ export default function EventGroupsSection({ event, joined, myGroup, onPropose, 
   );
 }
 
-const styles = StyleSheet.create({
-  container: { gap: 12 },
-  locked: { ...glass, flexDirection: 'row', alignItems: 'center', gap: 10, padding: 14, borderRadius: radii.inner },
-  lockedText: { flex: 1, color: colors.muted, fontSize: 14 },
-  muted: { color: colors.muted, fontSize: 13 },
-  toggle: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 8, marginTop: 4 },
-  propose: {
-    ...glass,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 14,
-    borderRadius: radii.pill,
-    borderStyle: 'dashed',
-  },
-  proposeText: { color: colors.text, fontSize: 14, fontWeight: '500' },
-  pressed: { opacity: 0.8 },
+const makeStyles = () =>
+  StyleSheet.create({
+    container: { gap: 12 },
+    locked: { ...glass, flexDirection: 'row', alignItems: 'center', gap: 10, padding: 14, borderRadius: radii.inner },
+    lockedText: { flex: 1, color: colors.muted, fontSize: 14 },
+    muted: { color: colors.muted, fontSize: 13 },
+    toggle: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 8, marginTop: 4 },
+    propose: {
+      ...glass,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      paddingVertical: 14,
+      borderRadius: radii.pill,
+      borderStyle: 'dashed',
+    },
+    proposeText: { color: colors.text, fontSize: 14, fontWeight: '500' },
+    pressed: { opacity: 0.8 },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

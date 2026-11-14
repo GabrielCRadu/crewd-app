@@ -50,3 +50,21 @@ export type ProfileDraft = Omit<UserProfile, 'uid' | 'learnedTags' | 'bio' | 'ph
 /** Ce se poate schimba din „Editează profilul”. */
 /** Data nașterii și genul NU se pot schimba după onboarding. */
 export type ProfileChanges = Partial<Pick<UserProfile, 'name' | 'city' | 'bio' | 'photoUrl' | 'photoThumb' | 'chosenTags'>>;
+
+/**
+ * Profilul public, vizibil oricui e logat (Firestore `profiles/{uid}`; spec 2026-11-14-profil-membru-tema-design.md).
+ * Copie a câmpurilor publice din `users/{uid}`; data nașterii, genul, emailul și înscrierile rămân private.
+ */
+export interface PublicProfile {
+  uid: string;
+  name: string;
+  /** Vârsta în ani (calculată la scriere); null dacă lipsește. */
+  age: number | null;
+  city: string;
+  bio: string;
+  /** Poza de profil (~400px, data URI JPEG). */
+  photoUrl: string | null;
+  username: string | null;
+  /** Tag-urile alese și cele învățate. */
+  tags: string[];
+}

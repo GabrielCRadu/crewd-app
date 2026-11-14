@@ -50,6 +50,19 @@ export function tr(text: string, params?: Record<string, string | number>): stri
   );
 }
 
+/**
+ * Text cu număr, la singular sau plural: `trPlural(n, '{n} persoană', '{n} persoane')`.
+ * În `en.ts` ambele forme au traducerea lor ('{n} person', '{n} people'). `{n}` primește numărul.
+ */
+export function trPlural(
+  count: number,
+  one: string,
+  many: string,
+  params?: Record<string, string | number>,
+): string {
+  return tr(count === 1 ? one : many, { n: count, ...params });
+}
+
 /** Schimbă limba și o ține minte pentru data viitoare. */
 export async function setLanguage(language: Language): Promise<void> {
   if (language === current) return;

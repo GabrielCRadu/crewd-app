@@ -10,6 +10,8 @@ export interface MemberSummary {
   tags: string[];
   /** Miniatura pozei de profil (data URI sau URL), sau null. Lipsește la intrările de dinainte de chat. */
   photo?: string | null;
+  /** Username-ul unic (pentru profilul membrului), sau null. Lipsește la intrările mai vechi. */
+  username?: string | null;
 }
 
 export interface CrewGroup {

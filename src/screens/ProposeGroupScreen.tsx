@@ -15,7 +15,7 @@ import { useEvents } from '../hooks/useEvents';
 import { useUserLocation } from '../hooks/useUserLocation';
 import type { EventsStackParamList } from '../navigation/eventsTypes';
 import { proposeGroup } from '../services/groupsService';
-import { colors } from '../theme/colors';
+import { appearance, colors, onThemeChange } from '../theme/colors';
 import { type } from '../theme/typography';
 import { glass, radii } from '../theme/shape';
 import type { ProposalDraft } from '../types/groups';
@@ -127,7 +127,7 @@ export default function ProposeGroupScreen({ navigation, route }: Props) {
                   value={current.meetupAt}
                   mode="time"
                   display="compact"
-                  themeVariant="dark"
+                  themeVariant={appearance.scheme}
                   onChange={(_e, date) => {
                     if (!date) return;
                     const next = new Date(event.startsAt);
@@ -137,7 +137,7 @@ export default function ProposeGroupScreen({ navigation, route }: Props) {
                 />
               </View>
             )}
-            <Text style={styles.hint}>{tr('Evenimentul începe la')}{' '}{formatTime(event.startsAt)}.</Text>
+            <Text style={styles.hint}>{tr('Evenimentul începe la {time}.', { time: formatTime(event.startsAt) })}</Text>
             {errors.meetupAt ? <Text style={styles.error}>{errors.meetupAt}</Text> : null}
           </View>
 
@@ -243,35 +243,41 @@ function Stepper({
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  flex: { flex: 1 },
-  header: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 20, paddingTop: 8, paddingBottom: 12 },
-  headerText: { flex: 1 },
-  title: { ...type.screenTitle, fontSize: 24 },
-  subtitle: { fontSize: 13, color: colors.muted },
-  content: { padding: 20, paddingTop: 8, paddingBottom: 32, gap: 20 },
-  block: { gap: 8 },
-  label: { ...type.label },
-  field: {
-    ...glass,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 10,
-    minHeight: 54,
-    paddingHorizontal: 18,
-    borderRadius: radii.pill,
-  },
-  pressed: { backgroundColor: colors.cardStrong },
-  fieldText: { color: colors.text, fontSize: 16 },
-  hint: { color: colors.faint, fontSize: 12 },
-  error: { color: colors.nope, fontSize: 12, marginLeft: 6 },
-  counter: { alignSelf: 'flex-end', color: colors.faint, fontSize: 12 },
-  ageRow: { flexDirection: 'row', gap: 12 },
-  stepper: { ...glass, flex: 1, alignItems: 'center', gap: 6, padding: 12, borderRadius: radii.inner },
-  stepperLabel: { color: colors.muted, fontSize: 12 },
-  stepperRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-  stepperValue: { color: colors.text, fontSize: 22, fontWeight: '600', minWidth: 32, textAlign: 'center' },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+const makeStyles = () =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    flex: { flex: 1 },
+    header: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 20, paddingTop: 8, paddingBottom: 12 },
+    headerText: { flex: 1 },
+    title: { ...type.screenTitle, fontSize: 24 },
+    subtitle: { fontSize: 13, color: colors.muted },
+    content: { padding: 20, paddingTop: 8, paddingBottom: 32, gap: 20 },
+    block: { gap: 8 },
+    label: { ...type.label },
+    field: {
+      ...glass,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: 10,
+      minHeight: 54,
+      paddingHorizontal: 18,
+      borderRadius: radii.pill,
+    },
+    pressed: { backgroundColor: colors.cardStrong },
+    fieldText: { color: colors.text, fontSize: 16 },
+    hint: { color: colors.faint, fontSize: 12 },
+    error: { color: colors.nope, fontSize: 12, marginLeft: 6 },
+    counter: { alignSelf: 'flex-end', color: colors.faint, fontSize: 12 },
+    ageRow: { flexDirection: 'row', gap: 12 },
+    stepper: { ...glass, flex: 1, alignItems: 'center', gap: 6, padding: 12, borderRadius: radii.inner },
+    stepperLabel: { color: colors.muted, fontSize: 12 },
+    stepperRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+    stepperValue: { color: colors.text, fontSize: 22, fontWeight: '600', minWidth: 32, textAlign: 'center' },
+    chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

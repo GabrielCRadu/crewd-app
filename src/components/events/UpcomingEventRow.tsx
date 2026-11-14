@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import EventPoster from './EventPoster';
 import type { EventWithDistance } from '../../types/events';
 import { getCategory } from '../../data/categories';
-import { colors } from '../../theme/colors';
+import { colors, onThemeChange } from '../../theme/colors';
 import { glass, radii } from '../../theme/shape';
 import { formatTime, formatWeekdayShort } from '../../utils/dates';
 import { tr } from '../../i18n';
@@ -51,32 +51,38 @@ export default function UpcomingEventRow({ event, joined, onPress }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  row: {
-    ...glass,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-    padding: 10,
-    borderRadius: radii.card,
-  },
-  pressed: { backgroundColor: colors.cardStrong },
-  poster: { width: 76, height: 76, borderRadius: radii.inner },
-  joinedBadge: {
-    position: 'absolute',
-    top: -4,
-    right: -4,
-    width: 22,
-    height: 22,
-    borderRadius: radii.pill,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.text,
-    borderWidth: 2,
-    borderColor: colors.background,
-  },
-  text: { flex: 1, gap: 3 },
-  title: { color: colors.text, fontSize: 16, fontWeight: '600' },
-  when: { color: colors.text, opacity: 0.75, fontSize: 13, fontWeight: '500' },
-  category: { color: colors.muted, fontSize: 12, fontWeight: '500' },
+const makeStyles = () =>
+  StyleSheet.create({
+    row: {
+      ...glass,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 14,
+      padding: 10,
+      borderRadius: radii.card,
+    },
+    pressed: { backgroundColor: colors.cardStrong },
+    poster: { width: 76, height: 76, borderRadius: radii.inner },
+    joinedBadge: {
+      position: 'absolute',
+      top: -4,
+      right: -4,
+      width: 22,
+      height: 22,
+      borderRadius: radii.pill,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.text,
+      borderWidth: 2,
+      borderColor: colors.background,
+    },
+    text: { flex: 1, gap: 3 },
+    title: { color: colors.text, fontSize: 16, fontWeight: '600' },
+    when: { color: colors.text, opacity: 0.75, fontSize: 13, fontWeight: '500' },
+    category: { color: colors.muted, fontSize: 12, fontWeight: '500' },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

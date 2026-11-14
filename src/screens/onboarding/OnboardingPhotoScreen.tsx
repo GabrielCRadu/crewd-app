@@ -8,7 +8,7 @@ import OnboardingHeader from '../../components/OnboardingHeader';
 import ProfilePhotoPicker from '../../components/ProfilePhotoPicker';
 import ScreenGlow from '../../components/ScreenGlow';
 import type { OnboardingStackParamList } from '../../navigation/authTypes';
-import { colors } from '../../theme/colors';
+import { colors, onThemeChange } from '../../theme/colors';
 import { type } from '../../theme/typography';
 import { tr } from '../../i18n';
 
@@ -47,11 +47,17 @@ export default function OnboardingPhotoScreen({ navigation, route }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  content: { flexGrow: 1, padding: 24, gap: 28 },
-  heading: { gap: 8 },
-  title: { ...type.screenTitle, fontSize: 36 },
-  subtitle: { fontSize: 15, lineHeight: 22, color: colors.muted },
-  bottom: { marginTop: 'auto' },
+const makeStyles = () =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    content: { flexGrow: 1, padding: 24, gap: 28 },
+    heading: { gap: 8 },
+    title: { ...type.screenTitle, fontSize: 36 },
+    subtitle: { fontSize: 15, lineHeight: 22, color: colors.muted },
+    bottom: { marginTop: 'auto' },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

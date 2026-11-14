@@ -5,7 +5,7 @@ import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/d
 import type { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
 
-import { colors } from '../theme/colors';
+import { appearance, colors, onThemeChange } from '../theme/colors';
 import { type } from '../theme/typography';
 import { glass, radii } from '../theme/shape';
 import {
@@ -102,7 +102,7 @@ export default function BirthDateField({ label, value, onChange, error, hint, co
               value={iosDraft}
               mode="date"
               display="spinner"
-              themeVariant="dark"
+              themeVariant={appearance.scheme}
               locale="ro-RO"
               maximumDate={maximumDate}
               minimumDate={minimumDate}
@@ -115,28 +115,34 @@ export default function BirthDateField({ label, value, onChange, error, hint, co
   );
 }
 
-const styles = StyleSheet.create({
-  container: { gap: 8 },
-  label: { ...type.label },
-  field: {
-    ...glass,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    minHeight: 54,
-    paddingHorizontal: 18,
-    borderRadius: radii.pill,
-  },
-  fieldPressed: { backgroundColor: colors.cardStrong },
-  fieldError: { borderColor: colors.nope },
-  value: { flex: 1, color: colors.text, fontSize: 16 },
-  placeholder: { color: colors.faint },
-  error: { color: colors.nope, fontSize: 12, marginLeft: 6 },
-  hintRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginLeft: 6 },
-  hint: { flex: 1, color: colors.faint, fontSize: 12 },
-  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' },
-  sheet: { backgroundColor: colors.surface, paddingBottom: 32, borderTopLeftRadius: radii.card, borderTopRightRadius: radii.card },
-  sheetHeader: { flexDirection: 'row', justifyContent: 'space-between', padding: 18 },
-  sheetCancel: { color: colors.muted, fontSize: 16 },
-  sheetDone: { color: colors.text, fontSize: 16, fontWeight: '600' },
+const makeStyles = () =>
+  StyleSheet.create({
+    container: { gap: 8 },
+    label: { ...type.label },
+    field: {
+      ...glass,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      minHeight: 54,
+      paddingHorizontal: 18,
+      borderRadius: radii.pill,
+    },
+    fieldPressed: { backgroundColor: colors.cardStrong },
+    fieldError: { borderColor: colors.nope },
+    value: { flex: 1, color: colors.text, fontSize: 16 },
+    placeholder: { color: colors.faint },
+    error: { color: colors.nope, fontSize: 12, marginLeft: 6 },
+    hintRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginLeft: 6 },
+    hint: { flex: 1, color: colors.faint, fontSize: 12 },
+    backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' },
+    sheet: { backgroundColor: colors.surface, paddingBottom: 32, borderTopLeftRadius: radii.card, borderTopRightRadius: radii.card },
+    sheetHeader: { flexDirection: 'row', justifyContent: 'space-between', padding: 18 },
+    sheetCancel: { color: colors.muted, fontSize: 16 },
+    sheetDone: { color: colors.text, fontSize: 16, fontWeight: '600' },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

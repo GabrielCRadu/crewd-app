@@ -4,6 +4,7 @@ import type { TextInputInstance } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
+import ConsentCheckbox from '../../components/ConsentCheckbox';
 import FormMessage from '../../components/FormMessage';
 import PasswordChecklist from '../../components/PasswordChecklist';
 import GlassIconButton from '../../components/GlassIconButton';
@@ -12,16 +13,19 @@ import ScreenGlow from '../../components/ScreenGlow';
 import TextField from '../../components/TextField';
 import type { AuthStackParamList } from '../../navigation/authTypes';
 import { isValidEmail, signUp } from '../../services/authService';
-import { colors } from '../../theme/colors';
+import { colors, onThemeChange } from '../../theme/colors';
 import { type } from '../../theme/typography';
 import { isStrongPassword } from '../../utils/passwordRules';
 import { tr } from '../../i18n';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'SignUp'>;
 
-type Errors = { email?: string; password?: string; confirm?: string };
+type Errors = { email?: string; password?: string; confirm?: string; consent?: string };
 
-/** Crearea contului: email, parolă, confirmare. După creare urmează onboarding-ul (automat). */
+/**
+ * Crearea contului: email, parolă, confirmare și acceptarea termenilor și a politicii de confidențialitate.
+ * După creare urmează onboarding-ul (automat).
+ */
 export default function SignUpScreen({ navigation }: Props) {
   const passwordRef = useRef<TextInputInstance>(null);
   const confirmRef = useRef<TextInputInstance>(null);
@@ -31,16 +35,19 @@ export default function SignUpScreen({ navigation }: Props) {
   const [errors, setErrors] = useState<Errors>({});
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  // Acceptarea termenilor și a politicii de confidențialitate (obligatorie pentru cont).
+  const [accepted, setAccepted] = useState(false);
 
   const submit = async () => {
     const nextErrors: Errors = {
       email: isValidEmail(email) ? undefined : tr('Introdu o adresă de email validă.'),
       password: isStrongPassword(password) ? undefined : tr('Parola nu îndeplinește cerințele de mai jos.'),
       confirm: confirm === password ? undefined : tr('Parolele nu coincid.'),
+      consent: accepted ? undefined : tr('Bifează că accepți termenii ca să-ți creezi contul.'),
     };
     setErrors(nextErrors);
     setMessage(null);
-    if (nextErrors.email || nextErrors.password || nextErrors.confirm) return;
+    if (nextErrors.email || nextErrors.password || nextErrors.confirm || nextErrors.consent) return;
 
     setLoading(true);
     try {
@@ -105,6 +112,17 @@ export default function SignUpScreen({ navigation }: Props) {
               onSubmitEditing={submit}
             />
 
+            <ConsentCheckbox
+              checked={accepted}
+              onChange={(value) => {
+                setAccepted(value);
+                if (value) setErrors((e) => ({ ...e, consent: undefined }));
+              }}
+              onOpenTerms={() => navigation.navigate('Terms')}
+              onOpenPrivacy={() => navigation.navigate('PrivacyPolicy')}
+              error={errors.consent}
+            />
+
             {message ? <FormMessage text={message} /> : null}
           </View>
 
@@ -128,16 +146,22 @@ export default function SignUpScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  flex: { flex: 1 },
-  content: { flexGrow: 1, padding: 24, gap: 24 },
-  heading: { gap: 8 },
-  title: { ...type.screenTitle, fontSize: 34 },
-  subtitle: { fontSize: 15, lineHeight: 22, color: colors.muted },
-  form: { gap: 16 },
-  bottom: { marginTop: 'auto', gap: 16 },
-  footer: { flexDirection: 'row', justifyContent: 'center', gap: 6 },
-  footerText: { color: colors.muted, fontSize: 15 },
-  footerLink: { color: colors.text, fontSize: 15, fontWeight: '600' },
+const makeStyles = () =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    flex: { flex: 1 },
+    content: { flexGrow: 1, padding: 24, gap: 24 },
+    heading: { gap: 8 },
+    title: { ...type.screenTitle, fontSize: 34 },
+    subtitle: { fontSize: 15, lineHeight: 22, color: colors.muted },
+    form: { gap: 16 },
+    bottom: { marginTop: 'auto', gap: 16 },
+    footer: { flexDirection: 'row', justifyContent: 'center', gap: 6 },
+    footerText: { color: colors.muted, fontSize: 15 },
+    footerLink: { color: colors.text, fontSize: 15, fontWeight: '600' },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

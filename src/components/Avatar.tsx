@@ -1,7 +1,7 @@
 import { Image, StyleSheet, Text } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { colors } from '../theme/colors';
+import { colors, onThemeChange } from '../theme/colors';
 import { gradients } from '../theme/gradients';
 
 interface Props {
@@ -39,7 +39,13 @@ export default function Avatar({ name, size = 40, square = false, initials = 1, 
   );
 }
 
-const styles = StyleSheet.create({
-  base: { alignItems: 'center', justifyContent: 'center' },
-  text: { color: colors.text, fontWeight: '600' },
+const makeStyles = () =>
+  StyleSheet.create({
+    base: { alignItems: 'center', justifyContent: 'center' },
+    text: { color: colors.text, fontWeight: '600' },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

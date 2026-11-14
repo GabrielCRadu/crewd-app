@@ -136,7 +136,13 @@ export function profileAge(p: { birthDate: string | null; age: number }, now: Da
  * `photo` e null când nu ai miniatură: Firestore refuză valorile undefined.
  */
 export function memberSummary(me: UserProfile, now: Date): MemberSummary {
-  return { name: me.name, age: profileAge(me, now), tags: allProfileTags(me), photo: me.photoThumb ?? null };
+  return {
+    name: me.name,
+    age: profileAge(me, now),
+    tags: allProfileTags(me),
+    photo: me.photoThumb ?? null,
+    username: me.username ?? null,
+  };
 }
 
 /**

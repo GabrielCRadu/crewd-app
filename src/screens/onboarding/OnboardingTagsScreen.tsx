@@ -12,7 +12,7 @@ import { useAuth } from '../../context/AuthContext';
 import { TAG_GROUPS } from '../../data/tags';
 import type { OnboardingStackParamList } from '../../navigation/authTypes';
 import { UsernameTakenError } from '../../services/usernamesService';
-import { colors } from '../../theme/colors';
+import { colors, onThemeChange } from '../../theme/colors';
 import { type } from '../../theme/typography';
 import type { TagGroup } from '../../types/social';
 import { tr } from '../../i18n';
@@ -115,15 +115,21 @@ export default function OnboardingTagsScreen({ navigation, route }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  content: { flexGrow: 1, padding: 24, gap: 22 },
-  heading: { gap: 8 },
-  title: { ...type.screenTitle, fontSize: 36 },
-  subtitle: { fontSize: 15, lineHeight: 22, color: colors.muted },
-  group: { gap: 10 },
-  label: { ...type.label },
-  tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  bottom: { marginTop: 'auto', gap: 12 },
-  counter: { alignSelf: 'center', color: colors.faint, fontSize: 13 },
+const makeStyles = () =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    content: { flexGrow: 1, padding: 24, gap: 22 },
+    heading: { gap: 8 },
+    title: { ...type.screenTitle, fontSize: 36 },
+    subtitle: { fontSize: 15, lineHeight: 22, color: colors.muted },
+    group: { gap: 10 },
+    label: { ...type.label },
+    tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    bottom: { marginTop: 'auto', gap: 12 },
+    counter: { alignSelf: 'center', color: colors.faint, fontSize: 13 },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

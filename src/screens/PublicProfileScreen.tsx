@@ -2,25 +2,34 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-import Avatar from '../components/Avatar';
 import GlassIconButton from '../components/GlassIconButton';
+import UserProfileView from '../components/profile/UserProfileView';
 import { usePublicCard } from '../hooks/usePublicCard';
 import type { ProfileStackParamList } from '../navigation/profileTypes';
-import { colors } from '../theme/colors';
+import { colors, onThemeChange } from '../theme/colors';
 import { radii } from '../theme/shape';
-import { type } from '../theme/typography';
 import { tr } from '../i18n';
 
 type Props = NativeStackScreenProps<ProfileStackParamList, 'PublicProfile'>;
 
 /**
- * Fișa publică a cuiva, deschisă din codul lui QR (spec 2026-11-14-username-parola-design.md):
- * poza mică, numele și @username. Profilul complet rămâne privat; adăugarea la prieteni vine
- * când prietenii trec pe Firestore.
+ * Profilul cuiva, deschis din codul lui QR (spec 2026-11-14-profil-membru-tema-design.md): username-ul
+ * duce la cont (fișa din usernames/), apoi se arată profilul lui complet (profiles/{uid}), cu butonul
+ * de prietenie. Fără profil public încă, se vede fișa: poza mică, numele și @username.
  */
 export default function PublicProfileScreen({ navigation, route }: Props) {
   const { username } = route.params;
   const { card, loading } = usePublicCard(username);
+
+  if (card) {
+    return (
+      <UserProfileView
+        uid={card.uid}
+        fallback={{ name: card.name, photoUrl: card.photoThumb, username: card.username }}
+        onBack={() => navigation.goBack()}
+      />
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
@@ -31,13 +40,6 @@ export default function PublicProfileScreen({ navigation, route }: Props) {
       <View style={styles.body}>
         {loading ? (
           <ActivityIndicator color={colors.text} />
-        ) : card ? (
-          <>
-            <Avatar name={card.name} size={112} square photoUrl={card.photoThumb} />
-            <Text style={styles.name}>{card.name}</Text>
-            <Text style={styles.username}>@{card.username}</Text>
-            <Text style={styles.note}>{tr('Adăugarea la prieteni vine în curând.')}</Text>
-          </>
         ) : (
           <>
             <Text style={styles.note}>{tr('Contul nu mai există.')}</Text>
@@ -51,13 +53,18 @@ export default function PublicProfileScreen({ navigation, route }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  header: { paddingHorizontal: 20, paddingTop: 8 },
-  body: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 10, padding: 32 },
-  name: { ...type.screenTitle, fontSize: 30, marginTop: 8 },
-  username: { color: colors.muted, fontSize: 17 },
-  note: { color: colors.muted, fontSize: 14, textAlign: 'center', marginTop: 12 },
-  pill: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: radii.pill, backgroundColor: colors.text, marginTop: 8 },
-  pillText: { color: colors.onLight, fontWeight: '600' },
+const makeStyles = () =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    header: { paddingHorizontal: 20, paddingTop: 8 },
+    body: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 10, padding: 32 },
+    note: { color: colors.muted, fontSize: 14 },
+    pill: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: radii.pill, backgroundColor: colors.text, marginTop: 8 },
+    pillText: { color: colors.onLight, fontWeight: '600' },
+  });
+
+let styles = makeStyles();
+// Tema se poate schimba din mers (Setări → Temă): stilurile se refac din noile culori.
+onThemeChange(() => {
+  styles = makeStyles();
 });

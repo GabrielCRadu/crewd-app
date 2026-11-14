@@ -26,9 +26,10 @@ import { useNow } from '../hooks/useNow';
 import { useUserLocation } from '../hooks/useUserLocation';
 import { isFirebaseConfigured } from '../lib/firebase';
 import type { ChatsStackParamList } from '../navigation/chatsTypes';
+import { openMemberProfile } from '../navigation/openMemberProfile';
 import { chatErrorMessage, sendGroupMessage } from '../services/chatService';
 import { MOCK_UID } from '../services/groupsService';
-import { colors } from '../theme/colors';
+import { colors, onThemeChange } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
 import type { ChatRow } from '../types/chat';
 import {
@@ -40,7 +41,7 @@ import {
   normalizeMessageText,
 } from '../utils/chatRules';
 import { formatDay, formatTime, startOfDay } from '../utils/dates';
-import { tr } from '../i18n';
+import { tr, trPlural } from '../i18n';
 
 type Props = NativeStackScreenProps<ChatsStackParamList, 'ChatRoom'>;
 
@@ -135,7 +136,7 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
             <Ionicons name="chevron-forward" size={16} color={colors.muted} />
           </View>
           <Text style={styles.headerSubtitle} numberOfLines={1}>
-            {group.memberUids.length}{' '}{tr('persoane')}</Text>
+            {trPlural(group.memberUids.length, '{n} persoană', '{n} persoane')}</Text>
         </Pressable>
       </View>
 
@@ -146,7 +147,7 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
         <View style={styles.bannerText}>
           <Text style={styles.bannerLabel}>{tr('NE VEDEM')}</Text>
           <Text style={styles.bannerWhen}>
-            {formatDay(group.meetupAt)}{' '}{tr('la')}{' '}{formatTime(group.meetupAt)} · {group.meetupPlace}
+            {tr('{day} la {time} · {place}', { day: formatDay(group.meetupAt), time: formatTime(group.meetupAt), place: group.meetupPlace })}
           </Text>
         </View>
         <Pressable onPress={openMap} style={styles.bannerButton}>
@@ -161,7 +162,13 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
           contentContainerStyle={styles.messages}
           data={rows}
           keyExtractor={(r) => r.key}
-          renderItem={({ item }) => (item.kind === 'day' ? <DayRow label={item.label} /> : <MessageRow row={item} />)}
+          renderItem={({ item }) =>
+            item.kind === 'day' ? (
+              <DayRow label={item.label} />
+            ) : (
+              <MessageRow row={item} onOpenAuthor={(authorUid) => openMemberProfile(navigation, authorUid, eventId, groupId)} />
+            )
+          }
           inverted
           keyboardShouldPersistTaps="handled"
         />
@@ -190,74 +197,80 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  center: { alignItems: 'center', justifyContent: 'center', gap: 16, padding: 32 },
-  emptyText: { color: colors.muted, fontSize: 15, textAlign: 'center' },
-  errorText: { color: colors.nope, fontSize: 13, textAlign: 'center', paddingHorizontal: 16, paddingBottom: 6 },
-  flex: { flex: 1 },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  headerText: { flex: 1 },
-  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  titleText: { flexShrink: 1 },
-  headerTitle: { fontSize: 18, fontWeight: '600', color: colors.text },
-  headerSubtitle: { fontSize: 12, color: colors.muted },
-  banner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    margin: 16,
-    padding: 16,
-    borderRadius: radii.card,
-    overflow: 'hidden',
-  },
-  bannerScrim: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, backgroundColor: 'rgba(11,10,16,0.35)' },
-  bannerText: { flex: 1 },
-  bannerLabel: { color: colors.text, fontSize: 11, fontWeight: '600', letterSpacing: 0.8, opacity: 0.8 },
-  bannerWhen: { color: colors.text, fontSize: 16, fontWeight: '600' },
-  bannerButton: { paddingHorizontal: 14, paddingVertical: 9, borderRadius: radii.pill, backgroundColor: colors.text },
-  bannerButtonText: { color: colors.onLight, fontWeight: '600', fontSize: 13 },
-  // Lista e inversată: „sus” în stil înseamnă jos pe ecran (padding lângă bara de scriere; puține mesaje stau jos).
-  messages: { paddingHorizontal: 16, paddingTop: 12, gap: 6, flexGrow: 1, justifyContent: 'flex-start' },
-  pressed: { opacity: 0.85 },
-  composer: {
-    flexDirection: 'row',
-    // Săgeata rămâne jos, lângă ultimul rând, când câmpul crește.
-    alignItems: 'flex-end',
-    gap: 10,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-  },
-  input: {
-    ...glass,
-    flex: 1,
-    color: colors.text,
-    // Colțuri fixe (nu pastilă), ca să arate bine și când câmpul are mai multe rânduri.
-    borderRadius: 24,
-    paddingHorizontal: 18,
-    paddingTop: 12,
-    paddingBottom: 12,
-    fontSize: 15,
-    lineHeight: 20,
-    // ~5 rânduri, apoi textul se derulează în câmp.
-    maxHeight: 124,
-  },
-  sendButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.text,
-  },
+const makeStyles = () =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    center: { alignItems: 'center', justifyContent: 'center', gap: 16, padding: 32 },
+    emptyText: { color: colors.muted, fontSize: 15, textAlign: 'center' },
+    errorText: { color: colors.nope, fontSize: 13, textAlign: 'center', paddingHorizontal: 16, paddingBottom: 6 },
+    flex: { flex: 1 },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    headerText: { flex: 1 },
+    titleRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+    titleText: { flexShrink: 1 },
+    headerTitle: { fontSize: 18, fontWeight: '600', color: colors.text },
+    headerSubtitle: { fontSize: 12, color: colors.muted },
+    banner: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      margin: 16,
+      padding: 16,
+      borderRadius: radii.card,
+      overflow: 'hidden',
+    },
+    bannerScrim: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, backgroundColor: 'rgba(11,10,16,0.35)' },
+    bannerText: { flex: 1 },
+    bannerLabel: { color: colors.text, fontSize: 11, fontWeight: '600', letterSpacing: 0.8, opacity: 0.8 },
+    bannerWhen: { color: colors.text, fontSize: 16, fontWeight: '600' },
+    bannerButton: { paddingHorizontal: 14, paddingVertical: 9, borderRadius: radii.pill, backgroundColor: colors.text },
+    bannerButtonText: { color: colors.onLight, fontWeight: '600', fontSize: 13 },
+    // Lista e inversată: „sus” în stil înseamnă jos pe ecran (padding lângă bara de scriere; puține mesaje stau jos).
+    messages: { paddingHorizontal: 16, paddingTop: 12, gap: 6, flexGrow: 1, justifyContent: 'flex-start' },
+    pressed: { opacity: 0.85 },
+    composer: {
+      flexDirection: 'row',
+      // Săgeata rămâne jos, lângă ultimul rând, când câmpul crește.
+      alignItems: 'flex-end',
+      gap: 10,
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+    },
+    input: {
+      ...glass,
+      flex: 1,
+      color: colors.text,
+      // Colțuri fixe (nu pastilă), ca să arate bine și când câmpul are mai multe rânduri.
+      borderRadius: 24,
+      paddingHorizontal: 18,
+      paddingTop: 12,
+      paddingBottom: 12,
+      fontSize: 15,
+      lineHeight: 20,
+      // ~5 rânduri, apoi textul se derulează în câmp.
+      maxHeight: 124,
+    },
+    sendButton: {
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.text,
+    },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

@@ -2,7 +2,7 @@ import { StyleSheet, Text } from 'react-native';
 
 import TextField from './TextField';
 import type { UsernameStatus } from '../hooks/useUsernameAvailability';
-import { colors } from '../theme/colors';
+import { colors, onThemeChange } from '../theme/colors';
 import { normalizeUsernameInput, usernameError } from '../utils/usernameRules';
 import { tr } from '../i18n';
 
@@ -49,7 +49,13 @@ export default function UsernameField({ value, onChange, status, error }: Props)
   );
 }
 
-const styles = StyleSheet.create({
-  status: { color: colors.faint, fontSize: 12, marginTop: -8, marginLeft: 6 },
-  available: { color: colors.like },
+const makeStyles = () =>
+  StyleSheet.create({
+    status: { color: colors.faint, fontSize: 12, marginTop: -8, marginLeft: 6 },
+    available: { color: colors.like },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

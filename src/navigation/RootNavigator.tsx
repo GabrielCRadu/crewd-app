@@ -24,7 +24,8 @@ import FriendRequestPopup from '../components/FriendRequestPopup';
 import InviteLinkHandler from '../components/InviteLinkHandler';
 import GradientButton from '../components/GradientButton';
 import { useAuth } from '../context/AuthContext';
-import { colors, isDark } from '../theme/colors';
+import { getPerson } from '../services/peopleService';
+import { appearance, colors, onThemeChange } from '../theme/colors';
 import { AuthNavigator, OnboardingNavigator } from './AuthNavigator';
 import { tr } from '../i18n';
 
@@ -36,25 +37,31 @@ type IconName = ComponentProps<typeof Ionicons>['name'];
  */
 const Tab = createMaterialTopTabNavigator();
 
-/** Pe Hartă nu schimbăm tab-ul trăgând: acolo degetul mută harta. */
-const NO_SWIPE_TABS = ['Map'];
+/**
+ * Tab-urile pe care nu se schimbă tab-ul trăgând. Hartă nu e aici: când degetul e pe hartă,
+ * harta oprește singură tragerea paginii (react-native-maps cere asta pe Android), așa că
+ * deasupra hărții (titlu, comutator) și sub ea (cardurile) poți trage, iar pe hartă o muți.
+ */
+const NO_SWIPE_TABS: string[] = [];
 
-// Tema navigării urmează tema telefonului, ca restul aplicației (src/theme/colors.ts).
-const baseTheme = isDark ? DarkTheme : DefaultTheme;
-const theme: Theme = {
-  ...baseTheme,
-  colors: {
-    ...baseTheme.colors,
-    primary: colors.primary,
-    background: colors.background,
-    card: colors.card,
-    text: colors.text,
-    border: colors.border,
-  },
-};
+/** Tema navigării, după tema activă a aplicației (src/theme/colors.ts); se calculează la randare. */
+function navigationTheme(): Theme {
+  const baseTheme = appearance.isDark ? DarkTheme : DefaultTheme;
+  return {
+    ...baseTheme,
+    colors: {
+      ...baseTheme.colors,
+      primary: colors.primary,
+      background: colors.background,
+      card: colors.card,
+      text: colors.text,
+      border: colors.border,
+    },
+  };
+}
 
 /** Ecranele care se deschid peste tab-uri și ascund bara de jos (vezi docs/layout-guide.md). */
-const FULLSCREEN_ROUTES = ['ChatRoom', 'EventDetails', 'RateEvent', 'PersonProfile', 'EditProfile', 'FriendsList', 'EventGroups', 'ProposeGroup', 'PersonFriends', 'DirectChat', 'GroupDetails', 'PublicProfile', 'Settings', 'PrivacyPolicy'];
+const FULLSCREEN_ROUTES = ['ChatRoom', 'EventDetails', 'RateEvent', 'PersonProfile', 'EditProfile', 'FriendsList', 'EventGroups', 'ProposeGroup', 'PersonFriends', 'DirectChat', 'GroupDetails', 'MemberProfile', 'PublicProfile', 'UserProfile', 'Settings', 'PrivacyPolicy', 'Terms'];
 
 /** Evenimente · Hartă · Chat · Profil (Descoperă a fost scos: recomandările sunt grupulețele de la evenimente). Primul tab e cel implicit. */
 const TABS: {
@@ -78,8 +85,12 @@ const navigationRef = createNavigationContainerRef<Record<string, object | undef
 
 /** Deschide profilul unei persoane în tab-ul Profil (cu profilul tău dedesubt, pentru „înapoi”). */
 function openPersonProfile(personId: string) {
-  if (navigationRef.isReady()) {
+  if (!navigationRef.isReady()) return;
+  // Persoanele de test au profilul lor; conturile reale, profilul complet (UserProfile).
+  if (getPerson(personId)) {
     navigationRef.navigate('Profile', { screen: 'PersonProfile', params: { personId }, initial: false });
+  } else {
+    navigationRef.navigate('Profile', { screen: 'UserProfile', params: { uid: personId }, initial: false });
   }
 }
 
@@ -127,7 +138,7 @@ export default function RootNavigator() {
 
   return (
     <NavigationContainer
-      theme={theme}
+      theme={navigationTheme()}
       ref={navigationRef}
       initialState={savedNavigationState}
       onReady={updateRoute}
@@ -164,7 +175,7 @@ export default function RootNavigator() {
 function LoadingScreen({ error, onRetry, onSignOut }: { error: string | null; onRetry: () => void; onSignOut: () => void }) {
   return (
     <View style={styles.loading}>
-      <Text style={styles.logo}>{tr('crewd')}</Text>
+      <Text style={styles.logo}>crewd</Text>
       {error ? (
         <View style={styles.loadingError}>
           <Text style={styles.loadingText}>{error}</Text>
@@ -251,22 +262,28 @@ function MainTabBar({ state, navigation }: MaterialTopTabBarProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  loading: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 24, padding: 32, backgroundColor: colors.background },
-  logo: { fontSize: 44, fontWeight: '600', letterSpacing: -1.5, color: colors.text },
-  loadingError: { alignItems: 'center', gap: 16 },
-  loadingText: { color: colors.muted, fontSize: 15, textAlign: 'center' },
-  loadingLink: { color: colors.faint, fontSize: 13, textDecorationLine: 'underline' },
-  tabBar: {
-    flexDirection: 'row',
-    backgroundColor: colors.background,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.border,
-    paddingTop: 8,
-  },
-  tabBarItem: { flex: 1, alignItems: 'center', gap: 4 },
-  tabLabel: { fontSize: 11, fontWeight: '500' },
-  // `overflow: hidden`: pe Android, fără el, fundalul pastilei active ieșea cu colțuri drepte.
-  iconPill: { width: 48, height: 28, borderRadius: 14, overflow: 'hidden', alignItems: 'center', justifyContent: 'center' },
-  iconPillActive: { backgroundColor: colors.cardStrong },
+const makeStyles = () =>
+  StyleSheet.create({
+    loading: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 24, padding: 32, backgroundColor: colors.background },
+    logo: { fontSize: 44, fontWeight: '600', letterSpacing: -1.5, color: colors.text },
+    loadingError: { alignItems: 'center', gap: 16 },
+    loadingText: { color: colors.muted, fontSize: 15, textAlign: 'center' },
+    loadingLink: { color: colors.faint, fontSize: 13, textDecorationLine: 'underline' },
+    tabBar: {
+      flexDirection: 'row',
+      backgroundColor: colors.background,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: colors.border,
+      paddingTop: 8,
+    },
+    tabBarItem: { flex: 1, alignItems: 'center', gap: 4 },
+    tabLabel: { fontSize: 11, fontWeight: '500' },
+    // `overflow: hidden`: pe Android, fără el, fundalul pastilei active ieșea cu colțuri drepte.
+    iconPill: { width: 48, height: 28, borderRadius: 14, overflow: 'hidden', alignItems: 'center', justifyContent: 'center' },
+    iconPillActive: { backgroundColor: colors.cardStrong },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

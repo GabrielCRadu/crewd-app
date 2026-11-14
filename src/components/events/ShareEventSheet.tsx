@@ -9,7 +9,7 @@ import { useFriends } from '../../hooks/useFriends';
 import { sendEventToFriend } from '../../services/directMessagesService';
 import { idsWithStatus } from '../../services/friendsService';
 import { getPerson } from '../../services/peopleService';
-import { colors } from '../../theme/colors';
+import { colors, onThemeChange } from '../../theme/colors';
 import { glass, radii } from '../../theme/shape';
 import type { Event } from '../../types/events';
 import type { Person } from '../../types/social';
@@ -105,41 +105,47 @@ export default function ShareEventSheet({ event, visible, onClose, onSent }: Pro
   );
 }
 
-const styles = StyleSheet.create({
-  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)' },
-  sheet: {
-    gap: 14,
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    borderTopLeftRadius: radii.card,
-    borderTopRightRadius: radii.card,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-  },
-  handle: { alignSelf: 'center', width: 40, height: 4, borderRadius: radii.pill, backgroundColor: colors.cardStrong },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  title: { fontSize: 20, fontWeight: '700', color: colors.text },
-  eventRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  poster: { width: 52, height: 52, borderRadius: radii.inner },
-  eventText: { flex: 1, gap: 2 },
-  eventTitle: { fontSize: 15, fontWeight: '600', color: colors.text },
-  muted: { fontSize: 13, color: colors.muted },
-  input: { ...glass, height: 46, paddingHorizontal: 16, borderRadius: radii.pill, fontSize: 15, color: colors.text },
-  label: { fontSize: 12, fontWeight: '700', letterSpacing: 1.6, color: colors.muted },
-  list: { maxHeight: 280 },
-  listContent: { gap: 8 },
-  friend: { ...glass, flexDirection: 'row', alignItems: 'center', gap: 12, padding: 10, borderRadius: radii.card },
-  pressed: { backgroundColor: colors.cardStrong },
-  friendName: { flex: 1, fontSize: 16, fontWeight: '600', color: colors.text },
-  sendPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: radii.pill,
-    backgroundColor: colors.text,
-  },
-  sendText: { color: colors.onLight, fontSize: 13, fontWeight: '600' },
+const makeStyles = () =>
+  StyleSheet.create({
+    backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)' },
+    sheet: {
+      gap: 14,
+      paddingHorizontal: 20,
+      paddingTop: 10,
+      borderTopLeftRadius: radii.card,
+      borderTopRightRadius: radii.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+    },
+    handle: { alignSelf: 'center', width: 40, height: 4, borderRadius: radii.pill, backgroundColor: colors.cardStrong },
+    header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    title: { fontSize: 20, fontWeight: '700', color: colors.text },
+    eventRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+    poster: { width: 52, height: 52, borderRadius: radii.inner },
+    eventText: { flex: 1, gap: 2 },
+    eventTitle: { fontSize: 15, fontWeight: '600', color: colors.text },
+    muted: { fontSize: 13, color: colors.muted },
+    input: { ...glass, height: 46, paddingHorizontal: 16, borderRadius: radii.pill, fontSize: 15, color: colors.text },
+    label: { fontSize: 12, fontWeight: '700', letterSpacing: 1.6, color: colors.muted },
+    list: { maxHeight: 280 },
+    listContent: { gap: 8 },
+    friend: { ...glass, flexDirection: 'row', alignItems: 'center', gap: 12, padding: 10, borderRadius: radii.card },
+    pressed: { backgroundColor: colors.cardStrong },
+    friendName: { flex: 1, fontSize: 16, fontWeight: '600', color: colors.text },
+    sendPill: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 5,
+      paddingHorizontal: 12,
+      paddingVertical: 7,
+      borderRadius: radii.pill,
+      backgroundColor: colors.text,
+    },
+    sendText: { color: colors.onLight, fontSize: 13, fontWeight: '600' },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

@@ -1,4 +1,5 @@
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
@@ -12,9 +13,10 @@ import { useNow } from '../hooks/useNow';
 import { useUserLocation } from '../hooks/useUserLocation';
 import { isFirebaseConfigured } from '../lib/firebase';
 import type { ChatsStackParamList } from '../navigation/chatsTypes';
+import { openMemberProfile } from '../navigation/openMemberProfile';
 import { MOCK_UID, leaveGroup } from '../services/groupsService';
 import { LEFT_GROUP_MESSAGE } from '../services/chatService';
-import { colors } from '../theme/colors';
+import { colors, onThemeChange } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
 import { type } from '../theme/typography';
 import type { GroupStatus } from '../types/groups';
@@ -102,13 +104,13 @@ export default function GroupDetailsScreen({ navigation, route }: Props) {
         <View style={styles.titleBlock}>
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.subtitle}>
-            {tr(STATUS_LABEL[groupStatus(group, now)])} · {group.memberUids.length}{' '}{tr('din')}{' '}{group.maxSize}{' '}{tr('locuri')}</Text>
+            {tr(STATUS_LABEL[groupStatus(group, now)])} · {tr('{count} din {size} locuri', { count: group.memberUids.length, size: group.maxSize })}</Text>
         </View>
 
         <View style={styles.card}>
           <Text style={type.label}>{tr('Ne vedem')}</Text>
           <Text style={styles.body}>
-            {formatDay(group.meetupAt, now)}{' '}{tr('la')}{' '}{formatTime(group.meetupAt)} · {group.meetupPlace}
+            {tr('{day} la {time} · {place}', { day: formatDay(group.meetupAt, now), time: formatTime(group.meetupAt), place: group.meetupPlace })}
           </Text>
         </View>
 
@@ -122,14 +124,22 @@ export default function GroupDetailsScreen({ navigation, route }: Props) {
               ))}
             </View>
           ) : null}
-          <Text style={styles.muted}>{tr('Vârste')}{' '}{group.minAge}–{group.maxAge}
+          <Text style={styles.muted}>{tr('Vârste {min}–{max}', { min: group.minAge, max: group.maxAge })}
           </Text>
         </View>
 
         <View style={styles.card}>
-          <Text style={type.label}>{tr('Membri ·')}{' '}{group.memberUids.length}</Text>
+          <Text style={type.label}>{tr('Membri · {n}', { n: group.memberUids.length })}</Text>
           {members.map(([memberUid, m], i) => (
-            <View key={memberUid} style={[styles.member, i > 0 && styles.memberDivider]}>
+            // Apăsat: se deschide profilul complet al persoanei (src/navigation/openMemberProfile.ts); „tu” nu se deschide.
+            <Pressable
+              key={memberUid}
+              disabled={memberUid === uid}
+              onPress={() => openMemberProfile(navigation, memberUid, group.eventId, group.id)}
+              accessibilityRole="button"
+              accessibilityLabel={tr('Profilul lui {name}', { name: m.name })}
+              style={({ pressed }) => [styles.member, i > 0 && styles.memberDivider, pressed && styles.pressed]}
+            >
               <Avatar name={m.name || '?'} size={40} photoUrl={m.photo ?? null} />
               <View style={styles.memberText}>
                 <Text style={styles.body}>
@@ -143,7 +153,8 @@ export default function GroupDetailsScreen({ navigation, route }: Props) {
                   </Text>
                 ) : null}
               </View>
-            </View>
+              {memberUid === uid ? null : <Ionicons name="chevron-forward" size={18} color={colors.faint} />}
+            </Pressable>
           ))}
         </View>
 
@@ -155,25 +166,31 @@ export default function GroupDetailsScreen({ navigation, route }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  center: { alignItems: 'center', justifyContent: 'center', gap: 16, padding: 32 },
-  emptyText: { color: colors.muted, fontSize: 15, textAlign: 'center' },
-  pill: { paddingHorizontal: 14, paddingVertical: 9, borderRadius: radii.pill, backgroundColor: colors.text },
-  pillText: { color: colors.onLight, fontWeight: '600', fontSize: 13 },
-  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10 },
-  content: { paddingHorizontal: 16, paddingBottom: 32, gap: 14 },
-  titleBlock: { gap: 4, marginBottom: 4 },
-  title: { ...type.screenTitle, fontSize: 30 },
-  subtitle: { color: colors.muted, fontSize: 14 },
-  card: { ...glass, borderRadius: radii.card, padding: 16, gap: 8 },
-  body: { color: colors.text, fontSize: 15 },
-  muted: { color: colors.muted, fontSize: 13 },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
-  member: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 8 },
-  memberDivider: { borderTopWidth: 1, borderTopColor: colors.border },
-  memberText: { flex: 1, gap: 2 },
-  leave: { alignSelf: 'center', paddingVertical: 12, marginTop: 4 },
-  leaveText: { color: colors.nope, fontSize: 15, fontWeight: '600', textDecorationLine: 'underline' },
-  pressed: { opacity: 0.7 },
+const makeStyles = () =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    center: { alignItems: 'center', justifyContent: 'center', gap: 16, padding: 32 },
+    emptyText: { color: colors.muted, fontSize: 15, textAlign: 'center' },
+    pill: { paddingHorizontal: 14, paddingVertical: 9, borderRadius: radii.pill, backgroundColor: colors.text },
+    pillText: { color: colors.onLight, fontWeight: '600', fontSize: 13 },
+    header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10 },
+    content: { paddingHorizontal: 16, paddingBottom: 32, gap: 14 },
+    titleBlock: { gap: 4, marginBottom: 4 },
+    title: { ...type.screenTitle, fontSize: 30 },
+    subtitle: { color: colors.muted, fontSize: 14 },
+    card: { ...glass, borderRadius: radii.card, padding: 16, gap: 8 },
+    body: { color: colors.text, fontSize: 15 },
+    muted: { color: colors.muted, fontSize: 13 },
+    chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+    member: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 8 },
+    memberDivider: { borderTopWidth: 1, borderTopColor: colors.border },
+    memberText: { flex: 1, gap: 2 },
+    leave: { alignSelf: 'center', paddingVertical: 12, marginTop: 4 },
+    leaveText: { color: colors.nope, fontSize: 15, fontWeight: '600', textDecorationLine: 'underline' },
+    pressed: { opacity: 0.7 },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

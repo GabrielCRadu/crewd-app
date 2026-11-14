@@ -14,10 +14,13 @@ import {
 } from '../services/friendsService';
 import type { FriendNotice } from '../services/friendsService';
 import { getPerson } from '../services/peopleService';
-import { colors } from '../theme/colors';
+import { getPublicProfile } from '../services/publicProfileService';
+import { personFromPublic } from '../utils/publicProfile';
+import { showFriendActionError } from './friendActionError';
+import { colors, onThemeChange } from '../theme/colors';
 import { radii } from '../theme/shape';
 import type { Person } from '../types/social';
-import { tr } from '../i18n';
+import { tr, trPlural } from '../i18n';
 
 interface Props {
   /** Deschide profilul persoanei care a trimis cererea. */
@@ -112,21 +115,38 @@ export default function FriendRequestPopup({ onOpenProfile, onOpenRequests, show
   ).current;
 
   useEffect(() => {
+    let active = true;
     const unsubscribe = subscribeToFriendNotices((notice) => {
-      const sender = getPerson(notice.personId);
-      if (!sender) return;
+      void senderOf(notice.personId).then((sender) => {
+        if (active && sender) show(sender, notice.kind);
+      });
+    });
+    // Persoana de test din memorie sau, pentru un cont real, profilul lui public.
+    async function senderOf(personId: string): Promise<Person | null> {
+      const test = getPerson(personId);
+      if (test) return test;
+      try {
+        const pub = await getPublicProfile(personId);
+        return pub ? personFromPublic(personId, pub) : null;
+      } catch (e) {
+        console.warn('Nu am putut încărca expeditorul cererii:', e);
+        return null;
+      }
+    }
+    function show(sender: Person, kind: FriendNotice['kind']) {
       setPerson(sender);
-      setKind(notice.kind);
+      setKind(kind);
       dragX.setValue(0);
       dragY.setValue(0);
       slide.setValue(0);
       Animated.spring(slide, { toValue: 1, useNativeDriver: true, friction: 8 }).start();
       if (hideTimer.current) clearTimeout(hideTimer.current);
       hideTimer.current = setTimeout(hide, VISIBLE_MS);
-    });
+    }
     // DEMO: o cerere de la Tudor la câteva secunde după pornire.
     scheduleDemoFriendRequest();
     return () => {
+      active = false;
       unsubscribe();
       if (hideTimer.current) clearTimeout(hideTimer.current);
     };
@@ -140,7 +160,7 @@ export default function FriendRequestPopup({ onOpenProfile, onOpenRequests, show
         onPress={onOpenRequests}
         hitSlop={8}
         accessibilityRole="button"
-        accessibilityLabel={`${pendingCount} ${pendingCount === 1 ? 'cerere' : 'cereri'} de prietenie`}
+        accessibilityLabel={trPlural(pendingCount, '{n} cerere de prietenie', '{n} cereri de prietenie')}
         style={({ pressed }) => [styles.pill, { top: insets.top + 10 }, pressed && styles.pressed]}
       >
         <Ionicons name="person-add" size={14} color={colors.onLight} />
@@ -158,7 +178,7 @@ export default function FriendRequestPopup({ onOpenProfile, onOpenRequests, show
   };
   const isMatch = kind === 'match';
   const accept = () => {
-    void (isMatch ? acceptMatch(person.id) : acceptFriendRequest(person.id));
+    (isMatch ? acceptMatch(person.id) : acceptFriendRequest(person.id)).catch(showFriendActionError);
     hide();
   };
 
@@ -187,7 +207,7 @@ export default function FriendRequestPopup({ onOpenProfile, onOpenRequests, show
           {isMatch ? (
             <>
               <Text style={styles.eyebrow}>{tr('VĂ POTRIVIȚI')}</Text>
-              <Text style={styles.message} numberOfLines={2}>{tr('Și')}{' '}<Text style={styles.inlineName}>{person.name}</Text>{' '}{tr('ar mai ieși cu tine')}</Text>
+              <Text style={styles.message} numberOfLines={2}>{tr('Și {name} ar mai ieși cu tine', { name: person.name })}</Text>
             </>
           ) : (
             <>
@@ -212,58 +232,64 @@ export default function FriendRequestPopup({ onOpenProfile, onOpenRequests, show
   );
 }
 
-const styles = StyleSheet.create({
-  // Bara pe toată lățimea ecranului, joasă: totul pe un rând.
-  card: {
-    position: 'absolute',
-    left: 12,
-    right: 12,
-    zIndex: 100,
-    elevation: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    paddingVertical: 10,
-    paddingLeft: 10,
-    paddingRight: 14,
-    borderRadius: radii.inner + 4,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    boxShadow: '0 12px 32px rgba(0,0,0,0.6)',
-  },
-  body: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 },
-  text: { flex: 1, gap: 1 },
-  eyebrow: { color: colors.muted, fontSize: 10, fontWeight: '700', letterSpacing: 1.4 },
-  inlineName: { color: colors.text, fontWeight: '700' },
-  name: { color: colors.text, fontSize: 15, fontWeight: '700' },
-  age: { color: colors.muted, fontWeight: '500' },
-  message: { color: colors.muted, fontSize: 12 },
-  accept: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    height: 32,
-    paddingHorizontal: 12,
-    borderRadius: radii.pill,
-    backgroundColor: colors.text,
-  },
-  pressed: { opacity: 0.8 },
-  acceptText: { color: colors.onLight, fontSize: 13, fontWeight: '700' },
-  // Butonul mic: pastilă albă cu iconița și numărul de cereri.
-  pill: {
-    position: 'absolute',
-    right: 14,
-    zIndex: 100,
-    elevation: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    height: 30,
-    paddingHorizontal: 10,
-    borderRadius: radii.pill,
-    backgroundColor: colors.text,
-    boxShadow: '0 6px 16px rgba(0,0,0,0.5)',
-  },
-  pillText: { color: colors.onLight, fontSize: 13, fontWeight: '700' },
+const makeStyles = () =>
+  StyleSheet.create({
+    // Bara pe toată lățimea ecranului, joasă: totul pe un rând.
+    card: {
+      position: 'absolute',
+      left: 12,
+      right: 12,
+      zIndex: 100,
+      elevation: 12,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      paddingVertical: 10,
+      paddingLeft: 10,
+      paddingRight: 14,
+      borderRadius: radii.inner + 4,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+      boxShadow: '0 12px 32px rgba(0,0,0,0.6)',
+    },
+    body: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 },
+    text: { flex: 1, gap: 1 },
+    eyebrow: { color: colors.muted, fontSize: 10, fontWeight: '700', letterSpacing: 1.4 },
+    inlineName: { color: colors.text, fontWeight: '700' },
+    name: { color: colors.text, fontSize: 15, fontWeight: '700' },
+    age: { color: colors.muted, fontWeight: '500' },
+    message: { color: colors.muted, fontSize: 12 },
+    accept: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      height: 32,
+      paddingHorizontal: 12,
+      borderRadius: radii.pill,
+      backgroundColor: colors.text,
+    },
+    pressed: { opacity: 0.8 },
+    acceptText: { color: colors.onLight, fontSize: 13, fontWeight: '700' },
+    // Butonul mic: pastilă albă cu iconița și numărul de cereri.
+    pill: {
+      position: 'absolute',
+      right: 14,
+      zIndex: 100,
+      elevation: 8,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      height: 30,
+      paddingHorizontal: 10,
+      borderRadius: radii.pill,
+      backgroundColor: colors.text,
+      boxShadow: '0 6px 16px rgba(0,0,0,0.5)',
+    },
+    pillText: { color: colors.onLight, fontSize: 13, fontWeight: '700' },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import type { LayoutChangeEvent } from 'react-native';
 
-import { colors } from '../theme/colors';
+import { colors, onThemeChange } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
 import { tr } from '../i18n';
 
@@ -65,18 +65,24 @@ export default function SegmentedControl<T extends string>({ options, value, onC
   );
 }
 
-const styles = StyleSheet.create({
-  container: { ...glass, flexDirection: 'row', borderRadius: radii.pill, padding: PADDING },
-  // Pastila albă stă sub etichete și alunecă între segmente.
-  pill: {
-    position: 'absolute',
-    top: PADDING,
-    bottom: PADDING,
-    left: PADDING,
-    borderRadius: radii.pill,
-    backgroundColor: colors.text,
-  },
-  segment: { flex: 1, alignItems: 'center', paddingVertical: 10, borderRadius: radii.pill },
-  label: { color: colors.muted, fontWeight: '500' },
-  labelActive: { color: colors.onLight, fontWeight: '600' },
+const makeStyles = () =>
+  StyleSheet.create({
+    container: { ...glass, flexDirection: 'row', borderRadius: radii.pill, padding: PADDING },
+    // Pastila albă stă sub etichete și alunecă între segmente.
+    pill: {
+      position: 'absolute',
+      top: PADDING,
+      bottom: PADDING,
+      left: PADDING,
+      borderRadius: radii.pill,
+      backgroundColor: colors.text,
+    },
+    segment: { flex: 1, alignItems: 'center', paddingVertical: 10, borderRadius: radii.pill },
+    label: { color: colors.muted, fontWeight: '500' },
+    labelActive: { color: colors.onLight, fontWeight: '600' },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

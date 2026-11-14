@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import GlassIconButton from '../GlassIconButton';
 import AddToGoogleCalendar from './AddToGoogleCalendar';
 import { getCategory } from '../../data/categories';
-import { colors } from '../../theme/colors';
+import { colors, onThemeChange } from '../../theme/colors';
 import { type } from '../../theme/typography';
 import { glass, radii } from '../../theme/shape';
 import type { EventWithDistance } from '../../types/events';
@@ -69,7 +69,7 @@ export default function JoinedCalendar({ events, onOpenEvent, onBrowse }: Props)
       <View style={styles.emptyCard}>
         <Ionicons name="calendar-outline" size={28} color={colors.text} />
         <Text style={styles.emptyTitle}>{tr('Calendarul tău e gol')}</Text>
-        <Text style={styles.emptyText}>{tr('Apasă „Vin și eu” la un eveniment și apare aici, la ziua și ora lui.')}</Text>
+        <Text style={styles.emptyText}>{tr('Apasă „Înscrie-te” la un eveniment și apare aici, la ziua și ora lui.')}</Text>
         <Pressable onPress={onBrowse} style={({ pressed }) => [styles.emptyButton, pressed && styles.pressed]}>
           <Text style={styles.emptyButtonText}>{tr('Vezi evenimentele')}</Text>
         </Pressable>
@@ -225,78 +225,84 @@ export default function JoinedCalendar({ events, onOpenEvent, onBrowse }: Props)
 
 const CELL_CIRCLE = 34;
 
-const styles = StyleSheet.create({
-  root: { gap: 14 },
-  monthCard: { ...glass, borderRadius: radii.card, padding: 14, gap: 4 },
-  monthHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
-  monthTitle: { color: colors.text, fontSize: 20, fontWeight: '800' },
-  monthNav: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  todayPill: { ...glass, borderRadius: radii.pill, paddingHorizontal: 14, height: 36, justifyContent: 'center' },
-  todayText: { color: colors.text, fontWeight: '600', fontSize: 13 },
-  weekRow: { flexDirection: 'row' },
-  weekday: { flex: 1, textAlign: 'center', color: colors.muted, fontSize: 12, fontWeight: '600', paddingVertical: 6 },
-  cell: { flex: 1, alignItems: 'center', paddingVertical: 3, gap: 3 },
-  dayCircle: {
-    width: CELL_CIRCLE,
-    height: CELL_CIRCLE,
-    borderRadius: CELL_CIRCLE / 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  todayCircle: { borderWidth: 1, borderColor: colors.text },
-  selectedCircle: { backgroundColor: colors.text, borderWidth: 0 },
-  dayNumber: { color: colors.text, fontSize: 15, fontWeight: '500' },
-  dayOutside: { color: colors.faint },
-  dayNumberSelected: { color: colors.onLight, fontWeight: '700' },
-  dots: { flexDirection: 'row', gap: 3, height: 6 },
-  // Roșu, ales intenționat (excepție de la stilul alb-negru): se vede imediat în ce zile ai ceva. Zilele trecute: același roșu, estompat.
-  dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.nope },
-  dotFaded: { opacity: 0.35 },
-  agendaHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 6 },
-  sectionTitle: { ...type.label },
-  link: { color: colors.text, fontSize: 13, fontWeight: '600' },
-  nothing: { color: colors.muted, fontSize: 14 },
-  dayGroup: { flexDirection: 'row', gap: 12 },
-  dayColumn: { width: 44, alignItems: 'center', gap: 4, paddingTop: 6 },
-  dayColWeekday: { color: colors.muted, fontSize: 11, fontWeight: '700', letterSpacing: 0.8 },
-  dayColToday: { color: colors.text },
-  dayColCircle: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },
-  dayColNumber: { color: colors.text, fontSize: 20, fontWeight: '700' },
-  dayEvents: { flex: 1, gap: 8 },
-  eventCard: {
-    ...glass,
-    borderRadius: radii.inner,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-  },
-  eventEnded: { opacity: 0.5 },
-  pressed: { backgroundColor: colors.cardStrong },
-  timeColumn: { width: 42, alignItems: 'flex-start' },
-  timeStart: { color: colors.text, fontSize: 14, fontWeight: '700' },
-  timeEnd: { color: colors.muted, fontSize: 12, marginTop: 2 },
-  eventBar: { width: 3, alignSelf: 'stretch', borderRadius: 2, backgroundColor: colors.text },
-  eventText: { flex: 1, gap: 3 },
-  eventTitle: { color: colors.text, fontSize: 15, fontWeight: '700' },
-  eventMeta: { color: colors.muted, fontSize: 13 },
-  eventTags: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  eventCategory: { color: colors.muted, fontSize: 12 },
-  badgeLive: {
-    color: colors.onLight,
-    backgroundColor: colors.text,
-    fontSize: 10,
-    fontWeight: '800',
-    paddingHorizontal: 6,
-    paddingVertical: 1,
-    borderRadius: radii.pill,
-    overflow: 'hidden',
-  },
-  badgeEnded: { color: colors.faint, fontSize: 12 },
-  emptyCard: { ...glass, borderRadius: radii.card, padding: 24, alignItems: 'center', gap: 10 },
-  emptyTitle: { color: colors.text, fontSize: 18, fontWeight: '700' },
-  emptyText: { color: colors.muted, fontSize: 14, textAlign: 'center', lineHeight: 20 },
-  emptyButton: { backgroundColor: colors.text, borderRadius: radii.pill, paddingHorizontal: 20, paddingVertical: 11, marginTop: 6 },
-  emptyButtonText: { color: colors.onLight, fontWeight: '600' },
+const makeStyles = () =>
+  StyleSheet.create({
+    root: { gap: 14 },
+    monthCard: { ...glass, borderRadius: radii.card, padding: 14, gap: 4 },
+    monthHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
+    monthTitle: { color: colors.text, fontSize: 20, fontWeight: '800' },
+    monthNav: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    todayPill: { ...glass, borderRadius: radii.pill, paddingHorizontal: 14, height: 36, justifyContent: 'center' },
+    todayText: { color: colors.text, fontWeight: '600', fontSize: 13 },
+    weekRow: { flexDirection: 'row' },
+    weekday: { flex: 1, textAlign: 'center', color: colors.muted, fontSize: 12, fontWeight: '600', paddingVertical: 6 },
+    cell: { flex: 1, alignItems: 'center', paddingVertical: 3, gap: 3 },
+    dayCircle: {
+      width: CELL_CIRCLE,
+      height: CELL_CIRCLE,
+      borderRadius: CELL_CIRCLE / 2,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    todayCircle: { borderWidth: 1, borderColor: colors.text },
+    selectedCircle: { backgroundColor: colors.text, borderWidth: 0 },
+    dayNumber: { color: colors.text, fontSize: 15, fontWeight: '500' },
+    dayOutside: { color: colors.faint },
+    dayNumberSelected: { color: colors.onLight, fontWeight: '700' },
+    dots: { flexDirection: 'row', gap: 3, height: 6 },
+    // Roșu, ales intenționat (excepție de la stilul alb-negru): se vede imediat în ce zile ai ceva. Zilele trecute: același roșu, estompat.
+    dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.nope },
+    dotFaded: { opacity: 0.35 },
+    agendaHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 6 },
+    sectionTitle: { ...type.label },
+    link: { color: colors.text, fontSize: 13, fontWeight: '600' },
+    nothing: { color: colors.muted, fontSize: 14 },
+    dayGroup: { flexDirection: 'row', gap: 12 },
+    dayColumn: { width: 44, alignItems: 'center', gap: 4, paddingTop: 6 },
+    dayColWeekday: { color: colors.muted, fontSize: 11, fontWeight: '700', letterSpacing: 0.8 },
+    dayColToday: { color: colors.text },
+    dayColCircle: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },
+    dayColNumber: { color: colors.text, fontSize: 20, fontWeight: '700' },
+    dayEvents: { flex: 1, gap: 8 },
+    eventCard: {
+      ...glass,
+      borderRadius: radii.inner,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      paddingVertical: 12,
+      paddingHorizontal: 12,
+    },
+    eventEnded: { opacity: 0.5 },
+    pressed: { backgroundColor: colors.cardStrong },
+    timeColumn: { width: 42, alignItems: 'flex-start' },
+    timeStart: { color: colors.text, fontSize: 14, fontWeight: '700' },
+    timeEnd: { color: colors.muted, fontSize: 12, marginTop: 2 },
+    eventBar: { width: 3, alignSelf: 'stretch', borderRadius: 2, backgroundColor: colors.text },
+    eventText: { flex: 1, gap: 3 },
+    eventTitle: { color: colors.text, fontSize: 15, fontWeight: '700' },
+    eventMeta: { color: colors.muted, fontSize: 13 },
+    eventTags: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    eventCategory: { color: colors.muted, fontSize: 12 },
+    badgeLive: {
+      color: colors.onLight,
+      backgroundColor: colors.text,
+      fontSize: 10,
+      fontWeight: '800',
+      paddingHorizontal: 6,
+      paddingVertical: 1,
+      borderRadius: radii.pill,
+      overflow: 'hidden',
+    },
+    badgeEnded: { color: colors.faint, fontSize: 12 },
+    emptyCard: { ...glass, borderRadius: radii.card, padding: 24, alignItems: 'center', gap: 10 },
+    emptyTitle: { color: colors.text, fontSize: 18, fontWeight: '700' },
+    emptyText: { color: colors.muted, fontSize: 14, textAlign: 'center', lineHeight: 20 },
+    emptyButton: { backgroundColor: colors.text, borderRadius: radii.pill, paddingHorizontal: 20, paddingVertical: 11, marginTop: 6 },
+    emptyButtonText: { color: colors.onLight, fontWeight: '600' },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

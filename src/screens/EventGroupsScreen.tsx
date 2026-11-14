@@ -11,7 +11,7 @@ import { usePreferences } from '../hooks/usePreferences';
 import { useUserLocation } from '../hooks/useUserLocation';
 import type { EventsStackParamList } from '../navigation/eventsTypes';
 import { isJoined } from '../services/preferencesService';
-import { colors } from '../theme/colors';
+import { colors, onThemeChange } from '../theme/colors';
 import { type } from '../theme/typography';
 import { formatDay, formatTime } from '../utils/dates';
 import { tr } from '../i18n';
@@ -74,12 +74,18 @@ export default function EventGroupsScreen({ navigation, route }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  center: { alignItems: 'center', justifyContent: 'center' },
-  header: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 20, paddingTop: 8, paddingBottom: 12 },
-  headerText: { flex: 1 },
-  title: { ...type.screenTitle, fontSize: 26 },
-  subtitle: { fontSize: 13, color: colors.muted },
-  content: { padding: 20, paddingTop: 8, paddingBottom: 32, gap: 16 },
+const makeStyles = () =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    center: { alignItems: 'center', justifyContent: 'center' },
+    header: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 20, paddingTop: 8, paddingBottom: 12 },
+    headerText: { flex: 1 },
+    title: { ...type.screenTitle, fontSize: 26 },
+    subtitle: { fontSize: 13, color: colors.muted },
+    content: { padding: 20, paddingTop: 8, paddingBottom: 32, gap: 16 },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Linking, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { StatusBar } from 'expo-status-bar';
+import { useIsFocused } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -8,8 +10,8 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import Aurora from '../components/Aurora';
 import GlassIconButton from '../components/GlassIconButton';
 import AddToGoogleCalendar from '../components/events/AddToGoogleCalendar';
+import FriendsGoingSection from '../components/events/FriendsGoingSection';
 import ShareEventSheet from '../components/events/ShareEventSheet';
-import AddMemorySheet from '../components/memories/AddMemorySheet';
 import GradientButton from '../components/GradientButton';
 import GlassBadge from '../components/events/GlassBadge';
 import { useAuth } from '../context/AuthContext';
@@ -25,7 +27,7 @@ import { useUserLocation } from '../hooks/useUserLocation';
 import type { EventsStackParamList } from '../navigation/eventsTypes';
 import { isJoined, joinEvent, leaveEvent } from '../services/preferencesService';
 import { hasRated } from '../services/ratingsService';
-import { colors } from '../theme/colors';
+import { appearance, colors, onThemeChange } from '../theme/colors';
 import { type } from '../theme/typography';
 import { gradients } from '../theme/gradients';
 import { glass, radii } from '../theme/shape';
@@ -47,12 +49,12 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
   const preferences = usePreferences();
   const myRatings = useRatings();
   const insets = useSafeAreaInsets();
+  const isFocused = useIsFocused();
   const { height } = useWindowDimensions();
   const { profile, user } = useAuth();
   const { groups: myGroups } = useMyGroups();
   const now = useNow();
   const [shareOpen, setShareOpen] = useState(false);
-  const [addMemoryOpen, setAddMemoryOpen] = useState(false);
 
   const event = useMemo(() => events.find((e) => e.id === eventId) ?? null, [events, eventId]);
 
@@ -111,16 +113,19 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.screen}>
+      {/* Peste zona foto (mereu închisă), iconițele barei de sus rămân albe și pe tema deschisă */}
+      {isFocused ? <StatusBar style="light" /> : null}
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* 1. Zona foto (~1/4 din ecran): aurora sub poză, umbrire jos, butonul „înapoi” și categoria */}
         <View style={[styles.hero, { height: Math.max(200, height * 0.28) }]}>
-          <Aurora style={StyleSheet.absoluteFill} />
+          {/* Aurora e închisă doar pe tema închisă; pe cea deschisă rămâne fundalul închis al pozei */}
+          {appearance.isDark ? <Aurora style={StyleSheet.absoluteFill} /> : null}
           {event.imageUrl ? <Image source={{ uri: event.imageUrl }} style={StyleSheet.absoluteFill} /> : null}
           <LinearGradient colors={gradients.scrim} style={styles.scrim} />
           {/* Umbrire sus, ca butoanele și bara telefonului să se vadă și pe afișe albe */}
           <LinearGradient colors={gradients.scrimTop} style={[styles.scrimTop, { height: insets.top + 90 }]} />
           {event.imageUrl && event.imageCredit ? (
-            <Text style={styles.imageCredit}>{tr('Foto:')}{' '}{event.imageCredit}</Text>
+            <Text style={styles.imageCredit}>{tr('Foto: {credit}', { credit: event.imageCredit })}</Text>
           ) : null}
           <GlassIconButton
             icon="chevron-back"
@@ -186,7 +191,7 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
           {event.source ? (
             <Pressable onPress={() => Linking.openURL(event.source!.url)} hitSlop={6} style={styles.sourceRow}>
               <Ionicons name="open-outline" size={14} color={colors.faint} />
-              <Text style={styles.sourceText}>{tr('Sursa:')}{' '}<Text style={styles.sourceLink}>{event.source.name}</Text>{' '}{tr('· verifică detaliile acolo')}</Text>
+              <Text style={styles.sourceText}>{tr('Sursa:')} <Text style={styles.sourceLink}>{event.source.name}</Text> {tr('· verifică detaliile acolo')}</Text>
             </Pressable>
           ) : null}
 
@@ -200,6 +205,12 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
 
           {/* Te-ai înscris: îl poți pune și în Google Calendar */}
           {!ended && joined ? <AddToGoogleCalendar event={event} /> : null}
+
+          {/* 8. Prietenii care merg (înainte și după înscriere); tap → profilul lor */}
+          <FriendsGoingSection
+            event={event}
+            onOpenPerson={(personId) => navigation.navigate('PersonProfile', { personId })}
+          />
         </View>
       </ScrollView>
 
@@ -211,15 +222,8 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
               <Text style={styles.endedText}>{tr('Evenimentul s-a terminat')}</Text>
             </View>
           ) : (
-            /* Ai fost la eveniment: adaugi o amintire și evaluezi oamenii */
+            /* Ai fost la eveniment: evaluezi oamenii */
             <View style={styles.endedActions}>
-              <Pressable
-                onPress={() => setAddMemoryOpen(true)}
-                style={({ pressed }) => [styles.memoryButton, pressed && styles.pressed]}
-              >
-                <Ionicons name="image-outline" size={18} color={colors.text} />
-                <Text style={styles.memoryButtonText}>{tr('Adaugă amintire')}</Text>
-              </Pressable>
               {rated ? (
                 <View style={styles.joinedRow}>
                   <View style={styles.joinedPill}>
@@ -251,7 +255,7 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
                 style={({ pressed }) => [styles.ticketButton, pressed && styles.pressed]}
               >
                 <Ionicons name="ticket-outline" size={18} color={colors.text} />
-                <Text style={styles.ticketText}>{event.priceInfo?.isFree ? tr('Înscriere') : 'Bilete'}</Text>
+                <Text style={styles.ticketText}>{event.priceInfo?.isFree ? tr('Înscriere') : tr('Bilete')}</Text>
               </Pressable>
             ) : null}
             <GradientButton label={tr('Înscrie-te')} icon="arrow-forward" onPress={() => saveJoin(joinEvent)} style={styles.ctaMain} />
@@ -268,14 +272,6 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
           setShareOpen(false);
           navigation.getParent()?.navigate('Chats', { screen: 'DirectChat', params: { personId }, initial: false });
         }}
-      />
-
-      {/* Amintirea se leagă de acest eveniment (doar dacă ai fost și s-a terminat) */}
-      <AddMemorySheet
-        visible={addMemoryOpen}
-        events={[event]}
-        initialEventId={event.id}
-        onClose={() => setAddMemoryOpen(false)}
       />
     </View>
   );
@@ -312,79 +308,76 @@ function Fact({ icon, children }: { icon: IconName; children: React.ReactNode })
   );
 }
 
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
-  imageCredit: { position: 'absolute', right: 12, bottom: 8, fontSize: 10, color: colors.photo.faint },
-  factsCard: { ...glass, padding: 14, gap: 10, borderRadius: radii.inner },
-  factRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
-  factText: { flex: 1, fontSize: 14, lineHeight: 20, color: colors.text },
-  sourceRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  sourceText: { flex: 1, fontSize: 12, color: colors.faint },
-  sourceLink: { color: colors.muted, textDecorationLine: 'underline' },
-  ctaRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  groupsHint: { ...glass, flexDirection: 'row', alignItems: 'center', gap: 10, padding: 14, borderRadius: radii.inner },
-  groupsHintText: { flex: 1, color: colors.muted, fontSize: 14 },
-  ctaMain: { flex: 1 },
-  ticketButton: {
-    ...glass,
-    height: 58,
-    paddingHorizontal: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    borderRadius: radii.pill,
-  },
-  ticketText: { color: colors.text, fontSize: 16, fontWeight: '500' },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
-  content: { paddingBottom: 24 },
-  hero: { overflow: 'hidden', backgroundColor: colors.backgroundAlt },
-  scrim: { position: 'absolute', left: 0, right: 0, bottom: 0, height: '60%' },
-  scrimTop: { position: 'absolute', left: 0, right: 0, top: 0 },
-  back: { position: 'absolute', left: 20 },
-  // Butoanele de pe poză: fundal închis (nu sticlă albă), ca să rămână vizibile pe afișe deschise la culoare.
-  onPhoto: { backgroundColor: colors.photo.glass, borderColor: colors.photo.glassBorder },
-  share: { position: 'absolute', right: 20 },
-  heroBadges: { position: 'absolute', left: 20, bottom: 16, flexDirection: 'row', gap: 8 },
-  body: { padding: 20, gap: 16 },
-  title: { ...type.screenTitle, fontSize: 30 },
-  infoRow: { flexDirection: 'row', gap: 12 },
-  infoBox: { ...glass, flex: 1, padding: 14, gap: 6, borderRadius: radii.inner },
-  infoLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  infoLabel: { fontSize: 12, color: colors.faint },
-  infoValue: { fontSize: 16, fontWeight: '600', color: colors.text },
-  infoSecondary: { fontSize: 14, color: colors.muted },
-  description: { fontSize: 15, lineHeight: 22, color: colors.muted },
-  muted: { fontSize: 13, color: colors.muted },
-  sectionTitle: { ...type.label, marginTop: 8 },
-  pressed: { opacity: 0.8 },
-  bottomBar: {
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    backgroundColor: colors.background,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-  },
-  joinedRow: { flexDirection: 'row', alignItems: 'center', gap: 16 },
-  endedActions: { gap: 10 },
-  memoryButton: {
-    ...glass,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    height: 48,
-    borderRadius: radii.pill,
-  },
-  memoryButtonText: { color: colors.text, fontSize: 15, fontWeight: '500' },
-  joinedPill: {
-    ...glass,
-    flex: 1,
-    height: 58,
-    borderRadius: radii.pill,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  joinedText: { color: colors.text, fontSize: 17, fontWeight: '600' },
-  endedText: { color: colors.muted, fontSize: 16, fontWeight: '500' },
-  cancel: { color: colors.muted, fontSize: 15, fontWeight: '500', textDecorationLine: 'underline' },
+const makeStyles = () =>
+  StyleSheet.create({
+    screen: { flex: 1, backgroundColor: colors.background },
+    imageCredit: { position: 'absolute', right: 12, bottom: 8, fontSize: 10, color: colors.photo.faint },
+    factsCard: { ...glass, padding: 14, gap: 10, borderRadius: radii.inner },
+    factRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
+    factText: { flex: 1, fontSize: 14, lineHeight: 20, color: colors.text },
+    sourceRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    sourceText: { flex: 1, fontSize: 12, color: colors.faint },
+    sourceLink: { color: colors.muted, textDecorationLine: 'underline' },
+    ctaRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    groupsHint: { ...glass, flexDirection: 'row', alignItems: 'center', gap: 10, padding: 14, borderRadius: radii.inner },
+    groupsHintText: { flex: 1, color: colors.muted, fontSize: 14 },
+    ctaMain: { flex: 1 },
+    ticketButton: {
+      ...glass,
+      height: 58,
+      paddingHorizontal: 20,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      borderRadius: radii.pill,
+    },
+    ticketText: { color: colors.text, fontSize: 16, fontWeight: '500' },
+    center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
+    content: { paddingBottom: 24 },
+    // Locul pozei: închis pe ambele teme, pentru că peste el stă text alb.
+    hero: { overflow: 'hidden', backgroundColor: colors.photo.placeholder },
+    scrim: { position: 'absolute', left: 0, right: 0, bottom: 0, height: '60%' },
+    scrimTop: { position: 'absolute', left: 0, right: 0, top: 0 },
+    back: { position: 'absolute', left: 20 },
+    // Butoanele de pe poză: fundal închis (nu sticlă albă), ca să rămână vizibile pe afișe deschise la culoare.
+    onPhoto: { backgroundColor: colors.photo.glass, borderColor: colors.photo.glassBorder },
+    share: { position: 'absolute', right: 20 },
+    heroBadges: { position: 'absolute', left: 20, bottom: 16, flexDirection: 'row', gap: 8 },
+    body: { padding: 20, gap: 16 },
+    title: { ...type.screenTitle, fontSize: 30 },
+    infoRow: { flexDirection: 'row', gap: 12 },
+    infoBox: { ...glass, flex: 1, padding: 14, gap: 6, borderRadius: radii.inner },
+    infoLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    infoLabel: { fontSize: 12, color: colors.faint },
+    infoValue: { fontSize: 16, fontWeight: '600', color: colors.text },
+    infoSecondary: { fontSize: 14, color: colors.muted },
+    description: { fontSize: 15, lineHeight: 22, color: colors.muted },
+    muted: { fontSize: 13, color: colors.muted },
+    sectionTitle: { ...type.label, marginTop: 8 },
+    pressed: { opacity: 0.8 },
+    bottomBar: {
+      paddingHorizontal: 20,
+      paddingTop: 12,
+      backgroundColor: colors.background,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+    },
+    joinedRow: { flexDirection: 'row', alignItems: 'center', gap: 16 },
+    endedActions: { gap: 10 },
+    joinedPill: {
+      ...glass,
+      flex: 1,
+      height: 58,
+      borderRadius: radii.pill,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    joinedText: { color: colors.text, fontSize: 17, fontWeight: '600' },
+    endedText: { color: colors.muted, fontSize: 16, fontWeight: '500' },
+    cancel: { color: colors.muted, fontSize: 15, fontWeight: '500', textDecorationLine: 'underline' },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

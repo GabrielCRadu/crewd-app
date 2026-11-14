@@ -6,8 +6,10 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import Avatar from '../components/Avatar';
 import GlassIconButton from '../components/GlassIconButton';
+import { showFriendActionError } from '../components/friendActionError';
 import { allProfileTags, useAuth } from '../context/AuthContext';
 import { useFriends } from '../hooks/useFriends';
+import { usePublicProfiles } from '../hooks/usePublicProfiles';
 import type { ProfileStackParamList } from '../navigation/profileTypes';
 import {
   acceptFriendRequest,
@@ -16,19 +18,20 @@ import {
   idsWithStatus,
 } from '../services/friendsService';
 import { commonTags, getPerson } from '../services/peopleService';
-import { colors } from '../theme/colors';
+import { colors, onThemeChange } from '../theme/colors';
 import { type } from '../theme/typography';
 import { glass, radii } from '../theme/shape';
 import type { Person } from '../types/social';
+import type { PublicProfile } from '../types/user';
+import { personFromPublic } from '../utils/publicProfile';
 import { tr } from '../i18n';
 
 type Props = NativeStackScreenProps<ProfileStackParamList, 'FriendsList'>;
 
-/** Persoanele cu o anumită relație, în ordinea alfabetică a numelui. */
-function peopleOf(ids: string[]): Person[] {
+/** Persoanele cu o anumită relație (de test sau conturi reale), în ordinea alfabetică a numelui. */
+function peopleOf(ids: string[], real: Record<string, PublicProfile | null>): Person[] {
   return ids
-    .map(getPerson)
-    .filter((p): p is Person => p !== undefined)
+    .map((id) => getPerson(id) ?? personFromPublic(id, real[id]))
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
@@ -41,11 +44,15 @@ export default function FriendsListScreen({ navigation }: Props) {
   const { profile } = useAuth();
   const myTags = useMemo(() => allProfileTags(profile), [profile]);
 
-  const incoming = peopleOf(idsWithStatus(friends, 'incoming'));
-  const accepted = peopleOf(idsWithStatus(friends, 'friends'));
-  const outgoing = peopleOf(idsWithStatus(friends, 'outgoing'));
+  // Conturile reale din listă (cele care nu sunt persoane de test): numele și poza din profilul lor public.
+  const realIds = Object.keys(friends).filter((id) => friends[id] !== 'blocked' && !getPerson(id));
+  const real = usePublicProfiles(realIds);
+  const incoming = peopleOf(idsWithStatus(friends, 'incoming'), real);
+  const accepted = peopleOf(idsWithStatus(friends, 'friends'), real);
+  const outgoing = peopleOf(idsWithStatus(friends, 'outgoing'), real);
 
-  const openPerson = (personId: string) => navigation.navigate('PersonProfile', { personId });
+  const openPerson = (personId: string) =>
+    getPerson(personId) ? navigation.navigate('PersonProfile', { personId }) : navigation.navigate('UserProfile', { uid: personId });
 
   const subtitle = (p: Person) => {
     const shared = commonTags(p, myTags).length;
@@ -62,19 +69,19 @@ export default function FriendsListScreen({ navigation }: Props) {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {incoming.length > 0 ? (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>{tr('Cereri de prietenie ·')}{' '}{incoming.length}</Text>
+            <Text style={styles.sectionTitle}>{tr('Cereri de prietenie · {n}', { n: incoming.length })}</Text>
             {incoming.map((p) => (
               <View key={p.id} style={[styles.row, styles.requestRow]}>
                 <PersonInfo person={p} subtitle={subtitle(p)} onPress={() => openPerson(p.id)} />
                 <View style={styles.requestActions}>
                   <Pressable
-                    onPress={() => acceptFriendRequest(p.id)}
+                    onPress={() => acceptFriendRequest(p.id).catch(showFriendActionError)}
                     style={({ pressed }) => [styles.acceptButton, pressed && styles.pressedLight]}
                   >
                     <Text style={styles.acceptText}>{tr('Acceptă')}</Text>
                   </Pressable>
                   <Pressable
-                    onPress={() => declineFriendRequest(p.id)}
+                    onPress={() => declineFriendRequest(p.id).catch(showFriendActionError)}
                     style={({ pressed }) => [styles.declineButton, pressed && styles.pressed]}
                   >
                     <Text style={styles.declineText}>{tr('Refuză')}</Text>
@@ -86,7 +93,7 @@ export default function FriendsListScreen({ navigation }: Props) {
         ) : null}
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{tr('Prietenii tăi ·')}{' '}{accepted.length}</Text>
+          <Text style={styles.sectionTitle}>{tr('Prietenii tăi · {n}', { n: accepted.length })}</Text>
           {accepted.length === 0 ? (
             <Text style={styles.muted}>{tr('Încă nu ai prieteni. Adaugă oamenii cunoscuți la evenimente din profilul lor.')}</Text>
           ) : (
@@ -109,7 +116,7 @@ export default function FriendsListScreen({ navigation }: Props) {
             {outgoing.map((p) => (
               <View key={p.id} style={styles.row}>
                 <PersonInfo person={p} subtitle={tr('Așteaptă răspuns')} onPress={() => openPerson(p.id)} />
-                <Pressable onPress={() => cancelFriendRequest(p.id)} hitSlop={8}>
+                <Pressable onPress={() => cancelFriendRequest(p.id).catch(showFriendActionError)} hitSlop={8}>
                   <Text style={styles.link}>{tr('Anulează')}</Text>
                 </Pressable>
               </View>
@@ -138,32 +145,38 @@ function PersonInfo({ person, subtitle, onPress }: { person: Person; subtitle: s
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  header: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 20, paddingTop: 8, paddingBottom: 12 },
-  title: { ...type.screenTitle, flex: 1, fontSize: 28 },
-  content: { padding: 20, paddingTop: 8, paddingBottom: 32, gap: 24 },
-  section: { gap: 10 },
-  sectionTitle: { ...type.label },
-  row: {
-    ...glass,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    padding: 12,
-    borderRadius: radii.card,
-  },
-  requestRow: { flexWrap: 'wrap' },
-  info: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12, minWidth: 180 },
-  infoText: { flex: 1, gap: 2 },
-  name: { fontSize: 16, fontWeight: '600', color: colors.text },
-  muted: { fontSize: 13, color: colors.muted },
-  requestActions: { flexDirection: 'row', gap: 8 },
-  acceptButton: { paddingHorizontal: 16, paddingVertical: 9, borderRadius: radii.pill, backgroundColor: colors.text },
-  acceptText: { color: colors.onLight, fontWeight: '600' },
-  declineButton: { ...glass, paddingHorizontal: 16, paddingVertical: 9, borderRadius: radii.pill },
-  declineText: { color: colors.text, fontWeight: '500' },
-  pressed: { backgroundColor: colors.cardStrong },
-  pressedLight: { opacity: 0.85 },
-  link: { color: colors.muted, fontSize: 14, textDecorationLine: 'underline' },
+const makeStyles = () =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    header: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 20, paddingTop: 8, paddingBottom: 12 },
+    title: { ...type.screenTitle, flex: 1, fontSize: 28 },
+    content: { padding: 20, paddingTop: 8, paddingBottom: 32, gap: 24 },
+    section: { gap: 10 },
+    sectionTitle: { ...type.label },
+    row: {
+      ...glass,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      padding: 12,
+      borderRadius: radii.card,
+    },
+    requestRow: { flexWrap: 'wrap' },
+    info: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12, minWidth: 180 },
+    infoText: { flex: 1, gap: 2 },
+    name: { fontSize: 16, fontWeight: '600', color: colors.text },
+    muted: { fontSize: 13, color: colors.muted },
+    requestActions: { flexDirection: 'row', gap: 8 },
+    acceptButton: { paddingHorizontal: 16, paddingVertical: 9, borderRadius: radii.pill, backgroundColor: colors.text },
+    acceptText: { color: colors.onLight, fontWeight: '600' },
+    declineButton: { ...glass, paddingHorizontal: 16, paddingVertical: 9, borderRadius: radii.pill },
+    declineText: { color: colors.text, fontWeight: '500' },
+    pressed: { backgroundColor: colors.cardStrong },
+    pressedLight: { opacity: 0.85 },
+    link: { color: colors.muted, fontSize: 14, textDecorationLine: 'underline' },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

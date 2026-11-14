@@ -15,6 +15,16 @@ service cloud.firestore {
       return u.replace('[.]', '_');
     }
 
+    // Id-ul unei perechi de conturi în friendships/: uid-urile sortate, unite cu `_` (src/utils/friendshipRules.ts).
+    function pair(a, b) {
+      return a < b ? a + '_' + b : b + '_' + a;
+    }
+    // `a` și `b` sunt prieteni (prietenie acceptată).
+    function areFriends(a, b) {
+      let path = /databases/$(database)/documents/friendships/$(pair(a, b));
+      return exists(path) && get(path).data.status == 'friends';
+    }
+
     // Evenimentele: oricine le poate citi; scrierea se face doar prin scripts/import-events.mjs
     // (firebase-admin cu cheia contului de serviciu, care ocolește aceste reguli).
     match /events/{eventId} {
@@ -242,6 +252,100 @@ service cloud.firestore {
       // La ștergerea contului, username-ul se eliberează.
       // Ștergerea unui username deja eliberat (reluarea unei ștergeri de cont eșuate) e permisă.
       allow delete: if request.auth != null && (resource == null || resource.data.uid == request.auth.uid);
+    }
+
+    // Profilul public (spec 2026-11-14-profil-membru-tema-design.md): copia câmpurilor publice din users/{uid},
+    // ținută la zi de aplicație. Oricine logat poate citi un profil anume (din grup, chat sau codul QR),
+    // dar nu poate lista colecția. Data nașterii, genul, emailul și înscrierile rămân în users/{uid}.
+    match /profiles/{uid} {
+      function validPublicProfile(d) {
+        return d.keys().hasOnly(['name', 'age', 'city', 'bio', 'photoUrl', 'username', 'tags', 'updatedAt'])
+          && d.name is string && d.name.size() > 0 && d.name.size() <= 50
+          && (d.age == null || (d.age is int && d.age >= 0 && d.age <= 130))
+          && d.city is string && d.city.size() <= 60
+          && d.bio is string && d.bio.size() <= 500
+          && (d.photoUrl == null
+            || (d.photoUrl is string && d.photoUrl.size() <= 600000 && d.photoUrl.matches('data:image/jpeg;base64,.*')))
+          // Username-ul, dacă e pus, trebuie să fie al tău (fișa lui din usernames/).
+          && (d.username == null
+            || (d.username is string
+              && get(/databases/$(database)/documents/usernames/$(usernameKey(d.username))).data.uid == uid))
+          && d.tags is list && d.tags.size() <= 60
+          && d.updatedAt == request.time;
+      }
+
+      allow get: if request.auth != null;
+      allow list: if false;
+      allow create, update: if request.auth != null && request.auth.uid == uid && validPublicProfile(request.resource.data);
+      allow delete: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // Prieteniile conturilor reale (spec 2026-11-14-prieteni-amintiri-design.md): un document pe pereche,
+    // id-ul = uid-urile sortate (`a_b`). Cei doi văd și schimbă relația; prietenii oricăruia dintre ei văd
+    // doar prieteniile acceptate (pentru „prieteni în comun”), nu și cererile.
+    match /friendships/{pairId} {
+      function a() {
+        return pairId.split('_')[0];
+      }
+      function b() {
+        return pairId.split('_')[1];
+      }
+      function isParty() {
+        return request.auth != null && (request.auth.uid == a() || request.auth.uid == b());
+      }
+      // Blocarea (în oricare direcție) oprește cererile noi.
+      function blocked() {
+        return exists(/databases/$(database)/documents/blocks/$(a() + '_' + b()))
+          || exists(/databases/$(database)/documents/blocks/$(b() + '_' + a()));
+      }
+
+      allow get: if isParty()
+        || (request.auth != null && resource != null && resource.data.status == 'friends'
+          && (areFriends(request.auth.uid, a()) || areFriends(request.auth.uid, b())));
+      // Doar propriile relații (interogarea `users array-contains <tu>`).
+      allow list: if request.auth != null && request.auth.uid in resource.data.users;
+
+      // Cererea: o trimiți tu, cu id-ul perechii sortate, dacă niciunul nu l-a blocat pe celălalt.
+      allow create: if isParty()
+        && pairId == a() + '_' + b()
+        && a() < b()
+        && request.resource.data.keys().hasOnly(['users', 'status', 'requestedBy', 'createdAt', 'updatedAt'])
+        && request.resource.data.users == [a(), b()]
+        && request.resource.data.requestedBy == request.auth.uid
+        && request.resource.data.status == 'pending'
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time
+        && !blocked();
+
+      // Acceptarea: doar cel care a primit cererea, doar `status` (→ 'friends') și `updatedAt`.
+      allow update: if isParty()
+        && resource.data.status == 'pending'
+        && resource.data.requestedBy != request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt'])
+        && request.resource.data.status == 'friends'
+        && request.resource.data.updatedAt == request.time;
+
+      // Refuz, anulare, eliminare, blocare: oricare dintre cei doi.
+      allow delete: if isParty();
+    }
+
+    // Blocările: blocks/{blocker_blocked}. Le vede și le șterge doar cine a blocat; regulile prieteniilor
+    // le folosesc ca să refuze cererile. Cel blocat nu le poate citi.
+    match /blocks/{blockId} {
+      function blocker() {
+        return blockId.split('_')[0];
+      }
+
+      allow get, delete: if request.auth != null && request.auth.uid == blocker();
+      allow list: if request.auth != null && resource.data.blocker == request.auth.uid;
+      allow create: if request.auth != null
+        && request.auth.uid == blocker()
+        && request.resource.data.keys().hasOnly(['blocker', 'blocked', 'createdAt'])
+        && request.resource.data.blocker == request.auth.uid
+        && request.resource.data.blocked is string
+        && request.resource.data.blocked != request.auth.uid
+        && blockId == request.auth.uid + '_' + request.resource.data.blocked
+        && request.resource.data.createdAt == request.time;
     }
 
     // Orice altceva e închis până adăugăm reguli explicite.
