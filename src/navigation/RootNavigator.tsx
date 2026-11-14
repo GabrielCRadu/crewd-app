@@ -83,7 +83,7 @@ function openFriendRequests() {
 
 /**
  * Ecranele pe care stă butonul mic cu cererile de prietenie: cele principale, unde colțul din
- * dreapta sus e liber. (Pe Profil ai deja badge-ul de la „prieteni”.)
+ * dreapta sus e liber. (Pe Profil colțul e ocupat de codul QR și „Editează”.)
  */
 const REQUESTS_PILL_ROUTES = ['EventsHome', 'Map', 'ChatsHome'];
 
