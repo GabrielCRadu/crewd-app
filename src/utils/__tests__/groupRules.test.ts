@@ -10,6 +10,7 @@ import {
   isVisibleTo,
   joinBlockReason,
   memberSummary,
+  otherGroupsOpenByDefault,
   profileAge,
   proposalErrors,
 } from '../groupRules';
@@ -268,5 +269,23 @@ describe('memberSummary', () => {
 
   it('keeps name, age and tags', () => {
     expect(memberSummary(profile, now)).toMatchObject({ name: 'Radu', age: 24, tags: ['concerte', 'rock', 'bere'] });
+  });
+});
+
+describe('otherGroupsOpenByDefault', () => {
+  it('shows the other groups when I am not in any group', () => {
+    expect(otherGroupsOpenByDefault(null, at(-3 * HOUR))).toBe(true);
+  });
+
+  it('hides them behind the toggle while my group is formed', () => {
+    expect(otherGroupsOpenByDefault(group({ formedAt: at(-5 * HOUR) }), at(-3 * HOUR))).toBe(false);
+  });
+
+  it('hides them while my group is still forming', () => {
+    expect(otherGroupsOpenByDefault(group({ memberUids: ['u1', 'u2'], createdAt: at(-24 * HOUR) }), at(-3 * HOUR))).toBe(false);
+  });
+
+  it('shows them when my group did not form in time, so I can pick another', () => {
+    expect(otherGroupsOpenByDefault(group({ memberUids: ['u1', 'u2'], createdAt: at(-24 * HOUR) }), at(-HOUR))).toBe(true);
   });
 });
