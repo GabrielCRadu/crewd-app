@@ -7,7 +7,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "deploy": "firebase deploy --only functions"
+    "deploy": "npx --yes firebase-tools@15 deploy --only functions"
   },
   "dependencies": {
     "@google/genai": "^3.3.0",

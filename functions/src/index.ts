@@ -34,7 +34,7 @@ setGlobalOptions({ region: REGION, maxInstances: 5 });
 
 let client: GoogleGenAI | null = null;
 function gemini(): GoogleGenAI {
-  client ??= new GoogleGenAI({ apiKey: GEMINI_API_KEY.value() });
+  client ??= new GoogleGenAI({ apiKey: GEMINI_API_KEY.value().trim() });
   return client;
 }
 
@@ -49,8 +49,20 @@ const RESPONSE_SCHEMA = {
   required: ['verdict', 'category', 'confidence', 'reason'],
 };
 
-/** Motivele pentru care Gemini nu dă un răspuns (filtrele lui), tratate ca „blocat”. */
-const BLOCK_FINISH_REASONS = new Set(['SAFETY', 'PROHIBITED_CONTENT', 'BLOCKLIST', 'SPII', 'IMAGE_SAFETY']);
+/**
+ * Motivele pentru care Gemini nu dă un răspuns, tratate ca „blocat” (mesajul se semnalează, nu se pierde):
+ * filtrele lui și răspunsurile pe care nu le poate da (limbă, recitare, altele).
+ */
+const BLOCK_FINISH_REASONS = new Set([
+  'SAFETY',
+  'PROHIBITED_CONTENT',
+  'BLOCKLIST',
+  'SPII',
+  'IMAGE_SAFETY',
+  'LANGUAGE',
+  'RECITATION',
+  'OTHER',
+]);
 
 const classify: Classify = async (prompt) => {
   const response = await gemini().models.generateContent({
@@ -103,26 +115,31 @@ function storeFor(messageRef: DocumentReference, createdAt: Date | undefined, dm
         .map((d) => ({ authorUid: String(d.authorUid ?? ''), text: String(d.text) }))
         .reverse();
     },
+    // Totul într-o tranzacție: jurnalul, ascunderea mesajului și (la DM) previzualizarea, ca o reîncercare
+    // sau un răspuns sosit chiar atunci să nu lase textul în listă și nici să golească alt mesaj.
     commit: async (action) => {
-      const batch = db.batch();
-      batch.set(db.collection('moderation').doc(action.logId), {
-        ...action.log,
-        checkedAt: Timestamp.fromDate(action.log.checkedAt as Date),
-        expireAt: Timestamp.fromDate(action.log.expireAt),
-      });
-      if (action.kind === 'remove') {
-        batch.update(messageRef, {
+      const logRef = db.collection('moderation').doc(action.logId);
+      await db.runTransaction(async (tx) => {
+        const [log, dm] = await Promise.all([tx.get(logRef), dmRef && action.kind === 'remove' ? tx.get(dmRef) : null]);
+        if (log.exists) return; // altă execuție a aceluiași trigger a terminat deja
+        tx.create(logRef, {
+          ...action.log,
+          checkedAt: Timestamp.fromDate(action.log.checkedAt as Date),
+          expireAt: Timestamp.fromDate(action.log.expireAt),
+        });
+        if (action.kind !== 'remove') return;
+        tx.update(messageRef, {
           text: '',
           ...(action.isDm ? { eventId: FieldValue.delete() } : {}),
           removed: { category: action.log.category, at: FieldValue.serverTimestamp() },
         });
-      }
-      await batch.commit();
-      // DM: lista conversațiilor nu mai arată textul eliminat (fără câmpuri noi în dms/{a_b}).
-      if (action.kind === 'remove' && dmRef) {
-        const last = await messageRef.parent.orderBy('createdAt', 'desc').limit(1).get();
-        if (last.docs[0]?.id === messageRef.id) await dmRef.update({ lastText: '', lastEventId: null });
-      }
+        // DM: previzualizarea arată acest mesaj doar dacă e încă ultimul (același autor, aceeași oră a serverului).
+        const d = dm?.data();
+        const lastAt = d?.lastAt instanceof Timestamp ? d.lastAt.toMillis() : null;
+        if (dmRef && d && d.lastBy === action.log.authorUid && createdAt && lastAt === createdAt.getTime()) {
+          tx.update(dmRef, { lastText: '', lastEventId: null });
+        }
+      });
     },
   };
 }

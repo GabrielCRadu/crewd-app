@@ -56,3 +56,9 @@ scripts/data/
 
 # Schițe și jurnale locale ale uneltelor de lucru
 .superpowers/
+
+# Firebase CLI / emulatoare
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log

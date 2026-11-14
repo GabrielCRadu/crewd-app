@@ -1,2 +1,4 @@
 node_modules/
 lib/
+# Secretele pentru emulator (ex. cheia Gemini) nu se urcă niciodată.
+*.local

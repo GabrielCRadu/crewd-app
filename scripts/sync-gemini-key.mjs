@@ -48,11 +48,12 @@ if (typeof secret.value !== 'string' || !secret.value) throw new Error('Secretul
 
 // 3. În Secret Manager, prin Firebase CLI; valoarea merge pe stdin, nu în argumente.
 console.log(`Cheia Gemini a fost luată din 1claw (versiunea ${secret.version}). O scriu în GEMINI_API_KEY…`);
-const child = spawn('npx', ['firebase-tools', 'functions:secrets:set', 'GEMINI_API_KEY', '--force'], {
+const child = spawn('npx', ['--yes', 'firebase-tools@15', 'functions:secrets:set', 'GEMINI_API_KEY', '--force'], {
   stdio: ['pipe', 'inherit', 'inherit'],
   shell: true,
 });
-child.stdin.end(`${secret.value}\n`);
+// Fără rând nou la final: CLI-ul păstrează valoarea exact cum o primește.
+child.stdin.end(secret.value.trim());
 child.on('exit', (code) => {
   if (code === 0) console.log('Gata. Acum: npm --prefix functions run deploy');
   process.exit(code ?? 1);
