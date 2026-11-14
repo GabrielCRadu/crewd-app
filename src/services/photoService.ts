@@ -1,5 +1,6 @@
 import * as ImagePicker from 'expo-image-picker';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
+import { tr } from '../i18n';
 
 /*
  * Fotografia de profil: o alegi din galerie sau faci una cu camera, o decupezi pătrat,
@@ -22,7 +23,7 @@ export async function pickProfilePhoto(source: PhotoSource): Promise<string | nu
       : await ImagePicker.requestMediaLibraryPermissionsAsync();
   if (!permission.granted) {
     throw new PhotoPermissionError(
-      source === 'camera' ? 'Ai nevoie de acces la cameră.' : 'Ai nevoie de acces la galerie.',
+      source === 'camera' ? tr('Ai nevoie de acces la cameră.') : tr('Ai nevoie de acces la galerie.'),
     );
   }
 
@@ -71,7 +72,7 @@ export async function pickMemoryPhoto(source: PhotoSource): Promise<string | nul
       : await ImagePicker.requestMediaLibraryPermissionsAsync();
   if (!permission.granted) {
     throw new PhotoPermissionError(
-      source === 'camera' ? 'Ai nevoie de acces la cameră.' : 'Ai nevoie de acces la galerie.',
+      source === 'camera' ? tr('Ai nevoie de acces la cameră.') : tr('Ai nevoie de acces la galerie.'),
     );
   }
 

@@ -25,6 +25,7 @@ import {
 } from '../../utils/groupRules';
 import { getMyRatings, getReputation } from '../../services/ratingsService';
 import { ME_ID } from '../../data/mockRatings';
+import { tr } from '../../i18n';
 
 interface Props {
   event: Event;
@@ -54,7 +55,7 @@ export default function EventGroupsSection({ event, joined, myGroup, onPropose, 
     return (
       <View style={styles.locked}>
         <Ionicons name="people-outline" size={20} color={colors.muted} />
-        <Text style={styles.lockedText}>Înscrie-te ca să vezi grupurile celor care merg.</Text>
+        <Text style={styles.lockedText}>{tr('Înscrie-te ca să vezi grupurile celor care merg.')}</Text>
       </View>
     );
   }
@@ -79,8 +80,8 @@ export default function EventGroupsSection({ event, joined, myGroup, onPropose, 
   const mineNote = !mine || canOpenChat(mine)
     ? null
     : mineStatus === 'expired'
-      ? 'Nu s-au strâns 3 persoane la timp. Alege alt grup de mai jos sau propune unul.'
-      : `Așteptăm încă ${missing} ${missing === 1 ? 'persoană' : 'persoane'}. Chat-ul se deschide când sunteți cel puțin ${MIN_FORM_MEMBERS}.`;
+      ? tr('Nu s-au strâns 3 persoane la timp. Alege alt grup de mai jos sau propune unul.')
+      : tr('Așteptăm încă {missing} {p}. Chat-ul se deschide când sunteți cel puțin {MIN_FORM_MEMBERS}.', { missing: missing, p: missing === 1 ? 'persoană' : 'persoane', MIN_FORM_MEMBERS: MIN_FORM_MEMBERS });
 
   const cardFor = (g: CrewGroup) => (
     <GroupCard
@@ -102,7 +103,7 @@ export default function EventGroupsSection({ event, joined, myGroup, onPropose, 
     try {
       await joinGroup(event.id, g.id, profile);
     } catch (e) {
-      Alert.alert('Nu ai putut intra', (e as Error).message);
+      Alert.alert(tr('Nu ai putut intra'), (e as Error).message);
     } finally {
       setBusyId(null);
     }
@@ -110,9 +111,9 @@ export default function EventGroupsSection({ event, joined, myGroup, onPropose, 
 
   const join = (g: CrewGroup) => {
     if (myGroup && myGroup.id !== g.id) {
-      Alert.alert('Schimbi grupul?', 'Poți fi într-un singur grup la un eveniment. Ieși din cel actual și intri aici?', [
-        { text: 'Rămân', style: 'cancel' },
-        { text: 'Schimb', onPress: () => void doJoin(g) },
+      Alert.alert(tr('Schimbi grupul?'), tr('Poți fi într-un singur grup la un eveniment. Ieși din cel actual și intri aici?'), [
+        { text: tr('Rămân'), style: 'cancel' },
+        { text: tr('Schimb'), onPress: () => void doJoin(g) },
       ]);
       return;
     }
@@ -126,7 +127,7 @@ export default function EventGroupsSection({ event, joined, myGroup, onPropose, 
 
       {mine ? (
         <>
-          <Text style={type.label}>Grupul tău</Text>
+          <Text style={type.label}>{tr('Grupul tău')}</Text>
           {cardFor(mine)}
           <Pressable
             onPress={() => setShowOthers(!othersOpen)}
@@ -134,7 +135,7 @@ export default function EventGroupsSection({ event, joined, myGroup, onPropose, 
             accessibilityRole="button"
             accessibilityState={{ expanded: othersOpen }}
           >
-            <Text style={type.label}>Alte grupuri · {others.length}</Text>
+            <Text style={type.label}>{tr('Alte grupuri ·')}{' '}{others.length}</Text>
             <Ionicons name={othersOpen ? 'chevron-up' : 'chevron-down'} size={18} color={colors.muted} />
           </Pressable>
         </>
@@ -144,13 +145,13 @@ export default function EventGroupsSection({ event, joined, myGroup, onPropose, 
         <>
           {!loading && others.length === 0 ? (
             <Text style={styles.muted}>
-              {mine ? 'Nu mai sunt alte grupuri pe gustul tău.' : 'Încă nu s-a format niciun grup pe gustul tău.'}
+              {mine ? tr('Nu mai sunt alte grupuri pe gustul tău.') : tr('Încă nu s-a format niciun grup pe gustul tău.')}
             </Text>
           ) : null}
           {others.map(cardFor)}
           <Pressable onPress={onPropose} style={({ pressed }) => [styles.propose, pressed && styles.pressed]}>
             <Ionicons name="add-circle-outline" size={18} color={colors.text} />
-            <Text style={styles.proposeText}>Niciunul nu ți se potrivește? Propune unul</Text>
+            <Text style={styles.proposeText}>{tr('Niciunul nu ți se potrivește? Propune unul')}</Text>
           </Pressable>
         </>
       ) : null}

@@ -14,6 +14,7 @@ import type { OnboardingStackParamList } from '../../navigation/authTypes';
 import { colors } from '../../theme/colors';
 import { type } from '../../theme/typography';
 import type { TagGroup } from '../../types/social';
+import { tr } from '../../i18n';
 
 type Props = NativeStackScreenProps<OnboardingStackParamList, 'OnboardingTags'>;
 
@@ -44,7 +45,7 @@ export default function OnboardingTagsScreen({ navigation, route }: Props) {
 
   const finish = async () => {
     if (total < MIN_TAGS) {
-      setError(`Alege cel puțin ${MIN_TAGS} tag-uri, ca să-ți putem recomanda evenimente și oameni.`);
+      setError(tr('Alege cel puțin {MIN_TAGS} tag-uri, ca să-ți putem recomanda evenimente și oameni.', { MIN_TAGS: MIN_TAGS }));
       return;
     }
     setError(null);
@@ -54,7 +55,7 @@ export default function OnboardingTagsScreen({ navigation, route }: Props) {
       // Profilul e salvat: RootNavigator trece singur la tab-uri.
     } catch (e) {
       console.warn('Nu am putut salva profilul:', e);
-      setError('Nu am putut salva profilul. Verifică conexiunea și încearcă din nou.');
+      setError(tr('Nu am putut salva profilul. Verifică conexiunea și încearcă din nou.'));
       setSaving(false);
     }
   };
@@ -66,10 +67,8 @@ export default function OnboardingTagsScreen({ navigation, route }: Props) {
         <OnboardingHeader step={2} onBack={() => navigation.goBack()} />
 
         <View style={styles.heading}>
-          <Text style={styles.title}>Ce îți place?</Text>
-          <Text style={styles.subtitle}>
-            Alege câteva tag-uri de pornire. Restul le învățăm din evenimentele la care mergi.
-          </Text>
+          <Text style={styles.title}>{tr('Ce îți place?')}</Text>
+          <Text style={styles.subtitle}>{tr('Alege câteva tag-uri de pornire. Restul le învățăm din evenimentele la care mergi.')}</Text>
         </View>
 
         {TAG_GROUPS.map((group) => (
@@ -86,13 +85,13 @@ export default function OnboardingTagsScreen({ navigation, route }: Props) {
         <View style={styles.bottom}>
           {error ? <FormMessage text={error} /> : null}
           <GradientButton
-            label={saving ? 'Se salvează…' : 'Gata, hai în Crewd'}
+            label={saving ? tr('Se salvează…') : tr('Gata, hai în Crewd')}
             icon="sparkles"
             loading={saving}
             onPress={finish}
           />
           <Text style={styles.counter}>
-            {total < MIN_TAGS ? `Mai alege ${MIN_TAGS - total}` : `${total} tag-uri alese`}
+            {total < MIN_TAGS ? tr('Mai alege {p}', { p: MIN_TAGS - total }) : `${total} tag-uri alese`}
           </Text>
         </View>
       </ScrollView>

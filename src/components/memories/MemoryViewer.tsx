@@ -8,6 +8,7 @@ import { deleteMemory, isMyMemory, setMemoryVisibility } from '../../services/me
 import { colors } from '../../theme/colors';
 import type { Memory } from '../../types/memories';
 import { formatLongDay } from '../../utils/dates';
+import { tr } from '../../i18n';
 
 interface Props {
   /** Amintirea deschisă; null = închis. */
@@ -24,10 +25,10 @@ export default function MemoryViewer({ memory, onClose }: Props) {
   const mine = memory ? isMyMemory(memory) : false;
 
   const confirmDelete = (target: Memory) =>
-    Alert.alert('Ștergi amintirea?', 'Poza dispare de pe profilul tău. Nu se poate anula.', [
-      { text: 'Renunță', style: 'cancel' },
+    Alert.alert(tr('Ștergi amintirea?'), tr('Poza dispare de pe profilul tău. Nu se poate anula.'), [
+      { text: tr('Renunță'), style: 'cancel' },
       {
-        text: 'Șterge',
+        text: tr('Șterge'),
         style: 'destructive',
         onPress: () => {
           void deleteMemory(target.id);
@@ -52,24 +53,24 @@ export default function MemoryViewer({ memory, onClose }: Props) {
 
             {mine ? (
               <>
-                <Text style={styles.label}>Cine o vede</Text>
+                <Text style={styles.label}>{tr('Cine o vede')}</Text>
                 <SegmentedControl
                   options={[
-                    { value: 'everyone', label: 'Toți' },
-                    { value: 'friends', label: 'Doar prietenii' },
+                    { value: 'everyone', label: tr('Toți') },
+                    { value: 'friends', label: tr('Doar prietenii') },
                   ]}
                   value={memory.visibility}
                   onChange={(visibility) => void setMemoryVisibility(memory.id, visibility)}
                 />
                 <Pressable onPress={() => confirmDelete(memory)} hitSlop={8} style={styles.deleteButton}>
                   <Ionicons name="trash-outline" size={16} color={colors.nope} />
-                  <Text style={styles.deleteText}>Șterge amintirea</Text>
+                  <Text style={styles.deleteText}>{tr('Șterge amintirea')}</Text>
                 </Pressable>
               </>
             ) : memory.visibility === 'friends' ? (
               <View style={styles.visibilityRow}>
                 <Ionicons name="lock-closed-outline" size={14} color={colors.muted} />
-                <Text style={styles.meta}>Doar pentru prieteni</Text>
+                <Text style={styles.meta}>{tr('Doar pentru prieteni')}</Text>
               </View>
             ) : null}
           </View>

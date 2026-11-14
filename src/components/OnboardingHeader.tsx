@@ -6,6 +6,7 @@ import { colors } from '../theme/colors';
 import { type } from '../theme/typography';
 import { gradients } from '../theme/gradients';
 import { radii } from '../theme/shape';
+import { tr } from '../i18n';
 
 interface Props {
   step: 1 | 2;
@@ -18,8 +19,8 @@ export default function OnboardingHeader({ step, onBack }: Props) {
   return (
     <View style={styles.container}>
       <View style={styles.row}>
-        {onBack ? <GlassIconButton icon="chevron-back" onPress={onBack} /> : <Text style={styles.logo}>crewd</Text>}
-        <Text style={styles.step}>Pasul {step} din 2</Text>
+        {onBack ? <GlassIconButton icon="chevron-back" onPress={onBack} /> : <Text style={styles.logo}>{tr('crewd')}</Text>}
+        <Text style={styles.step}>{tr('Pasul')}{' '}{step}{' '}{tr('din 2')}</Text>
       </View>
       <View style={styles.bars}>
         {[1, 2].map((n) =>

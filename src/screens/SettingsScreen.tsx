@@ -5,10 +5,12 @@ import { useNavigation } from '@react-navigation/native';
 
 import DeleteAccount from '../components/DeleteAccount';
 import GlassIconButton from '../components/GlassIconButton';
+import LanguageSwitch from '../components/LanguageSwitch';
 import { useAuth } from '../context/AuthContext';
 import { colors } from '../theme/colors';
 import { type } from '../theme/typography';
 import { glass, radii } from '../theme/shape';
+import { tr } from '../i18n';
 
 /**
  * Setările contului (din meniul cu trei linii de pe profil).
@@ -19,20 +21,24 @@ export default function SettingsScreen() {
   const { user, signOut } = useAuth();
 
   const confirmSignOut = () =>
-    Alert.alert('Ești sigur că vrei să ieși din cont?', 'Te poți loga din nou oricând cu emailul și parola.', [
-      { text: 'Nu', style: 'cancel' },
-      { text: 'Da', style: 'destructive', onPress: () => void signOut() },
+    Alert.alert(tr('Ești sigur că vrei să ieși din cont?'), tr('Te poți loga din nou oricând cu emailul și parola.'), [
+      { text: tr('Nu'), style: 'cancel' },
+      { text: tr('Da'), style: 'destructive', onPress: () => void signOut() },
     ]);
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.header}>
         <GlassIconButton icon="chevron-back" onPress={() => navigation.goBack()} />
-        <Text style={styles.title}>Setări</Text>
+        <Text style={styles.title}>{tr('Setări')}</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.label}>CONT</Text>
+        {/* Limba: toată aplicația trece pe limba aleasă */}
+        <Text style={styles.label}>{tr('LIMBĂ')}</Text>
+        <LanguageSwitch />
+
+        <Text style={[styles.label, styles.sectionGap]}>{tr('CONT')}</Text>
         <View style={styles.card}>
           {user?.email ? (
             <View style={styles.row}>
@@ -48,7 +54,7 @@ export default function SettingsScreen() {
             style={({ pressed }) => [styles.row, user?.email ? styles.rowBorder : null, pressed && styles.pressed]}
           >
             <Ionicons name="log-out-outline" size={18} color={colors.nope} />
-            <Text style={styles.signOut}>Ieși din cont</Text>
+            <Text style={styles.signOut}>{tr('Ieși din cont')}</Text>
           </Pressable>
         </View>
 
@@ -67,6 +73,7 @@ const styles = StyleSheet.create({
   title: { ...type.screenTitle, fontSize: 32 },
   content: { padding: 20, paddingTop: 8, gap: 10 },
   label: { ...type.label },
+  sectionGap: { marginTop: 16 },
   card: { ...glass, borderRadius: radii.inner, overflow: 'hidden' },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingVertical: 15 },
   rowBorder: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border },

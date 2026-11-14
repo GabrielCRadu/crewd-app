@@ -2,6 +2,7 @@ import type { Event, UserPreferences } from '../types/events';
 import { PAST_JOINED_EVENT_IDS } from '../data/mockEvents';
 import { INITIAL_PREFERENCES } from '../data/mockUser';
 import { savePreferences } from './profileService';
+import { tr } from '../i18n';
 
 /*
  * Preferințele utilizatorului și înscrierile la evenimente.
@@ -105,7 +106,7 @@ async function commit(next: UserPreferences): Promise<void> {
   } catch (e) {
     console.warn('Nu am putut salva înscrierea:', e);
     setPreferences(previous);
-    throw new Error('Nu am putut salva. Verifică conexiunea la internet și încearcă din nou.');
+    throw new Error(tr('Nu am putut salva. Verifică conexiunea la internet și încearcă din nou.'));
   }
 }
 

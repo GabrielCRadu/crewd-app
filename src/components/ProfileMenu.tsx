@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { colors } from '../theme/colors';
 import { radii } from '../theme/shape';
+import { tr } from '../i18n';
 
 /** Unde se deschide meniul: sub butonul cu trei linii, aliniat la dreapta lui. */
 export interface MenuAnchor {
@@ -38,14 +39,14 @@ export default function ProfileMenu({ anchor, onClose, onEdit, onSettings }: Pro
 
   // Delogarea e în Setări.
   const items: { label: string; icon: IconName; onPress: () => void }[] = [
-    { label: 'Editează profilul', icon: 'create-outline', onPress: choose(onEdit) },
-    { label: 'Setări', icon: 'settings-outline', onPress: choose(onSettings) },
+    { label: tr('Editează profilul'), icon: 'create-outline', onPress: choose(onEdit) },
+    { label: tr('Setări'), icon: 'settings-outline', onPress: choose(onSettings) },
   ];
 
   return (
     // Fără statusBarTranslucent: așa pozițiile măsurate cu measureInWindow se potrivesc cu ale modalului.
     <Modal visible={anchor !== null} transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel="Închide meniul" />
+      <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel={tr('Închide meniul')} />
       {anchor ? (
         <View style={[styles.card, { top: anchor.top, right: anchor.right }]} accessibilityRole="menu">
           {items.map((item, i) => (

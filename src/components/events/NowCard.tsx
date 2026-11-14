@@ -11,6 +11,7 @@ import { gradients } from '../../theme/gradients';
 import { radii } from '../../theme/shape';
 import { formatTime } from '../../utils/dates';
 import { formatDistance } from '../../utils/distance';
+import { tr } from '../../i18n';
 
 interface Props {
   event: EventWithDistance;
@@ -33,8 +34,8 @@ export default function NowCard({ event, onOpen }: Props) {
 
       {/* Sus: „ACUM” și distanța */}
       <View style={styles.top}>
-        <GlassBadge icon="radio-button-on" label="ACUM" />
-        <GlassBadge icon="navigate-outline" label={`la ${formatDistance(event.distanceKm)}`} />
+        <GlassBadge icon="radio-button-on" label={tr('ACUM')} />
+        <GlassBadge icon="navigate-outline" label={tr('la {distance}', { distance: formatDistance(event.distanceKm) })} />
       </View>
 
       {/* Jos: informațiile peste afiș */}
@@ -46,13 +47,13 @@ export default function NowCard({ event, onOpen }: Props) {
           {event.title}
         </Text>
         <View style={styles.footer}>
-          <Text style={styles.until}>Până la {formatTime(event.endsAt)}</Text>
+          <Text style={styles.until}>{tr('Până la')}{' '}{formatTime(event.endsAt)}</Text>
           <Pressable onPress={onOpen} style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}>
-            <Text style={styles.ctaText}>Vezi detalii</Text>
+            <Text style={styles.ctaText}>{tr('Vezi detalii')}</Text>
             <Ionicons name="arrow-forward" size={16} color={colors.onLight} />
           </Pressable>
         </View>
-        {event.imageCredit ? <Text style={styles.credit}>Foto: {event.imageCredit}</Text> : null}
+        {event.imageCredit ? <Text style={styles.credit}>{tr('Foto:')}{' '}{event.imageCredit}</Text> : null}
       </View>
     </Pressable>
   );

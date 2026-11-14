@@ -18,6 +18,7 @@ import { colors } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
 import type { Event } from '../types/events';
 import { formatEventDate, formatTime } from '../utils/dates';
+import { tr } from '../i18n';
 
 type Props = NativeStackScreenProps<ChatsStackParamList, 'DirectChat'>;
 
@@ -71,7 +72,7 @@ export default function DirectChatScreen({ navigation, route }: Props) {
             <Text style={styles.headerTitle} numberOfLines={1}>
               {person?.name ?? 'Prieten'}
             </Text>
-            <Text style={styles.headerSubtitle}>Doar voi doi</Text>
+            <Text style={styles.headerSubtitle}>{tr('Doar voi doi')}</Text>
           </View>
         </Pressable>
       </View>
@@ -84,7 +85,7 @@ export default function DirectChatScreen({ navigation, route }: Props) {
           keyExtractor={(m) => m.id}
           renderItem={renderMessage}
           ListEmptyComponent={
-            <Text style={styles.empty}>Trimite-i lui {person?.name ?? 'prietenului tău'} un eveniment sau un mesaj.</Text>
+            <Text style={styles.empty}>{tr('Trimite-i lui')}{' '}{person?.name ?? tr('prietenului tău')}{' '}{tr('un eveniment sau un mesaj.')}</Text>
           }
         />
 
@@ -92,14 +93,14 @@ export default function DirectChatScreen({ navigation, route }: Props) {
           <TextInput
             value={draft}
             onChangeText={setDraft}
-            placeholder="Scrie un mesaj…"
+            placeholder={tr('Scrie un mesaj…')}
             placeholderTextColor={colors.muted}
             selectionColor={colors.text}
             style={styles.input}
             onSubmitEditing={send}
             returnKeyType="send"
           />
-          <Pressable onPress={send} style={({ pressed }) => [styles.sendButton, pressed && styles.pressed]} accessibilityLabel="Trimite">
+          <Pressable onPress={send} style={({ pressed }) => [styles.sendButton, pressed && styles.pressed]} accessibilityLabel={tr('Trimite')}>
             <Ionicons name="arrow-up" size={22} color={colors.onLight} />
           </Pressable>
         </View>
@@ -121,7 +122,7 @@ function EventCard({ event, onOpen }: { event: Event; onOpen: () => void }) {
           {formatEventDate(event.startsAt)} · {event.venueName}
         </Text>
         <View style={styles.eventLink}>
-          <Text style={styles.eventLinkText}>Vezi evenimentul</Text>
+          <Text style={styles.eventLinkText}>{tr('Vezi evenimentul')}</Text>
           <Ionicons name="arrow-forward" size={14} color={colors.text} />
         </View>
       </View>

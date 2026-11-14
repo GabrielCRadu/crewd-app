@@ -1,4 +1,5 @@
 import type { Event } from '../types/events';
+import { tr } from '../i18n';
 
 /*
  * „Adaugă în Google Calendar”: un link către pagina Google Calendar de creare a unui eveniment,
@@ -22,7 +23,7 @@ function locationOf(event: Pick<Event, 'venueName' | 'address'>): string {
 /** Descrierea din calendar: textul organizatorului, nota despre oră și de unde afli mai multe. */
 function detailsOf(event: Pick<Event, 'description' | 'timeNote' | 'source' | 'ticketUrl'>): string {
   const link = event.source?.url ?? event.ticketUrl;
-  return [event.description, event.timeNote, link ? `Detalii: ${link}` : null, 'Adăugat din Crewd']
+  return [event.description, event.timeNote, link ? `Detalii: ${link}` : null, tr('Adăugat din Crewd')]
     .filter((part): part is string => Boolean(part && part.trim()))
     .join('\n\n');
 }

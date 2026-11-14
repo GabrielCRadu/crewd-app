@@ -5,6 +5,7 @@ import { RATING_TAGS } from '../data/ratingTags';
 import { colors } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
 import type { Reputation } from '../types/ratings';
+import { tr } from '../i18n';
 
 interface Props {
   reputation: Reputation;
@@ -19,7 +20,7 @@ export default function ReputationStats({ reputation }: Props) {
           <Ionicons name={tag.icon} size={18} color={colors.text} />
           <Text style={styles.value}>{reputation.tagCounts[tag.id]}</Text>
           <Text style={styles.label} numberOfLines={2}>
-            {tag.id === 'again' ? 'Aș mai ieși' : tag.label}
+            {tag.id === 'again' ? tr('Aș mai ieși') : tag.label}
           </Text>
         </View>
       ))}

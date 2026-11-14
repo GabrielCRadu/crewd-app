@@ -17,6 +17,7 @@ import { getPerson } from '../services/peopleService';
 import { colors } from '../theme/colors';
 import { radii } from '../theme/shape';
 import type { Person } from '../types/social';
+import { tr } from '../i18n';
 
 interface Props {
   /** Deschide profilul persoanei care a trimis cererea. */
@@ -175,20 +176,18 @@ export default function FriendRequestPopup({ onOpenProfile, onOpenRequests, show
       accessibilityRole="alert"
       accessibilityLabel={
         isMatch
-          ? `Vă potriviți. Și ${person.name} ar mai ieși cu tine.`
-          : `${person.name} ți-a trimis o cerere de prietenie`
+          ? tr('Vă potriviți. Și {name} ar mai ieși cu tine.', { name: person.name })
+          : tr('{name} ți-a trimis o cerere de prietenie', { name: person.name })
       }
     >
       {/* Un singur rând: poza și textul (deschid profilul), apoi „Acceptă” și ✕ */}
-      <Pressable onPress={openProfile} style={styles.body} accessibilityLabel={`Vezi profilul lui ${person.name}`}>
+      <Pressable onPress={openProfile} style={styles.body} accessibilityLabel={tr('Vezi profilul lui {name}', { name: person.name })}>
         <Avatar name={person.name} size={40} square photoUrl={person.photoUrl} />
         <View style={styles.text}>
           {isMatch ? (
             <>
-              <Text style={styles.eyebrow}>VĂ POTRIVIȚI</Text>
-              <Text style={styles.message} numberOfLines={2}>
-                Și <Text style={styles.inlineName}>{person.name}</Text> ar mai ieși cu tine
-              </Text>
+              <Text style={styles.eyebrow}>{tr('VĂ POTRIVIȚI')}</Text>
+              <Text style={styles.message} numberOfLines={2}>{tr('Și')}{' '}<Text style={styles.inlineName}>{person.name}</Text>{' '}{tr('ar mai ieși cu tine')}</Text>
             </>
           ) : (
             <>
@@ -196,9 +195,7 @@ export default function FriendRequestPopup({ onOpenProfile, onOpenRequests, show
                 {person.name}
                 {person.age ? <Text style={styles.age}>, {person.age}</Text> : null}
               </Text>
-              <Text style={styles.message} numberOfLines={1}>
-                ți-a trimis o cerere de prietenie
-              </Text>
+              <Text style={styles.message} numberOfLines={1}>{tr('ți-a trimis o cerere de prietenie')}</Text>
             </>
           )}
         </View>
@@ -206,9 +203,9 @@ export default function FriendRequestPopup({ onOpenProfile, onOpenRequests, show
 
       <Pressable onPress={accept} style={({ pressed }) => [styles.accept, pressed && styles.pressed]}>
         <Ionicons name={isMatch ? 'people' : 'checkmark'} size={15} color={colors.onLight} />
-        <Text style={styles.acceptText}>{isMatch ? 'Adăugați-vă' : 'Acceptă'}</Text>
+        <Text style={styles.acceptText}>{isMatch ? tr('Adăugați-vă') : tr('Acceptă')}</Text>
       </Pressable>
-      <Pressable onPress={hide} hitSlop={10} accessibilityLabel={isMatch ? 'Mai târziu' : 'Închide'}>
+      <Pressable onPress={hide} hitSlop={10} accessibilityLabel={isMatch ? tr('Mai târziu') : tr('Închide')}>
         <Ionicons name="close" size={18} color={colors.muted} />
       </Pressable>
     </Animated.View>

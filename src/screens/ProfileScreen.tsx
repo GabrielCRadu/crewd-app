@@ -50,6 +50,7 @@ import { type } from '../theme/typography';
 import { glass, radii } from '../theme/shape';
 import { autoBadgeProgress } from '../utils/badgeRules';
 import { sortMemories } from '../utils/memoryRules';
+import { tr } from '../i18n';
 
 /**
  * Tab-ul Profil (vezi docs/layout-guide.md): identitate cu statistici, „Despre mine”,
@@ -90,13 +91,13 @@ export default function ProfileScreen() {
   // „prieteni” deschide lista de prieteni; badge-ul arată câte cereri noi ai primit.
   const incomingCount = idsWithStatus(friends, 'incoming').length;
   const stats = [
-    { value: idsWithStatus(friends, 'friends').length, label: 'prieteni', onPress: () => navigation.navigate('FriendsList'), badge: incomingCount },
-    { value: myGroups.length, label: 'grupuri' },
-    { value: pastEvents.length, label: 'evenimente' },
+    { value: idsWithStatus(friends, 'friends').length, label: tr('prieteni'), onPress: () => navigation.navigate('FriendsList'), badge: incomingCount },
+    { value: myGroups.length, label: tr('grupuri') },
+    { value: pastEvents.length, label: tr('evenimente') },
   ];
 
   const saveBio = (bio: string) => {
-    updateBio(bio).catch(() => Alert.alert('Nu am putut salva', 'Verifică conexiunea și încearcă din nou.'));
+    updateBio(bio).catch(() => Alert.alert(tr('Nu am putut salva'), tr('Verifică conexiunea și încearcă din nou.')));
   };
 
   // Meniul se deschide chiar sub butonul cu trei linii, aliniat la marginea lui din dreapta.
@@ -117,12 +118,12 @@ export default function ProfileScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.header}>
-          <Text style={styles.title}>Profil</Text>
+          <Text style={styles.title}>{tr('Profil')}</Text>
           <View style={styles.headerActions}>
             {/* Codul tău QR, mic; apăsat se deschide mare, cu linkul de invitație */}
             <Pressable
               onPress={() => setQrOpen(true)}
-              accessibilityLabel="Codul tău QR de invitație"
+              accessibilityLabel={tr('Codul tău QR de invitație')}
               style={({ pressed }) => [styles.qrButton, pressed && styles.qrPressed]}
             >
               <Ionicons name="qr-code-outline" size={18} color={colors.text} />
@@ -131,7 +132,7 @@ export default function ProfileScreen() {
             <Pressable
               ref={menuButton}
               onPress={openMenu}
-              accessibilityLabel="Meniu"
+              accessibilityLabel={tr('Meniu')}
               style={({ pressed }) => [styles.qrButton, pressed && styles.qrPressed]}
             >
               <Ionicons name="menu" size={20} color={colors.text} />
@@ -146,7 +147,7 @@ export default function ProfileScreen() {
             <Pressable
               onPress={() => setPhotoOpen(true)}
               disabled={!profile.photoUrl}
-              accessibilityLabel="Mărește poza"
+              accessibilityLabel={tr('Mărește poza')}
             >
               <Avatar name={profile.name} size={84} square photoUrl={profile.photoUrl} />
             </Pressable>
@@ -191,24 +192,24 @@ export default function ProfileScreen() {
 
         {/* Totalurile primite după evenimente (anonime) */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Ce spun alții despre tine</Text>
+          <Text style={styles.sectionTitle}>{tr('Ce spun alții despre tine')}</Text>
           <ReputationStats reputation={reputation} />
         </View>
 
         {/* Badge-uri: propuse de oameni după evenimente (de la 3 persoane în sus) și câștigate din activitate */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Badge-uri</Text>
+          <Text style={styles.sectionTitle}>{tr('Badge-uri')}</Text>
           <BadgesCard
             voted={getMyVotedBadges()}
             auto={badgeProgress.filter((p) => p.earned).map((p) => p.badge)}
             progress={badgeProgress}
-            emptyText="Încă niciun badge. Le primești de la oamenii cu care ieși și din evenimentele la care mergi."
+            emptyText={tr('Încă niciun badge. Le primești de la oamenii cu care ieși și din evenimentele la care mergi.')}
           />
         </View>
 
         {/* Tag-urile alese, într-un singur card, pe grupuri */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Ce îți place</Text>
+          <Text style={styles.sectionTitle}>{tr('Ce îți place')}</Text>
           <GradientBorderCard>
             {TAG_GROUPS.map((group, i) => (
               <View key={group.id} style={[styles.tagGroup, i > 0 && styles.tagGroupDivided]}>
@@ -220,7 +221,7 @@ export default function ProfileScreen() {
                   {profile.chosenTags[group.id].map((t) => (
                     <Chip key={t} label={t} tint={tagTints[GROUP_STYLE[group.id].tint]} />
                   ))}
-                  {profile.chosenTags[group.id].length === 0 ? <Text style={styles.hint}>Nimic ales încă.</Text> : null}
+                  {profile.chosenTags[group.id].length === 0 ? <Text style={styles.hint}>{tr('Nimic ales încă.')}</Text> : null}
                 </View>
               </View>
             ))}
@@ -228,31 +229,31 @@ export default function ProfileScreen() {
         </View>
 
         <View style={[styles.card, styles.learnedCard]}>
-          <Text style={styles.cardTitle}>Învățate din evenimentele tale</Text>
-          <Text style={styles.hint}>Tag-uri adăugate automat după înscrieri. Le poți scoate oricând.</Text>
+          <Text style={styles.cardTitle}>{tr('Învățate din evenimentele tale')}</Text>
+          <Text style={styles.hint}>{tr('Tag-uri adăugate automat după înscrieri. Le poți scoate oricând.')}</Text>
           <View style={styles.tags}>
             {profile.learnedTags.map((t) => (
               <Chip key={t} label={t} dashed onRemove={() => void removeLearnedTag(t)} />
             ))}
-            {profile.learnedTags.length === 0 ? <Text style={styles.hint}>Niciun tag învățat încă.</Text> : null}
+            {profile.learnedTags.length === 0 ? <Text style={styles.hint}>{tr('Niciun tag învățat încă.')}</Text> : null}
           </View>
         </View>
 
         {/* Amintiri: poze de la evenimentele la care ai fost; se văd și pe profilul tău public */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Amintiri</Text>
+            <Text style={styles.sectionTitle}>{tr('Amintiri')}</Text>
             <Pressable
               onPress={() => setAddMemory({ eventId: null })}
               hitSlop={8}
               style={({ pressed }) => [styles.addMemoryButton, pressed && styles.pressed]}
             >
               <Ionicons name="add" size={16} color={colors.text} />
-              <Text style={styles.addMemoryText}>Adaugă amintire</Text>
+              <Text style={styles.addMemoryText}>{tr('Adaugă amintire')}</Text>
             </Pressable>
           </View>
           {memories.length === 0 ? (
-            <Text style={styles.hint}>Încă nicio amintire. Adaugă poze de la evenimentele la care ai fost.</Text>
+            <Text style={styles.hint}>{tr('Încă nicio amintire. Adaugă poze de la evenimentele la care ai fost.')}</Text>
           ) : (
             <MemoriesGrid memories={memories} showVisibility onOpen={(m) => setOpenMemoryId(m.id)} />
           )}
@@ -261,10 +262,10 @@ export default function ProfileScreen() {
         {/* Istoricul (privat): evenimentele trecute apar automat; o carte deschide detaliile, de unde evaluezi */}
         <View style={styles.section}>
           <View>
-            <Text style={styles.sectionTitle}>Istoricul tău</Text>
+            <Text style={styles.sectionTitle}>{tr('Istoricul tău')}</Text>
             <View style={styles.privateRow}>
               <Ionicons name="lock-closed-outline" size={13} color={colors.muted} />
-              <Text style={styles.hint}>Doar tu vezi această listă.</Text>
+              <Text style={styles.hint}>{tr('Doar tu vezi această listă.')}</Text>
             </View>
           </View>
           <EventHistoryCarousel

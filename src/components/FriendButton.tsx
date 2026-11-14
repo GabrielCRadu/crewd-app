@@ -14,6 +14,7 @@ import { colors } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
 import type { Gender } from '../types/user';
 import { removeFriendWording } from '../utils/friendWording';
+import { tr } from '../i18n';
 
 interface Props {
   personId: string;
@@ -42,7 +43,7 @@ export default function FriendButton({ personId, name, status, gender }: Props) 
         style={({ pressed }) => [styles.pill, primary, pressed && styles.pressed]}
       >
         <Ionicons name="person-add" size={18} color={primaryColor} />
-        <Text style={[styles.pillText, { color: primaryColor }]}>Adaugă prieten</Text>
+        <Text style={[styles.pillText, { color: primaryColor }]}>{tr('Adaugă prieten')}</Text>
       </Pressable>
     );
   }
@@ -52,10 +53,10 @@ export default function FriendButton({ personId, name, status, gender }: Props) 
       <View style={styles.row}>
         <View style={[styles.pill, secondary, styles.flex]}>
           <Ionicons name="time-outline" size={18} color={colors.text} />
-          <Text style={styles.pillText}>Cerere trimisă</Text>
+          <Text style={styles.pillText}>{tr('Cerere trimisă')}</Text>
         </View>
         <Pressable onPress={() => cancelFriendRequest(personId)} hitSlop={8}>
-          <Text style={linkStyle}>Anulează</Text>
+          <Text style={linkStyle}>{tr('Anulează')}</Text>
         </Pressable>
       </View>
     );
@@ -64,20 +65,20 @@ export default function FriendButton({ personId, name, status, gender }: Props) 
   if (status === 'incoming') {
     return (
       <View style={styles.incoming}>
-        <Text style={styles.incomingText}>{name} ți-a trimis o cerere de prietenie.</Text>
+        <Text style={styles.incomingText}>{name}{' '}{tr('ți-a trimis o cerere de prietenie.')}</Text>
         <View style={styles.row}>
           <Pressable
             onPress={() => acceptFriendRequest(personId)}
             style={({ pressed }) => [styles.pill, primary, styles.flex, pressed && styles.pressed]}
           >
             <Ionicons name="checkmark" size={18} color={primaryColor} />
-            <Text style={[styles.pillText, { color: primaryColor }]}>Acceptă</Text>
+            <Text style={[styles.pillText, { color: primaryColor }]}>{tr('Acceptă')}</Text>
           </Pressable>
           <Pressable
             onPress={() => declineFriendRequest(personId)}
             style={({ pressed }) => [styles.pill, secondary, styles.flex, pressed && styles.pressed]}
           >
-            <Text style={styles.pillText}>Refuză</Text>
+            <Text style={styles.pillText}>{tr('Refuză')}</Text>
           </Pressable>
         </View>
       </View>
@@ -88,13 +89,13 @@ export default function FriendButton({ personId, name, status, gender }: Props) 
     const wording = removeFriendWording(gender);
     const confirmRemove = () =>
       Alert.alert(wording.title, wording.message, [
-        { text: 'Renunță', style: 'cancel' },
+        { text: tr('Renunță'), style: 'cancel' },
         { text: wording.confirm, style: 'destructive', onPress: () => void removeFriend(personId) },
       ]);
     return (
       <Pressable onPress={confirmRemove} style={({ pressed }) => [styles.pill, secondary, pressed && styles.pressed]}>
         <Ionicons name="people" size={18} color={colors.text} />
-        <Text style={styles.pillText}>Prieteni ✓</Text>
+        <Text style={styles.pillText}>{tr('Prieteni ✓')}</Text>
         <Ionicons name="chevron-down" size={16} color={colors.muted} />
       </Pressable>
     );
@@ -105,10 +106,10 @@ export default function FriendButton({ personId, name, status, gender }: Props) 
     <View style={styles.row}>
       <View style={[styles.pill, secondary, styles.flex]}>
         <Ionicons name="ban" size={18} color={colors.nope} />
-        <Text style={styles.pillText}>Blocat</Text>
+        <Text style={styles.pillText}>{tr('Blocat')}</Text>
       </View>
       <Pressable onPress={() => unblockPerson(personId)} hitSlop={8}>
-        <Text style={linkStyle}>Deblochează</Text>
+        <Text style={linkStyle}>{tr('Deblochează')}</Text>
       </Pressable>
     </View>
   );

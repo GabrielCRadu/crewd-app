@@ -8,6 +8,7 @@ import type { EventWithDistance, LatLng } from '../../types/events';
 import { colors } from '../../theme/colors';
 import { darkMapStyle } from '../../theme/mapStyle';
 import { radii } from '../../theme/shape';
+import { tr } from '../../i18n';
 
 interface Props {
   events: EventWithDistance[];
@@ -68,7 +69,7 @@ export default function EventsMap({ events, userLocation, showUserLocation, onOp
 
       {events.length === 0 ? (
         <View style={styles.emptyOverlay} pointerEvents="none">
-          <Text style={styles.emptyText}>Niciun eveniment pentru categoriile alese</Text>
+          <Text style={styles.emptyText}>{tr('Niciun eveniment pentru categoriile alese')}</Text>
         </View>
       ) : null}
 

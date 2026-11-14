@@ -9,6 +9,7 @@ import { gradients } from '../../theme/gradients';
 import { glass, radii } from '../../theme/shape';
 import type { Event } from '../../types/events';
 import { formatShortDate } from '../../utils/dates';
+import { tr } from '../../i18n';
 
 interface Props {
   events: Event[];
@@ -29,7 +30,7 @@ export default function EventHistoryCarousel({ events, onOpen, onAddMemory }: Pr
   const myRatings = useRatings();
 
   if (events.length === 0) {
-    return <Text style={styles.empty}>Evenimentele la care mergi apar aici după ce se termină.</Text>;
+    return <Text style={styles.empty}>{tr('Evenimentele la care mergi apar aici după ce se termină.')}</Text>;
   }
 
   return (
@@ -64,7 +65,7 @@ export default function EventHistoryCarousel({ events, onOpen, onAddMemory }: Pr
               <View style={styles.actions}>
                 <View style={[styles.status, !rated && styles.statusTodo]}>
                   <Text style={[styles.statusText, !rated && styles.statusTextTodo]}>
-                    {rated ? 'Evaluat ✓' : 'Evaluează'}
+                    {rated ? tr('Evaluat ✓') : tr('Evaluează')}
                   </Text>
                 </View>
                 {onAddMemory ? (
@@ -72,10 +73,10 @@ export default function EventHistoryCarousel({ events, onOpen, onAddMemory }: Pr
                     onPress={() => onAddMemory(item.id)}
                     hitSlop={6}
                     accessibilityRole="button"
-                    accessibilityLabel={`Adaugă amintire de la ${item.title}`}
+                    accessibilityLabel={tr('Adaugă amintire de la {title}', { title: item.title })}
                     style={({ pressed }) => [styles.status, styles.memoryPill, pressed && styles.pressed]}
                   >
-                    <Text style={styles.statusText}>+ Amintire</Text>
+                    <Text style={styles.statusText}>{tr('+ Amintire')}</Text>
                   </Pressable>
                 ) : null}
               </View>

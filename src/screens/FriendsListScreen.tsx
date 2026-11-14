@@ -20,6 +20,7 @@ import { colors } from '../theme/colors';
 import { type } from '../theme/typography';
 import { glass, radii } from '../theme/shape';
 import type { Person } from '../types/social';
+import { tr } from '../i18n';
 
 type Props = NativeStackScreenProps<ProfileStackParamList, 'FriendsList'>;
 
@@ -55,13 +56,13 @@ export default function FriendsListScreen({ navigation }: Props) {
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.header}>
         <GlassIconButton icon="chevron-back" onPress={() => navigation.goBack()} />
-        <Text style={styles.title}>Prieteni</Text>
+        <Text style={styles.title}>{tr('Prieteni')}</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {incoming.length > 0 ? (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Cereri de prietenie · {incoming.length}</Text>
+            <Text style={styles.sectionTitle}>{tr('Cereri de prietenie ·')}{' '}{incoming.length}</Text>
             {incoming.map((p) => (
               <View key={p.id} style={[styles.row, styles.requestRow]}>
                 <PersonInfo person={p} subtitle={subtitle(p)} onPress={() => openPerson(p.id)} />
@@ -70,13 +71,13 @@ export default function FriendsListScreen({ navigation }: Props) {
                     onPress={() => acceptFriendRequest(p.id)}
                     style={({ pressed }) => [styles.acceptButton, pressed && styles.pressedLight]}
                   >
-                    <Text style={styles.acceptText}>Acceptă</Text>
+                    <Text style={styles.acceptText}>{tr('Acceptă')}</Text>
                   </Pressable>
                   <Pressable
                     onPress={() => declineFriendRequest(p.id)}
                     style={({ pressed }) => [styles.declineButton, pressed && styles.pressed]}
                   >
-                    <Text style={styles.declineText}>Refuză</Text>
+                    <Text style={styles.declineText}>{tr('Refuză')}</Text>
                   </Pressable>
                 </View>
               </View>
@@ -85,9 +86,9 @@ export default function FriendsListScreen({ navigation }: Props) {
         ) : null}
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Prietenii tăi · {accepted.length}</Text>
+          <Text style={styles.sectionTitle}>{tr('Prietenii tăi ·')}{' '}{accepted.length}</Text>
           {accepted.length === 0 ? (
-            <Text style={styles.muted}>Încă nu ai prieteni. Adaugă oamenii cunoscuți la evenimente din profilul lor.</Text>
+            <Text style={styles.muted}>{tr('Încă nu ai prieteni. Adaugă oamenii cunoscuți la evenimente din profilul lor.')}</Text>
           ) : (
             accepted.map((p) => (
               <Pressable
@@ -104,12 +105,12 @@ export default function FriendsListScreen({ navigation }: Props) {
 
         {outgoing.length > 0 ? (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Cereri trimise</Text>
+            <Text style={styles.sectionTitle}>{tr('Cereri trimise')}</Text>
             {outgoing.map((p) => (
               <View key={p.id} style={styles.row}>
-                <PersonInfo person={p} subtitle="Așteaptă răspuns" onPress={() => openPerson(p.id)} />
+                <PersonInfo person={p} subtitle={tr('Așteaptă răspuns')} onPress={() => openPerson(p.id)} />
                 <Pressable onPress={() => cancelFriendRequest(p.id)} hitSlop={8}>
-                  <Text style={styles.link}>Anulează</Text>
+                  <Text style={styles.link}>{tr('Anulează')}</Text>
                 </Pressable>
               </View>
             ))}

@@ -7,6 +7,7 @@ import { radii } from '../../theme/shape';
 import type { Memory } from '../../types/memories';
 import { formatShortDate } from '../../utils/dates';
 import { isSharedMemory } from '../../utils/memoryRules';
+import { tr } from '../../i18n';
 
 interface Props {
   /** Amintirile, deja filtrate și ordonate. */
@@ -27,14 +28,14 @@ export default function MemoriesGrid({ memories, sharedEventIds = [], showVisibi
           key={memory.id}
           onPress={() => onOpen(memory)}
           accessibilityRole="imagebutton"
-          accessibilityLabel={`Amintire de la ${memory.eventTitle}`}
+          accessibilityLabel={tr('Amintire de la {eventTitle}', { eventTitle: memory.eventTitle })}
           style={({ pressed }) => [styles.tile, pressed && styles.pressed]}
         >
           <View style={styles.photoFrame}>
             <Image source={{ uri: memory.photoUri }} style={StyleSheet.absoluteFill} resizeMode="cover" />
             {isSharedMemory(memory, sharedEventIds) ? (
               <View style={styles.topLeft}>
-                <GlassBadge icon="people" label="Împreună" />
+                <GlassBadge icon="people" label={tr('Împreună')} />
               </View>
             ) : null}
             {showVisibility && memory.visibility === 'friends' ? (

@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet } from 'react-native';
 import Chip from '../Chip';
 import type { CategoryId } from '../../types/events';
 import { CATEGORIES } from '../../data/categories';
+import { tr } from '../../i18n';
 
 interface Props {
   /** Categoriile selectate. Listă goală = „Toate”. */
@@ -24,7 +25,7 @@ export default function CategoryChips({ selected, onChange }: Props) {
       style={styles.scroll}
       contentContainerStyle={styles.row}
     >
-      <Chip label="Toate" active={selected.length === 0} onPress={() => onChange([])} />
+      <Chip label={tr('Toate')} active={selected.length === 0} onPress={() => onChange([])} />
       {CATEGORIES.map((c) => (
         <Chip key={c.id} label={c.label} active={selected.includes(c.id)} onPress={() => toggle(c.id)} />
       ))}

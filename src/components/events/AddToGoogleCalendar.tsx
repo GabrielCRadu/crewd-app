@@ -5,13 +5,14 @@ import { colors } from '../../theme/colors';
 import { glass, radii } from '../../theme/shape';
 import type { Event } from '../../types/events';
 import { googleCalendarUrl } from '../../utils/googleCalendar';
+import { tr } from '../../i18n';
 
 /** Deschide Google Calendar (aplicația sau site-ul) cu evenimentul completat, gata de salvat. */
 export async function openInGoogleCalendar(event: Event): Promise<void> {
   try {
     await Linking.openURL(googleCalendarUrl(event));
   } catch {
-    Alert.alert('Nu am putut deschide Google Calendar', 'Verifică dacă ai un browser sau aplicația Google Calendar.');
+    Alert.alert(tr('Nu am putut deschide Google Calendar'), tr('Verifică dacă ai un browser sau aplicația Google Calendar.'));
   }
 }
 
@@ -28,11 +29,11 @@ export default function AddToGoogleCalendar({ event, compact = false }: Props) {
       onPress={() => void openInGoogleCalendar(event)}
       hitSlop={compact ? 8 : 0}
       accessibilityRole="button"
-      accessibilityLabel={`Adaugă ${event.title} în Google Calendar`}
+      accessibilityLabel={tr('Adaugă {title} în Google Calendar', { title: event.title })}
       style={({ pressed }) => [compact ? styles.icon : styles.pill, pressed && styles.pressed]}
     >
       <Ionicons name="logo-google" size={compact ? 15 : 17} color={colors.text} />
-      {compact ? null : <Text style={styles.label}>Adaugă în Google Calendar</Text>}
+      {compact ? null : <Text style={styles.label}>{tr('Adaugă în Google Calendar')}</Text>}
     </Pressable>
   );
 }

@@ -20,6 +20,7 @@ import {
 import type { ProfileChanges, ProfileDraft, UserProfile } from '../types/user';
 import { isNewPhoto } from '../utils/profilePhoto';
 import { allProfileTags } from '../utils/profileTags';
+import { tr } from '../i18n';
 
 /*
  * Starea de autentificare pentru toată aplicația:
@@ -99,7 +100,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (loaded?.photoUrl && !loaded.photoThumb) void backfillThumbnail(loaded.uid, loaded.photoUrl);
       } catch (e) {
         console.warn('Nu am putut încărca profilul:', e);
-        if (active) setError('Nu am putut încărca profilul. Verifică conexiunea la internet.');
+        if (active) setError(tr('Nu am putut încărca profilul. Verifică conexiunea la internet.'));
       }
     });
     return () => {
@@ -115,7 +116,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const completeOnboarding = useCallback(
     async (draft: ProfileDraft) => {
-      if (!user) throw new Error('Nu ești logat.');
+      if (!user) throw new Error(tr('Nu ești logat.'));
       const created = await createProfile(user.uid, draft);
       loadUserPreferences(user.uid, null, allProfileTags(created));
       setProfile(created);
@@ -193,7 +194,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const deleteAccount = useCallback(
     async (password: string) => {
-      if (!isFirebaseConfigured || !user) throw new Error('Ștergerea contului merge doar cu un cont real.');
+      if (!isFirebaseConfigured || !user) throw new Error(tr('Ștergerea contului merge doar cu un cont real.'));
       // Întâi parola: dacă e greșită, nu se șterge nimic.
       await confirmPassword(password);
       await leaveAllGroups(user.uid);
@@ -216,6 +217,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth(): AuthContextValue {
   const value = useContext(AuthContext);
-  if (!value) throw new Error('useAuth() trebuie folosit în interiorul <AuthProvider>.');
+  if (!value) throw new Error(tr('useAuth() trebuie folosit în interiorul <AuthProvider>.'));
   return value;
 }

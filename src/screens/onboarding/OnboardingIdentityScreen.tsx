@@ -17,6 +17,7 @@ import { type } from '../../theme/typography';
 import { glass, radii } from '../../theme/shape';
 import type { Gender } from '../../types/user';
 import { MAX_AGE, MIN_AGE, ageFromBirthDate } from '../../utils/birthDate';
+import { tr } from '../../i18n';
 
 type Props = NativeStackScreenProps<OnboardingStackParamList, 'OnboardingIdentity'>;
 
@@ -48,14 +49,14 @@ export default function OnboardingIdentityScreen({ navigation }: Props) {
   const next = () => {
     const age = birthDate ? ageFromBirthDate(birthDate) : null;
     const nextErrors: Errors = {
-      name: name.trim().length >= 2 ? undefined : 'Scrie-ți numele.',
+      name: name.trim().length >= 2 ? undefined : tr('Scrie-ți numele.'),
       birthDate: !birthDate
-        ? 'Alege data nașterii.'
+        ? tr('Alege data nașterii.')
         : age !== null && age >= MIN_AGE && age <= MAX_AGE
           ? undefined
-          : `Trebuie să ai cel puțin ${MIN_AGE} ani.`,
-      city: city.trim().length >= 2 ? undefined : 'Scrie orașul.',
-      gender: gender ? undefined : 'Alege o opțiune.',
+          : tr('Trebuie să ai cel puțin {MIN_AGE} ani.', { MIN_AGE: MIN_AGE }),
+      city: city.trim().length >= 2 ? undefined : tr('Scrie orașul.'),
+      gender: gender ? undefined : tr('Alege o opțiune.'),
     };
     setErrors(nextErrors);
     if (Object.values(nextErrors).some(Boolean) || !gender || !birthDate) return;
@@ -72,16 +73,16 @@ export default function OnboardingIdentityScreen({ navigation }: Props) {
           <OnboardingHeader step={1} />
 
           <View style={styles.heading}>
-            <Text style={styles.title}>Salut, eu sunt…</Text>
-            <Text style={styles.subtitle}>Spune-ne câteva lucruri despre tine ca să îți găsim crew-ul potrivit.</Text>
+            <Text style={styles.title}>{tr('Salut, eu sunt…')}</Text>
+            <Text style={styles.subtitle}>{tr('Spune-ne câteva lucruri despre tine ca să îți găsim crew-ul potrivit.')}</Text>
           </View>
 
           <TextField
-            label="Nume"
+            label={tr('Nume')}
             value={name}
             onChangeText={setName}
             error={errors.name}
-            placeholder="Cum te strigă prietenii"
+            placeholder={tr('Cum te strigă prietenii')}
             autoCapitalize="words"
             autoComplete="given-name"
             textContentType="givenName"
@@ -91,20 +92,20 @@ export default function OnboardingIdentityScreen({ navigation }: Props) {
 
           <View style={styles.row}>
             <BirthDateField
-              label="Data nașterii"
+              label={tr('Data nașterii')}
               value={birthDate}
               onChange={setBirthDate}
               error={errors.birthDate}
-              hint={LOCKED_HINT}
+              hint={tr(LOCKED_HINT)}
               containerStyle={styles.ageField}
             />
             <TextField
               ref={cityRef}
-              label="Oraș"
+              label={tr('Oraș')}
               value={city}
               onChangeText={setCity}
               error={errors.city}
-              placeholder="Timișoara"
+              placeholder={tr('Timișoara')}
               autoCapitalize="words"
               returnKeyType="done"
               containerStyle={styles.cityField}
@@ -112,7 +113,7 @@ export default function OnboardingIdentityScreen({ navigation }: Props) {
           </View>
 
           <View style={styles.genderBlock}>
-            <Text style={styles.label}>Gen</Text>
+            <Text style={styles.label}>{tr('Gen')}</Text>
             <View style={styles.genderRow}>
               {GENDERS.map((g) => {
                 const active = gender === g.value;
@@ -124,7 +125,7 @@ export default function OnboardingIdentityScreen({ navigation }: Props) {
                     accessibilityState={{ selected: active }}
                     style={[styles.genderOption, active && styles.genderActive]}
                   >
-                    <Text style={[styles.genderText, active && styles.genderTextActive]}>{g.label}</Text>
+                    <Text style={[styles.genderText, active && styles.genderTextActive]}>{tr(g.label)}</Text>
                   </Pressable>
                 );
               })}
@@ -132,14 +133,14 @@ export default function OnboardingIdentityScreen({ navigation }: Props) {
             {errors.gender ? <Text style={styles.error}>{errors.gender}</Text> : null}
             <View style={styles.hintRow}>
               <Ionicons name="lock-closed-outline" size={12} color={colors.faint} />
-              <Text style={styles.hint}>{LOCKED_HINT}</Text>
+              <Text style={styles.hint}>{tr(LOCKED_HINT)}</Text>
             </View>
           </View>
 
           <View style={styles.bottom}>
-            <GradientButton label="Continuă" icon="arrow-forward" onPress={next} />
+            <GradientButton label={tr('Continuă')} icon="arrow-forward" onPress={next} />
             <Pressable onPress={signOut} hitSlop={8} style={styles.signOut}>
-              <Text style={styles.signOutText}>Nu e contul tău? Ieși</Text>
+              <Text style={styles.signOutText}>{tr('Nu e contul tău? Ieși')}</Text>
             </Pressable>
           </View>
         </ScrollView>

@@ -4,7 +4,9 @@
  * Funcții pure, ca să le putem testa.
  */
 
-const MONTHS_LONG = [
+import { getLanguage } from '../i18n';
+
+const MONTHS_LONG_RO = [
   'Ianuarie',
   'Februarie',
   'Martie',
@@ -18,9 +20,27 @@ const MONTHS_LONG = [
   'Noiembrie',
   'Decembrie',
 ];
+const MONTHS_LONG_EN = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
+/** Numele lunilor în limba aleasă. */
+const monthsLong = () => (getLanguage() === 'en' ? MONTHS_LONG_EN : MONTHS_LONG_RO);
 
-/** Literele zilelor din capul grilei, de luni până duminică. */
-export const WEEKDAY_INITIALS = ['L', 'Ma', 'Mi', 'J', 'V', 'S', 'D'];
+/** Literele zilelor din capul grilei, de luni până duminică, în limba aleasă. */
+export function weekdayInitials(): string[] {
+  return getLanguage() === 'en' ? ['M', 'T', 'W', 'T', 'F', 'S', 'S'] : ['L', 'Ma', 'Mi', 'J', 'V', 'S', 'D'];
+}
 
 /** O zi din grila lunii. */
 export interface CalendarDay {
@@ -48,12 +68,12 @@ export function addMonths(d: Date, months: number): Date {
 
 /** Ex. „Noiembrie 2026”. */
 export function formatMonthYear(d: Date): string {
-  return `${MONTHS_LONG[d.getMonth()]} ${d.getFullYear()}`;
+  return `${monthsLong()[d.getMonth()]} ${d.getFullYear()}`;
 }
 
 /** Ex. „noiembrie”. */
 export function formatMonthName(d: Date): string {
-  return MONTHS_LONG[d.getMonth()]!.toLowerCase();
+  return monthsLong()[d.getMonth()]!.toLowerCase();
 }
 
 /**

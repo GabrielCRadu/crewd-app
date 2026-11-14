@@ -14,6 +14,7 @@ import { isJoined } from '../services/preferencesService';
 import { colors } from '../theme/colors';
 import { type } from '../theme/typography';
 import { formatDay, formatTime } from '../utils/dates';
+import { tr } from '../i18n';
 
 type Props = NativeStackScreenProps<EventsStackParamList, 'EventGroups'>;
 
@@ -53,7 +54,7 @@ export default function EventGroupsScreen({ navigation, route }: Props) {
       <View style={styles.header}>
         <GlassIconButton icon="chevron-back" onPress={() => navigation.goBack()} />
         <View style={styles.headerText}>
-          <Text style={styles.title}>Grupuri</Text>
+          <Text style={styles.title}>{tr('Grupuri')}</Text>
           <Text style={styles.subtitle} numberOfLines={1}>
             {event.title} · {formatDay(event.startsAt, now)}, {formatTime(event.startsAt)}
           </Text>

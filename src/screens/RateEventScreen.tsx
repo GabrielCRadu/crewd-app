@@ -26,6 +26,7 @@ import type { EventRatings, PersonRating, RatingTag } from '../types/ratings';
 import type { Person } from '../types/social';
 import { BADGE_THRESHOLD, toggleProposal } from '../utils/badgeRules';
 import { formatLongDay } from '../utils/dates';
+import { tr } from '../i18n';
 
 type Props = NativeStackScreenProps<EventsStackParamList, 'RateEvent'>;
 
@@ -52,7 +53,7 @@ export default function RateEventScreen({ navigation, route }: Props) {
   if (!event) {
     return (
       <View style={styles.center}>
-        {loading ? <ActivityIndicator color={colors.text} /> : <Text style={styles.muted}>Evenimentul nu a fost găsit.</Text>}
+        {loading ? <ActivityIndicator color={colors.text} /> : <Text style={styles.muted}>{tr('Evenimentul nu a fost găsit.')}</Text>}
       </View>
     );
   }
@@ -73,11 +74,11 @@ export default function RateEventScreen({ navigation, route }: Props) {
   // Raportul cere confirmare și șterge tag-urile pozitive date aceleiași persoane.
   const report = (person: Person) => {
     Alert.alert(
-      `Raportezi pe ${person.name}?`,
-      'Persoana nu va afla cine a raportat-o. Pe profilul ei apare doar numărul total de rapoarte.',
+      tr('Raportezi pe {name}?', { name: person.name }),
+      tr('Persoana nu va afla cine a raportat-o. Pe profilul ei apare doar numărul total de rapoarte.'),
       [
-        { text: 'Renunță', style: 'cancel' },
-        { text: 'Raportează', style: 'destructive', onPress: () => setRating(person.id, { tags: [], reported: true }) },
+        { text: tr('Renunță'), style: 'cancel' },
+        { text: tr('Raportează'), style: 'destructive', onPress: () => setRating(person.id, { tags: [], reported: true }) },
       ],
     );
   };
@@ -103,7 +104,7 @@ export default function RateEventScreen({ navigation, route }: Props) {
       <View style={styles.header}>
         <GlassIconButton icon="chevron-back" onPress={() => navigation.goBack()} />
         <View style={styles.headerText}>
-          <Text style={styles.title}>Cum a fost?</Text>
+          <Text style={styles.title}>{tr('Cum a fost?')}</Text>
           <Text style={styles.subtitle} numberOfLines={1}>
             {event.title} · {formatLongDay(event.startsAt)}
           </Text>
@@ -113,14 +114,11 @@ export default function RateEventScreen({ navigation, route }: Props) {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.notice}>
           <Ionicons name="lock-closed-outline" size={16} color={colors.text} />
-          <Text style={styles.noticeText}>
-            Evaluările sunt anonime: nimeni nu află cine ce a dat. Pe profiluri apar doar totalurile. Un badge apare
-            abia când {BADGE_THRESHOLD} persoane diferite l-au propus.
-          </Text>
+          <Text style={styles.noticeText}>{tr('Evaluările sunt anonime: nimeni nu află cine ce a dat. Pe profiluri apar doar totalurile. Un badge apare abia când')}{' '}{BADGE_THRESHOLD}{' '}{tr('persoane diferite l-au propus.')}</Text>
         </View>
 
         {companions.length === 0 ? (
-          <Text style={styles.muted}>Nu ai pe cine evalua la acest eveniment.</Text>
+          <Text style={styles.muted}>{tr('Nu ai pe cine evalua la acest eveniment.')}</Text>
         ) : (
           companions.map((person) => {
             const rating = ratingOf(person.id);
@@ -133,7 +131,7 @@ export default function RateEventScreen({ navigation, route }: Props) {
                   <Avatar name={person.name} size={44} photoUrl={person.photoUrl} />
                   <View style={styles.personText}>
                     <Text style={styles.personName}>{person.name}</Text>
-                    <Text style={styles.muted}>Vezi profilul</Text>
+                    <Text style={styles.muted}>{tr('Vezi profilul')}</Text>
                   </View>
                   <Ionicons name="chevron-forward" size={18} color={colors.faint} />
                 </Pressable>
@@ -141,9 +139,9 @@ export default function RateEventScreen({ navigation, route }: Props) {
                 {rating.reported ? (
                   <View style={styles.reportedRow}>
                     <Ionicons name="flag" size={15} color={colors.nope} />
-                    <Text style={styles.reportedText}>Raportat · anonim</Text>
+                    <Text style={styles.reportedText}>{tr('Raportat · anonim')}</Text>
                     <Pressable onPress={() => setRating(person.id, EMPTY)} hitSlop={8}>
-                      <Text style={styles.link}>Anulează raportul</Text>
+                      <Text style={styles.link}>{tr('Anulează raportul')}</Text>
                     </Pressable>
                   </View>
                 ) : (
@@ -164,7 +162,7 @@ export default function RateEventScreen({ navigation, route }: Props) {
                     />
                     <Pressable onPress={() => report(person)} hitSlop={8} style={styles.reportButton}>
                       <Ionicons name="flag-outline" size={14} color={colors.muted} />
-                      <Text style={styles.reportText}>Nu a fost ok? Raportează</Text>
+                      <Text style={styles.reportText}>{tr('Nu a fost ok? Raportează')}</Text>
                     </Pressable>
                   </>
                 )}
@@ -175,7 +173,7 @@ export default function RateEventScreen({ navigation, route }: Props) {
       </ScrollView>
 
       <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 12 }]}>
-        <GradientButton label="Trimite evaluarea" icon="checkmark" onPress={submit} />
+        <GradientButton label={tr('Trimite evaluarea')} icon="checkmark" onPress={submit} />
       </View>
     </SafeAreaView>
   );
