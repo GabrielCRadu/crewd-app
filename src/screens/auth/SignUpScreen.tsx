@@ -5,14 +5,16 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import FormMessage from '../../components/FormMessage';
+import PasswordChecklist from '../../components/PasswordChecklist';
 import GlassIconButton from '../../components/GlassIconButton';
 import GradientButton from '../../components/GradientButton';
 import ScreenGlow from '../../components/ScreenGlow';
 import TextField from '../../components/TextField';
 import type { AuthStackParamList } from '../../navigation/authTypes';
-import { MIN_PASSWORD_LENGTH, isValidEmail, signUp } from '../../services/authService';
+import { isValidEmail, signUp } from '../../services/authService';
 import { colors } from '../../theme/colors';
 import { type } from '../../theme/typography';
+import { isStrongPassword } from '../../utils/passwordRules';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'SignUp'>;
 
@@ -32,8 +34,7 @@ export default function SignUpScreen({ navigation }: Props) {
   const submit = async () => {
     const nextErrors: Errors = {
       email: isValidEmail(email) ? undefined : 'Introdu o adresă de email validă.',
-      password:
-        password.length >= MIN_PASSWORD_LENGTH ? undefined : `Parola trebuie să aibă cel puțin ${MIN_PASSWORD_LENGTH} caractere.`,
+      password: isStrongPassword(password) ? undefined : 'Parola nu îndeplinește cerințele de mai jos.',
       confirm: confirm === password ? undefined : 'Parolele nu coincid.',
     };
     setErrors(nextErrors);
@@ -82,13 +83,14 @@ export default function SignUpScreen({ navigation }: Props) {
               value={password}
               onChangeText={setPassword}
               error={errors.password}
-              placeholder={`Cel puțin ${MIN_PASSWORD_LENGTH} caractere`}
+              placeholder="Minim 8 caractere, literă mică și mare"
               password
               autoComplete="new-password"
               textContentType="newPassword"
               returnKeyType="next"
               onSubmitEditing={() => confirmRef.current?.focus()}
             />
+            <PasswordChecklist password={password} />
             <TextField
               ref={confirmRef}
               label="Confirmă parola"
