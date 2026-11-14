@@ -25,6 +25,7 @@ import { claimUsername, releaseUsername, updatePublicCard } from '../services/us
 import { deletePublicProfile, getPublicProfile, savePublicProfile } from '../services/publicProfileService';
 import { publicProfileKey, toPublicProfile } from '../utils/publicProfile';
 import { startFriendsSync, stopFriendsSync } from '../services/friendsService';
+import { deleteMyFriendData } from '../services/friendshipsFirestore';
 import { allProfileTags } from '../utils/profileTags';
 import { tr } from '../i18n';
 
@@ -252,6 +253,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Întâi parola: dacă e greșită, nu se șterge nimic.
       await confirmPassword(password);
       await leaveAllGroups(user.uid);
+      // Prieteniile, cererile și blocările tale (ce e deja șters nu contează, deci se poate relua).
+      await deleteMyFriendData(user.uid);
       // Username-ul se eliberează înainte de profil (regulile verifică proprietarul din fișa publică).
       if (profile?.username) await releaseUsername(profile.username, user.uid);
       await deletePublicProfile(user.uid);
