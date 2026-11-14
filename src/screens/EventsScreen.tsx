@@ -5,7 +5,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import ScreenGlow from '../components/ScreenGlow';
+import SegmentedControl from '../components/SegmentedControl';
 import CategoryChips from '../components/events/CategoryChips';
+import JoinedCalendar from '../components/events/JoinedCalendar';
 import NowCarousel from '../components/events/NowCarousel';
 import UpcomingEventRow from '../components/events/UpcomingEventRow';
 import { useEvents } from '../hooks/useEvents';
@@ -21,10 +23,13 @@ import { isLive } from '../utils/dates';
 import { addDistance, isUpcomingOrLive, matchesCategories, sortByDate } from '../utils/eventFilters';
 
 type Props = NativeStackScreenProps<EventsStackParamList, 'EventsHome'>;
+type Mode = 'all' | 'calendar';
 
 /**
  * Ecranul principal al tab-ului (docs/layout-guide.md → Tab Evenimente):
- * titlu → categorii → cardul „ACUM” → „Urmează”.
+ * titlu → Toate | Calendarul meu →
+ * - Toate: categorii → cardul „ACUM” → „Urmează”;
+ * - Calendarul meu: luna cu evenimentele la care ești înscris și programul pe zile (JoinedCalendar).
  * Harta evenimentelor s-a mutat în tab-ul Hartă (modul Evenimente).
  */
 export default function EventsScreen({ navigation }: Props) {
@@ -32,7 +37,14 @@ export default function EventsScreen({ navigation }: Props) {
   const { events, loading, error } = useEvents(location.coords);
   const preferences = usePreferences();
 
+  const [mode, setMode] = useState<Mode>('all');
   const [categoryIds, setCategoryIds] = useState<CategoryId[]>([]);
+
+  // Calendarul: toate evenimentele la care ești înscris (și cele trecute, ca să-ți vezi luna), cu distanța.
+  const joined = useMemo(
+    () => addDistance(events.filter((e) => isJoined(preferences, e.id)), location.coords),
+    [events, preferences, location.coords],
+  );
 
   // Evenimentele încă neterminate, din categoriile alese, cu distanța până la tine, sortate după oră.
   const visible = useMemo(
@@ -59,9 +71,17 @@ export default function EventsScreen({ navigation }: Props) {
 
       <View style={styles.header}>
         <Text style={styles.title}>Evenimente</Text>
+        <SegmentedControl
+          options={[
+            { value: 'all', label: 'Toate' },
+            { value: 'calendar', label: 'Calendarul meu' },
+          ]}
+          value={mode}
+          onChange={setMode}
+        />
       </View>
 
-      <CategoryChips selected={categoryIds} onChange={setCategoryIds} />
+      {mode === 'all' ? <CategoryChips selected={categoryIds} onChange={setCategoryIds} /> : null}
 
       {/* Mesajul despre locație: pastilă de sticlă, ca să se citească pe fundalul închis */}
       {locationNotice ? (
@@ -78,6 +98,15 @@ export default function EventsScreen({ navigation }: Props) {
         </View>
       ) : null}
 
+      {mode === 'calendar' ? (
+        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+          {loading ? (
+            <ActivityIndicator color={colors.text} style={styles.loader} />
+          ) : (
+            <JoinedCalendar events={joined} onOpenEvent={openEvent} onBrowse={() => setMode('all')} />
+          )}
+        </ScrollView>
+      ) : (
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           {liveNow.length > 0 ? (
             <NowCarousel events={liveNow} onOpen={openEvent} />
@@ -99,6 +128,7 @@ export default function EventsScreen({ navigation }: Props) {
             ))
           )}
         </ScrollView>
+      )}
     </SafeAreaView>
   );
 }

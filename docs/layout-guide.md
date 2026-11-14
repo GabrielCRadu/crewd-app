@@ -63,6 +63,8 @@ De sus în jos:
 ### Ecranul principal
 
 1. **Titlu mare** „Evenimente”.
+   Sub titlu, **comutator** cu două segmente egale: **Toate | Calendarul meu**.
+   Punctele de mai jos descriu „Toate”; „Calendarul meu” e descris după ele.
 2. **Chip-uri de categorii** pe un singur rând, cu scroll orizontal: Toate, Concerte, Party-uri, Teatru… (fără Filme)
 3. **Card evidențiat „ACUM”**, pentru evenimentul în desfășurare, pe toată lățimea:
    - sus: badge-ul „ACUM” în stânga și distanța în dreapta;
@@ -74,6 +76,18 @@ De sus în jos:
    - un chevron › în dreapta.
 
 Harta evenimentelor nu mai e aici: s-a mutat în tab-ul Hartă, modul **Evenimente**.
+
+### Calendarul meu
+
+Evenimentele la care ești înscris, ca într-un calendar:
+
+1. **Cardul lunii:** „Noiembrie 2026”, butonul „Azi” și săgeți ‹ › pentru luna trecută / următoare;
+   rândul L Ma Mi J V S D, apoi grila zilelor. Ziua de azi are un contur, ziua aleasă e un cerc alb,
+   iar sub zilele cu evenimente apare câte un punct pentru fiecare (maxim 3).
+2. **Programul**, sub card: „TOATĂ LUNA NOIEMBRIE” sau ziua aleasă (cu „Toată luna” în dreapta).
+   Pe fiecare zi: ziua săptămânii și numărul în stânga, iar în dreapta câte un card pe eveniment,
+   cu ora de început și de final, titlul, „Loc · distanță” și categoria („ACUM” / „Încheiat” când e cazul).
+3. Fără înscrieri: un card gol cu „Calendarul tău e gol” și butonul „Vezi evenimentele”.
 
 ### Detalii eveniment
 
