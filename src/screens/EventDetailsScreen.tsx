@@ -10,6 +10,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import Aurora from '../components/Aurora';
 import GlassIconButton from '../components/GlassIconButton';
 import AddToGoogleCalendar from '../components/events/AddToGoogleCalendar';
+import FriendsGoingSection from '../components/events/FriendsGoingSection';
 import ShareEventSheet from '../components/events/ShareEventSheet';
 import AddMemorySheet from '../components/memories/AddMemorySheet';
 import GradientButton from '../components/GradientButton';
@@ -206,6 +207,12 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
 
           {/* Te-ai înscris: îl poți pune și în Google Calendar */}
           {!ended && joined ? <AddToGoogleCalendar event={event} /> : null}
+
+          {/* 8. Prietenii care merg (înainte și după înscriere); tap → profilul lor */}
+          <FriendsGoingSection
+            event={event}
+            onOpenPerson={(personId) => navigation.navigate('PersonProfile', { personId })}
+          />
         </View>
       </ScrollView>
 
