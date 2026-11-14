@@ -12,7 +12,12 @@ export const USERNAME_MAX = 20;
 const USERNAME_PATTERN = /^[a-z0-9](?:[a-z0-9._]{1,18}[a-z0-9])$/;
 
 /** Nume care nu pot fi alese (forma canonică). */
-export const RESERVED_USERNAMES = ['crewd', 'admin', 'support', 'moderator', 'official', 'help', 'system'];
+export const RESERVED_USERNAMES = [
+  'crewd', 'admin', 'support', 'moderator', 'official', 'help', 'system', 'staff', 'team',
+  'crewd_team', 'crewd_support', 'crewd_official', 'crewd_admin', 'root', 'security', 'contact', 'info', 'null', 'undefined',
+];
+/** Nimic de forma „crewd.ceva” / „crewd_ceva” (imită echipa); ca în firestore.rules. */
+const RESERVED_PREFIX = /^crewd[._]/;
 
 const FORMAT_MESSAGE = 'Doar litere mici, cifre, punct și underscore; nu începe și nu se termină cu punct sau underscore.';
 
@@ -34,7 +39,7 @@ export function usernameError(username: string): string | null {
   if (username.length < USERNAME_MIN) return tr('Username-ul are cel puțin {min} caractere.', { min: USERNAME_MIN });
   if (username.length > USERNAME_MAX) return tr('Username-ul are cel mult {max} de caractere.', { max: USERNAME_MAX });
   if (!USERNAME_PATTERN.test(username)) return tr(FORMAT_MESSAGE);
-  if (RESERVED_USERNAMES.includes(canonicalUsername(username))) return tr('Username-ul e rezervat.');
+  if (RESERVED_USERNAMES.includes(canonicalUsername(username)) || RESERVED_PREFIX.test(username)) return tr('Username-ul e rezervat.');
   return null;
 }
 

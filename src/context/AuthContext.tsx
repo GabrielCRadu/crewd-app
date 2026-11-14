@@ -10,7 +10,6 @@ import type { AuthUser } from '../services/authService';
 import { loadUserPreferences, seedTagScores } from '../services/preferencesService';
 import {
   createProfile,
-  deleteProfile,
   getProfile,
   getSavedPreferences,
   setBio,
@@ -272,8 +271,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (profile?.username) await releaseUsername(profile.username, user.uid);
       await deletePublicProfile(user.uid);
       publishedKey.current = null;
-      await deleteProfile(user.uid);
-      // Ultimul pas: contul din Firebase Auth. După el, sesiunea se închide și apare ecranul de login.
+      // Ultimul pas: contul din Firebase Auth. Profilul users/{uid} îl șterge apoi funcția cleanupDeletedUser
+      // (aplicația nu-l mai poate șterge: audit). După el, sesiunea se închide și apare ecranul de login.
       await deleteCurrentUser();
     },
     [user, profile],
