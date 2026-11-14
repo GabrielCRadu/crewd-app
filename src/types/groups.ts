@@ -8,6 +8,8 @@ export interface MemberSummary {
   name: string;
   age: number;
   tags: string[];
+  /** Miniatura pozei de profil (data URI sau URL), sau null. Lipsește la intrările de dinainte de chat. */
+  photo?: string | null;
 }
 
 export interface CrewGroup {

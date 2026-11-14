@@ -18,6 +18,7 @@ import ChatsNavigator from './ChatsNavigator';
 import ProfileNavigator from './ProfileNavigator';
 import EventReminders from '../components/EventReminders';
 import FriendRequestPopup from '../components/FriendRequestPopup';
+import InviteLinkHandler from '../components/InviteLinkHandler';
 import GradientButton from '../components/GradientButton';
 import { useAuth } from '../context/AuthContext';
 import { colors } from '../theme/colors';
@@ -40,7 +41,7 @@ const theme: Theme = {
 };
 
 /** Ecranele care se deschid peste tab-uri și ascund bara de jos (vezi docs/layout-guide.md). */
-const FULLSCREEN_ROUTES = ['ChatRoom', 'EventDetails', 'RateEvent', 'PersonProfile', 'EditProfile', 'FriendsList', 'EventGroups', 'ProposeGroup', 'PersonFriends', 'DirectChat'];
+const FULLSCREEN_ROUTES = ['ChatRoom', 'EventDetails', 'RateEvent', 'PersonProfile', 'EditProfile', 'FriendsList', 'EventGroups', 'ProposeGroup', 'PersonFriends', 'DirectChat', 'GroupDetails'];
 
 /** Evenimente · Hartă · Chat · Profil (Descoperă a fost scos: recomandările sunt grupulețele de la evenimente). Primul tab e cel implicit. */
 const TABS: {
@@ -117,6 +118,8 @@ export default function RootNavigator() {
       ) : (
         <LoadingScreen error={error} onRetry={retry} onSignOut={signOut} />
       )}
+      {/* Linkurile de invitație (codul QR de pe profil): montat mereu, ca să supraviețuiască înregistrării */}
+      <InviteLinkHandler onOpenProfile={openPersonProfile} />
     </NavigationContainer>
   );
 }

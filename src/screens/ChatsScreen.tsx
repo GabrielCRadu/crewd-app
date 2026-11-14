@@ -4,11 +4,15 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import Avatar from '../components/Avatar';
 import DirectThreadsSection from '../components/DirectThreadsSection';
+import LastMessageLine from '../components/chat/LastMessageLine';
+import { useAuth } from '../context/AuthContext';
 import { useEvents } from '../hooks/useEvents';
 import { useMyGroups } from '../hooks/useMyGroups';
 import { useNow } from '../hooks/useNow';
 import { useUserLocation } from '../hooks/useUserLocation';
+import { isFirebaseConfigured } from '../lib/firebase';
 import type { ChatsStackParamList } from '../navigation/chatsTypes';
+import { MOCK_UID } from '../services/groupsService';
 import { colors } from '../theme/colors';
 import { type } from '../theme/typography';
 import { glass, radii } from '../theme/shape';
@@ -27,6 +31,8 @@ export default function ChatsScreen({ navigation }: Props) {
   const location = useUserLocation();
   const { events } = useEvents(location.coords);
   const now = useNow();
+  const { user } = useAuth();
+  const myUid = isFirebaseConfigured ? (user?.uid ?? '') : MOCK_UID;
 
   const titleOf = (g: CrewGroup) => events.find((e) => e.id === g.eventId)?.title ?? 'Eveniment';
   const sorted = [...groups].sort((a, b) => a.meetupAt.getTime() - b.meetupAt.getTime());
@@ -34,9 +40,9 @@ export default function ChatsScreen({ navigation }: Props) {
   const open = (g: CrewGroup) => {
     if (!canOpenChat(g)) {
       if (groupStatus(g, now) === 'expired') {
-        Alert.alert('Grupulețul nu s-a format', 'Nu s-au strâns 3 persoane la timp. Alege alt grupuleț de la eveniment.');
+        Alert.alert('Grupul nu s-a format', 'Nu s-au strâns 3 persoane la timp. Alege alt grup de la eveniment.');
       } else {
-        Alert.alert('Grupulețul se formează', `Chat-ul se deschide când sunteți cel puțin ${MIN_FORM_MEMBERS}.`);
+        Alert.alert('Grupul se formează', `Chat-ul se deschide când sunteți cel puțin ${MIN_FORM_MEMBERS}.`);
       }
       return;
     }
@@ -49,16 +55,19 @@ export default function ChatsScreen({ navigation }: Props) {
         <Text style={styles.title}>Chat-uri</Text>
         {/* Conversațiile doar cu un prieten (ex. un eveniment trimis) */}
         <DirectThreadsSection onOpen={(personId) => navigation.navigate('DirectChat', { personId })} />
-        <Text style={styles.sectionTitle}>Grupulețele tale</Text>
+        <Text style={styles.sectionTitle}>Grupurile tale</Text>
 
         {loading ? <ActivityIndicator color={colors.text} /> : null}
         {!loading && sorted.length === 0 ? (
-          <Text style={styles.empty}>Intră într-un grupuleț de la un eveniment ca să-l vezi aici.</Text>
+          <Text style={styles.empty}>Intră într-un grup de la un eveniment ca să-l vezi aici.</Text>
         ) : null}
 
         {sorted.map((g) => {
           const status = groupStatus(g, now);
           const title = titleOf(g);
+          const memberNames = Object.values(g.members)
+            .map((m) => m.name)
+            .join(', ');
           return (
             <Pressable key={g.id} onPress={() => open(g)} style={({ pressed }) => [styles.card, pressed && styles.pressed]}>
               <View style={styles.groupRow}>
@@ -67,11 +76,13 @@ export default function ChatsScreen({ navigation }: Props) {
                   <Text style={styles.groupName} numberOfLines={1}>
                     {title}
                   </Text>
-                  <Text style={styles.members} numberOfLines={1}>
-                    {Object.values(g.members)
-                      .map((m) => m.name)
-                      .join(', ')}
-                  </Text>
+                  {canOpenChat(g) ? (
+                    <LastMessageLine eventId={g.eventId} groupId={g.id} myUid={myUid} fallback={memberNames} />
+                  ) : (
+                    <Text style={styles.members} numberOfLines={1}>
+                      {memberNames}
+                    </Text>
+                  )}
                 </View>
                 {!canOpenChat(g) ? (
                   <View style={styles.badge}>

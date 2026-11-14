@@ -6,7 +6,10 @@ Actualizează lista când rezolvi ceva sau adaugi un mock nou.
 ## Date mock (de înlocuit cu Firestore / date reale)
 
 - [x] ~~Chat: grupurile mock~~: Chat arată grupulețele reale (`useMyGroups`).
-- [ ] **Mesajele din chat** (`MESSAGES` din `src/data/mockSocial.ts`): mock; mesajele trimise rămân doar local, în ecranul deschis (`ChatRoomScreen`).
+- [x] ~~Mesajele din chat (mock)~~: conversațiile grupurilor sunt acum în Firestore (`chatService`, `events/{e}/groups/{g}/messages`). Fără `.env.local` rămân în memorie, cu 3 mesaje demo în grupurile mock formate.
+- [ ] **Conversații inventate în grupurile de test** (`scripts/seed-groups.mjs`: `messages/demo-1` … `demo-4` și pozele membrilor demo de pe Unsplash): de șters înainte de lansare, împreună cu grupurile demo.
+- [ ] **Chat-ul de grup** n-are încă notificări pentru mesaje noi, număr de necitite, poze sau ștergerea mesajelor. Moderarea automată cu AI vine mai târziu (pe backend).
+- [ ] **Membrii din Detaliile grupului** nu deschid încă profilul persoanei (vine cu profilul public, odată cu prietenii pe Firestore).
 - [x] ~~Grupuri pe gustul tău (mock)~~: înlocuite de grupulețele reale (`EventGroupsSection`, `groupsService`).
 - [ ] **Blocarea după raportări** la grupulețe folosește reputația mock (`ratingsService`, `ME_ID`); se verifică doar în aplicație, nu în regulile Firestore.
 - [ ] **Anunțul „grupulețul nu s-a format”**: grupulețele expirate doar dispar din listă; nu există încă un mesaj/notificare pentru membri.
@@ -17,11 +20,13 @@ Actualizează lista când rezolvi ceva sau adaugi un mock nou.
 - [ ] **„Vă potriviți”** (Cami): cine ți-a dat „Aș mai ieși” e mock (`THEY_WOULD_GO_AGAIN` în `mockRatings.ts`); notificarea apare doar pe telefonul tău. Cu Firebase: se verifică pe server și primesc amândoi notificarea.
 - [ ] **Mesaje directe** (Cami, `directMessagesService`): doar în memorie, cu un răspuns automat DEMO după ce trimiți un eveniment. Cu Firebase: `directChats/{uidA_uidB}/messages` și reguli noi.
 - [x] ~~Reamintire cu o oră înainte de evenimentele la care ești înscris~~ (Cami, `remindersService`, `expo-notifications`): notificări locale, merg și în Expo Go.
+- [ ] **Codul QR și linkul de invitație** (Cami, `inviteService`, `InviteLinkHandler`): linkul e `crewd://invite/<uid>` (în Expo Go `exp://…/--/invite/<uid>`) și deschide profilul doar pentru persoanele de test (`PEOPLE`). Pentru conturi reale trebuie profilul public din Firestore. Un link `https://…/invite/<uid>` cere un domeniu propriu (universal links / app links). „Salvează codul QR” nu e făcut.
 - [ ] **Raportarea din profilul cuiva** (meniul ⋯): se adună la totalul de rapoarte din `ratingsService`, doar în memorie.
 - [ ] **Cine merge / câți caută companie** la un eveniment: generate stabil din id (`demoSocial` în `src/services/eventsService.ts`). Trebuie calculate din înscrierile reale.
 - [ ] **Evenimente trecute pentru istoric**: `e16`–`e18` (`PAST_JOINED_EVENT_IDS` în `src/data/mockEvents.ts`), adăugate peste datele din Firestore ca să meargă istoricul și evaluările.
 - [ ] **Evaluări și reputație**: `src/data/mockRatings.ts` + `src/services/ratingsService.ts`, doar în memorie. `ME_ID` trebuie înlocuit cu uid-ul din Auth. Raportările nu blochează încă pe nimeni.
 - [ ] **Badge-uri pe profil** (Stef): `src/services/badgesService.ts` + `src/data/mockBadges.ts`, doar în memorie. Voturile celorlalți și badge-urile automate ale altor persoane sunt mock; ale tale se calculează din istoric (`src/utils/badgeRules.ts`). Cu Firestore, numărarea celor 3 persoane diferite trebuie făcută pe server, cu reguli noi.
+- [ ] **Amintiri** (Stef): `src/services/memoriesService.ts` + `src/data/mockMemories.ts`, doar în memorie (pozele tale dispar la repornire). Amintirile celorlalți sunt mock, cu poze de pe Unsplash (de scos înainte de prezentare, ca restul). Cu Firebase: pozele în Storage și reguli care lasă amintirile „doar prieteni” numai prietenilor.
 - [ ] **Persoanele** (`PEOPLE`) din profilul altei persoane (`PersonProfileScreen`), folosite la evaluări și la grupulețele demo fără Firebase. (Descoperă a fost scos.)
 - [ ] **Profil demo** fără Firebase (`DEMO_PROFILE` / `MY_PROFILE`): fallback doar când lipsește `.env.local`.
 - [ ] **Evenimente mock** (`src/data/mockEvents.ts`): fallback doar când lipsește `.env.local`.
@@ -52,7 +57,7 @@ Actualizează lista când rezolvi ceva sau adaugi un mock nou.
 
 ## Date și drepturi
 
-- [ ] **ÎNAINTE DE PREZENTARE: șterge pozele de test de pe Unsplash**: `photoUrl` din `src/data/mockSocial.ts` (profilurile persoanelor de test). Se încarcă direct de pe images.unsplash.com. (Afișele evenimentelor de test vin acum din baza de date.)
+- [ ] **ÎNAINTE DE PREZENTARE: șterge pozele de test de pe Unsplash**: `photoUrl` din `src/data/mockSocial.ts` (profilurile persoanelor de test) și `photo` din `scripts/seed-groups.mjs` (membrii grupurilor demo din Firestore). Se încarcă direct de pe images.unsplash.com. (Afișele evenimentelor de test vin acum din baza de date.)
 
 - [ ] **Evenimentele din Firestore** (din `evenimente-timisoara-verificate.json`) sunt doar pentru **demo intern**. Înainte de o lansare publică trebuie acordul surselor (iaBilet, Zile și Nopți, OnEvent etc.) sau o sursă cu licență (ex. acord scris de la OMD Timișoara / Visit Timișoara).
 - [ ] **Imaginile evenimentelor** sunt încărcate direct de pe site-urile organizatorilor (cu „Foto: …”). Pentru producție: acordul organizatorilor sau imagini proprii.

@@ -20,7 +20,7 @@ export function useEventGroups(eventId: string): { groups: CrewGroup[]; loading:
       },
       (e) => {
         console.warn('Nu am putut încărca grupulețele:', e);
-        setError('Nu am putut încărca grupulețele. Verifică conexiunea la internet.');
+        setError('Nu am putut încărca grupurile. Verifică conexiunea la internet.');
         setLoading(false);
       },
     );

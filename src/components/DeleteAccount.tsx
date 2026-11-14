@@ -58,7 +58,7 @@ export default function DeleteAccount() {
               <Text style={styles.title}>Ștergi contul definitiv?</Text>
             </View>
             <Text style={styles.text}>
-              Se șterg profilul tău, înscrierile la evenimente și locul tău în grupulețe. Nu se poate anula.
+              Se șterg profilul tău, înscrierile la evenimente și locul tău în grupuri. Nu se poate anula.
             </Text>
             <TextField
               label="Confirmă cu parola"

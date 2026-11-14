@@ -9,10 +9,20 @@ import { useNow } from '../../hooks/useNow';
 import { joinGroup } from '../../services/groupsService';
 import { colors } from '../../theme/colors';
 import { glass, radii } from '../../theme/shape';
+import { type } from '../../theme/typography';
 import type { Event } from '../../types/events';
 import type { CrewGroup } from '../../types/groups';
 import { commonTags, sortGroupsForUser } from '../../utils/groupMatch';
-import { REPORT_BLOCK_THRESHOLD, groupStatus, isVisibleTo, joinBlockReason, profileAge } from '../../utils/groupRules';
+import {
+  MIN_FORM_MEMBERS,
+  REPORT_BLOCK_THRESHOLD,
+  canOpenChat,
+  groupStatus,
+  isVisibleTo,
+  joinBlockReason,
+  otherGroupsOpenByDefault,
+  profileAge,
+} from '../../utils/groupRules';
 import { getMyRatings, getReputation } from '../../services/ratingsService';
 import { ME_ID } from '../../data/mockRatings';
 
@@ -22,23 +32,29 @@ interface Props {
   /** Grupulețul meu la acest eveniment, dacă sunt într-unul. */
   myGroup: CrewGroup | null;
   onPropose: () => void;
+  /** Deschide conversația grupului tău (butonul din cardul lui). */
+  onOpenChat: () => void;
 }
 
 /**
  * Grupulețele evenimentului (docs/superpowers/specs/2026-11-13-grupulete-design.md → Fluxul):
  * apar abia după „Înscrie-te”, doar cele în care te încadrezi, ordonate după potrivire.
+ * Grupul tău e primul, cu „Deschide chat-ul” în card; celelalte stau sub „Alte grupuri”, închis
+ * cât timp ești într-un grup (ca să nu sari dintr-unul în altul). Ieșirea din grup e în chat → Detalii.
  */
-export default function EventGroupsSection({ event, joined, myGroup, onPropose }: Props) {
+export default function EventGroupsSection({ event, joined, myGroup, onPropose, onOpenChat }: Props) {
   const { profile, user } = useAuth();
   const { groups, loading, error } = useEventGroups(event.id);
   const now = useNow();
   const [busyId, setBusyId] = useState<string | null>(null);
+  // null = cum e implicit (otherGroupsOpenByDefault); altfel ce a ales utilizatorul.
+  const [showOthers, setShowOthers] = useState<boolean | null>(null);
 
   if (!joined) {
     return (
       <View style={styles.locked}>
         <Ionicons name="people-outline" size={20} color={colors.muted} />
-        <Text style={styles.lockedText}>Înscrie-te ca să vezi grupulețele celor care merg.</Text>
+        <Text style={styles.lockedText}>Înscrie-te ca să vezi grupurile celor care merg.</Text>
       </View>
     );
   }
@@ -54,6 +70,32 @@ export default function EventGroupsSection({ event, joined, myGroup, onPropose }
     myAge,
     now,
   );
+  // Grupul meu din lista ascultată (mai proaspătă), sau cel din useMyGroups dacă nu mai e vizibil în listă.
+  const mine = myGroup ? (groups.find((g) => g.id === myGroup.id) ?? myGroup) : null;
+  const others = visible.filter((g) => g.id !== mine?.id);
+  const othersOpen = showOthers ?? otherGroupsOpenByDefault(mine, now);
+  const mineStatus = mine ? groupStatus(mine, now) : null;
+  const missing = mine ? Math.max(0, MIN_FORM_MEMBERS - mine.memberUids.length) : 0;
+  const mineNote = !mine || canOpenChat(mine)
+    ? null
+    : mineStatus === 'expired'
+      ? 'Nu s-au strâns 3 persoane la timp. Alege alt grup de mai jos sau propune unul.'
+      : `Așteptăm încă ${missing} ${missing === 1 ? 'persoană' : 'persoane'}. Chat-ul se deschide când sunteți cel puțin ${MIN_FORM_MEMBERS}.`;
+
+  const cardFor = (g: CrewGroup) => (
+    <GroupCard
+      key={g.id}
+      group={g}
+      status={groupStatus(g, now)}
+      common={commonTags(g, myTags)}
+      isMine={mine?.id === g.id}
+      blockReason={joinBlockReason(g, { age: myAge, isRegistered: joined, currentGroupId: mine?.id ?? null, isBlocked }, now)}
+      busy={busyId === g.id}
+      onJoin={() => join(g)}
+      onOpenChat={mine?.id === g.id && canOpenChat(g) ? onOpenChat : undefined}
+      note={mine?.id === g.id ? mineNote : null}
+    />
+  );
 
   const doJoin = async (g: CrewGroup) => {
     setBusyId(g.id);
@@ -68,7 +110,7 @@ export default function EventGroupsSection({ event, joined, myGroup, onPropose }
 
   const join = (g: CrewGroup) => {
     if (myGroup && myGroup.id !== g.id) {
-      Alert.alert('Schimbi grupulețul?', 'Poți fi într-un singur grupuleț la un eveniment. Ieși din cel actual și intri aici?', [
+      Alert.alert('Schimbi grupul?', 'Poți fi într-un singur grup la un eveniment. Ieși din cel actual și intri aici?', [
         { text: 'Rămân', style: 'cancel' },
         { text: 'Schimb', onPress: () => void doJoin(g) },
       ]);
@@ -81,31 +123,37 @@ export default function EventGroupsSection({ event, joined, myGroup, onPropose }
     <View style={styles.container}>
       {loading ? <ActivityIndicator color={colors.text} /> : null}
       {error ? <Text style={styles.muted}>{error}</Text> : null}
-      {!loading && visible.length === 0 ? (
-        <Text style={styles.muted}>Încă nu s-a format niciun grupuleț pe gustul tău.</Text>
+
+      {mine ? (
+        <>
+          <Text style={type.label}>Grupul tău</Text>
+          {cardFor(mine)}
+          <Pressable
+            onPress={() => setShowOthers(!othersOpen)}
+            style={({ pressed }) => [styles.toggle, pressed && styles.pressed]}
+            accessibilityRole="button"
+            accessibilityState={{ expanded: othersOpen }}
+          >
+            <Text style={type.label}>Alte grupuri · {others.length}</Text>
+            <Ionicons name={othersOpen ? 'chevron-up' : 'chevron-down'} size={18} color={colors.muted} />
+          </Pressable>
+        </>
       ) : null}
 
-      {visible.map((g) => (
-        <GroupCard
-          key={g.id}
-          group={g}
-          status={groupStatus(g, now)}
-          common={commonTags(g, myTags)}
-          isMine={myGroup?.id === g.id}
-          blockReason={joinBlockReason(
-            g,
-            { age: myAge, isRegistered: joined, currentGroupId: myGroup?.id ?? null, isBlocked },
-            now,
-          )}
-          busy={busyId === g.id}
-          onJoin={() => join(g)}
-        />
-      ))}
-
-      <Pressable onPress={onPropose} style={({ pressed }) => [styles.propose, pressed && styles.pressed]}>
-        <Ionicons name="add-circle-outline" size={18} color={colors.text} />
-        <Text style={styles.proposeText}>Niciunul nu ți se potrivește? Propune unul</Text>
-      </Pressable>
+      {othersOpen ? (
+        <>
+          {!loading && others.length === 0 ? (
+            <Text style={styles.muted}>
+              {mine ? 'Nu mai sunt alte grupuri pe gustul tău.' : 'Încă nu s-a format niciun grup pe gustul tău.'}
+            </Text>
+          ) : null}
+          {others.map(cardFor)}
+          <Pressable onPress={onPropose} style={({ pressed }) => [styles.propose, pressed && styles.pressed]}>
+            <Ionicons name="add-circle-outline" size={18} color={colors.text} />
+            <Text style={styles.proposeText}>Niciunul nu ți se potrivește? Propune unul</Text>
+          </Pressable>
+        </>
+      ) : null}
     </View>
   );
 }
@@ -115,6 +163,7 @@ const styles = StyleSheet.create({
   locked: { ...glass, flexDirection: 'row', alignItems: 'center', gap: 10, padding: 14, borderRadius: radii.inner },
   lockedText: { flex: 1, color: colors.muted, fontSize: 14 },
   muted: { color: colors.muted, fontSize: 13 },
+  toggle: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 8, marginTop: 4 },
   propose: {
     ...glass,
     flexDirection: 'row',

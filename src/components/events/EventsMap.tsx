@@ -1,17 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
+import MapView from 'react-native-maps';
 
-import GlassIconButton from '../GlassIconButton';
-import GradientButton from '../GradientButton';
-import DistanceDot from './DistanceDot';
+import EventMapMarker from './EventMapMarker';
+import EventMapPreview from './EventMapPreview';
 import type { EventWithDistance, LatLng } from '../../types/events';
 import { colors } from '../../theme/colors';
 import { darkMapStyle } from '../../theme/mapStyle';
 import { radii } from '../../theme/shape';
-import { cardShadow } from '../../theme/shadows';
-import { formatEventDate } from '../../utils/dates';
-import { formatDistance, getDistanceColor } from '../../utils/distance';
 
 interface Props {
   events: EventWithDistance[];
@@ -24,7 +20,13 @@ interface Props {
 /** Cât de mult se vede la început (în grade; ~0.1 ≈ 11 km), ca să încapă și evenimentele mai depărtate. */
 const ZOOM_DELTA = 0.1;
 
-/** Modul „Hartă” al tab-ului: pini colorați după distanță + card plutitor pentru pinul apăsat. */
+/** Durata mișcării hărții spre evenimentul apăsat (ms). */
+const FOCUS_MS = 350;
+
+/**
+ * Modul „Evenimente” al tab-ului Hartă: afișul fiecărui eveniment la locul lui (contur colorat după distanță)
+ * și o mini-previzualizare jos pentru evenimentul apăsat.
+ */
 export default function EventsMap({ events, userLocation, showUserLocation, onOpenEvent }: Props) {
   const mapRef = useRef<MapView>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -37,6 +39,12 @@ export default function EventsMap({ events, userLocation, showUserLocation, onOp
   // Dacă evenimentul selectat dispare din filtre, ascundem și cardul.
   const selected = events.find((e) => e.id === selectedId) ?? null;
 
+  // La apăsare, aducem evenimentul în centru, ca previzualizarea de jos să nu-l acopere.
+  const select = (event: EventWithDistance) => {
+    setSelectedId(event.id);
+    mapRef.current?.animateCamera({ center: event.location }, { duration: FOCUS_MS });
+  };
+
   return (
     <View style={styles.container}>
       <MapView
@@ -48,14 +56,13 @@ export default function EventsMap({ events, userLocation, showUserLocation, onOp
         toolbarEnabled={false}
         userInterfaceStyle="dark"
         customMapStyle={darkMapStyle}
+        // O apăsare pe hartă (nu pe un eveniment) închide previzualizarea.
+        onPress={(e) => {
+          if (e.nativeEvent.action !== 'marker-press') setSelectedId(null);
+        }}
       >
         {events.map((e) => (
-          <Marker
-            key={e.id}
-            coordinate={e.location}
-            pinColor={getDistanceColor(e.distanceKm)}
-            onPress={() => setSelectedId(e.id)}
-          />
+          <EventMapMarker key={e.id} event={e} selected={e.id === selectedId} onPress={() => select(e)} />
         ))}
       </MapView>
 
@@ -65,24 +72,9 @@ export default function EventsMap({ events, userLocation, showUserLocation, onOp
         </View>
       ) : null}
 
-      {/* Cardul plutitor al pinului apăsat */}
+      {/* Mini-previzualizarea evenimentului apăsat */}
       {selected ? (
-        <View style={styles.card}>
-          <View style={styles.cardTop}>
-            <View style={styles.cardText}>
-              <Text style={styles.cardTitle} numberOfLines={1}>
-                {selected.title}
-              </Text>
-              <View style={styles.metaRow}>
-                <Text style={styles.cardMeta}>{formatEventDate(selected.startsAt)} ·</Text>
-                <DistanceDot km={selected.distanceKm} />
-                <Text style={styles.cardMeta}>{formatDistance(selected.distanceKm)}</Text>
-              </View>
-            </View>
-            <GlassIconButton icon="close" size={36} round onPress={() => setSelectedId(null)} />
-          </View>
-          <GradientButton label="Vezi detalii" icon="arrow-forward" compact onPress={() => onOpenEvent(selected.id)} />
-        </View>
+        <EventMapPreview event={selected} onOpen={() => onOpenEvent(selected.id)} onClose={() => setSelectedId(null)} />
       ) : null}
     </View>
   );
@@ -99,23 +91,4 @@ const styles = StyleSheet.create({
     borderRadius: radii.pill,
     overflow: 'hidden',
   },
-  // Suprafață opacă (surface), ca pe tab-ul Hartă: sticla nu se citește bine peste hartă.
-  card: {
-    position: 'absolute',
-    left: 16,
-    right: 16,
-    bottom: 16,
-    padding: 16,
-    gap: 14,
-    borderRadius: radii.card,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    ...cardShadow,
-  },
-  cardTop: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  cardText: { flex: 1, gap: 3 },
-  cardTitle: { color: colors.text, fontSize: 17, fontWeight: '600' },
-  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  cardMeta: { color: colors.muted, fontSize: 13 },
 });

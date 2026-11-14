@@ -9,6 +9,7 @@ import Aurora from '../components/Aurora';
 import Avatar from '../components/Avatar';
 import GlassIconButton from '../components/GlassIconButton';
 import ShareEventSheet from '../components/events/ShareEventSheet';
+import AddMemorySheet from '../components/memories/AddMemorySheet';
 import GradientButton from '../components/GradientButton';
 import GlassBadge from '../components/events/GlassBadge';
 import { useAuth } from '../context/AuthContext';
@@ -52,6 +53,7 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
   const { groups: myGroups } = useMyGroups();
   const now = useNow();
   const [shareOpen, setShareOpen] = useState(false);
+  const [addMemoryOpen, setAddMemoryOpen] = useState(false);
 
   const event = useMemo(() => events.find((e) => e.id === eventId) ?? null, [events, eventId]);
 
@@ -93,7 +95,7 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
   const confirmLeave = () =>
     Alert.alert(
       'Ieși din eveniment?',
-      myGroup ? 'Ieși și din grupulețul tău de la acest eveniment.' : 'Te poți înscrie din nou oricând.',
+      myGroup ? 'Ieși și din grupul tău de la acest eveniment.' : 'Te poți înscrie din nou oricând.',
       [
         { text: 'Rămân', style: 'cancel' },
         { text: 'Ies', style: 'destructive', onPress: leaveEventAndGroup },
@@ -101,12 +103,12 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
     );
   // Ce scrie pe butonul „Vezi grupulețele”, după starea grupulețului meu.
   const groupsHint = !myGroup
-    ? 'Alege un grupuleț cu care să mergi.'
+    ? 'Alege un grup cu care să mergi.'
     : canOpenChat(myGroup)
-      ? `Ești într-un grupuleț de ${myGroup.memberUids.length} · chat-ul e deschis.`
+      ? `Ești într-un grup de ${myGroup.memberUids.length} · chat-ul e deschis.`
       : myGroupStatus === 'expired'
-        ? 'Grupulețul tău nu s-a format. Alege altul.'
-        : `Grupulețul tău se formează: mai e nevoie de ${missing}.`;
+        ? 'Grupul tău nu s-a format. Alege altul.'
+        : `Grupul tău se formează: mai e nevoie de ${missing}.`;
 
   return (
     <View style={styles.screen}>
@@ -223,7 +225,7 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
           {!ended && !joined ? (
             <View style={styles.groupsHint}>
               <Ionicons name="people-outline" size={18} color={colors.muted} />
-              <Text style={styles.groupsHintText}>Înscrie-te ca să vezi grupulețele celor care merg.</Text>
+              <Text style={styles.groupsHintText}>Înscrie-te ca să vezi grupurile celor care merg.</Text>
             </View>
           ) : null}
         </View>
@@ -236,17 +238,29 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
             <View style={styles.joinedPill}>
               <Text style={styles.endedText}>Evenimentul s-a terminat</Text>
             </View>
-          ) : rated ? (
-            <View style={styles.joinedRow}>
-              <View style={styles.joinedPill}>
-                <Text style={styles.joinedText}>Evaluat ✓</Text>
-              </View>
-              <Pressable onPress={openRating} hitSlop={8}>
-                <Text style={styles.cancel}>Modifică</Text>
-              </Pressable>
-            </View>
           ) : (
-            <GradientButton label="Evaluează oamenii" icon="people" onPress={openRating} />
+            /* Ai fost la eveniment: adaugi o amintire și evaluezi oamenii */
+            <View style={styles.endedActions}>
+              <Pressable
+                onPress={() => setAddMemoryOpen(true)}
+                style={({ pressed }) => [styles.memoryButton, pressed && styles.pressed]}
+              >
+                <Ionicons name="image-outline" size={18} color={colors.text} />
+                <Text style={styles.memoryButtonText}>Adaugă amintire</Text>
+              </Pressable>
+              {rated ? (
+                <View style={styles.joinedRow}>
+                  <View style={styles.joinedPill}>
+                    <Text style={styles.joinedText}>Evaluat ✓</Text>
+                  </View>
+                  <Pressable onPress={openRating} hitSlop={8}>
+                    <Text style={styles.cancel}>Modifică</Text>
+                  </Pressable>
+                </View>
+              ) : (
+                <GradientButton label="Evaluează oamenii" icon="people" onPress={openRating} />
+              )}
+            </View>
           )
         ) : joined ? (
           /* După înscriere, butonul se împarte în două: ieși din eveniment / vezi grupulețele */
@@ -255,7 +269,7 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
               <Ionicons name="exit-outline" size={18} color={colors.text} />
               <Text style={styles.ticketText}>Ieși</Text>
             </Pressable>
-            <GradientButton label="Vezi grupulețele" icon="people" onPress={openGroups} style={styles.ctaMain} />
+            <GradientButton label="Vezi grupurile" icon="people" onPress={openGroups} style={styles.ctaMain} />
           </View>
         ) : (
           <View style={styles.ctaRow}>
@@ -282,6 +296,14 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
           setShareOpen(false);
           navigation.getParent()?.navigate('Chats', { screen: 'DirectChat', params: { personId }, initial: false });
         }}
+      />
+
+      {/* Amintirea se leagă de acest eveniment (doar dacă ai fost și s-a terminat) */}
+      <AddMemorySheet
+        visible={addMemoryOpen}
+        events={[event]}
+        initialEventId={event.id}
+        onClose={() => setAddMemoryOpen(false)}
       />
     </View>
   );
@@ -374,6 +396,17 @@ const styles = StyleSheet.create({
     borderTopColor: colors.border,
   },
   joinedRow: { flexDirection: 'row', alignItems: 'center', gap: 16 },
+  endedActions: { gap: 10 },
+  memoryButton: {
+    ...glass,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    height: 48,
+    borderRadius: radii.pill,
+  },
+  memoryButtonText: { color: colors.text, fontSize: 15, fontWeight: '500' },
   joinedPill: {
     ...glass,
     flex: 1,

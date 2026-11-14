@@ -81,7 +81,8 @@ Creat la finalul onboarding-ului (`src/services/profileService.ts`).
 | `city` | string | |
 | `gender` | string | `female`, `male` sau `other`. **Nu se poate schimba după onboarding.** |
 | `bio` | string | „Despre mine”, maxim 500 de caractere |
-| `photoUrl` | string \| null | poza de profil ca data URI JPEG mic (maxim ~300 KB) |
+| `photoUrl` | string \| null | poza de profil ca data URI JPEG (până la 1080px, maxim 600 000 de caractere) |
+| `photoThumb` | string \| null | miniatura pozei (~96 px, data URI JPEG, maxim 20 000 caractere), copiată în `members.<uid>.photo` din grupurile în care e utilizatorul |
 | `joinedEventIds` | string[] | evenimentele la care e înscris; se salvează la fiecare „Înscrie-te” / „Anulează” |
 | `tagScores` | map | scorul fiecărui tag (crește la înscriere, scade la anulare); pornește de la tag-urile din profil |
 | `chosenTags` | map | `{ events: string[], music: string[], hobbies: string[] }`, tag-urile din `src/data/tags.ts` |
@@ -104,11 +105,15 @@ Grupulețele unui eveniment (`docs/superpowers/specs/2026-11-13-grupulete-design
 | `vibe` | string | 1–120 caractere |
 | `tags` | string[] | tag-urile comune ale celui care propune cu evenimentul |
 | `memberUids` | string[] | membrii; maxim `maxSize` |
-| `members` | map | `uid → { name, age, tags }`, copiat de fiecare membru la intrare (fără email, fără poză) |
+| `members` | map | `uid → { name, age, tags, photo }`, copiat de fiecare membru la intrare (fără email); `photo` e miniatura lui sau `null`, iar membrul și-o poate actualiza singur |
 | `createdAt` | Timestamp | |
 | `formedAt` | Timestamp \| null | când a ajuns prima dată la 3 membri; odată setat, grupul rămâne format |
 
 Starea (în formare, format, complet, expirat, închis) nu e salvată: se calculează din aceste câmpuri și din oră (`groupStatus`).
+
+### `events/{eventId}/groups/{groupId}/messages/{messageId}`
+
+Conversația grupului (`docs/superpowers/specs/2026-11-14-chat-grup-design.md`). O citesc și o scriu doar membrii (`memberUids`); un mesaj nu se poate modifica sau șterge din aplicație. Câmpuri: `authorUid` (cine a scris, trebuie să fie utilizatorul logat), `authorName` (numele de la trimitere, 1–50 caractere), `text` (1–1000 caractere) și `createdAt` (ora serverului). Scrie `src/services/chatService.ts`.
 
 ### `meta/eventsImport`
 

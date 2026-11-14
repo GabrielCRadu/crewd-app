@@ -63,18 +63,17 @@ De sus în jos:
 ### Ecranul principal
 
 1. **Titlu mare** „Evenimente”.
-2. **Comutator** cu două segmente egale: **Listă | Hartă**.
-3. **Chip-uri de categorii** pe un singur rând, cu scroll orizontal: Toate, Concerte, Party-uri, Teatru… (fără Filme)
-4. **Card evidențiat „ACUM”**, pentru evenimentul în desfășurare, pe toată lățimea:
+2. **Chip-uri de categorii** pe un singur rând, cu scroll orizontal: Toate, Concerte, Party-uri, Teatru… (fără Filme)
+3. **Card evidențiat „ACUM”**, pentru evenimentul în desfășurare, pe toată lățimea:
    - sus: badge-ul „ACUM” în stânga și distanța în dreapta;
    - titlul evenimentului, mare;
    - jos: „Categorie · până la HH:MM” în stânga și butonul „Vin și eu” în dreapta.
-5. **Secțiunea „Urmează”:** listă verticală de rânduri. Fiecare rând are:
+4. **Secțiunea „Urmează”:** listă verticală de rânduri. Fiecare rând are:
    - o casetă pătrată de dată în stânga (ziua săptămânii prescurtată, iar sub ea numărul zilei);
    - titlul, „HH:MM · Loc · distanță” și „Categorie” (plus „· Înscris” dacă e cazul);
    - un chevron › în dreapta.
 
-În modul Hartă, lista e înlocuită de hartă.
+Harta evenimentelor nu mai e aici: s-a mutat în tab-ul Hartă, modul **Evenimente**.
 
 ### Detalii eveniment
 
@@ -90,10 +89,18 @@ De sus în jos:
    - în dreapta: butonul „Intră”.
 7. **Butonul „Înscrie-te”**, fix în partea de jos, pe toată lățimea, separat de conținut.
 
-## Tab Hartă (prieteni)
+## Tab Hartă (prieteni și evenimente)
 
 1. **Titlu mare** „Hartă”.
 2. **Comutator** cu două segmente: **Prieteni | Evenimente**.
+
+### Modul Evenimente
+
+Harta cu afișe mutată din tab-ul Evenimente: chip-urile de categorii sus, apoi harta pe tot restul
+ecranului, cu afișul fiecărui eveniment la locul lui și o previzualizare jos pentru evenimentul apăsat.
+
+### Modul Prieteni
+
 3. **Harta** ocupă tot restul ecranului.
    - Prietenii apar ca avatare rotunde cu inițiala și numele într-o etichetă sub ele.
    - Poziția ta e un punct cu eticheta „Tu”.

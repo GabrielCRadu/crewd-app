@@ -15,11 +15,15 @@ export const colors = {
   surface: '#161616',
   /** Conturul fin al cardurilor. */
   border: 'rgba(255,255,255,0.12)',
+  /** Întunecarea din spatele unei foi de jos (restul ecranului rămâne vizibil, dar estompat). */
+  backdrop: 'rgba(0,0,0,0.6)',
   text: '#FFFFFF',
   muted: 'rgba(255,255,255,0.62)',
   faint: 'rgba(255,255,255,0.40)',
   /** Text pe elemente albe (pastila albă, butonul principal). */
   onLight: '#0A0A0A',
+  /** Text secundar pe elemente albe (ex. ora pe bula albă a mesajelor tale). */
+  onLightMuted: 'rgba(10,10,10,0.5)',
   /** Accentul principal: alb (stil monocrom; culoarea o dau pozele, nu interfața). */
   primary: '#FFFFFF',
   /** Tonuri de gri (fostele accente calde), pentru elementele care încă le folosesc. */

@@ -1,6 +1,7 @@
 import { describe, expect, it } from '@jest/globals';
 
 import type { CrewGroup, JoinContext, ProposalDraft } from '../../types/groups';
+import type { UserProfile } from '../../types/user';
 import {
   canOpenChat,
   defaultProposal,
@@ -8,6 +9,8 @@ import {
   groupStatus,
   isVisibleTo,
   joinBlockReason,
+  memberSummary,
+  otherGroupsOpenByDefault,
   profileAge,
   proposalErrors,
 } from '../groupRules';
@@ -110,13 +113,13 @@ describe('joinBlockReason', () => {
 
   it('blocks users with confirmed reports', () => {
     expect(joinBlockReason(group(), { ...okCtx, isBlocked: true }, now)).toBe(
-      'Nu poți intra în grupulețe o perioadă, din cauza raportărilor.',
+      'Nu poți intra în grupuri o perioadă, din cauza raportărilor.',
     );
   });
 
   it('blocks full groups', () => {
     const g = group({ maxSize: 3, memberUids: ['u1', 'u2', 'u3'], formedAt: at(-5 * HOUR) });
-    expect(joinBlockReason(g, okCtx, now)).toBe('Grupulețul s-a umplut.');
+    expect(joinBlockReason(g, okCtx, now)).toBe('Grupul s-a umplut.');
   });
 
   it('blocks users outside the age range', () => {
@@ -128,11 +131,11 @@ describe('joinBlockReason', () => {
   });
 
   it('blocks expired groups', () => {
-    expect(joinBlockReason(group(), okCtx, at(-HOUR))).toBe('Grupulețul nu s-a format la timp.');
+    expect(joinBlockReason(group(), okCtx, at(-HOUR))).toBe('Grupul nu s-a format la timp.');
   });
 
   it('blocks joining the group you are already in', () => {
-    expect(joinBlockReason(group(), { ...okCtx, currentGroupId: 'g1' }, now)).toBe('Ești deja în acest grupuleț.');
+    expect(joinBlockReason(group(), { ...okCtx, currentGroupId: 'g1' }, now)).toBe('Ești deja în acest grup.');
   });
 
   it('allows joining when everything checks out (even if you are in another group)', () => {
@@ -227,7 +230,7 @@ describe('final review fixes', () => {
   });
 
   it('does not allow joining a group with no members left', () => {
-    expect(joinBlockReason(group({ memberUids: [] }), okCtx, at(-3 * HOUR))).toBe('Grupulețul nu mai există.');
+    expect(joinBlockReason(group({ memberUids: [] }), okCtx, at(-3 * HOUR))).toBe('Grupul nu mai există.');
   });
 
   it('rejects a meetup exactly 30 minutes away (the server needs strictly more)', () => {
@@ -236,5 +239,53 @@ describe('final review fixes', () => {
     const exact = new Date(d.meetupAt.getTime() - 30 * 60_000);
     expect(proposalErrors(d, 25, eventStart, exact).meetupAt).toBeDefined();
     expect(proposalErrors(d, 25, eventStart, now)).toEqual({});
+  });
+});
+
+describe('memberSummary', () => {
+  const now = new Date(2026, 10, 14, 12, 0);
+  const profile: UserProfile = {
+    uid: 'u1',
+    name: 'Radu',
+    birthDate: '2002-03-10',
+    age: 0,
+    city: 'Timișoara',
+    gender: 'male',
+    bio: '',
+    photoUrl: null,
+    chosenTags: { events: ['concerte'], music: ['rock'], hobbies: [] },
+    learnedTags: ['bere'],
+  };
+
+  it('sets photo to null (never undefined) when there is no thumbnail', () => {
+    const summary = memberSummary(profile, now);
+    expect('photo' in summary).toBe(true);
+    expect(summary.photo).toBeNull();
+  });
+
+  it('copies the profile thumbnail', () => {
+    expect(memberSummary({ ...profile, photoThumb: 'data:image/jpeg;base64,AAA' }, now).photo).toBe('data:image/jpeg;base64,AAA');
+  });
+
+  it('keeps name, age and tags', () => {
+    expect(memberSummary(profile, now)).toMatchObject({ name: 'Radu', age: 24, tags: ['concerte', 'rock', 'bere'] });
+  });
+});
+
+describe('otherGroupsOpenByDefault', () => {
+  it('shows the other groups when I am not in any group', () => {
+    expect(otherGroupsOpenByDefault(null, at(-3 * HOUR))).toBe(true);
+  });
+
+  it('hides them behind the toggle while my group is formed', () => {
+    expect(otherGroupsOpenByDefault(group({ formedAt: at(-5 * HOUR) }), at(-3 * HOUR))).toBe(false);
+  });
+
+  it('hides them while my group is still forming', () => {
+    expect(otherGroupsOpenByDefault(group({ memberUids: ['u1', 'u2'], createdAt: at(-24 * HOUR) }), at(-3 * HOUR))).toBe(false);
+  });
+
+  it('shows them when my group did not form in time, so I can pick another', () => {
+    expect(otherGroupsOpenByDefault(group({ memberUids: ['u1', 'u2'], createdAt: at(-24 * HOUR) }), at(-HOUR))).toBe(true);
   });
 });
