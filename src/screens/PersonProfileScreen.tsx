@@ -8,6 +8,7 @@ import type { NavigationProp, RouteProp } from '@react-navigation/native';
 import Chip from '../components/Chip';
 import FriendButton from '../components/FriendButton';
 import GlassIconButton from '../components/GlassIconButton';
+import PhotoViewer from '../components/PhotoViewer';
 import BadgesCard from '../components/badges/BadgesCard';
 import EventHistoryCarousel from '../components/events/EventHistoryCarousel';
 import MemoriesGrid from '../components/memories/MemoriesGrid';
@@ -55,6 +56,7 @@ export default function PersonProfileScreen() {
   const myBadgeProposals = useBadgeProposals();
   const allMemories = useMemories();
   const [openMemoryId, setOpenMemoryId] = useState<string | null>(null);
+  const [photoOpen, setPhotoOpen] = useState(false);
   const friends = useFriends();
   const location = useUserLocation();
   const { events } = useEvents(location.coords);
@@ -149,7 +151,9 @@ export default function PersonProfileScreen() {
           <View style={styles.identity}>
             {/* Poza de profil; fără poză, un pătrat de sticlă cu inițiala */}
             {person.photoUrl ? (
-              <Image source={{ uri: person.photoUrl }} style={styles.photo} />
+              <Pressable onPress={() => setPhotoOpen(true)} accessibilityLabel="Mărește poza">
+                <Image source={{ uri: person.photoUrl }} style={styles.photo} />
+              </Pressable>
             ) : (
               <View style={styles.photo}>
                 <Text style={styles.photoInitial}>{person.name.slice(0, 1).toUpperCase()}</Text>
@@ -310,6 +314,11 @@ export default function PersonProfileScreen() {
       </ScrollView>
 
       <MemoryViewer memory={memories.find((m) => m.id === openMemoryId) ?? null} onClose={() => setOpenMemoryId(null)} />
+      <PhotoViewer
+        photoUrl={photoOpen ? (person.photoUrl ?? null) : null}
+        caption={person.name}
+        onClose={() => setPhotoOpen(false)}
+      />
     </View>
   );
 }
