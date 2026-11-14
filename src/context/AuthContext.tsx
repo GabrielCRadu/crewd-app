@@ -18,6 +18,7 @@ import {
   updateProfileFields,
 } from '../services/profileService';
 import type { ProfileChanges, ProfileDraft, UserProfile } from '../types/user';
+import { isNewPhoto } from '../utils/profilePhoto';
 import { allProfileTags } from '../utils/profileTags';
 
 /*
@@ -158,7 +159,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async (changes: ProfileChanges) => {
       if (!profile) return;
       const previous = profile;
-      const photoChanged = changes.photoUrl !== undefined;
+      const photoChanged = isNewPhoto(changes, profile.photoUrl);
       const full: ProfileChanges = photoChanged
         ? { ...changes, photoThumb: changes.photoUrl ? await makeThumbnail(changes.photoUrl) : null }
         : changes;

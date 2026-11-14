@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals';
 
 import type { ChatRow, GroupMessage } from '../../types/chat';
-import { buildChatRows, dayLabel, lastMessagePreview, normalizeMessageText } from '../chatRules';
+import { authorNameFor, buildChatRows, dayLabel, lastMessagePreview, normalizeMessageText } from '../chatRules';
 
 // Ore locale (nu UTC), ca testele să nu depindă de fusul orar al calculatorului.
 const now = new Date(2026, 10, 14, 18, 0);
@@ -138,5 +138,15 @@ describe('lastMessagePreview', () => {
 
   it("prefixes someone else's message with their name", () => {
     expect(lastMessagePreview(msg('1', 'ana', 'Ana', now, 'Salut!'), 'me')).toBe('Ana: Salut!');
+  });
+});
+
+describe('authorNameFor', () => {
+  it('signs messages with the name stored in the group (what the rules check)', () => {
+    expect(authorNameFor({ u1: { name: 'Radu' } }, 'u1', 'Radu Gabriel')).toBe('Radu');
+  });
+
+  it('falls back to the profile name when the member entry is missing', () => {
+    expect(authorNameFor({}, 'u1', 'Radu Gabriel')).toBe('Radu Gabriel');
   });
 });

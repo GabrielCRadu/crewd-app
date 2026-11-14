@@ -61,6 +61,14 @@ export function buildChatRows(
   return rows;
 }
 
+/**
+ * Numele cu care semnezi un mesaj: cel din intrarea ta din grup (`members[uid].name`), pe care îl verifică
+ * și firestore.rules, ca nimeni să nu poată scrie în numele altcuiva. Fără intrare: numele din profil.
+ */
+export function authorNameFor(members: Record<string, { name: string }>, uid: string, profileName: string): string {
+  return members[uid]?.name ?? profileName;
+}
+
 /** Previzualizarea din lista de chat-uri: „Tu: …” sau „Ana: …”. */
 export function lastMessagePreview(message: GroupMessage, myUid: string): string {
   const who = message.authorUid === myUid ? 'Tu' : message.authorName;

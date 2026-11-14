@@ -31,7 +31,7 @@ import { MOCK_UID } from '../services/groupsService';
 import { colors } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
 import type { ChatRow } from '../types/chat';
-import { MAX_MESSAGE_LENGTH, buildChatRows, normalizeMessageText } from '../utils/chatRules';
+import { MAX_MESSAGE_LENGTH, authorNameFor, buildChatRows, normalizeMessageText } from '../utils/chatRules';
 import { formatDay, formatTime } from '../utils/dates';
 import { canOpenChat } from '../utils/groupRules';
 
@@ -115,7 +115,7 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
     // Mesajul tău apare imediat (scrierea locală a Firestore); lista coboară la el.
     scrollAfterSend.current = true;
     listRef.current?.scrollToEnd({ animated: true });
-    sendGroupMessage(eventId, groupId, { uid, name: profile?.name ?? '' }, text).catch((e: unknown) => {
+    sendGroupMessage(eventId, groupId, { uid, name: authorNameFor(group.members, uid, profile?.name ?? '') }, text).catch((e: unknown) => {
       // Textul nu se pierde: revine în câmp, ca să poți încerca din nou.
       setDraft((current) => current || text);
       Alert.alert('Mesajul nu s-a trimis', chatErrorMessage(e));
