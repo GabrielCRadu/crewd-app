@@ -22,7 +22,8 @@ import { glass, radii } from '../theme/shape';
 
 interface Props {
   visible: boolean;
-  uid: string;
+  /** Username-ul unic: e în codul QR și apare sub el. */
+  username: string;
   name: string;
   photoUrl?: string | null;
   onClose: () => void;
@@ -38,11 +39,11 @@ const COPIED_MS = 2000;
  * și te poate adăuga la prieteni. Dedesubt: trimiterea linkului pe alte aplicații și copierea lui.
  * Se închide cu X, cu swipe în jos sau cu o atingere în afara panoului.
  */
-export default function InviteQrSheet({ visible, uid, name, photoUrl, onClose }: Props) {
+export default function InviteQrSheet({ visible, username, name, photoUrl, onClose }: Props) {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const qrSize = Math.min(width - 120, 260);
-  const url = inviteUrl(uid);
+  const url = inviteUrl(username);
   const [copied, setCopied] = useState(false);
 
   // Panoul: urcă la deschidere și se poate trage în jos.
@@ -74,14 +75,14 @@ export default function InviteQrSheet({ visible, uid, name, photoUrl, onClose }:
   }, [copied]);
 
   const copy = () => {
-    copyInvite(uid)
+    copyInvite(username)
       .then(() => setCopied(true))
       .catch(() => Alert.alert('Nu am putut copia linkul', 'Încearcă din nou.'));
   };
 
   // Dacă meniul de share nu merge, linkul se copiază în schimb.
   const share = () => {
-    shareInvite(uid)
+    shareInvite(username)
       .then((result) => result === 'copied' && setCopied(true))
       .catch(() => Alert.alert('Nu am putut trimite linkul', 'Încearcă din nou.'));
   };
@@ -115,6 +116,7 @@ export default function InviteQrSheet({ visible, uid, name, photoUrl, onClose }:
               logoBackgroundColor={colors.text}
             />
           </View>
+          <Text style={styles.username}>@{username}</Text>
           <Text style={styles.hint}>Scanează ca să mă adaugi ca prieten</Text>
 
           <View style={styles.actions}>
@@ -151,6 +153,7 @@ const styles = StyleSheet.create({
   top: { position: 'absolute', top: 14, right: 16 },
   // Loc deasupra codului pentru butonul X din colț.
   qrCard: { backgroundColor: colors.text, borderRadius: radii.card, padding: 18, marginTop: 40 },
+  username: { color: colors.text, fontSize: 18, fontWeight: '700', textAlign: 'center' },
   hint: { color: colors.muted, fontSize: 15, textAlign: 'center' },
   actions: { alignSelf: 'stretch', gap: 10, marginTop: 4 },
   copyButton: {
