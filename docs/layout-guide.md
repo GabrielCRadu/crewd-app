@@ -11,6 +11,8 @@ Textele din ghid („Maria”, „Seara de board games” etc.) sunt date de exe
 ## Navigare
 
 - Bara de tab-uri de jos are **4 tab-uri**, în ordinea: **Evenimente · Hartă · Chat · Profil**. Evenimente se deschide implicit.
+- Între tab-uri se trece și **trăgând stânga / dreapta** pe ecran (ca paginile). Excepții: pe Hartă tragerea mută harta,
+  iar pe ecranele deschise peste tab-uri (detalii eveniment, conversație etc.) nu se schimbă tab-ul.
 - **Descoperă a fost scos** (decizie de produs, 2026-11-13): recomandările de oameni sunt acum grupulețele din detaliile fiecărui eveniment (vezi `docs/superpowers/specs/2026-11-13-grupulete-design.md`).
 - Fiecare tab are o iconiță deasupra etichetei. Tab-ul activ are iconița evidențiată într-o „pastilă”.
 - Ecranele de detaliu (detalii eveniment, conversație) se deschid peste tab și au un buton „înapoi” în stânga sus.

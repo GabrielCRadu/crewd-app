@@ -8,7 +8,8 @@ import {
   getFocusedRouteNameFromRoute,
 } from '@react-navigation/native';
 import type { Theme } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import type { MaterialTopTabBarProps } from '@react-navigation/material-top-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -26,7 +27,14 @@ import { AuthNavigator, OnboardingNavigator } from './AuthNavigator';
 
 type IconName = ComponentProps<typeof Ionicons>['name'];
 
-const Tab = createBottomTabNavigator();
+/**
+ * Tab-urile de jos se pot și trage stânga / dreapta (ca paginile): navigatorul „material top tabs”
+ * cu bara pusă jos (`tabBarPosition="bottom"`) și bara noastră (MainTabBar), la fel ca înainte.
+ */
+const Tab = createMaterialTopTabNavigator();
+
+/** Pe Hartă nu schimbăm tab-ul trăgând: acolo degetul mută harta. */
+const NO_SWIPE_TABS = ['Map'];
 
 const theme: Theme = {
   ...DarkTheme,
@@ -149,39 +157,69 @@ function LoadingScreen({ error, onRetry, onSignOut }: { error: string | null; on
 const TAB_BAR_HEIGHT = 64;
 
 function MainTabs() {
-  const insets = useSafeAreaInsets();
-  // Bara de jos mai înaltă: înălțimea noastră + zona de siguranță (bara de gesturi / butoanele telefonului).
-  const tabBarStyle = [styles.tabBar, { height: TAB_BAR_HEIGHT + insets.bottom, paddingBottom: insets.bottom + 6 }];
   return (
     <Tab.Navigator
-        screenOptions={{
-          headerShown: false,
-          tabBarActiveTintColor: colors.text,
-          tabBarInactiveTintColor: colors.faint,
-          tabBarLabelStyle: { fontSize: 11, fontWeight: '500' },
-          tabBarStyle,
-          tabBarItemStyle: styles.tabBarItem,
-        }}
-      >
-        {TABS.map((t) => (
-          <Tab.Screen
-            key={t.name}
-            name={t.name}
-            component={t.component}
-            options={({ route }) => ({
-              title: t.title,
-              tabBarStyle: FULLSCREEN_ROUTES.includes(getFocusedRouteNameFromRoute(route) ?? '')
-                ? { display: 'none' }
-                : tabBarStyle,
-              tabBarIcon: ({ focused, color }) => (
-                <View style={[styles.iconPill, focused && styles.iconPillActive]}>
-                  <Ionicons name={focused ? t.iconActive : t.icon} size={20} color={color} />
-                </View>
-              ),
-            })}
-          />
-        ))}
+      tabBarPosition="bottom"
+      tabBar={(props) => <MainTabBar {...props} />}
+      screenOptions={{ lazy: true, lazyPreloadDistance: 1, sceneStyle: { backgroundColor: colors.background } }}
+    >
+      {TABS.map((t) => (
+        <Tab.Screen
+          key={t.name}
+          name={t.name}
+          component={t.component}
+          options={({ route }) => ({
+            title: t.title,
+            // Tragi doar pe ecranele principale: nu pe Hartă și nu pe ecranele deschise peste tab-uri.
+            swipeEnabled:
+              !NO_SWIPE_TABS.includes(t.name) &&
+              !FULLSCREEN_ROUTES.includes(getFocusedRouteNameFromRoute(route) ?? ''),
+          })}
+        />
+      ))}
     </Tab.Navigator>
+  );
+}
+
+/**
+ * Bara de jos: iconița (în pastilă când e activă) și eticheta, pentru fiecare tab.
+ * Se ascunde pe ecranele care se deschid peste tab-uri (FULLSCREEN_ROUTES).
+ */
+function MainTabBar({ state, navigation }: MaterialTopTabBarProps) {
+  const insets = useSafeAreaInsets();
+  const focusedTab = state.routes[state.index];
+  if (focusedTab && FULLSCREEN_ROUTES.includes(getFocusedRouteNameFromRoute(focusedTab) ?? '')) return null;
+
+  return (
+    // Bara de jos mai înaltă: înălțimea noastră + zona de siguranță (bara de gesturi / butoanele telefonului).
+    <View style={[styles.tabBar, { height: TAB_BAR_HEIGHT + insets.bottom, paddingBottom: insets.bottom + 6 }]}>
+      {state.routes.map((route, index) => {
+        const tab = TABS.find((t) => t.name === route.name);
+        if (!tab) return null;
+        const focused = state.index === index;
+        const color = focused ? colors.text : colors.faint;
+        const onPress = () => {
+          // Ca la tab-urile obișnuite: apăsat din nou pe tab-ul activ, stiva lui revine la început.
+          const event = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
+          if (!focused && !event.defaultPrevented) navigation.navigate(route.name, route.params);
+        };
+        return (
+          <Pressable
+            key={route.key}
+            onPress={onPress}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: focused }}
+            accessibilityLabel={tab.title}
+            style={styles.tabBarItem}
+          >
+            <View style={[styles.iconPill, focused && styles.iconPillActive]}>
+              <Ionicons name={focused ? tab.iconActive : tab.icon} size={20} color={color} />
+            </View>
+            <Text style={[styles.tabLabel, { color }]}>{tab.title}</Text>
+          </Pressable>
+        );
+      })}
+    </View>
   );
 }
 
@@ -191,8 +229,16 @@ const styles = StyleSheet.create({
   loadingError: { alignItems: 'center', gap: 16 },
   loadingText: { color: colors.muted, fontSize: 15, textAlign: 'center' },
   loadingLink: { color: colors.faint, fontSize: 13, textDecorationLine: 'underline' },
-  tabBar: { backgroundColor: colors.background, borderTopColor: colors.border, paddingTop: 8 },
-  tabBarItem: { gap: 4 },
-  iconPill: { width: 48, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  tabBar: {
+    flexDirection: 'row',
+    backgroundColor: colors.background,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.border,
+    paddingTop: 8,
+  },
+  tabBarItem: { flex: 1, alignItems: 'center', gap: 4 },
+  tabLabel: { fontSize: 11, fontWeight: '500' },
+  // `overflow: hidden`: pe Android, fără el, fundalul pastilei active ieșea cu colțuri drepte.
+  iconPill: { width: 48, height: 28, borderRadius: 14, overflow: 'hidden', alignItems: 'center', justifyContent: 'center' },
   iconPillActive: { backgroundColor: colors.cardStrong },
 });
