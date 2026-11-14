@@ -1,6 +1,7 @@
 import { describe, expect, it } from '@jest/globals';
 
 import type { CrewGroup, JoinContext, ProposalDraft } from '../../types/groups';
+import type { UserProfile } from '../../types/user';
 import {
   canOpenChat,
   defaultProposal,
@@ -8,6 +9,7 @@ import {
   groupStatus,
   isVisibleTo,
   joinBlockReason,
+  memberSummary,
   profileAge,
   proposalErrors,
 } from '../groupRules';
@@ -236,5 +238,35 @@ describe('final review fixes', () => {
     const exact = new Date(d.meetupAt.getTime() - 30 * 60_000);
     expect(proposalErrors(d, 25, eventStart, exact).meetupAt).toBeDefined();
     expect(proposalErrors(d, 25, eventStart, now)).toEqual({});
+  });
+});
+
+describe('memberSummary', () => {
+  const now = new Date(2026, 10, 14, 12, 0);
+  const profile: UserProfile = {
+    uid: 'u1',
+    name: 'Radu',
+    birthDate: '2002-03-10',
+    age: 0,
+    city: 'Timișoara',
+    gender: 'male',
+    bio: '',
+    photoUrl: null,
+    chosenTags: { events: ['concerte'], music: ['rock'], hobbies: [] },
+    learnedTags: ['bere'],
+  };
+
+  it('sets photo to null (never undefined) when there is no thumbnail', () => {
+    const summary = memberSummary(profile, now);
+    expect('photo' in summary).toBe(true);
+    expect(summary.photo).toBeNull();
+  });
+
+  it('copies the profile thumbnail', () => {
+    expect(memberSummary({ ...profile, photoThumb: 'data:image/jpeg;base64,AAA' }, now).photo).toBe('data:image/jpeg;base64,AAA');
+  });
+
+  it('keeps name, age and tags', () => {
+    expect(memberSummary(profile, now)).toMatchObject({ name: 'Radu', age: 24, tags: ['concerte', 'rock', 'bere'] });
   });
 });

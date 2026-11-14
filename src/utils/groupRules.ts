@@ -1,5 +1,7 @@
-import type { CrewGroup, GroupStatus, JoinContext, ProposalDraft } from '../types/groups';
+import type { CrewGroup, GroupStatus, JoinContext, MemberSummary, ProposalDraft } from '../types/groups';
+import type { UserProfile } from '../types/user';
 import { ageFromBirthDate } from './birthDate';
+import { allProfileTags } from './profileTags';
 
 /*
  * Regulile grupulețelor, ca funcții pure (testate în __tests__/groupRules.test.ts).
@@ -126,4 +128,12 @@ export function proposalErrors(
 /** Vârsta din profil: din data nașterii, sau din `age` la profilurile vechi. */
 export function profileAge(p: { birthDate: string | null; age: number }, now: Date): number {
   return p.birthDate ? ageFromBirthDate(p.birthDate, now) : p.age;
+}
+
+/**
+ * Ce copiem din profil în `members[uid]` al grupului (vizibil celorlalți membri).
+ * `photo` e null când nu ai miniatură: Firestore refuză valorile undefined.
+ */
+export function memberSummary(me: UserProfile, now: Date): MemberSummary {
+  return { name: me.name, age: profileAge(me, now), tags: allProfileTags(me), photo: me.photoThumb ?? null };
 }

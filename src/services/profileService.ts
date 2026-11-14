@@ -45,6 +45,7 @@ export async function getProfile(uid: string): Promise<UserProfile | null> {
     gender: d.gender ?? 'other',
     bio: d.bio ?? '',
     photoUrl: d.photoUrl ?? null,
+    photoThumb: d.photoThumb ?? null,
     chosenTags: {
       events: d.chosenTags?.events ?? [],
       music: d.chosenTags?.music ?? [],
