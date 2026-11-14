@@ -10,6 +10,7 @@ import AboutCard from '../components/AboutCard';
 import Aurora from '../components/Aurora';
 import Avatar from '../components/Avatar';
 import Chip from '../components/Chip';
+import PhotoViewer from '../components/PhotoViewer';
 import DeleteAccount from '../components/DeleteAccount';
 import ReputationStats from '../components/ReputationStats';
 import BadgesCard from '../components/badges/BadgesCard';
@@ -55,6 +56,7 @@ export default function ProfileScreen() {
   // Foaia „Adaugă amintire”: închisă, deschisă fără eveniment ales, sau pentru un eveniment anume.
   const [addMemory, setAddMemory] = useState<{ eventId: string | null } | null>(null);
   const [openMemoryId, setOpenMemoryId] = useState<string | null>(null);
+  const [photoOpen, setPhotoOpen] = useState(false);
   // Badge-uri: cele votate sunt încă mock (badgesService); cele automate vin din istoricul tău.
   const badgeProgress = autoBadgeProgress(pastEvents);
 
@@ -110,7 +112,13 @@ export default function ProfileScreen() {
         <View style={styles.identity}>
           <Aurora style={StyleSheet.absoluteFill} />
           <View style={styles.identityRow}>
-            <Avatar name={profile.name} size={84} square photoUrl={profile.photoUrl} />
+            <Pressable
+              onPress={() => setPhotoOpen(true)}
+              disabled={!profile.photoUrl}
+              accessibilityLabel="Mărește poza"
+            >
+              <Avatar name={profile.name} size={84} square photoUrl={profile.photoUrl} />
+            </Pressable>
             <View style={styles.identityText}>
               <Text style={styles.name}>
                 {profile.name}, {profile.age}
@@ -255,6 +263,11 @@ export default function ProfileScreen() {
         onClose={() => setAddMemory(null)}
       />
       <MemoryViewer memory={memories.find((m) => m.id === openMemoryId) ?? null} onClose={() => setOpenMemoryId(null)} />
+      <PhotoViewer
+        photoUrl={photoOpen ? (profile.photoUrl ?? null) : null}
+        caption={profile.name}
+        onClose={() => setPhotoOpen(false)}
+      />
     </SafeAreaView>
   );
 }
