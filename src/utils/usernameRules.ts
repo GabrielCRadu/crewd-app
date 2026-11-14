@@ -38,5 +38,5 @@ export function usernameError(username: string): string | null {
 
 /** Username-ul unei persoane de test, din numele ei (ex. „Ana-Maria” → `anamaria`). */
 export function usernameFromName(name: string): string {
-  return normalizeUsernameInput(name.normalize('NFD').replace(/[̀-ͯ]/g, ''));
+  return normalizeUsernameInput(name.normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
 }

@@ -15,7 +15,8 @@ Fără `.env.local`, aplicația merge în continuare, cu datele mock din `src/da
 
 - **Email + parolă**, prin Firebase Auth (SDK-ul JS, merge în Expo Go). Trebuie activat o singură dată: Firebase Console → Authentication → Sign-in method → **Email/Password** → Enable.
 - Sesiunea se păstrează în AsyncStorage (`initializeAuth` + `getReactNativePersistence`, după [expo.fyi/firebase-js-auth-setup](https://expo.fyi/firebase-js-auth-setup)), deci rămâi logat după repornire.
-- Fluxul (`src/context/AuthContext.tsx` + `src/navigation/RootNavigator.tsx`): sesiune → **Login / Creare cont** → **onboarding** (2 pași, `docs/layout-guide.md`) → tab-uri. Login-ul e obligatoriu.
+- Fluxul (`src/context/AuthContext.tsx` + `src/navigation/RootNavigator.tsx`): sesiune → **Login / Creare cont** → **onboarding** (3 pași: identitate cu username, poză, tag-uri) → tab-uri. Conturile vechi fără username sau poză trec întâi prin „Completează-ți profilul”. Login-ul e obligatoriu.
+- **Parola**: minim 8 caractere, o literă mică și o literă mare (`src/utils/passwordRules.ts`). Ca regula să se aplice și la resetarea parolei, se activează și în Firebase Console → Authentication → Settings → **Password policy** (aceleași cerințe), cu modul care nu blochează login-ul conturilor existente.
 - Fără `.env.local`, aplicația sare peste login și folosește profilul mock.
 - **Google**: nu merge în Expo Go (cere cod nativ, adică un development build). Se adaugă după ce avem un build nativ (EAS în cloud sau local).
 
@@ -81,7 +82,8 @@ Creat la finalul onboarding-ului (`src/services/profileService.ts`).
 | `city` | string | |
 | `gender` | string | `female`, `male` sau `other`. **Nu se poate schimba după onboarding.** |
 | `bio` | string | „Despre mine”, maxim 500 de caractere |
-| `photoUrl` | string \| null | poza de profil ca data URI JPEG (până la 1080px, maxim 600 000 de caractere) |
+| `username` | string | username-ul unic, strict litere mici (3–20: `a–z`, cifre, `.`, `_`); se alege o singură dată și nu se mai schimbă. Rezervat în aceeași tranzacție în `usernames/` |
+| `photoUrl` | string | poza de profil ca data URI JPEG 400×400 (maxim 600 000 de caractere); **obligatorie** la profilurile noi și nu se poate șterge, doar înlocui |
 | `photoThumb` | string \| null | miniatura pozei (~96 px, data URI JPEG, maxim 20 000 caractere), copiată în `members.<uid>.photo` din grupurile în care e utilizatorul |
 | `joinedEventIds` | string[] | evenimentele la care e înscris; se salvează la fiecare „Înscrie-te” / „Anulează” |
 | `tagScores` | map | scorul fiecărui tag (crește la înscriere, scade la anulare); pornește de la tag-urile din profil |
@@ -114,6 +116,10 @@ Starea (în formare, format, complet, expirat, închis) nu e salvată: se calcul
 ### `events/{eventId}/groups/{groupId}/messages/{messageId}`
 
 Conversația grupului (`docs/superpowers/specs/2026-11-14-chat-grup-design.md`). O citesc și o scriu doar membrii (`memberUids`); un mesaj nu se poate modifica sau șterge din aplicație. Câmpuri: `authorUid` (cine a scris, trebuie să fie utilizatorul logat), `authorName` (numele de la trimitere, 1–50 caractere), `text` (1–1000 caractere) și `createdAt` (ora serverului). Scrie `src/services/chatService.ts`.
+
+### `usernames/{key}`
+
+Username-urile unice (`docs/superpowers/specs/2026-11-14-username-parola-design.md`). Cheia e forma canonică a username-ului (`.` înlocuit cu `_`), ca `radu.g` și `radu_g` să nu poată exista amândouă. Câmpuri: `username` (forma aleasă), `uid`, `name`, `photoThumb` (miniatura sau `null`) — fișa publică deschisă din codul QR. Orice utilizator logat poate citi un username exact (`get`), dar nu poate lista colecția. Se creează doar împreună cu `users/{uid}.username`, se actualizează doar `name` și `photoThumb`, iar la ștergerea contului se șterge (username-ul se eliberează). Scrie `src/services/usernamesService.ts`.
 
 ### `meta/eventsImport`
 

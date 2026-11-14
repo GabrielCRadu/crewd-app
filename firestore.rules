@@ -4,6 +4,17 @@ rules_version = '2';
 // Se aplică din Firebase Console → Firestore Database → Rules (copiază tot fișierul) sau cu `firebase deploy --only firestore:rules`.
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Username: 3–20 caractere, litere mici, cifre, `.` și `_`, nu începe/termină cu `.`/`_`, nu e rezervat
+    // (aceleași reguli ca src/utils/usernameRules.ts).
+    function validUsername(u) {
+      return u.matches('^[a-z0-9](?:[a-z0-9._]{1,18}[a-z0-9])$')
+        && !(usernameKey(u) in ['crewd', 'admin', 'support', 'moderator', 'official', 'help', 'system']);
+    }
+    // Forma canonică (cheia din usernames/): `.` și `_` contează la fel.
+    function usernameKey(u) {
+      return u.replace('\\.', '_');
+    }
+
     // Evenimentele: oricine le poate citi; scrierea se face doar prin scripts/import-events.mjs
     // (firebase-admin cu cheia contului de serviciu, care ocolește aceste reguli).
     match /events/{eventId} {
@@ -158,7 +169,9 @@ service cloud.firestore {
           && (!('photoThumb' in d) || d.photoThumb == null || (d.photoThumb is string && d.photoThumb.size() <= 20000))
           && (!('joinedEventIds' in d) || (d.joinedEventIds is list && d.joinedEventIds.size() <= 500))
           && (!('groupByEvent' in d) || d.groupByEvent is map)
-          && (!('tagScores' in d) || d.tagScores is map);
+          && (!('tagScores' in d) || d.tagScores is map)
+          // Username-ul unic (strict litere mici); unicitatea o garantează colecția usernames/{key}.
+          && (!('username' in d) || (d.username is string && validUsername(d.username)));
       }
 
       // Data nașterii e un Timestamp (miezul nopții UTC); cel puțin 18 ani împliniți (6574 de zile ≈ 18 ani cu 4 ani bisecți).
@@ -168,19 +181,61 @@ service cloud.firestore {
 
       allow read: if isOwner();
 
+      // Profil nou: cu username (rezervat în aceeași tranzacție în usernames/) și cu poză.
       allow create: if isOwner()
         && validProfile(request.resource.data)
         && isAdult(request.resource.data.birthDate)
-        && request.resource.data.gender in ['female', 'male', 'other'];
+        && request.resource.data.gender in ['female', 'male', 'other']
+        && request.resource.data.get('username', null) is string
+        && existsAfter(/databases/$(database)/documents/usernames/$(usernameKey(request.resource.data.username)))
+        && request.resource.data.get('photoUrl', null) is string;
 
       // Data nașterii și genul (și `age` la profilurile vechi) NU se mai pot schimba după onboarding.
       allow update: if isOwner()
         && validProfile(request.resource.data)
         && request.resource.data.get('birthDate', null) == resource.data.get('birthDate', null)
         && request.resource.data.get('gender', null) == resource.data.get('gender', null)
-        && request.resource.data.get('age', null) == resource.data.get('age', null);
+        && request.resource.data.get('age', null) == resource.data.get('age', null)
+        // Username-ul se alege o singură dată (conturile vechi îl primesc acum), apoi nu se mai schimbă.
+        && (resource.data.get('username', null) == null
+          ? (request.resource.data.get('username', null) == null
+            || existsAfter(/databases/$(database)/documents/usernames/$(usernameKey(request.resource.data.username))))
+          : request.resource.data.get('username', null) == resource.data.username)
+        // Poza se poate înlocui, dar nu șterge.
+        && !(resource.data.get('photoUrl', null) is string && !(request.resource.data.get('photoUrl', null) is string));
 
       allow delete: if isOwner();
+    }
+
+    // Username-urile (spec 2026-11-14-username-parola-design.md): cheia e forma canonică (`.` → `_`),
+    // ca `radu.g` și `radu_g` să nu poată exista amândouă. Oricine logat poate căuta un username exact
+    // (fișa publică din codul QR: nume + miniatură), dar nu poate lista colecția.
+    match /usernames/{key} {
+      function validCard(d) {
+        return d.name is string && d.name.size() > 0 && d.name.size() <= 50
+          && (d.photoThumb == null || (d.photoThumb is string && d.photoThumb.size() <= 20000));
+      }
+
+      allow get: if request.auth != null;
+      allow list: if false;
+
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly(['username', 'uid', 'name', 'photoThumb'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.username is string
+        && validUsername(request.resource.data.username)
+        && usernameKey(request.resource.data.username) == key
+        && validCard(request.resource.data)
+        && getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.username == request.resource.data.username;
+
+      // Doar numele și miniatura (când îți schimbi numele sau poza).
+      allow update: if request.auth != null
+        && resource.data.uid == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'photoThumb'])
+        && validCard(request.resource.data);
+
+      // La ștergerea contului, username-ul se eliberează.
+      allow delete: if request.auth != null && resource.data.uid == request.auth.uid;
     }
 
     // Orice altceva e închis până adăugăm reguli explicite.
