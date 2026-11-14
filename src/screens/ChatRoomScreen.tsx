@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -11,7 +11,6 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import type { NativeScrollEvent, NativeSyntheticEvent } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -43,9 +42,6 @@ import { formatDay, formatTime } from '../utils/dates';
 
 type Props = NativeStackScreenProps<ChatsStackParamList, 'ChatRoom'>;
 
-/** Cât de aproape de capăt (în px) contează ca „ești jos” în conversație. */
-const NEAR_BOTTOM_PX = 120;
-
 /**
  * Conversația unui grup: antet (numele grupului deschide Detaliile), banner „Ne vedem”, mesajele din
  * Firestore în timp real, bara de scriere (docs/layout-guide.md, spec 2026-11-14-chat-grup-design.md).
@@ -64,26 +60,10 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
   const { messages, error } = useGroupMessages(eventId, groupId, isMember);
 
   const members = group?.members;
-  const rows = useMemo(() => buildChatRows(messages, uid ?? '', members ?? {}), [messages, uid, members]);
-
-  // Lista coboară singură la ultimul mesaj: la deschidere, când trimiți și când vine un mesaj nou
-  // cât timp ești deja jos (dacă ai urcat să citești mesaje mai vechi, nu te trage în jos).
+  // Lista e inversată (cea mai nouă întâi), ca în orice aplicație de chat: se deschide direct jos, la ultimul
+  // mesaj, fără să coboare animat, iar mesajele noi apar jos cât timp ești acolo.
+  const rows = useMemo(() => buildChatRows(messages, uid ?? '', members ?? {}).reverse(), [messages, uid, members]);
   const listRef = useRef<FlatList<ChatRow>>(null);
-  const nearBottom = useRef(true);
-  const scrollAfterSend = useRef(false);
-  useEffect(() => {
-    nearBottom.current = true;
-  }, [groupId]);
-
-  const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent;
-    nearBottom.current = contentSize.height - (contentOffset.y + layoutMeasurement.height) < NEAR_BOTTOM_PX;
-  };
-  const scrollToBottomIfNeeded = () => {
-    if (!nearBottom.current && !scrollAfterSend.current) return;
-    scrollAfterSend.current = false;
-    listRef.current?.scrollToEnd({ animated: true });
-  };
 
   const state = chatRoomState({ groupsLoading: loading, group, uid, messagesError: error });
 
@@ -119,9 +99,8 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
     const text = normalizeMessageText(draft);
     if (!text) return;
     setDraft('');
-    // Mesajul tău apare imediat (scrierea locală a Firestore); lista coboară la el.
-    scrollAfterSend.current = true;
-    listRef.current?.scrollToEnd({ animated: true });
+    // Mesajul tău apare imediat (scrierea locală a Firestore); lista coboară la el, chiar dacă citeai mai sus.
+    listRef.current?.scrollToOffset({ offset: 0, animated: true });
     sendGroupMessage(eventId, groupId, { uid, name: authorNameFor(group.members, uid, profile?.name ?? '') }, text).catch((e: unknown) => {
       // Textul nu se pierde: revine în câmp, ca să poți încerca din nou.
       setDraft((current) => current || text);
@@ -177,10 +156,7 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
           data={rows}
           keyExtractor={(r) => r.key}
           renderItem={({ item }) => (item.kind === 'day' ? <DayRow label={item.label} /> : <MessageRow row={item} />)}
-          onScroll={onScroll}
-          scrollEventThrottle={100}
-          onContentSizeChange={scrollToBottomIfNeeded}
-          onLayout={scrollToBottomIfNeeded}
+          inverted
           keyboardShouldPersistTaps="handled"
         />
 
@@ -242,7 +218,8 @@ const styles = StyleSheet.create({
   bannerWhen: { color: colors.text, fontSize: 16, fontWeight: '600' },
   bannerButton: { paddingHorizontal: 14, paddingVertical: 9, borderRadius: radii.pill, backgroundColor: colors.text },
   bannerButtonText: { color: colors.onLight, fontWeight: '600', fontSize: 13 },
-  messages: { paddingHorizontal: 16, paddingBottom: 12, gap: 6, flexGrow: 1, justifyContent: 'flex-end' },
+  // Lista e inversată: „sus” în stil înseamnă jos pe ecran (padding lângă bara de scriere; puține mesaje stau jos).
+  messages: { paddingHorizontal: 16, paddingTop: 12, gap: 6, flexGrow: 1, justifyContent: 'flex-start' },
   pressed: { opacity: 0.85 },
   composer: {
     flexDirection: 'row',
