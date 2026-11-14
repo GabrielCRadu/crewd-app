@@ -1,5 +1,6 @@
 import type { LatLng } from '../types/events';
 import type { ChatGroup, ChatMessage, Friend, Person, Profile } from '../types/social';
+import { usernameFromName } from '../utils/usernameRules';
 
 /*
  * Date mock pentru Descoperă, Hartă, Chat și Profil.
@@ -131,6 +132,9 @@ export const PEOPLE: Person[] = [
     photoUrl: avatarPhoto('photo-1464822759023-fed622ff2c3b'),
   },
 ];
+
+// Username-urile persoanelor de test, din nume (ex. „Maria” → @maria); linkurile lor deschid profilul de test.
+for (const person of PEOPLE) person.username = usernameFromName(person.name);
 
 /** Prietenii mock, așezați în jurul locației dispozitivului (0.01° ≈ 1 km). */
 export const FRIENDS: Friend[] = [

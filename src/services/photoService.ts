@@ -3,14 +3,14 @@ import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 
 /*
  * Fotografia de profil: o alegi din galerie sau faci una cu camera, o decupezi pătrat,
- * apoi o micșorăm la 1080px și o comprimăm, ca să încapă ca data URI în documentul users/{uid}
- * (~250–350 KB din limita de 1 MB) și să rămână clară și când e mărită pe tot ecranul.
+ * apoi o micșorăm la 400px și o comprimăm, ca să încapă ca data URI în documentul users/{uid}
+ * (câteva zeci de KB; fără Firebase Storage, documentul trebuie să rămână mic).
  */
 
 export type PhotoSource = 'camera' | 'library';
 
-/** Latura maximă a pozei salvate, în pixeli (cât lățimea unui ecran de telefon). */
-const PHOTO_SIZE = 1080;
+/** Latura maximă a pozei salvate, în pixeli. */
+const PHOTO_SIZE = 400;
 
 export class PhotoPermissionError extends Error {}
 
@@ -35,7 +35,7 @@ export async function pickProfilePhoto(source: PhotoSource): Promise<string | nu
   // Nu mărim pozele deja mici.
   const side = Math.min(asset.width || PHOTO_SIZE, PHOTO_SIZE);
   const image = await ImageManipulator.manipulate(asset.uri).resize({ width: side, height: null }).renderAsync();
-  const saved = await image.saveAsync({ format: SaveFormat.JPEG, compress: 0.8, base64: true });
+  const saved = await image.saveAsync({ format: SaveFormat.JPEG, compress: 0.7, base64: true });
   return saved.base64 ? `data:image/jpeg;base64,${saved.base64}` : null;
 }
 

@@ -17,6 +17,7 @@ import EventsNavigator from './EventsNavigator';
 import FriendsMapScreen from '../screens/FriendsMapScreen';
 import ChatsNavigator from './ChatsNavigator';
 import ProfileNavigator from './ProfileNavigator';
+import CompleteProfileScreen from '../screens/CompleteProfileScreen';
 import EventReminders from '../components/EventReminders';
 import FriendRequestPopup from '../components/FriendRequestPopup';
 import InviteLinkHandler from '../components/InviteLinkHandler';
@@ -49,7 +50,7 @@ const theme: Theme = {
 };
 
 /** Ecranele care se deschid peste tab-uri și ascund bara de jos (vezi docs/layout-guide.md). */
-const FULLSCREEN_ROUTES = ['ChatRoom', 'EventDetails', 'RateEvent', 'PersonProfile', 'EditProfile', 'FriendsList', 'EventGroups', 'ProposeGroup', 'PersonFriends', 'DirectChat', 'GroupDetails'];
+const FULLSCREEN_ROUTES = ['ChatRoom', 'EventDetails', 'RateEvent', 'PersonProfile', 'EditProfile', 'FriendsList', 'EventGroups', 'ProposeGroup', 'PersonFriends', 'DirectChat', 'GroupDetails', 'PublicProfile'];
 
 /** Evenimente · Hartă · Chat · Profil (Descoperă a fost scos: recomandările sunt grupulețele de la evenimente). Primul tab e cel implicit. */
 const TABS: {
@@ -72,6 +73,13 @@ const navigationRef = createNavigationContainerRef<Record<string, object | undef
 function openPersonProfile(personId: string) {
   if (navigationRef.isReady()) {
     navigationRef.navigate('Profile', { screen: 'PersonProfile', params: { personId }, initial: false });
+  }
+}
+
+/** Fișa publică a cuiva (din codul lui QR). */
+function openPublicProfile(username: string) {
+  if (navigationRef.isReady()) {
+    navigationRef.navigate('Profile', { screen: 'PublicProfile', params: { username }, initial: false });
   }
 }
 
@@ -123,11 +131,13 @@ export default function RootNavigator() {
         <AuthNavigator />
       ) : status === 'needsProfile' ? (
         <OnboardingNavigator />
+      ) : status === 'needsCompletion' ? (
+        <CompleteProfileScreen />
       ) : (
         <LoadingScreen error={error} onRetry={retry} onSignOut={signOut} />
       )}
       {/* Linkurile de invitație (codul QR de pe profil): montat mereu, ca să supraviețuiască înregistrării */}
-      <InviteLinkHandler onOpenProfile={openPersonProfile} />
+      <InviteLinkHandler onOpenProfile={openPersonProfile} onOpenPublic={openPublicProfile} />
     </NavigationContainer>
   );
 }

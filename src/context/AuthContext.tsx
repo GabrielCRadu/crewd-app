@@ -19,6 +19,9 @@ import {
 } from '../services/profileService';
 import type { ProfileChanges, ProfileDraft, UserProfile } from '../types/user';
 import { isNewPhoto } from '../utils/profilePhoto';
+import { isProfileComplete } from '../utils/profileCompleteness';
+import { usernameFromName } from '../utils/usernameRules';
+import { claimUsername, releaseUsername, updatePublicCard } from '../services/usernamesService';
 import { allProfileTags } from '../utils/profileTags';
 
 /*
@@ -26,10 +29,11 @@ import { allProfileTags } from '../utils/profileTags';
  * - loading:       verificăm sesiunea salvată
  * - signedOut:     ecranele de login / creare cont
  * - needsProfile:  logat, dar fără profil → onboarding
+ * - needsCompletion: profil vechi fără username sau poză → „Completează-ți profilul”
  * - ready:         tab-urile
  * Fără Firebase configurat (.env.local lipsă) sărim direct la `ready`, cu profilul mock.
  */
-export type AuthStatus = 'loading' | 'signedOut' | 'needsProfile' | 'ready';
+export type AuthStatus = 'loading' | 'signedOut' | 'needsProfile' | 'needsCompletion' | 'ready';
 
 interface AuthContextValue {
   status: AuthStatus;
@@ -45,6 +49,8 @@ interface AuthContextValue {
   signOut: () => Promise<void>;
   /** Șterge definitiv contul: confirmă parola, iese din grupulețe, șterge profilul și contul. */
   deleteAccount: (password: string) => Promise<void>;
+  /** Conturile vechi: alege username-ul și/sau pune poza care lipsește, apoi intră în aplicație. */
+  completeProfile: (parts: { username?: string; photoUrl?: string }) => Promise<void>;
   retry: () => void;
 }
 
@@ -59,6 +65,7 @@ const DEMO_PROFILE: UserProfile = {
   photoUrl: null,
   chosenTags: MY_PROFILE.chosenTags,
   learnedTags: MY_PROFILE.learnedTags,
+  username: usernameFromName(MY_PROFILE.name),
 };
 
 /** Re-exportat de aici pentru ecranele care îl importă din context (definit în utils/profileTags.ts). */
@@ -94,9 +101,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!active) return;
         if (loaded) loadUserPreferences(nextUser.uid, saved, allProfileTags(loaded));
         setProfile(loaded);
-        setStatus(loaded ? 'ready' : 'needsProfile');
+        setStatus(loaded ? (isProfileComplete(loaded) ? 'ready' : 'needsCompletion') : 'needsProfile');
         // Profilurile cu poză de dinainte de chat n-au miniatură: o generăm o dată, în fundal.
-        if (loaded?.photoUrl && !loaded.photoThumb) void backfillThumbnail(loaded.uid, loaded.photoUrl);
+        if (loaded?.photoUrl && !loaded.photoThumb) void backfillThumbnail(loaded.uid, loaded.photoUrl, loaded.username ?? null);
       } catch (e) {
         console.warn('Nu am putut încărca profilul:', e);
         if (active) setError('Nu am putut încărca profilul. Verifică conexiunea la internet.');
@@ -116,7 +123,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const completeOnboarding = useCallback(
     async (draft: ProfileDraft) => {
       if (!user) throw new Error('Nu ești logat.');
-      const created = await createProfile(user.uid, draft);
+      const created = await createProfile(user.uid, draft, await makeThumbnail(draft.photoUrl));
       loadUserPreferences(user.uid, null, allProfileTags(created));
       setProfile(created);
       setStatus('ready');
@@ -141,13 +148,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   // Miniatura pentru chat, generată după login la profilurile care au poză, dar n-au încă miniatură.
-  async function backfillThumbnail(uid: string, photoUrl: string) {
+  async function backfillThumbnail(uid: string, photoUrl: string, username: string | null) {
     try {
       const photoThumb = await makeThumbnail(photoUrl);
       if (!photoThumb) return;
       await updateProfileFields(uid, { photoThumb });
       setProfile((p) => (p && p.uid === uid ? { ...p, photoThumb } : p));
       await refreshMyPhotoInGroups(uid, photoThumb);
+      if (username) await updatePublicCard(username, { photoThumb });
     } catch (e) {
       console.warn('Nu am putut salva miniatura pozei:', e);
     }
@@ -173,6 +181,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
       if (photoChanged) void refreshMyPhotoInGroups(isFirebaseConfigured ? profile.uid : MOCK_UID, full.photoThumb ?? null);
+      // Fișa publică (din codul QR) ține numele și miniatura la zi; o eroare aici nu anulează salvarea.
+      const nameChanged = changes.name !== undefined && changes.name !== profile.name;
+      if (profile.username && (photoChanged || nameChanged)) {
+        updatePublicCard(profile.username, {
+          ...(nameChanged ? { name: changes.name } : {}),
+          ...(photoChanged ? { photoThumb: full.photoThumb ?? null } : {}),
+        }).catch((e: unknown) => console.warn('Nu am putut actualiza fișa publică:', e));
+      }
     },
     [profile],
   );
@@ -197,18 +213,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Întâi parola: dacă e greșită, nu se șterge nimic.
       await confirmPassword(password);
       await leaveAllGroups(user.uid);
+      // Username-ul se eliberează înainte de profil (regulile verifică proprietarul din fișa publică).
+      if (profile?.username) await releaseUsername(profile.username, user.uid);
       await deleteProfile(user.uid);
       // Ultimul pas: contul din Firebase Auth. După el, sesiunea se închide și apare ecranul de login.
       await deleteCurrentUser();
     },
-    [user],
+    [user, profile],
+  );
+
+  // „Completează-ți profilul” (conturi vechi): întâi poza (cu miniatura), apoi username-ul (tranzacție;
+  // dacă e luat între timp, aruncă UsernameTakenError și ecranul cere altul).
+  const completeProfile = useCallback(
+    async (parts: { username?: string; photoUrl?: string }) => {
+      if (!profile) return;
+      let next: UserProfile = profile;
+      if (parts.photoUrl) {
+        const photoThumb = await makeThumbnail(parts.photoUrl);
+        if (isFirebaseConfigured) await updateProfileFields(profile.uid, { photoUrl: parts.photoUrl, photoThumb });
+        next = { ...next, photoUrl: parts.photoUrl, photoThumb };
+        setProfile(next);
+        void refreshMyPhotoInGroups(isFirebaseConfigured ? profile.uid : MOCK_UID, photoThumb);
+      }
+      if (parts.username) {
+        await claimUsername(profile.uid, { username: parts.username, name: next.name, photoThumb: next.photoThumb ?? null });
+        next = { ...next, username: parts.username };
+        setProfile(next);
+      }
+      if (isProfileComplete(next)) setStatus('ready');
+    },
+    [profile],
   );
 
   const retry = useCallback(() => setAttempt((n) => n + 1), []);
 
   const value = useMemo(
-    () => ({ status, user, profile, error, completeOnboarding, updateBio, updateProfile, removeLearnedTag, signOut, deleteAccount, retry }),
-    [status, user, profile, error, completeOnboarding, updateBio, updateProfile, removeLearnedTag, signOut, deleteAccount, retry],
+    () => ({
+      status,
+      user,
+      profile,
+      error,
+      completeOnboarding,
+      updateBio,
+      updateProfile,
+      removeLearnedTag,
+      signOut,
+      deleteAccount,
+      completeProfile,
+      retry,
+    }),
+    [status, user, profile, error, completeOnboarding, updateBio, updateProfile, removeLearnedTag, signOut, deleteAccount, completeProfile, retry],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

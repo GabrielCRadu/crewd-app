@@ -103,14 +103,16 @@ export default function ProfileScreen() {
         <View style={styles.header}>
           <Text style={styles.title}>Profil</Text>
           <View style={styles.headerActions}>
-            {/* Codul tău QR, mic; apăsat se deschide mare, cu linkul de invitație */}
-            <Pressable
-              onPress={() => setQrOpen(true)}
-              accessibilityLabel="Codul tău QR de invitație"
-              style={({ pressed }) => [styles.qrButton, pressed && styles.qrPressed]}
-            >
-              <Ionicons name="qr-code-outline" size={18} color={colors.text} />
-            </Pressable>
+            {/* Codul tău QR (cu username-ul), mic; apăsat se deschide mare, cu linkul de invitație */}
+            {profile.username ? (
+              <Pressable
+                onPress={() => setQrOpen(true)}
+                accessibilityLabel="Codul tău QR de invitație"
+                style={({ pressed }) => [styles.qrButton, pressed && styles.qrPressed]}
+              >
+                <Ionicons name="qr-code-outline" size={18} color={colors.text} />
+              </Pressable>
+            ) : null}
             <Pressable
               onPress={() => navigation.navigate('EditProfile')}
               style={({ pressed }) => [styles.editButton, pressed && styles.pressed]}
@@ -135,6 +137,7 @@ export default function ProfileScreen() {
               <Text style={styles.name}>
                 {profile.name}, {profile.age}
               </Text>
+              {profile.username ? <Text style={styles.username}>@{profile.username}</Text> : null}
               <View style={styles.cityRow}>
                 <Ionicons name="location-outline" size={16} color={colors.text} />
                 <Text style={styles.city}>{profile.city}</Text>
@@ -280,13 +283,15 @@ export default function ProfileScreen() {
         caption={profile.name}
         onClose={() => setPhotoOpen(false)}
       />
-      <InviteQrSheet
-        visible={qrOpen}
-        uid={profile.uid}
-        name={profile.name}
-        photoUrl={profile.photoUrl}
-        onClose={() => setQrOpen(false)}
-      />
+      {profile.username ? (
+        <InviteQrSheet
+          visible={qrOpen}
+          username={profile.username}
+          name={profile.name}
+          photoUrl={profile.photoUrl}
+          onClose={() => setQrOpen(false)}
+        />
+      ) : null}
     </SafeAreaView>
   );
 }
@@ -324,6 +329,7 @@ const styles = StyleSheet.create({
   identityRow: { flexDirection: 'row', alignItems: 'center', gap: 16, padding: 18 },
   identityText: { flex: 1, gap: 6 },
   name: { fontSize: 28, fontWeight: '600', letterSpacing: -0.5, color: colors.text },
+  username: { color: colors.muted, fontSize: 15, marginTop: -2 },
   cityRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   city: { color: colors.text, fontSize: 15, opacity: 0.85 },
   statsRow: {

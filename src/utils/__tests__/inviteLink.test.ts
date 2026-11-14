@@ -1,43 +1,40 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { invitePath, personIdFromLink } from '../inviteLink';
+import { invitePath, usernameFromLink } from '../inviteLink';
 
 describe('invitePath', () => {
-  it('builds the invite path', () => {
-    expect(invitePath('p4')).toBe('invite/p4');
+  it('puts the username in the invite path', () => {
+    expect(invitePath('radu.g')).toBe('invite/radu.g');
   });
 
   it('is stable for the same person', () => {
-    expect(invitePath('p4')).toBe(invitePath('p4'));
-  });
-
-  it('escapes unusual ids', () => {
-    expect(invitePath('a b/c')).toBe('invite/a%20b%2Fc');
+    expect(invitePath('radu.g')).toBe(invitePath('radu.g'));
   });
 });
 
-describe('personIdFromLink', () => {
-  it('reads the installed app link (crewd://invite/p4)', () => {
-    expect(personIdFromLink({ hostname: 'invite', path: 'p4' })).toBe('p4');
+describe('usernameFromLink', () => {
+  it('reads the installed app link (crewd://invite/radu.g)', () => {
+    expect(usernameFromLink({ hostname: 'invite', path: 'radu.g' })).toBe('radu.g');
   });
 
-  it('reads the Expo Go link (exp://ip:8081/--/invite/p4)', () => {
-    expect(personIdFromLink({ hostname: '192.168.1.5', path: '--/invite/p4' })).toBe('p4');
-    expect(personIdFromLink({ hostname: '192.168.1.5', path: 'invite/p4' })).toBe('p4');
+  it('reads the Expo Go link (exp://ip:8081/--/invite/radu.g)', () => {
+    expect(usernameFromLink({ hostname: '192.168.1.5', path: '--/invite/radu.g' })).toBe('radu.g');
+    expect(usernameFromLink({ hostname: '192.168.1.5', path: 'invite/radu.g' })).toBe('radu.g');
   });
 
-  it('reads a web-style link (https://domain/invite/p4)', () => {
-    expect(personIdFromLink({ hostname: 'example.com', path: 'invite/p4' })).toBe('p4');
+  it('reads a web-style link (https://domain/invite/radu.g)', () => {
+    expect(usernameFromLink({ hostname: 'example.com', path: 'invite/radu.g' })).toBe('radu.g');
   });
 
-  it('round-trips an escaped id', () => {
-    expect(personIdFromLink({ hostname: null, path: invitePath('a b/c') })).toBe('a b/c');
+  it('refuses a link whose username is not valid', () => {
+    expect(usernameFromLink({ hostname: 'invite', path: 'AB' })).toBeNull();
+    expect(usernameFromLink({ hostname: 'invite', path: 'Radu.G' })).toBeNull();
   });
 
   it('ignores links that are not invites', () => {
-    expect(personIdFromLink({ hostname: '192.168.1.5', path: '' })).toBeNull();
-    expect(personIdFromLink({ hostname: null, path: null })).toBeNull();
-    expect(personIdFromLink({ hostname: 'events', path: 'e1' })).toBeNull();
-    expect(personIdFromLink({ hostname: 'invite', path: '' })).toBeNull();
+    expect(usernameFromLink({ hostname: '192.168.1.5', path: '' })).toBeNull();
+    expect(usernameFromLink({ hostname: null, path: null })).toBeNull();
+    expect(usernameFromLink({ hostname: 'events', path: 'e1' })).toBeNull();
+    expect(usernameFromLink({ hostname: 'invite', path: '' })).toBeNull();
   });
 });
