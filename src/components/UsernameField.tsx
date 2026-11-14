@@ -28,7 +28,7 @@ export default function UsernameField({ value, onChange, status, error }: Props)
         value={value}
         onChangeText={(text) => onChange(normalizeUsernameInput(text))}
         error={problem}
-        placeholder="ex. radu.g"
+        placeholder="ex. nume.prenume"
         autoCapitalize="none"
         autoCorrect={false}
         autoComplete="username"
