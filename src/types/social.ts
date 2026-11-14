@@ -1,4 +1,5 @@
 import type { LatLng } from './events';
+import type { Gender } from './user';
 
 /** Un grup de tag-uri afișat ca secțiune (ex. „Muzică”). */
 export interface TagGroup {
@@ -22,6 +23,8 @@ export interface Person {
   bio?: string;
   /** Fotografia de profil (URL). Lipsă = se afișează inițiala. */
   photoUrl?: string;
+  /** Genul ales de persoană în profilul ei; după el alegem „prietena” / „prietenul” în texte. */
+  gender?: Gender;
 }
 
 /** Un prieten afișat pe hartă. */
