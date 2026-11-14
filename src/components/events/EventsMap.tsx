@@ -24,7 +24,7 @@ const ZOOM_DELTA = 0.1;
 const FOCUS_MS = 350;
 
 /**
- * Modul „Hartă” al tab-ului: afișul fiecărui eveniment la locul lui (contur colorat după distanță)
+ * Modul „Evenimente” al tab-ului Hartă: afișul fiecărui eveniment la locul lui (contur colorat după distanță)
  * și o mini-previzualizare jos pentru evenimentul apăsat.
  */
 export default function EventsMap({ events, userLocation, showUserLocation, onOpenEvent }: Props) {

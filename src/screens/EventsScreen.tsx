@@ -5,9 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import ScreenGlow from '../components/ScreenGlow';
-import SegmentedControl from '../components/SegmentedControl';
 import CategoryChips from '../components/events/CategoryChips';
-import EventsMap from '../components/events/EventsMap';
 import NowCarousel from '../components/events/NowCarousel';
 import UpcomingEventRow from '../components/events/UpcomingEventRow';
 import { useEvents } from '../hooks/useEvents';
@@ -23,19 +21,17 @@ import { isLive } from '../utils/dates';
 import { addDistance, isUpcomingOrLive, matchesCategories, sortByDate } from '../utils/eventFilters';
 
 type Props = NativeStackScreenProps<EventsStackParamList, 'EventsHome'>;
-type Mode = 'list' | 'map';
 
 /**
  * Ecranul principal al tab-ului (docs/layout-guide.md → Tab Evenimente):
- * titlu → Listă | Hartă → categorii → cardul „ACUM” → „Urmează”.
- * În modul Hartă, conținutul de sub categorii e înlocuit de hartă.
+ * titlu → categorii → cardul „ACUM” → „Urmează”.
+ * Harta evenimentelor s-a mutat în tab-ul Hartă (modul Evenimente).
  */
 export default function EventsScreen({ navigation }: Props) {
   const location = useUserLocation();
   const { events, loading, error } = useEvents(location.coords);
   const preferences = usePreferences();
 
-  const [mode, setMode] = useState<Mode>('list');
   const [categoryIds, setCategoryIds] = useState<CategoryId[]>([]);
 
   // Evenimentele încă neterminate, din categoriile alese, cu distanța până la tine, sortate după oră.
@@ -63,14 +59,6 @@ export default function EventsScreen({ navigation }: Props) {
 
       <View style={styles.header}>
         <Text style={styles.title}>Evenimente</Text>
-        <SegmentedControl
-          options={[
-            { value: 'list', label: 'Listă' },
-            { value: 'map', label: 'Hartă' },
-          ]}
-          value={mode}
-          onChange={setMode}
-        />
       </View>
 
       <CategoryChips selected={categoryIds} onChange={setCategoryIds} />
@@ -90,15 +78,7 @@ export default function EventsScreen({ navigation }: Props) {
         </View>
       ) : null}
 
-      {mode === 'map' ? (
-        <EventsMap
-          events={visible}
-          userLocation={location.coords}
-          showUserLocation={location.status === 'granted'}
-          onOpenEvent={openEvent}
-        />
-      ) : (
-        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           {liveNow.length > 0 ? (
             <NowCarousel events={liveNow} onOpen={openEvent} />
           ) : null}
@@ -119,7 +99,6 @@ export default function EventsScreen({ navigation }: Props) {
             ))
           )}
         </ScrollView>
-      )}
     </SafeAreaView>
   );
 }
