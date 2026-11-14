@@ -155,13 +155,8 @@ export default function EditProfileScreen({ navigation }: Props) {
               <PhotoButton icon="camera-outline" label="Cameră" disabled={photoBusy} onPress={() => choosePhoto('camera')} />
               <PhotoButton icon="images-outline" label="Galerie" disabled={photoBusy} onPress={() => choosePhoto('library')} />
             </View>
-            {photoUrl ? (
-              <Pressable onPress={() => setPhotoUrl(null)} hitSlop={8}>
-                <Text style={styles.removePhoto}>Șterge fotografia</Text>
-              </Pressable>
-            ) : (
-              <Text style={styles.hint}>Fără poză, apare inițiala numelui.</Text>
-            )}
+            {/* Poza e obligatorie: se poate înlocui, dar nu șterge. */}
+            <Text style={styles.hint}>Poza ta e obligatorie; o poți înlocui oricând.</Text>
           </View>
 
           {/* Nume, vârstă, oraș */}
@@ -319,7 +314,6 @@ const styles = StyleSheet.create({
   photoButtonText: { color: colors.text, fontSize: 14, fontWeight: '500' },
   pressed: { backgroundColor: colors.cardStrong },
   disabled: { opacity: 0.5 },
-  removePhoto: { color: colors.muted, fontSize: 13, textDecorationLine: 'underline' },
   hint: { color: colors.faint, fontSize: 13 },
   row: { flexDirection: 'row', gap: 12, alignItems: 'flex-start' },
   cityField: { flex: 1 },
