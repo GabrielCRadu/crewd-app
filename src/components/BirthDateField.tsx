@@ -15,6 +15,7 @@ import {
   latestAllowedBirthDate,
   toBirthDateString,
 } from '../utils/birthDate';
+import { tr } from '../i18n';
 
 interface Props {
   label: string;
@@ -63,11 +64,11 @@ export default function BirthDateField({ label, value, onChange, error, hint, co
       <Pressable
         onPress={open}
         accessibilityRole="button"
-        accessibilityLabel={`${label}: ${value ? formatBirthDate(value) : 'neselectată'}`}
+        accessibilityLabel={`${label}: ${value ? formatBirthDate(value) : tr('neselectată')}`}
         style={({ pressed }) => [styles.field, pressed && styles.fieldPressed, error ? styles.fieldError : null]}
       >
         <Text style={[styles.value, !value && styles.placeholder]} numberOfLines={1}>
-          {value ? formatBirthDate(value) : 'Alege data'}
+          {value ? formatBirthDate(value) : tr('Alege data')}
         </Text>
         <Ionicons name="calendar-outline" size={18} color={colors.muted} />
       </Pressable>
@@ -85,7 +86,7 @@ export default function BirthDateField({ label, value, onChange, error, hint, co
           <View style={styles.sheet}>
             <View style={styles.sheetHeader}>
               <Pressable onPress={() => setIosOpen(false)} hitSlop={8}>
-                <Text style={styles.sheetCancel}>Anulează</Text>
+                <Text style={styles.sheetCancel}>{tr('Anulează')}</Text>
               </Pressable>
               <Pressable
                 onPress={() => {
@@ -94,7 +95,7 @@ export default function BirthDateField({ label, value, onChange, error, hint, co
                 }}
                 hitSlop={8}
               >
-                <Text style={styles.sheetDone}>Gata</Text>
+                <Text style={styles.sheetDone}>{tr('Gata')}</Text>
               </Pressable>
             </View>
             <DateTimePicker

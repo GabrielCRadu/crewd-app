@@ -1,56 +1,57 @@
 import type { AutoBadgeInfo, VotedBadgeInfo } from '../types/badges';
+import { tr } from '../i18n';
 
 /** Badge-urile pe care le poți propune cuiva după un eveniment, în ordinea în care apar. */
 export const VOTED_BADGES: VotedBadgeInfo[] = [
-  { id: 'funny', label: 'Amuzant', icon: 'balloon-outline' },
-  { id: 'warm', label: 'Cald cu toată lumea', icon: 'heart-outline' },
-  { id: 'listener', label: 'Bun ascultător', icon: 'ear-outline' },
-  { id: 'energy', label: 'Energie bună', icon: 'flash-outline' },
-  { id: 'chill', label: 'Relaxat', icon: 'leaf-outline' },
-  { id: 'soul', label: 'Sufletul grupului', icon: 'star-outline' },
-  { id: 'inclusive', label: 'Îi include pe toți', icon: 'people-circle-outline' },
-  { id: 'icebreaker', label: 'Sparge gheața', icon: 'snow-outline' },
-  { id: 'organizer', label: 'Organizator bun', icon: 'clipboard-outline' },
-  { id: 'reliable', label: 'Se ține de cuvânt', icon: 'shield-checkmark-outline' },
-  { id: 'dancer', label: 'Neobosit pe ringul de dans', icon: 'musical-notes-outline' },
-  { id: 'guide', label: 'Știe locurile', icon: 'compass-outline' },
+  { id: 'funny', get label() { return tr('Amuzant'); }, icon: 'balloon-outline' },
+  { id: 'warm', get label() { return tr('Cald cu toată lumea'); }, icon: 'heart-outline' },
+  { id: 'listener', get label() { return tr('Bun ascultător'); }, icon: 'ear-outline' },
+  { id: 'energy', get label() { return tr('Energie bună'); }, icon: 'flash-outline' },
+  { id: 'chill', get label() { return tr('Relaxat'); }, icon: 'leaf-outline' },
+  { id: 'soul', get label() { return tr('Sufletul grupului'); }, icon: 'star-outline' },
+  { id: 'inclusive', get label() { return tr('Îi include pe toți'); }, icon: 'people-circle-outline' },
+  { id: 'icebreaker', get label() { return tr('Sparge gheața'); }, icon: 'snow-outline' },
+  { id: 'organizer', get label() { return tr('Organizator bun'); }, icon: 'clipboard-outline' },
+  { id: 'reliable', get label() { return tr('Se ține de cuvânt'); }, icon: 'shield-checkmark-outline' },
+  { id: 'dancer', get label() { return tr('Neobosit pe ringul de dans'); }, icon: 'musical-notes-outline' },
+  { id: 'guide', get label() { return tr('Știe locurile'); }, icon: 'compass-outline' },
 ];
 
 /** Badge-urile automate și pragurile lor (ușor de schimbat). */
 export const AUTO_BADGES: AutoBadgeInfo[] = [
   {
     id: 'festivalier',
-    label: 'Festivalier',
+    get label() { return tr('Festivalier'); },
     icon: 'musical-note-outline',
     rule: { kind: 'category', category: 'muzica', count: 5 },
-    unit: 'concerte',
+    get unit() { return tr('concerte'); },
   },
   {
     id: 'party',
-    label: 'Petrecăreț',
+    get label() { return tr('Petrecăreț'); },
     icon: 'sparkles-outline',
     rule: { kind: 'category', category: 'party', count: 5 },
-    unit: 'party-uri',
+    get unit() { return tr('party-uri'); },
   },
   {
     id: 'theatre',
-    label: 'Împătimit de teatru',
+    get label() { return tr('Împătimit de teatru'); },
     icon: 'ticket-outline',
     rule: { kind: 'category', category: 'teatru', count: 3 },
-    unit: 'piese',
+    get unit() { return tr('piese'); },
   },
   {
     id: 'explorer',
-    label: 'Explorator',
+    get label() { return tr('Explorator'); },
     icon: 'map-outline',
     rule: { kind: 'categories', count: 3 },
-    unit: 'feluri de evenimente',
+    get unit() { return tr('feluri de evenimente'); },
   },
   {
     id: 'regular',
-    label: 'Nelipsit',
+    get label() { return tr('Nelipsit'); },
     icon: 'ribbon-outline',
     rule: { kind: 'events', count: 10 },
-    unit: 'evenimente',
+    get unit() { return tr('evenimente'); },
   },
 ];

@@ -9,6 +9,7 @@ import { colors } from '../theme/colors';
 import { type } from '../theme/typography';
 import { glass, radii } from '../theme/shape';
 import { formatTime } from '../utils/dates';
+import { tr } from '../i18n';
 
 interface Props {
   onOpen: (personId: string) => void;
@@ -18,7 +19,7 @@ interface Props {
 function preview(message: DirectMessage): string {
   const who = message.fromMe ? 'Tu: ' : '';
   if (message.text) return who + message.text;
-  return message.fromMe ? 'Ai trimis un eveniment' : 'Ți-a trimis un eveniment';
+  return message.fromMe ? tr('Ai trimis un eveniment') : tr('Ți-a trimis un eveniment');
 }
 
 /** Secțiunea „Mesaje directe” din tab-ul Chat: conversațiile doar cu un prieten. Nu apare dacă nu ai niciuna. */
@@ -28,7 +29,7 @@ export default function DirectThreadsSection({ onOpen }: Props) {
 
   return (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>Mesaje directe</Text>
+      <Text style={styles.sectionTitle}>{tr('Mesaje directe')}</Text>
       {threads.map(({ personId, last }) => {
         const person = getPerson(personId);
         if (!person) return null;

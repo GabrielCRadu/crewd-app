@@ -3,6 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { colors } from '../theme/colors';
 import { PASSWORD_RULES, passwordChecks } from '../utils/passwordRules';
+import { tr } from '../i18n';
 
 /** Cerințele parolei, sub câmp: fiecare se bifează pe măsură ce scrii. */
 export default function PasswordChecklist({ password }: { password: string }) {
@@ -12,9 +13,9 @@ export default function PasswordChecklist({ password }: { password: string }) {
       {PASSWORD_RULES.map((rule) => {
         const ok = checks[rule.key];
         return (
-          <View key={rule.key} style={styles.row} accessibilityLabel={`${rule.label}: ${ok ? 'îndeplinit' : 'neîndeplinit'}`}>
+          <View key={rule.key} style={styles.row} accessibilityLabel={`${tr(rule.label)}: ${ok ? tr('îndeplinit') : tr('neîndeplinit')}`}>
             <Ionicons name={ok ? 'checkmark-circle' : 'ellipse-outline'} size={16} color={ok ? colors.like : colors.faint} />
-            <Text style={[styles.text, ok && styles.textOk]}>{rule.label}</Text>
+            <Text style={[styles.text, ok && styles.textOk]}>{tr(rule.label)}</Text>
           </View>
         );
       })}

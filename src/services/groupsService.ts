@@ -20,6 +20,7 @@ import type { UserProfile } from '../types/user';
 import { MIN_FORM_MEMBERS, REPORT_BLOCK_THRESHOLD, joinBlockReason, memberSummary, profileAge } from '../utils/groupRules';
 import { getPreferences, isJoined } from './preferencesService';
 import { getMyRatings, getReputation } from './ratingsService';
+import { tr } from '../i18n';
 
 /*
  * Grupulețele de la evenimente (docs/superpowers/specs/2026-11-13-grupulete-design.md).
@@ -51,8 +52,8 @@ async function guard<T>(action: () => Promise<T>): Promise<T> {
     console.warn('Grupulețe: eroare Firestore', e);
     // Serverul a refuzat (regulile): ceva s-a schimbat între timp (locuri, termen, înscriere), nu e o problemă de rețea.
     const code = typeof e === 'object' && e !== null && 'code' in e ? String((e as { code: unknown }).code) : '';
-    if (code === 'permission-denied') throw new GroupActionError(DENIED_MESSAGE);
-    throw new GroupActionError(NETWORK_MESSAGE);
+    if (code === 'permission-denied') throw new GroupActionError(tr(DENIED_MESSAGE));
+    throw new GroupActionError(tr(NETWORK_MESSAGE));
   }
 }
 
@@ -107,7 +108,7 @@ async function firestoreJoin(eventId: string, groupId: string, me: UserProfile):
     const userSnap = await tx.get(userRef(me.uid));
     const currentGroupId: string | null = userSnap.data()?.groupByEvent?.[eventId] ?? null;
     const target = fromDoc(await tx.get(groupRef(eventId, groupId)));
-    if (!target) throw new GroupActionError('Grupul nu mai există.');
+    if (!target) throw new GroupActionError(tr('Grupul nu mai există.'));
     const previous =
       currentGroupId && currentGroupId !== groupId ? fromDoc(await tx.get(groupRef(eventId, currentGroupId))) : null;
 
@@ -137,8 +138,8 @@ async function firestorePropose(eventId: string, draft: ProposalDraft, tags: str
     const currentGroupId: string | null = userSnap.data()?.groupByEvent?.[eventId] ?? null;
     const previous = currentGroupId ? fromDoc(await tx.get(groupRef(eventId, currentGroupId))) : null;
 
-    if (!isJoined(getPreferences(), eventId)) throw new GroupActionError('Înscrie-te întâi la eveniment.');
-    if (isBlocked()) throw new GroupActionError('Nu poți propune grupuri o perioadă, din cauza raportărilor.');
+    if (!isJoined(getPreferences(), eventId)) throw new GroupActionError(tr('Înscrie-te întâi la eveniment.'));
+    if (isBlocked()) throw new GroupActionError(tr('Nu poți propune grupuri o perioadă, din cauza raportărilor.'));
 
     if (previous) removeMember(tx, previous, me.uid);
     tx.set(newRef, {
@@ -255,7 +256,7 @@ function mockRemove(eventId: string, groupId: string, uid: string) {
 function mockJoin(eventId: string, groupId: string, me: UserProfile) {
   const now = new Date();
   const target = mockGroupsFor(eventId).find((g) => g.id === groupId);
-  if (!target) throw new GroupActionError('Grupul nu mai există.');
+  if (!target) throw new GroupActionError(tr('Grupul nu mai există.'));
   const currentGroupId = myGroupByEvent[eventId] ?? null;
   const reason = joinBlockReason(
     target,
@@ -374,7 +375,7 @@ export function subscribeToMyGroups(
 /** Propune un grupuleț nou (devii primul membru; ieși din grupulețul vechi de la eveniment, dacă erai). */
 export async function proposeGroup(eventId: string, draft: ProposalDraft, tags: string[], me: UserProfile): Promise<string> {
   if (!db) {
-    if (!isJoined(getPreferences(), eventId)) throw new GroupActionError('Înscrie-te întâi la eveniment.');
+    if (!isJoined(getPreferences(), eventId)) throw new GroupActionError(tr('Înscrie-te întâi la eveniment.'));
     const current = myGroupByEvent[eventId];
     if (current) mockRemove(eventId, current, me.uid);
     const id = `${eventId}-mine-${++mockSeq}`;

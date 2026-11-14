@@ -7,6 +7,7 @@ import { colors } from '../../theme/colors';
 import type { VotedBadgeId } from '../../types/badges';
 import { MAX_BADGES_PER_PERSON, canPropose } from '../../utils/badgeRules';
 import BadgePill from './BadgePill';
+import { tr } from '../../i18n';
 
 interface Props {
   /** Badge-urile bifate pentru această persoană. */
@@ -32,9 +33,9 @@ export default function BadgePicker({ selected, onToggle }: Props) {
         style={({ pressed }) => [styles.header, pressed && styles.pressed]}
       >
         <Ionicons name="ribbon-outline" size={16} color={colors.text} />
-        <Text style={styles.title}>Propune un badge</Text>
+        <Text style={styles.title}>{tr('Propune un badge')}</Text>
         <Text style={styles.count}>
-          {selected.length} din {MAX_BADGES_PER_PERSON}
+          {selected.length}{' '}{tr('din')}{' '}{MAX_BADGES_PER_PERSON}
         </Text>
         <Ionicons name={open ? 'chevron-up' : 'chevron-down'} size={16} color={colors.muted} />
       </Pressable>

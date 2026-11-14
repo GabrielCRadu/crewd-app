@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../../theme/colors';
 import { glass, radii } from '../../theme/shape';
 import type { IconName } from '../../types/events';
+import { tr } from '../../i18n';
 
 interface Props {
   label: string;
@@ -32,7 +33,7 @@ export default function BadgePill({ label, icon, selected = false, disabled = fa
       ]}
     >
       <Ionicons name={icon} size={15} color={selected ? colors.onLight : colors.text} />
-      <Text style={[styles.label, selected && styles.labelSelected]}>{label}</Text>
+      <Text style={[styles.label, selected && styles.labelSelected]}>{tr(label)}</Text>
     </Pressable>
   );
 }

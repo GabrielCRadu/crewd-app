@@ -1,9 +1,18 @@
 import type { Event } from '../types/events';
+import { getLanguage, tr } from '../i18n';
 
-// Formatăm datele manual (în română), ca să nu depindem de suportul Intl de pe telefon.
-const MONTHS_SHORT = ['ian', 'feb', 'mar', 'apr', 'mai', 'iun', 'iul', 'aug', 'sept', 'oct', 'nov', 'dec'];
-const WEEKDAYS_SHORT = ['Dum', 'Lun', 'Mar', 'Mie', 'Joi', 'Vin', 'Sâm'];
-const WEEKDAYS_LONG = ['Duminică', 'Luni', 'Marți', 'Miercuri', 'Joi', 'Vineri', 'Sâmbătă'];
+// Formatăm datele manual (română sau engleză, după limba aleasă), ca să nu depindem de suportul Intl de pe telefon.
+const en = () => getLanguage() === 'en';
+const MONTHS_SHORT = () =>
+  en()
+    ? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    : ['ian', 'feb', 'mar', 'apr', 'mai', 'iun', 'iul', 'aug', 'sept', 'oct', 'nov', 'dec'];
+const WEEKDAYS_SHORT = () =>
+  en() ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] : ['Dum', 'Lun', 'Mar', 'Mie', 'Joi', 'Vin', 'Sâm'];
+const WEEKDAYS_LONG = () =>
+  en()
+    ? ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+    : ['Duminică', 'Luni', 'Marți', 'Miercuri', 'Joi', 'Vineri', 'Sâmbătă'];
 
 // ---------- Ajutoare de bază ----------
 
@@ -41,7 +50,7 @@ export function hasEnded(event: Event, now = Date.now()): boolean {
 
 /** Ex: „13 nov”. */
 export function formatShortDate(d: Date): string {
-  return `${d.getDate()} ${MONTHS_SHORT[d.getMonth()]}`;
+  return `${d.getDate()} ${MONTHS_SHORT()[d.getMonth()]}`;
 }
 
 /** Ex: „20:00”. */
@@ -51,14 +60,14 @@ export function formatTime(d: Date): string {
 
 /** Ziua prescurtată, cu majuscule, pentru caseta de dată din „Urmează” (ex. „VIN”). */
 export function formatWeekdayShort(d: Date): string {
-  return WEEKDAYS_SHORT[d.getDay()]!.toUpperCase();
+  return WEEKDAYS_SHORT()[d.getDay()]!.toUpperCase();
 }
 
 /** „Azi”, „Mâine” sau „Sâm, 14 nov”. */
 export function formatDay(d: Date, now = new Date()): string {
   if (sameDay(d, now)) return 'Azi';
-  if (sameDay(d, addDays(now, 1))) return 'Mâine';
-  return `${WEEKDAYS_SHORT[d.getDay()]}, ${d.getDate()} ${MONTHS_SHORT[d.getMonth()]}`;
+  if (sameDay(d, addDays(now, 1))) return tr('Mâine');
+  return `${WEEKDAYS_SHORT()[d.getDay()]}, ${d.getDate()} ${MONTHS_SHORT()[d.getMonth()]}`;
 }
 
 /** Ex: „Azi · 20:00” (mini-cardul de pe hartă). */
@@ -68,5 +77,5 @@ export function formatEventDate(d: Date, now = new Date()): string {
 
 /** Ex: „Vineri, 13 nov” (caseta „Când” din detalii; ora se afișează separat, dedesubt). */
 export function formatLongDay(d: Date): string {
-  return `${WEEKDAYS_LONG[d.getDay()]}, ${d.getDate()} ${MONTHS_SHORT[d.getMonth()]}`;
+  return `${WEEKDAYS_LONG()[d.getDay()]}, ${d.getDate()} ${MONTHS_SHORT()[d.getMonth()]}`;
 }

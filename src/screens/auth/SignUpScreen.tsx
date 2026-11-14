@@ -15,6 +15,7 @@ import { isValidEmail, signUp } from '../../services/authService';
 import { colors } from '../../theme/colors';
 import { type } from '../../theme/typography';
 import { isStrongPassword } from '../../utils/passwordRules';
+import { tr } from '../../i18n';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'SignUp'>;
 
@@ -33,9 +34,9 @@ export default function SignUpScreen({ navigation }: Props) {
 
   const submit = async () => {
     const nextErrors: Errors = {
-      email: isValidEmail(email) ? undefined : 'Introdu o adresă de email validă.',
-      password: isStrongPassword(password) ? undefined : 'Parola nu îndeplinește cerințele de mai jos.',
-      confirm: confirm === password ? undefined : 'Parolele nu coincid.',
+      email: isValidEmail(email) ? undefined : tr('Introdu o adresă de email validă.'),
+      password: isStrongPassword(password) ? undefined : tr('Parola nu îndeplinește cerințele de mai jos.'),
+      confirm: confirm === password ? undefined : tr('Parolele nu coincid.'),
     };
     setErrors(nextErrors);
     setMessage(null);
@@ -59,13 +60,13 @@ export default function SignUpScreen({ navigation }: Props) {
           <GlassIconButton icon="chevron-back" onPress={() => navigation.goBack()} />
 
           <View style={styles.heading}>
-            <Text style={styles.title}>Creează cont</Text>
-            <Text style={styles.subtitle}>Un minut și ești în crew. Apoi îți alegi ce-ți place.</Text>
+            <Text style={styles.title}>{tr('Creează cont')}</Text>
+            <Text style={styles.subtitle}>{tr('Un minut și ești în crew. Apoi îți alegi ce-ți place.')}</Text>
           </View>
 
           <View style={styles.form}>
             <TextField
-              label="Email"
+              label={tr('Email')}
               value={email}
               onChangeText={setEmail}
               error={errors.email}
@@ -79,11 +80,11 @@ export default function SignUpScreen({ navigation }: Props) {
             />
             <TextField
               ref={passwordRef}
-              label="Parolă"
+              label={tr('Parolă')}
               value={password}
               onChangeText={setPassword}
               error={errors.password}
-              placeholder="Minim 8 caractere, literă mică și mare"
+              placeholder={tr('Minim 8 caractere, literă mică și mare')}
               password
               autoComplete="new-password"
               textContentType="newPassword"
@@ -93,7 +94,7 @@ export default function SignUpScreen({ navigation }: Props) {
             <PasswordChecklist password={password} />
             <TextField
               ref={confirmRef}
-              label="Confirmă parola"
+              label={tr('Confirmă parola')}
               value={confirm}
               onChangeText={setConfirm}
               error={errors.confirm}
@@ -109,15 +110,15 @@ export default function SignUpScreen({ navigation }: Props) {
 
           <View style={styles.bottom}>
             <GradientButton
-              label={loading ? 'Se creează contul…' : 'Creează contul'}
+              label={loading ? tr('Se creează contul…') : tr('Creează contul')}
               icon="arrow-forward"
               loading={loading}
               onPress={submit}
             />
             <View style={styles.footer}>
-              <Text style={styles.footerText}>Ai deja cont?</Text>
+              <Text style={styles.footerText}>{tr('Ai deja cont?')}</Text>
               <Pressable onPress={() => navigation.navigate('Login')} hitSlop={8}>
-                <Text style={styles.footerLink}>Intră</Text>
+                <Text style={styles.footerLink}>{tr('Intră')}</Text>
               </Pressable>
             </View>
           </View>

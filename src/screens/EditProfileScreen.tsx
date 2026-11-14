@@ -33,6 +33,7 @@ import { glass, radii } from '../theme/shape';
 import type { TagGroup } from '../types/social';
 import type { Gender, UserProfile } from '../types/user';
 import { formatBirthDate } from '../utils/birthDate';
+import { tr } from '../i18n';
 
 type Props = NativeStackScreenProps<ProfileStackParamList, 'EditProfile'>;
 
@@ -81,8 +82,8 @@ export default function EditProfileScreen({ navigation }: Props) {
       const picked = await pickProfilePhoto(source);
       if (picked) setPhotoUrl(picked);
     } catch (e) {
-      const message = e instanceof PhotoPermissionError ? e.message : 'Nu am putut încărca fotografia.';
-      Alert.alert('Fotografia de profil', `${message} Poți da acces din setările telefonului.`);
+      const message = e instanceof PhotoPermissionError ? e.message : tr('Nu am putut încărca fotografia.');
+      Alert.alert(tr('Fotografia de profil'), tr('{message} Poți da acces din setările telefonului.', { message: message }));
     } finally {
       setPhotoBusy(false);
     }
@@ -100,16 +101,16 @@ export default function EditProfileScreen({ navigation }: Props) {
       navigation.goBack();
       return;
     }
-    Alert.alert('Renunți la modificări?', 'Ce ai schimbat nu se salvează.', [
-      { text: 'Rămân aici', style: 'cancel' },
-      { text: 'Renunță', style: 'destructive', onPress: () => navigation.goBack() },
+    Alert.alert(tr('Renunți la modificări?'), tr('Ce ai schimbat nu se salvează.'), [
+      { text: tr('Rămân aici'), style: 'cancel' },
+      { text: tr('Renunță|modificări'), style: 'destructive', onPress: () => navigation.goBack() },
     ]);
   };
 
   const save = async () => {
     const nextErrors: Errors = {
-      name: name.trim().length >= 2 ? undefined : 'Scrie-ți numele.',
-      city: city.trim().length >= 2 ? undefined : 'Scrie orașul.',
+      name: name.trim().length >= 2 ? undefined : tr('Scrie-ți numele.'),
+      city: city.trim().length >= 2 ? undefined : tr('Scrie orașul.'),
     };
     setErrors(nextErrors);
     if (Object.values(nextErrors).some(Boolean)) {
@@ -117,7 +118,7 @@ export default function EditProfileScreen({ navigation }: Props) {
       return;
     }
     if (totalTags < MIN_TAGS) {
-      setFormError(`Alege cel puțin ${MIN_TAGS} preferințe, ca să-ți putem recomanda evenimente și oameni.`);
+      setFormError(tr('Alege cel puțin {MIN_TAGS} preferințe, ca să-ți putem recomanda evenimente și oameni.', { MIN_TAGS: MIN_TAGS }));
       return;
     }
 
@@ -134,7 +135,7 @@ export default function EditProfileScreen({ navigation }: Props) {
       navigation.goBack();
     } catch (e) {
       console.warn('Nu am putut salva profilul:', e);
-      setFormError('Nu am putut salva profilul. Verifică conexiunea și încearcă din nou.');
+      setFormError(tr('Nu am putut salva profilul. Verifică conexiunea și încearcă din nou.'));
       setSaving(false);
     }
   };
@@ -143,7 +144,7 @@ export default function EditProfileScreen({ navigation }: Props) {
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.header}>
         <GlassIconButton icon="chevron-back" onPress={goBack} />
-        <Text style={styles.title}>Editează profilul</Text>
+        <Text style={styles.title}>{tr('Editează profilul')}</Text>
       </View>
 
       <KeyboardAvoidingView style={styles.flex} behavior="padding">
@@ -152,20 +153,20 @@ export default function EditProfileScreen({ navigation }: Props) {
           <View style={styles.photoBlock}>
             <Avatar name={name || initial.name} size={112} square photoUrl={photoUrl} />
             <View style={styles.photoActions}>
-              <PhotoButton icon="camera-outline" label="Cameră" disabled={photoBusy} onPress={() => choosePhoto('camera')} />
-              <PhotoButton icon="images-outline" label="Galerie" disabled={photoBusy} onPress={() => choosePhoto('library')} />
+              <PhotoButton icon="camera-outline" label={tr('Cameră')} disabled={photoBusy} onPress={() => choosePhoto('camera')} />
+              <PhotoButton icon="images-outline" label={tr('Galerie')} disabled={photoBusy} onPress={() => choosePhoto('library')} />
             </View>
             {/* Poza e obligatorie: se poate înlocui, dar nu șterge. */}
-            <Text style={styles.hint}>Poza ta e obligatorie; o poți înlocui oricând.</Text>
+            <Text style={styles.hint}>{tr('Poza ta e obligatorie; o poți înlocui oricând.')}</Text>
           </View>
 
           {/* Nume, vârstă, oraș */}
           <TextField
-            label="Nume"
+            label={tr('Nume')}
             value={name}
             onChangeText={setName}
             error={errors.name}
-            placeholder="Cum te strigă prietenii"
+            placeholder={tr('Cum te strigă prietenii')}
             autoCapitalize="words"
             maxLength={50}
             returnKeyType="next"
@@ -174,11 +175,11 @@ export default function EditProfileScreen({ navigation }: Props) {
           <View style={styles.row}>
             <TextField
               ref={cityRef}
-              label="Locație"
+              label={tr('Locație')}
               value={city}
               onChangeText={setCity}
               error={errors.city}
-              placeholder="Orașul tău"
+              placeholder={tr('Orașul tău')}
               autoCapitalize="words"
               containerStyle={styles.cityField}
             />
@@ -187,25 +188,25 @@ export default function EditProfileScreen({ navigation }: Props) {
           {/* Data nașterii și genul: doar pentru citire */}
           <View style={styles.lockedCard}>
             <View style={styles.lockedRow}>
-              <Text style={styles.label}>Data nașterii</Text>
+              <Text style={styles.label}>{tr('Data nașterii')}</Text>
               <Text style={styles.lockedValue}>
                 {initial.birthDate ? formatBirthDate(initial.birthDate) : `${initial.age} ani`}
               </Text>
             </View>
             <View style={styles.lockedRow}>
-              <Text style={styles.label}>Gen</Text>
-              <Text style={styles.lockedValue}>{GENDER_LABELS[initial.gender]}</Text>
+              <Text style={styles.label}>{tr('Gen')}</Text>
+              <Text style={styles.lockedValue}>{tr(GENDER_LABELS[initial.gender])}</Text>
             </View>
             <View style={styles.lockedHintRow}>
               <Ionicons name="lock-closed-outline" size={12} color={colors.faint} />
-              <Text style={styles.lockedHint}>Data nașterii și genul nu mai pot fi modificate după crearea profilului.</Text>
+              <Text style={styles.lockedHint}>{tr('Data nașterii și genul nu mai pot fi modificate după crearea profilului.')}</Text>
             </View>
           </View>
 
           {/* Descrierea */}
           <View style={styles.block}>
             <View style={styles.labelRow}>
-              <Text style={styles.label}>Despre mine</Text>
+              <Text style={styles.label}>{tr('Despre mine')}</Text>
               <Text style={styles.counter}>
                 {bio.length}/{MAX_BIO}
               </Text>
@@ -213,7 +214,7 @@ export default function EditProfileScreen({ navigation }: Props) {
             <TextInput
               value={bio}
               onChangeText={setBio}
-              placeholder="Ce îți place, cum îți petreci serile, ce cauți la evenimente…"
+              placeholder={tr('Ce îți place, cum îți petreci serile, ce cauți la evenimente…')}
               placeholderTextColor={colors.faint}
               selectionColor={colors.primary}
               multiline
@@ -225,8 +226,8 @@ export default function EditProfileScreen({ navigation }: Props) {
           {/* Preferințele: aceleași culori ca în cardul „Ce îți place” */}
           <View style={styles.block}>
             <View style={styles.labelRow}>
-              <Text style={styles.sectionTitle}>Preferințe</Text>
-              <Text style={styles.counter}>{totalTags} alese</Text>
+              <Text style={styles.sectionTitle}>{tr('Preferințe')}</Text>
+              <Text style={styles.counter}>{totalTags}{' '}{tr('alese')}</Text>
             </View>
             {TAG_GROUPS.map((group) => {
               const style = TAG_GROUP_STYLE[group.id];
@@ -260,7 +261,7 @@ export default function EditProfileScreen({ navigation }: Props) {
 
       <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 12 }]}>
         <GradientButton
-          label={saving ? 'Se salvează…' : 'Salvează'}
+          label={saving ? tr('Se salvează…') : tr('Salvează')}
           icon="checkmark"
           loading={saving}
           disabled={!dirty}

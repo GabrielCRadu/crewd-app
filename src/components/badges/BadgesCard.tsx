@@ -6,6 +6,7 @@ import { glass, radii } from '../../theme/shape';
 import type { AutoBadgeInfo, AutoBadgeProgress, VotedBadgeInfo } from '../../types/badges';
 import { BADGE_THRESHOLD } from '../../utils/badgeRules';
 import BadgePill from './BadgePill';
+import { tr } from '../../i18n';
 
 interface Props {
   /** Badge-urile votate care au atins pragul. */
@@ -32,7 +33,7 @@ export default function BadgesCard({ voted, auto, progress, emptyText }: Props) 
 
       {voted.length > 0 ? (
         <View style={styles.group}>
-          <Text style={styles.groupLabel}>De la oameni</Text>
+          <Text style={styles.groupLabel}>{tr('De la oameni')}</Text>
           <View style={styles.pills}>
             {voted.map((badge) => (
               <BadgePill key={badge.id} label={badge.label} icon={badge.icon} />
@@ -43,7 +44,7 @@ export default function BadgesCard({ voted, auto, progress, emptyText }: Props) 
 
       {auto.length > 0 ? (
         <View style={styles.group}>
-          <Text style={styles.groupLabel}>Din activitate</Text>
+          <Text style={styles.groupLabel}>{tr('Din activitate')}</Text>
           <View style={styles.pills}>
             {auto.map((badge) => (
               <BadgePill key={badge.id} label={badge.label} icon={badge.icon} />
@@ -54,7 +55,7 @@ export default function BadgesCard({ voted, auto, progress, emptyText }: Props) 
 
       {upcoming.length > 0 ? (
         <View style={[styles.group, !isEmpty && styles.divided]}>
-          <Text style={styles.groupLabel}>Urmează</Text>
+          <Text style={styles.groupLabel}>{tr('Urmează')}</Text>
           {upcoming.map(({ badge, current, target }) => (
             <View key={badge.id} style={styles.progressRow}>
               <Ionicons name={badge.icon} size={16} color={colors.muted} />
@@ -62,7 +63,7 @@ export default function BadgesCard({ voted, auto, progress, emptyText }: Props) 
                 <View style={styles.progressHeader}>
                   <Text style={styles.progressLabel}>{badge.label}</Text>
                   <Text style={styles.progressCount}>
-                    {current} din {target} {badge.unit}
+                    {current}{' '}{tr('din')}{' '}{target} {badge.unit}
                   </Text>
                 </View>
                 <View style={styles.track}>
@@ -74,9 +75,7 @@ export default function BadgesCard({ voted, auto, progress, emptyText }: Props) 
         </View>
       ) : null}
 
-      <Text style={styles.hint}>
-        Un badge de la oameni apare abia când {BADGE_THRESHOLD} persoane diferite l-au propus. Nu se vede cine.
-      </Text>
+      <Text style={styles.hint}>{tr('Un badge de la oameni apare abia când')}{' '}{BADGE_THRESHOLD}{' '}{tr('persoane diferite l-au propus. Nu se vede cine.')}</Text>
     </View>
   );
 }

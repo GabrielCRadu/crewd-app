@@ -15,6 +15,7 @@ import { PEOPLE } from '../data/mockSocial';
 import { db } from '../lib/firebase';
 import type { GroupMessage } from '../types/chat';
 import { LEFT_GROUP_MESSAGE, normalizeMessageText } from '../utils/chatRules';
+import { tr } from '../i18n';
 
 /*
  * Conversația unui grup (docs/superpowers/specs/2026-11-14-chat-grup-design.md).
@@ -42,7 +43,7 @@ export function chatErrorMessage(e: unknown): string {
   if (e instanceof ChatActionError) return e.message;
   const code = typeof e === 'object' && e !== null && 'code' in e ? String((e as { code: unknown }).code) : '';
   if (code === 'permission-denied') return LEFT_GROUP_MESSAGE;
-  return NETWORK_MESSAGE;
+  return tr(NETWORK_MESSAGE);
 }
 
 // ---------------------------------------------------------------------------------------------

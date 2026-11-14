@@ -1,5 +1,15 @@
-import { Fragment, useState } from 'react';
-import { Alert, KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Fragment, useRef, useState } from 'react';
+import type { ComponentRef } from 'react';
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -11,7 +21,8 @@ import Aurora from '../components/Aurora';
 import Avatar from '../components/Avatar';
 import Chip from '../components/Chip';
 import PhotoViewer from '../components/PhotoViewer';
-import DeleteAccount from '../components/DeleteAccount';
+import ProfileMenu from '../components/ProfileMenu';
+import type { MenuAnchor } from '../components/ProfileMenu';
 import InviteQrSheet from '../components/InviteQrSheet';
 import ReputationStats from '../components/ReputationStats';
 import BadgesCard from '../components/badges/BadgesCard';
@@ -39,6 +50,7 @@ import { type } from '../theme/typography';
 import { glass, radii } from '../theme/shape';
 import { autoBadgeProgress } from '../utils/badgeRules';
 import { sortMemories } from '../utils/memoryRules';
+import { tr } from '../i18n';
 
 /**
  * Tab-ul Profil (vezi docs/layout-guide.md): identitate cu statistici, „Despre mine”,
@@ -46,7 +58,7 @@ import { sortMemories } from '../utils/memoryRules';
  * Datele vin din profilul utilizatorului logat (AuthContext → Firestore users/{uid}).
  */
 export default function ProfileScreen() {
-  const { profile, user, updateBio, removeLearnedTag, signOut } = useAuth();
+  const { profile, updateBio, removeLearnedTag } = useAuth();
   const pastEvents = usePastEvents();
   const friends = useFriends();
   const { groups: myGroups } = useMyGroups();
@@ -59,6 +71,10 @@ export default function ProfileScreen() {
   const [openMemoryId, setOpenMemoryId] = useState<string | null>(null);
   const [photoOpen, setPhotoOpen] = useState(false);
   const [qrOpen, setQrOpen] = useState(false);
+  // Meniul cu trei linii: unde se deschide (null = închis).
+  const [menuAnchor, setMenuAnchor] = useState<MenuAnchor | null>(null);
+  const menuButton = useRef<ComponentRef<typeof View>>(null);
+  const { width: windowWidth } = useWindowDimensions();
   // Badge-uri: cele votate sunt încă mock (badgesService); cele automate vin din istoricul tău.
   const badgeProgress = autoBadgeProgress(pastEvents);
 
@@ -75,20 +91,21 @@ export default function ProfileScreen() {
   // „prieteni” deschide lista de prieteni; badge-ul arată câte cereri noi ai primit.
   const incomingCount = idsWithStatus(friends, 'incoming').length;
   const stats = [
-    { value: idsWithStatus(friends, 'friends').length, label: 'prieteni', onPress: () => navigation.navigate('FriendsList'), badge: incomingCount },
-    { value: myGroups.length, label: 'grupuri' },
-    { value: pastEvents.length, label: 'evenimente' },
+    { value: idsWithStatus(friends, 'friends').length, label: tr('prieteni'), onPress: () => navigation.navigate('FriendsList'), badge: incomingCount },
+    { value: myGroups.length, label: tr('grupuri') },
+    { value: pastEvents.length, label: tr('evenimente') },
   ];
 
   const saveBio = (bio: string) => {
-    updateBio(bio).catch(() => Alert.alert('Nu am putut salva', 'Verifică conexiunea și încearcă din nou.'));
+    updateBio(bio).catch(() => Alert.alert(tr('Nu am putut salva'), tr('Verifică conexiunea și încearcă din nou.')));
   };
 
-  const confirmSignOut = () =>
-    Alert.alert('Ieși din cont?', 'Te poți loga din nou oricând cu emailul și parola.', [
-      { text: 'Anulează', style: 'cancel' },
-      { text: 'Ieși', style: 'destructive', onPress: () => void signOut() },
-    ]);
+  // Meniul se deschide chiar sub butonul cu trei linii, aliniat la marginea lui din dreapta.
+  const openMenu = () => {
+    menuButton.current?.measureInWindow((x, y, width, height) => {
+      setMenuAnchor({ top: y + height + 8, right: Math.max(12, windowWidth - (x + width)) });
+    });
+  };
 
   return (
     // Fundal complet negru; culoarea apare doar în câteva carduri (identitate, „Despre mine”, conturul „Ce îți place”).
@@ -101,23 +118,26 @@ export default function ProfileScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.header}>
-          <Text style={styles.title}>Profil</Text>
+          <Text style={styles.title}>{tr('Profil')}</Text>
           <View style={styles.headerActions}>
             {/* Codul tău QR (cu username-ul), mic; apăsat se deschide mare, cu linkul de invitație */}
             {profile.username ? (
               <Pressable
                 onPress={() => setQrOpen(true)}
-                accessibilityLabel="Codul tău QR de invitație"
+                accessibilityLabel={tr('Codul tău QR de invitație')}
                 style={({ pressed }) => [styles.qrButton, pressed && styles.qrPressed]}
               >
                 <Ionicons name="qr-code-outline" size={18} color={colors.text} />
               </Pressable>
             ) : null}
+            {/* Meniul (trei linii, ca pe Instagram): Editează, Setări, Delogare */}
             <Pressable
-              onPress={() => navigation.navigate('EditProfile')}
-              style={({ pressed }) => [styles.editButton, pressed && styles.pressed]}
+              ref={menuButton}
+              onPress={openMenu}
+              accessibilityLabel={tr('Meniu')}
+              style={({ pressed }) => [styles.qrButton, pressed && styles.qrPressed]}
             >
-              <Text style={styles.editText}>Editează</Text>
+              <Ionicons name="menu" size={20} color={colors.text} />
             </Pressable>
           </View>
         </View>
@@ -129,7 +149,7 @@ export default function ProfileScreen() {
             <Pressable
               onPress={() => setPhotoOpen(true)}
               disabled={!profile.photoUrl}
-              accessibilityLabel="Mărește poza"
+              accessibilityLabel={tr('Mărește poza')}
             >
               <Avatar name={profile.name} size={84} square photoUrl={profile.photoUrl} />
             </Pressable>
@@ -175,24 +195,24 @@ export default function ProfileScreen() {
 
         {/* Totalurile primite după evenimente (anonime) */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Ce spun alții despre tine</Text>
+          <Text style={styles.sectionTitle}>{tr('Ce spun alții despre tine')}</Text>
           <ReputationStats reputation={reputation} />
         </View>
 
         {/* Badge-uri: propuse de oameni după evenimente (de la 3 persoane în sus) și câștigate din activitate */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Badge-uri</Text>
+          <Text style={styles.sectionTitle}>{tr('Badge-uri')}</Text>
           <BadgesCard
             voted={getMyVotedBadges()}
             auto={badgeProgress.filter((p) => p.earned).map((p) => p.badge)}
             progress={badgeProgress}
-            emptyText="Încă niciun badge. Le primești de la oamenii cu care ieși și din evenimentele la care mergi."
+            emptyText={tr('Încă niciun badge. Le primești de la oamenii cu care ieși și din evenimentele la care mergi.')}
           />
         </View>
 
         {/* Tag-urile alese, într-un singur card, pe grupuri */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Ce îți place</Text>
+          <Text style={styles.sectionTitle}>{tr('Ce îți place')}</Text>
           <GradientBorderCard>
             {TAG_GROUPS.map((group, i) => (
               <View key={group.id} style={[styles.tagGroup, i > 0 && styles.tagGroupDivided]}>
@@ -204,7 +224,7 @@ export default function ProfileScreen() {
                   {profile.chosenTags[group.id].map((t) => (
                     <Chip key={t} label={t} tint={tagTints[GROUP_STYLE[group.id].tint]} />
                   ))}
-                  {profile.chosenTags[group.id].length === 0 ? <Text style={styles.hint}>Nimic ales încă.</Text> : null}
+                  {profile.chosenTags[group.id].length === 0 ? <Text style={styles.hint}>{tr('Nimic ales încă.')}</Text> : null}
                 </View>
               </View>
             ))}
@@ -212,31 +232,31 @@ export default function ProfileScreen() {
         </View>
 
         <View style={[styles.card, styles.learnedCard]}>
-          <Text style={styles.cardTitle}>Învățate din evenimentele tale</Text>
-          <Text style={styles.hint}>Tag-uri adăugate automat după înscrieri. Le poți scoate oricând.</Text>
+          <Text style={styles.cardTitle}>{tr('Învățate din evenimentele tale')}</Text>
+          <Text style={styles.hint}>{tr('Tag-uri adăugate automat după înscrieri. Le poți scoate oricând.')}</Text>
           <View style={styles.tags}>
             {profile.learnedTags.map((t) => (
               <Chip key={t} label={t} dashed onRemove={() => void removeLearnedTag(t)} />
             ))}
-            {profile.learnedTags.length === 0 ? <Text style={styles.hint}>Niciun tag învățat încă.</Text> : null}
+            {profile.learnedTags.length === 0 ? <Text style={styles.hint}>{tr('Niciun tag învățat încă.')}</Text> : null}
           </View>
         </View>
 
         {/* Amintiri: poze de la evenimentele la care ai fost; se văd și pe profilul tău public */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Amintiri</Text>
+            <Text style={styles.sectionTitle}>{tr('Amintiri')}</Text>
             <Pressable
               onPress={() => setAddMemory({ eventId: null })}
               hitSlop={8}
               style={({ pressed }) => [styles.addMemoryButton, pressed && styles.pressed]}
             >
               <Ionicons name="add" size={16} color={colors.text} />
-              <Text style={styles.addMemoryText}>Adaugă amintire</Text>
+              <Text style={styles.addMemoryText}>{tr('Adaugă amintire')}</Text>
             </Pressable>
           </View>
           {memories.length === 0 ? (
-            <Text style={styles.hint}>Încă nicio amintire. Adaugă poze de la evenimentele la care ai fost.</Text>
+            <Text style={styles.hint}>{tr('Încă nicio amintire. Adaugă poze de la evenimentele la care ai fost.')}</Text>
           ) : (
             <MemoriesGrid memories={memories} showVisibility onOpen={(m) => setOpenMemoryId(m.id)} />
           )}
@@ -245,10 +265,10 @@ export default function ProfileScreen() {
         {/* Istoricul (privat): evenimentele trecute apar automat; o carte deschide detaliile, de unde evaluezi */}
         <View style={styles.section}>
           <View>
-            <Text style={styles.sectionTitle}>Istoricul tău</Text>
+            <Text style={styles.sectionTitle}>{tr('Istoricul tău')}</Text>
             <View style={styles.privateRow}>
               <Ionicons name="lock-closed-outline" size={13} color={colors.muted} />
-              <Text style={styles.hint}>Doar tu vezi această listă.</Text>
+              <Text style={styles.hint}>{tr('Doar tu vezi această listă.')}</Text>
             </View>
           </View>
           <EventHistoryCarousel
@@ -257,17 +277,7 @@ export default function ProfileScreen() {
             onAddMemory={(eventId) => setAddMemory({ eventId })}
           />
         </View>
-
-        {/* Contul: emailul și ieșirea */}
-        <View style={styles.accountCard}>
-          {user?.email ? <Text style={styles.accountEmail}>{user.email}</Text> : null}
-          <Pressable onPress={confirmSignOut} style={({ pressed }) => [styles.signOutButton, pressed && styles.pressed]}>
-            <Ionicons name="log-out-outline" size={18} color={colors.text} />
-            <Text style={styles.signOutText}>Ieși din cont</Text>
-          </Pressable>
-          {/* Ștergerea definitivă a contului (cere parola) */}
-          <DeleteAccount />
-        </View>
+        {/* Contul (emailul, ieșirea, ștergerea) s-a mutat în Setări (meniul cu trei linii). */}
       </ScrollView>
       </KeyboardAvoidingView>
 
@@ -283,6 +293,12 @@ export default function ProfileScreen() {
         caption={profile.name}
         onClose={() => setPhotoOpen(false)}
       />
+      <ProfileMenu
+        anchor={menuAnchor}
+        onClose={() => setMenuAnchor(null)}
+        onEdit={() => navigation.navigate('EditProfile')}
+        onSettings={() => navigation.navigate('Settings')}
+      />
       {profile.username ? (
         <InviteQrSheet
           visible={qrOpen}
@@ -296,7 +312,7 @@ export default function ProfileScreen() {
   );
 }
 
-/** Înălțimea butoanelor din antet (iconița QR și „Editează”), ca să stea la aceeași linie. */
+/** Înălțimea butoanelor din antet (codul QR și meniul), ca să stea la aceeași linie. */
 const HEADER_BUTTON_HEIGHT = 40;
 
 const styles = StyleSheet.create({
@@ -316,14 +332,6 @@ const styles = StyleSheet.create({
   },
   qrPressed: { backgroundColor: colors.cardStrong },
   title: { ...type.screenTitle, fontSize: 32 },
-  editButton: {
-    ...glass,
-    height: HEADER_BUTTON_HEIGHT,
-    paddingHorizontal: 18,
-    justifyContent: 'center',
-    borderRadius: radii.pill,
-  },
-  editText: { color: colors.text, fontWeight: '500' },
   pressed: { backgroundColor: colors.cardStrong },
   identity: { ...glass, borderRadius: radii.card, overflow: 'hidden' },
   identityRow: { flexDirection: 'row', alignItems: 'center', gap: 16, padding: 18 },
@@ -380,16 +388,4 @@ const styles = StyleSheet.create({
   learnedCard: { gap: 10 },
   hint: { fontSize: 13, color: colors.muted },
   privateRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 },
-  accountCard: { alignItems: 'center', gap: 12, marginTop: 8 },
-  accountEmail: { color: colors.faint, fontSize: 13 },
-  signOutButton: {
-    ...glass,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: radii.pill,
-  },
-  signOutText: { color: colors.text, fontWeight: '500' },
 });

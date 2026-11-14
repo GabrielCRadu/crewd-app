@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../theme/colors';
 import type { TagTint } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
+import { tr } from '../i18n';
 
 interface Props {
   label: string;
@@ -31,7 +32,7 @@ export default function Chip({ label, active = false, dashed = false, tint, onPr
         tint && { backgroundColor: tint.background, borderColor: tint.border },
       ]}
     >
-      <Text style={[styles.label, active && styles.labelActive]}>{label}</Text>
+      <Text style={[styles.label, active && styles.labelActive]}>{tr(label)}</Text>
       {onRemove ? <Ionicons name="close" size={14} color={colors.muted} /> : null}
     </Pressable>
   );

@@ -21,6 +21,7 @@ import { glass, radii } from '../theme/shape';
 import type { CategoryId } from '../types/events';
 import { isLive } from '../utils/dates';
 import { addDistance, isUpcomingOrLive, matchesCategories, sortByDate } from '../utils/eventFilters';
+import { tr } from '../i18n';
 
 type Props = NativeStackScreenProps<EventsStackParamList, 'EventsHome'>;
 type Mode = 'all' | 'calendar';
@@ -70,11 +71,11 @@ export default function EventsScreen({ navigation }: Props) {
       <ScreenGlow />
 
       <View style={styles.header}>
-        <Text style={styles.title}>Evenimente</Text>
+        <Text style={styles.title}>{tr('Evenimente')}</Text>
         <SegmentedControl
           options={[
-            { value: 'all', label: 'Toate' },
-            { value: 'calendar', label: 'Calendarul meu' },
+            { value: 'all', label: tr('Toate') },
+            { value: 'calendar', label: tr('Calendarul meu') },
           ]}
           value={mode}
           onChange={setMode}
@@ -112,11 +113,11 @@ export default function EventsScreen({ navigation }: Props) {
             <NowCarousel events={liveNow} onOpen={openEvent} />
           ) : null}
 
-          <Text style={styles.sectionTitle}>Urmează</Text>
+          <Text style={styles.sectionTitle}>{tr('Urmează')}</Text>
           {loading ? (
             <ActivityIndicator color={colors.text} style={styles.loader} />
           ) : upcoming.length === 0 ? (
-            <Text style={styles.empty}>Niciun eveniment pentru categoriile alese.</Text>
+            <Text style={styles.empty}>{tr('Niciun eveniment pentru categoriile alese.')}</Text>
           ) : (
             upcoming.map((e) => (
               <UpcomingEventRow

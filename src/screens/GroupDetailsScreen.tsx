@@ -20,6 +20,7 @@ import { type } from '../theme/typography';
 import type { GroupStatus } from '../types/groups';
 import { formatDay, formatTime } from '../utils/dates';
 import { groupStatus } from '../utils/groupRules';
+import { tr } from '../i18n';
 
 type Props = NativeStackScreenProps<ChatsStackParamList, 'GroupDetails'>;
 
@@ -53,9 +54,9 @@ export default function GroupDetailsScreen({ navigation, route }: Props) {
           <ActivityIndicator color={colors.text} />
         ) : (
           <>
-            <Text style={styles.emptyText}>{LEFT_GROUP_MESSAGE}</Text>
+            <Text style={styles.emptyText}>{tr(LEFT_GROUP_MESSAGE)}</Text>
             <Pressable onPress={() => navigation.goBack()} style={styles.pill}>
-              <Text style={styles.pillText}>Înapoi</Text>
+              <Text style={styles.pillText}>{tr('Înapoi')}</Text>
             </Pressable>
           </>
         )}
@@ -73,17 +74,17 @@ export default function GroupDetailsScreen({ navigation, route }: Props) {
   // Ieși din grup: rămâi înscris la eveniment; te întorci la lista de chat-uri.
   const confirmLeave = () => {
     if (!uid) return;
-    Alert.alert('Ieși din grup?', 'Ieși și din chat-ul lui (e același lucru). Rămâi înscris la eveniment și poți alege alt grup.', [
-      { text: 'Rămân', style: 'cancel' },
+    Alert.alert(tr('Ieși din grup?'), tr('Ieși și din chat-ul lui (e același lucru). Rămâi înscris la eveniment și poți alege alt grup.'), [
+      { text: tr('Rămân'), style: 'cancel' },
       {
-        text: 'Ies',
+        text: tr('Ies'),
         style: 'destructive',
         onPress: () => {
           // Întâi înapoi la lista de chat-uri, ca să nu clipească „Nu mai ești în acest grup.” pe ecranele de aici
           // (grupul dispare din lista ta imediat, înainte să se termine salvarea). O eroare apare peste listă.
           const { eventId: groupEventId, id } = group;
           navigation.popToTop();
-          leaveGroup(groupEventId, id, uid).catch((e: Error) => Alert.alert('Nu ai ieșit din grup', e.message));
+          leaveGroup(groupEventId, id, uid).catch((e: Error) => Alert.alert(tr('Nu ai ieșit din grup'), e.message));
         },
       },
     ]);
@@ -101,19 +102,18 @@ export default function GroupDetailsScreen({ navigation, route }: Props) {
         <View style={styles.titleBlock}>
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.subtitle}>
-            {STATUS_LABEL[groupStatus(group, now)]} · {group.memberUids.length} din {group.maxSize} locuri
-          </Text>
+            {tr(STATUS_LABEL[groupStatus(group, now)])} · {group.memberUids.length}{' '}{tr('din')}{' '}{group.maxSize}{' '}{tr('locuri')}</Text>
         </View>
 
         <View style={styles.card}>
-          <Text style={type.label}>Ne vedem</Text>
+          <Text style={type.label}>{tr('Ne vedem')}</Text>
           <Text style={styles.body}>
-            {formatDay(group.meetupAt, now)} la {formatTime(group.meetupAt)} · {group.meetupPlace}
+            {formatDay(group.meetupAt, now)}{' '}{tr('la')}{' '}{formatTime(group.meetupAt)} · {group.meetupPlace}
           </Text>
         </View>
 
         <View style={styles.card}>
-          <Text style={type.label}>Vibe</Text>
+          <Text style={type.label}>{tr('Vibe')}</Text>
           <Text style={styles.body}>{group.vibe}</Text>
           {group.tags.length > 0 ? (
             <View style={styles.chips}>
@@ -122,21 +122,20 @@ export default function GroupDetailsScreen({ navigation, route }: Props) {
               ))}
             </View>
           ) : null}
-          <Text style={styles.muted}>
-            Vârste {group.minAge}–{group.maxAge}
+          <Text style={styles.muted}>{tr('Vârste')}{' '}{group.minAge}–{group.maxAge}
           </Text>
         </View>
 
         <View style={styles.card}>
-          <Text style={type.label}>Membri · {group.memberUids.length}</Text>
+          <Text style={type.label}>{tr('Membri ·')}{' '}{group.memberUids.length}</Text>
           {members.map(([memberUid, m], i) => (
             <View key={memberUid} style={[styles.member, i > 0 && styles.memberDivider]}>
               <Avatar name={m.name || '?'} size={40} photoUrl={m.photo ?? null} />
               <View style={styles.memberText}>
                 <Text style={styles.body}>
                   {m.name}, {m.age}
-                  {memberUid === group.proposerUid ? <Text style={styles.muted}> · a propus</Text> : null}
-                  {memberUid === uid ? <Text style={styles.muted}> · tu</Text> : null}
+                  {memberUid === group.proposerUid ? <Text style={styles.muted}>{' '}{tr('· a propus')}</Text> : null}
+                  {memberUid === uid ? <Text style={styles.muted}>{' '}{tr('· tu')}</Text> : null}
                 </Text>
                 {m.tags.length > 0 ? (
                   <Text style={styles.muted} numberOfLines={1}>
@@ -149,7 +148,7 @@ export default function GroupDetailsScreen({ navigation, route }: Props) {
         </View>
 
         <Pressable onPress={confirmLeave} hitSlop={8} style={({ pressed }) => [styles.leave, pressed && styles.pressed]}>
-          <Text style={styles.leaveText}>Ieși din grup</Text>
+          <Text style={styles.leaveText}>{tr('Ieși din grup')}</Text>
         </Pressable>
       </ScrollView>
     </SafeAreaView>

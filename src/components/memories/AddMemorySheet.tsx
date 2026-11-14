@@ -16,6 +16,7 @@ import { type } from '../../theme/typography';
 import type { Event } from '../../types/events';
 import type { MemoryVisibility } from '../../types/memories';
 import { formatShortDate } from '../../utils/dates';
+import { tr } from '../../i18n';
 
 interface Props {
   visible: boolean;
@@ -33,7 +34,7 @@ interface Props {
 export default function AddMemorySheet({ visible, events, initialEventId = null, onClose }: Props) {
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel="Închide" />
+      <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel={tr('Închide')} />
       {/* Conținutul se montează la fiecare deschidere, ca foaia să pornească mereu goală. */}
       {visible ? <SheetContent events={events} initialEventId={initialEventId} onClose={onClose} /> : null}
     </Modal>
@@ -56,7 +57,7 @@ function SheetContent({ events, initialEventId, onClose }: Omit<Props, 'visible'
       const picked = await pickMemoryPhoto(source);
       if (picked) setPhotoUri(picked);
     } catch (e) {
-      setError(e instanceof PhotoPermissionError ? e.message : 'Nu am putut încărca poza.');
+      setError(e instanceof PhotoPermissionError ? e.message : tr('Nu am putut încărca poza.'));
     }
   };
 
@@ -71,19 +72,17 @@ function SheetContent({ events, initialEventId, onClose }: Omit<Props, 'visible'
     <View style={[styles.sheet, { paddingBottom: insets.bottom + 16 }]}>
       <View style={styles.handle} />
       <View style={styles.header}>
-        <Text style={styles.title}>Adaugă amintire</Text>
-        <Pressable onPress={onClose} hitSlop={10} accessibilityLabel="Închide">
+        <Text style={styles.title}>{tr('Adaugă amintire')}</Text>
+        <Pressable onPress={onClose} hitSlop={10} accessibilityLabel={tr('Închide')}>
           <Ionicons name="close" size={22} color={colors.muted} />
         </Pressable>
       </View>
 
       {events.length === 0 ? (
-        <Text style={styles.muted}>
-          Amintirile se adaugă la evenimentele la care ai fost. După primul eveniment terminat, îl găsești aici.
-        </Text>
+        <Text style={styles.muted}>{tr('Amintirile se adaugă la evenimentele la care ai fost. După primul eveniment terminat, îl găsești aici.')}</Text>
       ) : (
         <>
-          <Text style={styles.label}>De la ce eveniment</Text>
+          <Text style={styles.label}>{tr('De la ce eveniment')}</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.events}>
             {events.map((e) => (
               <Chip
@@ -95,32 +94,32 @@ function SheetContent({ events, initialEventId, onClose }: Omit<Props, 'visible'
             ))}
           </ScrollView>
 
-          <Text style={styles.label}>Poza</Text>
+          <Text style={styles.label}>{tr('Poza')}</Text>
           {photoUri ? (
             <View style={styles.previewRow}>
               <Image source={{ uri: photoUri }} style={styles.preview} resizeMode="cover" />
               <Pressable onPress={() => setPhotoUri(null)} hitSlop={8}>
-                <Text style={styles.link}>Alege altă poză</Text>
+                <Text style={styles.link}>{tr('Alege altă poză')}</Text>
               </Pressable>
             </View>
           ) : (
             <View style={styles.sources}>
               <Pressable onPress={() => pick('library')} style={({ pressed }) => [styles.source, pressed && styles.pressed]}>
                 <Ionicons name="images-outline" size={20} color={colors.text} />
-                <Text style={styles.sourceText}>Din galerie</Text>
+                <Text style={styles.sourceText}>{tr('Din galerie')}</Text>
               </Pressable>
               <Pressable onPress={() => pick('camera')} style={({ pressed }) => [styles.source, pressed && styles.pressed]}>
                 <Ionicons name="camera-outline" size={20} color={colors.text} />
-                <Text style={styles.sourceText}>Fă o poză</Text>
+                <Text style={styles.sourceText}>{tr('Fă o poză')}</Text>
               </Pressable>
             </View>
           )}
 
-          <Text style={styles.label}>Cine o vede</Text>
+          <Text style={styles.label}>{tr('Cine o vede')}</Text>
           <SegmentedControl
             options={[
-              { value: 'everyone', label: 'Toți' },
-              { value: 'friends', label: 'Doar prietenii' },
+              { value: 'everyone', label: tr('Toți') },
+              { value: 'friends', label: tr('Doar prietenii') },
             ]}
             value={visibility}
             onChange={setVisibility}
@@ -128,13 +127,13 @@ function SheetContent({ events, initialEventId, onClose }: Omit<Props, 'visible'
 
           <View style={styles.notice}>
             <Ionicons name="people-outline" size={16} color={colors.text} />
-            <Text style={styles.noticeText}>Nu pune poze în care se văd fețele altora fără acordul lor.</Text>
+            <Text style={styles.noticeText}>{tr('Nu pune poze în care se văd fețele altora fără acordul lor.')}</Text>
           </View>
 
           {error ? <FormMessage text={error} /> : null}
 
           <GradientButton
-            label="Adaugă amintirea"
+            label={tr('Adaugă amintirea')}
             icon="checkmark"
             onPress={save}
             disabled={!event || !photoUri}

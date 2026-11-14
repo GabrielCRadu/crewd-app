@@ -7,7 +7,7 @@ import {
   createNavigationContainerRef,
   getFocusedRouteNameFromRoute,
 } from '@react-navigation/native';
-import type { Theme } from '@react-navigation/native';
+import type { NavigationState, Theme } from '@react-navigation/native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import type { MaterialTopTabBarProps } from '@react-navigation/material-top-tabs';
 import { Ionicons } from '@expo/vector-icons';
@@ -25,6 +25,7 @@ import GradientButton from '../components/GradientButton';
 import { useAuth } from '../context/AuthContext';
 import { colors } from '../theme/colors';
 import { AuthNavigator, OnboardingNavigator } from './AuthNavigator';
+import { tr } from '../i18n';
 
 type IconName = ComponentProps<typeof Ionicons>['name'];
 
@@ -50,7 +51,7 @@ const theme: Theme = {
 };
 
 /** Ecranele care se deschid peste tab-uri și ascund bara de jos (vezi docs/layout-guide.md). */
-const FULLSCREEN_ROUTES = ['ChatRoom', 'EventDetails', 'RateEvent', 'PersonProfile', 'EditProfile', 'FriendsList', 'EventGroups', 'ProposeGroup', 'PersonFriends', 'DirectChat', 'GroupDetails', 'PublicProfile'];
+const FULLSCREEN_ROUTES = ['ChatRoom', 'EventDetails', 'RateEvent', 'PersonProfile', 'EditProfile', 'FriendsList', 'EventGroups', 'ProposeGroup', 'PersonFriends', 'DirectChat', 'GroupDetails', 'PublicProfile', 'Settings', 'PrivacyPolicy'];
 
 /** Evenimente · Hartă · Chat · Profil (Descoperă a fost scos: recomandările sunt grupulețele de la evenimente). Primul tab e cel implicit. */
 const TABS: {
@@ -65,6 +66,9 @@ const TABS: {
   { name: 'Chats', title: 'Chat', component: ChatsNavigator, icon: 'chatbubble-outline', iconActive: 'chatbubble' },
   { name: 'Profile', title: 'Profil', component: ProfileNavigator, icon: 'person-outline', iconActive: 'person' },
 ];
+
+/** Ultima stare a navigării (vezi `onStateChange`): se refolosește după schimbarea limbii. */
+let savedNavigationState: NavigationState | undefined;
 
 /** Navigarea din afara ecranelor (ex. notificarea de cerere de prietenie). */
 const navigationRef = createNavigationContainerRef<Record<string, object | undefined>>();
@@ -112,9 +116,20 @@ export default function RootNavigator() {
   // Ecranul curent (pornim pe Evenimente, primul tab), ca să știm unde arătăm butonul de cereri.
   const [routeName, setRouteName] = useState('EventsHome');
   const updateRoute = () => setRouteName(navigationRef.getCurrentRoute()?.name ?? 'EventsHome');
+  // Ținem minte unde ești, ca după schimbarea limbii (care redesenează tot) să rămâi pe același ecran.
+  const onStateChange = (state: NavigationState | undefined) => {
+    savedNavigationState = state;
+    updateRoute();
+  };
 
   return (
-    <NavigationContainer theme={theme} ref={navigationRef} onReady={updateRoute} onStateChange={updateRoute}>
+    <NavigationContainer
+      theme={theme}
+      ref={navigationRef}
+      initialState={savedNavigationState}
+      onReady={updateRoute}
+      onStateChange={onStateChange}
+    >
       {status === 'ready' ? (
         <>
           <MainTabs />
@@ -146,13 +161,13 @@ export default function RootNavigator() {
 function LoadingScreen({ error, onRetry, onSignOut }: { error: string | null; onRetry: () => void; onSignOut: () => void }) {
   return (
     <View style={styles.loading}>
-      <Text style={styles.logo}>crewd</Text>
+      <Text style={styles.logo}>{tr('crewd')}</Text>
       {error ? (
         <View style={styles.loadingError}>
           <Text style={styles.loadingText}>{error}</Text>
-          <GradientButton label="Încearcă din nou" icon="refresh" onPress={onRetry} compact />
+          <GradientButton label={tr('Încearcă din nou')} icon="refresh" onPress={onRetry} compact />
           <Pressable onPress={onSignOut} hitSlop={8}>
-            <Text style={styles.loadingLink}>Ieși din cont</Text>
+            <Text style={styles.loadingLink}>{tr('Ieși din cont')}</Text>
           </Pressable>
         </View>
       ) : (
@@ -179,7 +194,7 @@ function MainTabs() {
           name={t.name}
           component={t.component}
           options={({ route }) => ({
-            title: t.title,
+            title: tr(t.title),
             // Tragi doar pe ecranele principale: nu pe Hartă și nu pe ecranele deschise peste tab-uri.
             swipeEnabled:
               !NO_SWIPE_TABS.includes(t.name) &&
@@ -219,13 +234,13 @@ function MainTabBar({ state, navigation }: MaterialTopTabBarProps) {
             onPress={onPress}
             accessibilityRole="tab"
             accessibilityState={{ selected: focused }}
-            accessibilityLabel={tab.title}
+            accessibilityLabel={tr(tab.title)}
             style={styles.tabBarItem}
           >
             <View style={[styles.iconPill, focused && styles.iconPillActive]}>
               <Ionicons name={focused ? tab.iconActive : tab.icon} size={20} color={color} />
             </View>
-            <Text style={[styles.tabLabel, { color }]}>{tab.title}</Text>
+            <Text style={[styles.tabLabel, { color }]}>{tr(tab.title)}</Text>
           </Pressable>
         );
       })}

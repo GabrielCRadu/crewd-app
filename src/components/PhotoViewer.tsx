@@ -3,6 +3,7 @@ import { Animated, Image, Modal, Pressable, StyleSheet, Text, useWindowDimension
 
 import { colors } from '../theme/colors';
 import { radii } from '../theme/shape';
+import { tr } from '../i18n';
 
 interface Props {
   /** Poza deschisă mare; null = închis. */
@@ -45,7 +46,7 @@ export default function PhotoViewer({ photoUrl, caption, onClose }: Props) {
 
   return (
     <Modal visible={photoUrl !== null} transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent>
-      <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel="Închide poza">
+      <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel={tr('Închide poza')}>
         {photoUrl ? (
           <Animated.View style={{ transform: [{ scale }] }}>
             {/* Poza mică (deja încărcată) stă dedesubt până vine varianta mare */}
