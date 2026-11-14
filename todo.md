@@ -22,6 +22,7 @@ Actualizează lista când rezolvi ceva sau adaugi un mock nou.
 - [ ] **Evenimente trecute pentru istoric**: `e16`–`e18` (`PAST_JOINED_EVENT_IDS` în `src/data/mockEvents.ts`), adăugate peste datele din Firestore ca să meargă istoricul și evaluările.
 - [ ] **Evaluări și reputație**: `src/data/mockRatings.ts` + `src/services/ratingsService.ts`, doar în memorie. `ME_ID` trebuie înlocuit cu uid-ul din Auth. Raportările nu blochează încă pe nimeni.
 - [ ] **Badge-uri pe profil** (Stef): `src/services/badgesService.ts` + `src/data/mockBadges.ts`, doar în memorie. Voturile celorlalți și badge-urile automate ale altor persoane sunt mock; ale tale se calculează din istoric (`src/utils/badgeRules.ts`). Cu Firestore, numărarea celor 3 persoane diferite trebuie făcută pe server, cu reguli noi.
+- [ ] **Amintiri** (Stef): `src/services/memoriesService.ts` + `src/data/mockMemories.ts`, doar în memorie (pozele tale dispar la repornire). Amintirile celorlalți sunt mock, cu poze de pe Unsplash (de scos înainte de prezentare, ca restul). Cu Firebase: pozele în Storage și reguli care lasă amintirile „doar prieteni” numai prietenilor.
 - [ ] **Persoanele** (`PEOPLE`) din profilul altei persoane (`PersonProfileScreen`), folosite la evaluări și la grupulețele demo fără Firebase. (Descoperă a fost scos.)
 - [ ] **Profil demo** fără Firebase (`DEMO_PROFILE` / `MY_PROFILE`): fallback doar când lipsește `.env.local`.
 - [ ] **Evenimente mock** (`src/data/mockEvents.ts`): fallback doar când lipsește `.env.local`.
