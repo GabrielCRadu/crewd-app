@@ -35,3 +35,34 @@ export async function pickProfilePhoto(source: PhotoSource): Promise<string | nu
   const saved = await image.saveAsync({ format: SaveFormat.JPEG, compress: 0.7, base64: true });
   return saved.base64 ? `data:image/jpeg;base64,${saved.base64}` : null;
 }
+
+/** Lățimea maximă a unei poze-amintire, în pixeli. */
+const MEMORY_PHOTO_WIDTH = 1080;
+
+/**
+ * Alege o poză pentru o amintire (cameră sau galerie), fără decupare.
+ * O micșorăm și o comprimăm; întoarce calea fișierului de pe dispozitiv, sau null dacă ai renunțat.
+ */
+export async function pickMemoryPhoto(source: PhotoSource): Promise<string | null> {
+  const permission =
+    source === 'camera'
+      ? await ImagePicker.requestCameraPermissionsAsync()
+      : await ImagePicker.requestMediaLibraryPermissionsAsync();
+  if (!permission.granted) {
+    throw new PhotoPermissionError(
+      source === 'camera' ? 'Ai nevoie de acces la cameră.' : 'Ai nevoie de acces la galerie.',
+    );
+  }
+
+  const options: ImagePicker.ImagePickerOptions = { mediaTypes: ['images'], quality: 1 };
+  const result =
+    source === 'camera' ? await ImagePicker.launchCameraAsync(options) : await ImagePicker.launchImageLibraryAsync(options);
+  const asset = result.canceled ? null : result.assets[0];
+  if (!asset) return null;
+
+  // Nu mărim pozele deja mici.
+  const width = Math.min(asset.width || MEMORY_PHOTO_WIDTH, MEMORY_PHOTO_WIDTH);
+  const image = await ImageManipulator.manipulate(asset.uri).resize({ width, height: null }).renderAsync();
+  const saved = await image.saveAsync({ format: SaveFormat.JPEG, compress: 0.75 });
+  return saved.uri;
+}
