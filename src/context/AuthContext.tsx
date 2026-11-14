@@ -89,12 +89,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [attempt, setAttempt] = useState(0);
   // Amprenta ultimului profil public scris (src/utils/publicProfile.ts).
   const publishedKey = useRef<string | null>(null);
+  // Contul curent: o încărcare pornită pentru alt cont (schimbare rapidă de cont) nu mai scrie nimic (audit).
+  const currentUid = useRef<string | null>(null);
 
   useEffect(() => {
     if (!isFirebaseConfigured) return;
     let active = true;
     const unsubscribe = subscribeToAuth(async (nextUser) => {
       if (!active) return;
+      currentUid.current = nextUser?.uid ?? null;
       setUser(nextUser);
       setError(null);
       if (!nextUser) {
@@ -111,7 +114,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const loaded = await getProfile(nextUser.uid);
         // Înscrierile și scorurile salvate se încarcă o singură dată, la login.
         const saved = loaded ? await getSavedPreferences(nextUser.uid) : null;
-        if (!active) return;
+        if (!active || currentUid.current !== nextUser.uid) return;
         if (loaded) loadUserPreferences(nextUser.uid, saved, allProfileTags(loaded));
         setProfile(loaded);
         setStatus(loaded ? (isProfileComplete(loaded) ? 'ready' : 'needsCompletion') : 'needsProfile');
@@ -119,7 +122,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (loaded?.photoUrl && !loaded.photoThumb) void backfillThumbnail(loaded.uid, loaded.photoUrl, loaded.username ?? null);
       } catch (e) {
         console.warn('Nu am putut încărca profilul:', e);
-        if (active) setError(tr('Nu am putut încărca profilul. Verifică conexiunea la internet.'));
+        if (active && currentUid.current === nextUser.uid) setError(tr('Nu am putut încărca profilul. Verifică conexiunea la internet.'));
       }
     });
     return () => {

@@ -14,6 +14,7 @@ import UpcomingEventRow from '../components/events/UpcomingEventRow';
 import { useEvents } from '../hooks/useEvents';
 import { usePreferences } from '../hooks/usePreferences';
 import { getLocationNotice, useUserLocation } from '../hooks/useUserLocation';
+import { useNow } from '../hooks/useNow';
 import type { EventsStackParamList } from '../navigation/eventsTypes';
 import { isJoined } from '../services/preferencesService';
 import { colors, onThemeChange } from '../theme/colors';
@@ -48,18 +49,23 @@ export default function EventsScreen({ navigation }: Props) {
     [events, preferences, location.coords],
   );
 
+  // Ora curentă, la fiecare minut: „ACUM” și „Urmează” se actualizează cât stai pe ecran (audit).
+  const now = useNow();
   // Evenimentele încă neterminate, din categoriile alese, cu distanța până la tine, sortate după oră.
   const visible = useMemo(
     () =>
       sortByDate(
         addDistance(events, location.coords).filter((e) => isUpcomingOrLive(e) && matchesCategories(e, categoryIds)),
       ),
-    [events, location.coords, categoryIds],
+    // `now` e în dependențe ca lista să se refacă la fiecare minut (isUpcomingOrLive citește ora curentă).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [events, location.coords, categoryIds, now],
   );
   // „ACUM” = toate evenimentele în desfășurare (cel mai apropiat primul); restul intră în „Urmează”.
   const liveNow = useMemo(
     () => visible.filter((e) => isLive(e)).sort((a, b) => a.distanceKm - b.distanceKm),
-    [visible],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [visible, now],
   );
   const upcoming = visible.filter((e) => !isLive(e));
 

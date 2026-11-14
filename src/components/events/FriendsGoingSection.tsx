@@ -5,6 +5,8 @@ import { Ionicons } from '@expo/vector-icons';
 import Avatar from '../Avatar';
 import { useEventGroups } from '../../hooks/useEventGroups';
 import { useFriends } from '../../hooks/useFriends';
+import { usePreferences } from '../../hooks/usePreferences';
+import { isJoined } from '../../services/preferencesService';
 import { idsWithStatus } from '../../services/friendsService';
 import { getPerson } from '../../services/peopleService';
 import { colors, onThemeChange } from '../../theme/colors';
@@ -31,7 +33,9 @@ interface Props {
  */
 export default function FriendsGoingSection({ event, onOpenPerson }: Props) {
   const friendsState = useFriends();
-  const { groups, loading } = useEventGroups(event.id);
+  const preferences = usePreferences();
+  // Grupurile se văd doar după înscriere; fără ea, prietenii apar doar după înscrierile lor.
+  const { groups, loading } = useEventGroups(event.id, isJoined(preferences, event.id));
   const [expanded, setExpanded] = useState(false);
 
   const going = useMemo(() => {

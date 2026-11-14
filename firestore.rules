@@ -8,11 +8,20 @@ service cloud.firestore {
     // (aceleași reguli ca src/utils/usernameRules.ts).
     function validUsername(u) {
       return u.matches('^[a-z0-9](?:[a-z0-9._]{1,18}[a-z0-9])$')
-        && !(usernameKey(u) in ['crewd', 'admin', 'support', 'moderator', 'official', 'help', 'system']);
+        && !(usernameKey(u) in ['crewd', 'admin', 'support', 'moderator', 'official', 'help', 'system', 'staff', 'team',
+          'crewd_team', 'crewd_support', 'crewd_official', 'crewd_admin', 'root', 'security', 'contact', 'info', 'null', 'undefined'])
+        && !u.matches('^crewd[._].*');
     }
     // Forma canonică (cheia din usernames/): `.` și `_` contează la fel.
     function usernameKey(u) {
       return u.replace('[.]', '_');
+    }
+
+    // Vârsta în ani împliniți, calendaristic, ca în aplicație (src/utils/birthDate.ts): de ziua ta ai noul an.
+    function calendarAge(birth) {
+      return request.time.year() - birth.year()
+        - ((request.time.month() < birth.month()
+          || (request.time.month() == birth.month() && request.time.day() < birth.day())) ? 1 : 0);
     }
 
     // Id-ul unei perechi de conturi în friendships/: uid-urile sortate, unite cu `_` (src/utils/friendshipRules.ts).
@@ -41,12 +50,30 @@ service cloud.firestore {
         function meAfter() {
           return getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data;
         }
-        // Vârsta din data nașterii (sau `age` la profilurile vechi) e în [minAge, maxAge].
+        // Vârsta din data nașterii (sau `age` la profilurile vechi).
+        function ageOf(u) {
+          return 'birthDate' in u ? calendarAge(u.birthDate) : u.get('age', -1);
+        }
+        // Vârsta e în [minAge, maxAge].
         function ageFits(u, minAge, maxAge) {
-          return ('birthDate' in u
-              && math.floor((request.time - u.birthDate).seconds() / 31557600) >= minAge
-              && math.floor((request.time - u.birthDate).seconds() / 31557600) <= maxAge)
-            || (!('birthDate' in u) && 'age' in u && u.age >= minAge && u.age <= maxAge);
+          return ageOf(u) >= minAge && ageOf(u) <= maxAge;
+        }
+        // Un singur grup pe eveniment pentru fiecare om (audit): evidența din memberships/ arată spre acest grup.
+        function membershipHere() {
+          return getAfter(/databases/$(database)/documents/memberships/$(request.auth.uid)/events/$(eventId)).data.groupId == groupId;
+        }
+        // Intrarea ta în grup: doar câmpurile cunoscute, cu numele și vârsta din profilul tău (nu inventate).
+        function validEntry(entry) {
+          return entry.keys().hasOnly(['name', 'age', 'tags', 'photo', 'username'])
+            && entry.name == me().name
+            && entry.age == ageOf(me())
+            && entry.tags is list && entry.tags.size() <= 30
+            && (entry.get('username', null) == null || entry.username == me().get('username', null))
+            && validPhoto(entry);
+        }
+        // Evenimentul există și întâlnirea e înainte de începutul lui.
+        function eventStart() {
+          return get(/databases/$(database)/documents/events/$(eventId)).data.startsAt;
         }
         function isRegistered() {
           return eventId in me().get('joinedEventIds', []);
@@ -65,15 +92,17 @@ service cloud.firestore {
             || (g.createdAt > g.meetupAt - duration.value(2, 'h') && request.time <= g.meetupAt - duration.value(30, 'm'));
         }
 
-        allow read: if request.auth != null;
+        // Citire: doar cine s-a înscris la eveniment (sau e deja membru), nu orice cont (audit: urmărire).
+        allow read: if request.auth != null && (isRegistered() || request.auth.uid in resource.data.memberUids);
 
         // Propunere: cel care propune e singurul membru, criteriile sunt valide, iar profilul lui arată spre grupuleț.
         allow create: if request.auth != null
           && request.resource.data.eventId == eventId
+          && exists(/databases/$(database)/documents/events/$(eventId))
           && request.resource.data.proposerUid == request.auth.uid
           && request.resource.data.memberUids == [request.auth.uid]
           && request.resource.data.members.keys().hasOnly([request.auth.uid])
-          && validPhoto(request.resource.data.members[request.auth.uid])
+          && validEntry(request.resource.data.members[request.auth.uid])
           && request.resource.data.formedAt == null
           && request.resource.data.createdAt == request.time
           && request.resource.data.maxSize is int
@@ -83,6 +112,7 @@ service cloud.firestore {
           && request.resource.data.maxAge >= request.resource.data.minAge && request.resource.data.maxAge <= 99
           && request.resource.data.meetupAt is timestamp
           && request.resource.data.meetupAt > request.time + duration.value(30, 'm')
+          && request.resource.data.meetupAt <= eventStart()
           && request.resource.data.vibe is string
           && request.resource.data.vibe.size() > 0 && request.resource.data.vibe.size() <= 120
           && request.resource.data.meetupPlace is string
@@ -90,7 +120,8 @@ service cloud.firestore {
           && request.resource.data.tags is list
           && ageFits(me(), request.resource.data.minAge, request.resource.data.maxAge)
           && isRegistered()
-          && pointsHere();
+          && pointsHere()
+          && membershipHere();
 
         // Intrare: se adaugă doar utilizatorul curent, în limita locurilor, înainte de întâlnire (și de termen, dacă nu e format).
         allow update: if request.auth != null
@@ -99,7 +130,7 @@ service cloud.firestore {
           && request.resource.data.memberUids == resource.data.memberUids.concat([request.auth.uid])
           && request.resource.data.memberUids.size() <= resource.data.maxSize
           && request.resource.data.members.diff(resource.data.members).affectedKeys().hasOnly([request.auth.uid])
-          && validPhoto(request.resource.data.members[request.auth.uid])
+          && validEntry(request.resource.data.members[request.auth.uid])
           && request.time < resource.data.meetupAt
           && (resource.data.formedAt != null || beforeFormationDeadline(resource.data))
           && ((resource.data.formedAt == null && request.resource.data.memberUids.size() >= 3)
@@ -107,7 +138,8 @@ service cloud.firestore {
               : request.resource.data.formedAt == resource.data.formedAt)
           && ageFits(me(), resource.data.minAge, resource.data.maxAge)
           && isRegistered()
-          && pointsHere();
+          && pointsHere()
+          && membershipHere();
 
         // Ieșire: se scoate doar utilizatorul curent; restul rămâne neschimbat.
         allow update: if request.auth != null
@@ -138,7 +170,9 @@ service cloud.firestore {
 
           allow read: if isMember();
 
+          // Chatul pornește abia după ce grupul s-a format (audit).
           allow create: if isMember()
+            && group().formedAt != null
             && request.resource.data.keys().hasOnly(['authorUid', 'authorName', 'text', 'createdAt'])
             && request.resource.data.authorUid == request.auth.uid
             // Numele de pe mesaj e cel din intrarea autorului în grup: nimeni nu poate semna în numele altcuiva.
@@ -168,7 +202,9 @@ service cloud.firestore {
 
       // Câmpurile care trebuie să fie valide la orice scriere.
       function validProfile(d) {
-        return d.name is string && d.name.size() > 0 && d.name.size() <= 50
+        return d.keys().hasOnly(['name', 'username', 'birthDate', 'age', 'city', 'gender', 'bio', 'photoUrl', 'photoThumb',
+            'chosenTags', 'learnedTags', 'joinedEventIds', 'tagScores', 'groupByEvent', 'createdAt', 'updatedAt'])
+          && d.name is string && d.name.size() > 0 && d.name.size() <= 50
           && d.city is string && d.city.size() <= 60
           && d.chosenTags is map
           && d.learnedTags is list
@@ -189,9 +225,9 @@ service cloud.firestore {
         return getAfter(/databases/$(database)/documents/usernames/$(usernameKey(u))).data.uid == request.auth.uid;
       }
 
-      // Data nașterii e un Timestamp (miezul nopții UTC); cel puțin 18 ani împliniți (6574 de zile ≈ 18 ani cu 4 ani bisecți).
+      // Data nașterii e un Timestamp (miezul nopții UTC); cel puțin 18 ani împliniți, calendaristic.
       function isAdult(birthDate) {
-        return birthDate is timestamp && birthDate <= request.time - duration.value(6574, 'd');
+        return birthDate is timestamp && calendarAge(birthDate) >= 18;
       }
 
       allow read: if isOwner();
@@ -218,7 +254,9 @@ service cloud.firestore {
         // Poza se poate înlocui, dar nu șterge.
         && !(resource.data.get('photoUrl', null) is string && !(request.resource.data.get('photoUrl', null) is string));
 
-      allow delete: if isOwner();
+      // Profilul nu se șterge din aplicație (altfel l-ai recrea cu altă dată a nașterii, păstrând username-ul):
+      // îl șterge funcția cleanupDeletedUser când se șterge contul din Firebase Auth (audit).
+      allow delete: if false;
     }
 
     // Username-urile (spec 2026-11-14-username-parola-design.md): cheia e forma canonică (`.` → `_`),
@@ -395,6 +433,29 @@ service cloud.firestore {
 
     // moderation/{id}: jurnalul moderării automate, scris doar de Cloud Functions (admin); închis pentru aplicație
     // prin regula de mai jos. Câmpul `removed` din mesaje îl scrie tot doar funcția (regulile de creare nu îl permit).
+
+    // În ce grup ești la fiecare eveniment: un singur document pe eveniment, deci un singur grup (audit).
+    // Îl scrie aplicația în aceeași tranzacție cu intrarea / propunerea / ieșirea (groupsService.ts).
+    match /memberships/{uid}/events/{eventId} {
+      function isOwner() {
+        return request.auth != null && request.auth.uid == uid;
+      }
+      function groupAfter(groupId) {
+        return getAfter(/databases/$(database)/documents/events/$(eventId)/groups/$(groupId)).data;
+      }
+      // Grupul vechi nu te mai are (ai ieșit din el în aceeași tranzacție).
+      function leftOld() {
+        return resource == null || !(uid in groupAfter(resource.data.groupId).memberUids);
+      }
+
+      allow read: if isOwner();
+      allow create, update: if isOwner()
+        && request.resource.data.keys().hasOnly(['groupId'])
+        && request.resource.data.groupId is string
+        && uid in groupAfter(request.resource.data.groupId).memberUids
+        && (resource == null || resource.data.groupId == request.resource.data.groupId || leftOld());
+      allow delete: if isOwner() && leftOld();
+    }
 
     // Orice altceva e închis până adăugăm reguli explicite.
     match /{document=**} {

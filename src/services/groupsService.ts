@@ -93,6 +93,8 @@ function fromDoc(snap: DocumentSnapshot<DocumentData>): CrewGroup | null {
 
 const groupRef = (eventId: string, groupId: string) => doc(db!, 'events', eventId, 'groups', groupId);
 const userRef = (uid: string) => doc(db!, 'users', uid);
+/** În ce grup ești la un eveniment (unul singur; regulile Firestore o verifică). */
+const membershipRef = (uid: string, eventId: string) => doc(db!, 'memberships', uid, 'events', eventId);
 
 /** Scoate utilizatorul dintr-un grupuleț, în cadrul unei tranzacții (după ce s-au făcut toate citirile). */
 function removeMember(tx: Transaction, g: CrewGroup, uid: string) {
@@ -127,6 +129,7 @@ async function firestoreJoin(eventId: string, groupId: string, me: UserProfile):
       ...(target.formedAt === null && memberUids.length >= MIN_FORM_MEMBERS ? { formedAt: serverTimestamp() } : {}),
     });
     tx.update(userRef(me.uid), { [`groupByEvent.${eventId}`]: groupId });
+    tx.set(membershipRef(me.uid, eventId), { groupId });
   });
 }
 
@@ -158,6 +161,7 @@ async function firestorePropose(eventId: string, draft: ProposalDraft, tags: str
       formedAt: null,
     });
     tx.update(userRef(me.uid), { [`groupByEvent.${eventId}`]: newRef.id });
+    tx.set(membershipRef(me.uid, eventId), { groupId: newRef.id });
   });
   return newRef.id;
 }
@@ -167,6 +171,7 @@ async function firestoreLeave(eventId: string, groupId: string, uid: string): Pr
     const g = fromDoc(await tx.get(groupRef(eventId, groupId)));
     if (g && g.memberUids.includes(uid)) removeMember(tx, g, uid);
     tx.update(userRef(uid), { [`groupByEvent.${eventId}`]: deleteField() });
+    tx.delete(membershipRef(uid, eventId));
   });
 }
 

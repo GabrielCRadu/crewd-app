@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -44,16 +44,26 @@ export default function JoinedCalendar({ events, onOpenEvent, onBrowse }: Props)
   const todayKey = dayKey(today);
   const [month, setMonth] = useState(() => initialMonth(events, today));
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  // Evenimentele pot sosi după prima afișare (lista goală la început): luna se recalculează o dată,
+  // la primele evenimente, dacă utilizatorul nu a schimbat-o între timp (audit: luna greșită).
+  const [monthChosen, setMonthChosen] = useState(events.length > 0);
+  useEffect(() => {
+    if (monthChosen || events.length === 0) return;
+    setMonth(initialMonth(events, new Date()));
+    setMonthChosen(true);
+  }, [events, monthChosen]);
 
   const weeks = useMemo(() => monthGrid(month), [month]);
   const allByDay = useMemo(() => groupByDay(events), [events]);
   const monthByDay = useMemo(() => groupByDay(inMonth(events, month)), [events, month]);
 
   const changeMonth = (delta: number) => {
+    setMonthChosen(true);
     setMonth((m) => addMonths(m, delta));
     setSelectedKey(null);
   };
   const goToday = () => {
+    setMonthChosen(true);
     setMonth(startOfMonth(today));
     setSelectedKey(todayKey);
   };

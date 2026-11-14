@@ -1,7 +1,6 @@
 import type { CrewGroup, GroupStatus, JoinContext, MemberSummary, ProposalDraft } from '../types/groups';
 import type { UserProfile } from '../types/user';
 import { ageFromBirthDate } from './birthDate';
-import { allProfileTags } from './profileTags';
 import { tr } from '../i18n';
 
 /*
@@ -139,7 +138,7 @@ export function memberSummary(me: UserProfile, now: Date): MemberSummary {
   return {
     name: me.name,
     age: profileAge(me, now),
-    tags: allProfileTags(me),
+    tags: [...new Set([...me.chosenTags.events, ...me.chosenTags.music, ...me.chosenTags.hobbies])].slice(0, 30),
     photo: me.photoThumb ?? null,
     username: me.username ?? null,
   };
@@ -153,4 +152,15 @@ export function otherGroupsOpenByDefault(myGroup: CrewGroup | null, now: Date): 
   if (!myGroup) return true;
   const status = groupStatus(myGroup, now);
   return status === 'expired' || status === 'closed';
+}
+
+/**
+ * Ora întâlnirii aleasă din ceas (oră, minut) pentru un eveniment: în ziua evenimentului, iar dacă
+ * ar ieși după început (ex. eveniment la 01:00, întâlnire la 23:30), în seara dinainte.
+ */
+export function meetupTimeFor(eventStart: Date, hours: number, minutes: number): Date {
+  const next = new Date(eventStart);
+  next.setHours(hours, minutes, 0, 0);
+  if (next.getTime() > eventStart.getTime()) next.setDate(next.getDate() - 1);
+  return next;
 }
