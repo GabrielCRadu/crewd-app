@@ -38,7 +38,7 @@ export default function EventGroupsSection({ event, joined, myGroup, onPropose }
     return (
       <View style={styles.locked}>
         <Ionicons name="people-outline" size={20} color={colors.muted} />
-        <Text style={styles.lockedText}>Înscrie-te ca să vezi grupulețele celor care merg.</Text>
+        <Text style={styles.lockedText}>Înscrie-te ca să vezi grupurile celor care merg.</Text>
       </View>
     );
   }
@@ -68,7 +68,7 @@ export default function EventGroupsSection({ event, joined, myGroup, onPropose }
 
   const join = (g: CrewGroup) => {
     if (myGroup && myGroup.id !== g.id) {
-      Alert.alert('Schimbi grupulețul?', 'Poți fi într-un singur grupuleț la un eveniment. Ieși din cel actual și intri aici?', [
+      Alert.alert('Schimbi grupul?', 'Poți fi într-un singur grup la un eveniment. Ieși din cel actual și intri aici?', [
         { text: 'Rămân', style: 'cancel' },
         { text: 'Schimb', onPress: () => void doJoin(g) },
       ]);
@@ -82,7 +82,7 @@ export default function EventGroupsSection({ event, joined, myGroup, onPropose }
       {loading ? <ActivityIndicator color={colors.text} /> : null}
       {error ? <Text style={styles.muted}>{error}</Text> : null}
       {!loading && visible.length === 0 ? (
-        <Text style={styles.muted}>Încă nu s-a format niciun grupuleț pe gustul tău.</Text>
+        <Text style={styles.muted}>Încă nu s-a format niciun grup pe gustul tău.</Text>
       ) : null}
 
       {visible.map((g) => (

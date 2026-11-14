@@ -61,13 +61,13 @@ export default function EventGroupsScreen({ navigation, route }: Props) {
   const confirmLeaveGroup = () => {
     const uid = user?.uid ?? profile?.uid;
     if (!myGroup || !uid) return;
-    Alert.alert('Ieși din grupuleț?', 'Ieși și din chat-ul lui (e același lucru). Rămâi înscris la eveniment și poți alege alt grupuleț.', [
+    Alert.alert('Ieși din grup?', 'Ieși și din chat-ul lui (e același lucru). Rămâi înscris la eveniment și poți alege alt grup.', [
       { text: 'Rămân', style: 'cancel' },
       {
         text: 'Ies',
         style: 'destructive',
         onPress: () => {
-          leaveGroup(event.id, myGroup.id, uid).catch((e: Error) => Alert.alert('Nu ai ieșit din grupuleț', e.message));
+          leaveGroup(event.id, myGroup.id, uid).catch((e: Error) => Alert.alert('Nu ai ieșit din grup', e.message));
         },
       },
     ]);
@@ -78,7 +78,7 @@ export default function EventGroupsScreen({ navigation, route }: Props) {
       <View style={styles.header}>
         <GlassIconButton icon="chevron-back" onPress={() => navigation.goBack()} />
         <View style={styles.headerText}>
-          <Text style={styles.title}>Grupulețe</Text>
+          <Text style={styles.title}>Grupuri</Text>
           <Text style={styles.subtitle} numberOfLines={1}>
             {event.title} · {formatDay(event.startsAt, now)}, {formatTime(event.startsAt)}
           </Text>
@@ -91,7 +91,7 @@ export default function EventGroupsScreen({ navigation, route }: Props) {
           <View style={styles.mine}>
             {canOpenChat(myGroup) ? (
               <>
-                <Text style={styles.mineTitle}>Ești în grupuleț</Text>
+                <Text style={styles.mineTitle}>Ești în grup</Text>
                 <Text style={styles.mineText}>
                   {myGroup.memberUids.length} persoane · ne vedem la {formatTime(myGroup.meetupAt)}, {myGroup.meetupPlace}
                 </Text>
@@ -101,9 +101,9 @@ export default function EventGroupsScreen({ navigation, route }: Props) {
               <>
                 <View style={styles.mineRow}>
                   <Ionicons name="alert-circle-outline" size={18} color={colors.nope} />
-                  <Text style={styles.mineTitle}>Grupulețul nu s-a format</Text>
+                  <Text style={styles.mineTitle}>Grupul nu s-a format</Text>
                 </View>
-                <Text style={styles.mineText}>Nu s-au strâns 3 persoane la timp. Alege alt grupuleț sau propune unul.</Text>
+                <Text style={styles.mineText}>Nu s-au strâns 3 persoane la timp. Alege alt grup sau propune unul.</Text>
               </>
             ) : (
               <>
@@ -118,7 +118,7 @@ export default function EventGroupsScreen({ navigation, route }: Props) {
             )}
             <Pressable onPress={confirmLeaveGroup} hitSlop={8} style={styles.leave}>
               <Ionicons name="exit-outline" size={16} color={colors.muted} />
-              <Text style={styles.leaveText}>Ieși din grupuleț</Text>
+              <Text style={styles.leaveText}>Ieși din grup</Text>
             </Pressable>
           </View>
         ) : null}

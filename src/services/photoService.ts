@@ -36,6 +36,24 @@ export async function pickProfilePhoto(source: PhotoSource): Promise<string | nu
   return saved.base64 ? `data:image/jpeg;base64,${saved.base64}` : null;
 }
 
+/** Latura miniaturii din chat și din lista de membri, în pixeli. */
+export const THUMB_SIZE = 96;
+
+/**
+ * Miniatura pătrată (~96px) a unei poze de profil (data URI sau fișier), ca data URI JPEG de câțiva KB.
+ * Întoarce null dacă nu s-a putut genera (poza de profil rămâne oricum salvată).
+ */
+export async function makeThumbnail(photoUri: string): Promise<string | null> {
+  try {
+    const image = await ImageManipulator.manipulate(photoUri).resize({ width: THUMB_SIZE, height: THUMB_SIZE }).renderAsync();
+    const saved = await image.saveAsync({ format: SaveFormat.JPEG, compress: 0.6, base64: true });
+    return saved.base64 ? `data:image/jpeg;base64,${saved.base64}` : null;
+  } catch (e) {
+    console.warn('Nu am putut genera miniatura pozei:', e);
+    return null;
+  }
+}
+
 /** Lățimea maximă a unei poze-amintire, în pixeli. */
 const MEMORY_PHOTO_WIDTH = 1080;
 

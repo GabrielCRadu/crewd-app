@@ -100,7 +100,7 @@ export default function ProposeGroupScreen({ navigation, route }: Props) {
       <View style={styles.header}>
         <GlassIconButton icon="chevron-back" onPress={() => navigation.goBack()} />
         <View style={styles.headerText}>
-          <Text style={styles.title}>Propune un grupuleț</Text>
+          <Text style={styles.title}>Propune un grup</Text>
           <Text style={styles.subtitle} numberOfLines={1}>
             {event.title}
           </Text>
@@ -207,11 +207,11 @@ export default function ProposeGroupScreen({ navigation, route }: Props) {
           ) : null}
 
           <Text style={styles.hint}>
-            Devii primul membru. Grupulețul se formează când sunteți cel puțin 3, iar chat-ul se deschide atunci.
+            Devii primul membru. Grupul se formează când sunteți cel puțin 3, iar chat-ul se deschide atunci.
           </Text>
 
           {formError ? <FormMessage text={formError} /> : null}
-          <GradientButton label="Propune grupulețul" icon="arrow-forward" loading={saving} onPress={submit} />
+          <GradientButton label="Propune grupul" icon="arrow-forward" loading={saving} onPress={submit} />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

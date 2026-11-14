@@ -4,7 +4,8 @@ import type { ReactNode } from 'react';
 import { MY_PROFILE } from '../data/mockSocial';
 import { isFirebaseConfigured } from '../lib/firebase';
 import { confirmPassword, deleteCurrentUser, signOut as authSignOut, subscribeToAuth } from '../services/authService';
-import { leaveAllGroups } from '../services/groupsService';
+import { MOCK_UID, leaveAllGroups, refreshMyPhotoInGroups } from '../services/groupsService';
+import { makeThumbnail } from '../services/photoService';
 import type { AuthUser } from '../services/authService';
 import { loadUserPreferences, seedTagScores } from '../services/preferencesService';
 import {
@@ -17,6 +18,7 @@ import {
   updateProfileFields,
 } from '../services/profileService';
 import type { ProfileChanges, ProfileDraft, UserProfile } from '../types/user';
+import { isNewPhoto } from '../utils/profilePhoto';
 import { allProfileTags } from '../utils/profileTags';
 
 /*
@@ -93,6 +95,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (loaded) loadUserPreferences(nextUser.uid, saved, allProfileTags(loaded));
         setProfile(loaded);
         setStatus(loaded ? 'ready' : 'needsProfile');
+        // Profilurile cu poză de dinainte de chat n-au miniatură: o generăm o dată, în fundal.
+        if (loaded?.photoUrl && !loaded.photoThumb) void backfillThumbnail(loaded.uid, loaded.photoUrl);
       } catch (e) {
         console.warn('Nu am putut încărca profilul:', e);
         if (active) setError('Nu am putut încărca profilul. Verifică conexiunea la internet.');
@@ -136,19 +140,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [profile],
   );
 
+  // Miniatura pentru chat, generată după login la profilurile care au poză, dar n-au încă miniatură.
+  async function backfillThumbnail(uid: string, photoUrl: string) {
+    try {
+      const photoThumb = await makeThumbnail(photoUrl);
+      if (!photoThumb) return;
+      await updateProfileFields(uid, { photoThumb });
+      setProfile((p) => (p && p.uid === uid ? { ...p, photoThumb } : p));
+      await refreshMyPhotoInGroups(uid, photoThumb);
+    } catch (e) {
+      console.warn('Nu am putut salva miniatura pozei:', e);
+    }
+  }
+
   // „Editează profilul”: actualizăm imediat pe ecran; dacă salvarea în Firestore eșuează, revenim.
+  // O poză nouă vine cu miniatura ei, copiată apoi și în grupurile în care ești.
   const updateProfile = useCallback(
     async (changes: ProfileChanges) => {
       if (!profile) return;
       const previous = profile;
-      setProfile({ ...profile, ...changes });
-      if (!isFirebaseConfigured) return;
-      try {
-        await updateProfileFields(profile.uid, changes);
-      } catch (e) {
-        setProfile(previous);
-        throw e;
+      const photoChanged = isNewPhoto(changes, profile.photoUrl);
+      const full: ProfileChanges = photoChanged
+        ? { ...changes, photoThumb: changes.photoUrl ? await makeThumbnail(changes.photoUrl) : null }
+        : changes;
+      setProfile({ ...profile, ...full });
+      if (isFirebaseConfigured) {
+        try {
+          await updateProfileFields(profile.uid, full);
+        } catch (e) {
+          setProfile(previous);
+          throw e;
+        }
       }
+      if (photoChanged) void refreshMyPhotoInGroups(isFirebaseConfigured ? profile.uid : MOCK_UID, full.photoThumb ?? null);
     },
     [profile],
   );

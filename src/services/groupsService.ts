@@ -7,17 +7,17 @@ import {
   onSnapshot,
   runTransaction,
   serverTimestamp,
+  updateDoc,
 } from 'firebase/firestore';
 import type { DocumentData, DocumentSnapshot, Transaction } from 'firebase/firestore';
 
-import { allProfileTags } from '../utils/profileTags';
 import { placeMockEvents } from '../data/mockEvents';
 import { ME_ID } from '../data/mockRatings';
 import { PEOPLE } from '../data/mockSocial';
 import { db } from '../lib/firebase';
 import type { CrewGroup, MemberSummary, ProposalDraft } from '../types/groups';
 import type { UserProfile } from '../types/user';
-import { MIN_FORM_MEMBERS, REPORT_BLOCK_THRESHOLD, joinBlockReason, profileAge } from '../utils/groupRules';
+import { MIN_FORM_MEMBERS, REPORT_BLOCK_THRESHOLD, joinBlockReason, memberSummary, profileAge } from '../utils/groupRules';
 import { getPreferences, isJoined } from './preferencesService';
 import { getMyRatings, getReputation } from './ratingsService';
 
@@ -37,10 +37,6 @@ export class GroupActionError extends Error {}
 
 const NETWORK_MESSAGE = 'Nu am putut salva. Verifică conexiunea la internet și încearcă din nou.';
 const DENIED_MESSAGE = 'Nu s-a putut: între timp s-a schimbat ceva (locuri, termen sau înscriere). Reîncarcă și încearcă din nou.';
-
-function memberSummary(me: UserProfile, now: Date): MemberSummary {
-  return { name: me.name, age: profileAge(me, now), tags: allProfileTags(me) };
-}
 
 function isBlocked(): boolean {
   return getReputation(getMyRatings(), ME_ID).reportsCount >= REPORT_BLOCK_THRESHOLD;
@@ -111,7 +107,7 @@ async function firestoreJoin(eventId: string, groupId: string, me: UserProfile):
     const userSnap = await tx.get(userRef(me.uid));
     const currentGroupId: string | null = userSnap.data()?.groupByEvent?.[eventId] ?? null;
     const target = fromDoc(await tx.get(groupRef(eventId, groupId)));
-    if (!target) throw new GroupActionError('Grupulețul nu mai există.');
+    if (!target) throw new GroupActionError('Grupul nu mai există.');
     const previous =
       currentGroupId && currentGroupId !== groupId ? fromDoc(await tx.get(groupRef(eventId, currentGroupId))) : null;
 
@@ -142,7 +138,7 @@ async function firestorePropose(eventId: string, draft: ProposalDraft, tags: str
     const previous = currentGroupId ? fromDoc(await tx.get(groupRef(eventId, currentGroupId))) : null;
 
     if (!isJoined(getPreferences(), eventId)) throw new GroupActionError('Înscrie-te întâi la eveniment.');
-    if (isBlocked()) throw new GroupActionError('Nu poți propune grupulețe o perioadă, din cauza raportărilor.');
+    if (isBlocked()) throw new GroupActionError('Nu poți propune grupuri o perioadă, din cauza raportărilor.');
 
     if (previous) removeMember(tx, previous, me.uid);
     tx.set(newRef, {
@@ -193,7 +189,12 @@ function mockGroupsFor(eventId: string): CrewGroup[] {
     if (event && event.startsAt.getTime() - Date.now() > 3 * 3_600_000) {
       const meetupAt = new Date(event.startsAt.getTime() - 15 * 60_000);
       const createdAt = new Date(Date.now() - 24 * 3_600_000);
-      const summary = (p: (typeof PEOPLE)[number]): MemberSummary => ({ name: p.name, age: p.age, tags: p.tags });
+      const summary = (p: (typeof PEOPLE)[number]): MemberSummary => ({
+        name: p.name,
+        age: p.age,
+        tags: p.tags,
+        photo: p.photoUrl ?? null,
+      });
       const formedMembers = PEOPLE.slice(0, 4);
       const formingMembers = PEOPLE.slice(2, 4);
       seeded.push(
@@ -254,7 +255,7 @@ function mockRemove(eventId: string, groupId: string, uid: string) {
 function mockJoin(eventId: string, groupId: string, me: UserProfile) {
   const now = new Date();
   const target = mockGroupsFor(eventId).find((g) => g.id === groupId);
-  if (!target) throw new GroupActionError('Grupulețul nu mai există.');
+  if (!target) throw new GroupActionError('Grupul nu mai există.');
   const currentGroupId = myGroupByEvent[eventId] ?? null;
   const reason = joinBlockReason(
     target,
@@ -448,6 +449,35 @@ export async function leaveAllGroups(uid: string): Promise<void> {
     const byEvent: Record<string, string> = snap.data()?.groupByEvent ?? {};
     for (const [eventId, groupId] of Object.entries(byEvent)) await firestoreLeave(eventId, groupId, uid);
   });
+}
+
+/**
+ * După ce îți schimbi poza: pune noua miniatură în `members[uid].photo` la grupurile în care ești deja,
+ * ca ceilalți să o vadă în chat. Erorile doar se loghează (poza de profil e deja salvată).
+ */
+export async function refreshMyPhotoInGroups(uid: string, photo: string | null): Promise<void> {
+  if (!db) {
+    for (const [eventId, groupId] of Object.entries(myGroupByEvent)) {
+      mockUpdate(eventId, groupId, (g) =>
+        g.members[uid] ? { ...g, members: { ...g.members, [uid]: { ...g.members[uid]!, photo } } } : g,
+      );
+    }
+    mockNotify();
+    return;
+  }
+  try {
+    const snap = await getDoc(userRef(uid));
+    const byEvent: Record<string, string> = snap.data()?.groupByEvent ?? {};
+    await Promise.all(
+      Object.entries(byEvent).map(([eventId, groupId]) =>
+        updateDoc(groupRef(eventId, groupId), { [`members.${uid}.photo`]: photo }).catch((e: unknown) =>
+          console.warn(`Nu am putut actualiza miniatura în grupul ${groupId}:`, e),
+        ),
+      ),
+    );
+  } catch (e) {
+    console.warn('Nu am putut actualiza miniatura în grupuri:', e);
+  }
 }
 
 /** Uid-ul folosit fără Firebase (profilul demo). */

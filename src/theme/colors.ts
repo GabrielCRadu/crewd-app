@@ -22,6 +22,8 @@ export const colors = {
   faint: 'rgba(255,255,255,0.40)',
   /** Text pe elemente albe (pastila albă, butonul principal). */
   onLight: '#0A0A0A',
+  /** Text secundar pe elemente albe (ex. ora pe bula albă a mesajelor tale). */
+  onLightMuted: 'rgba(10,10,10,0.5)',
   /** Accentul principal: alb (stil monocrom; culoarea o dau pozele, nu interfața). */
   primary: '#FFFFFF',
   /** Tonuri de gri (fostele accente calde), pentru elementele care încă le folosesc. */
