@@ -11,6 +11,7 @@ import {
 import type { User } from 'firebase/auth';
 
 import { auth } from '../lib/firebase';
+import { MIN_PASSWORD_LENGTH } from '../utils/passwordRules';
 
 /*
  * Autentificarea cu email și parolă (Firebase Auth). Ecranele folosesc doar funcțiile de aici
@@ -19,8 +20,6 @@ import { auth } from '../lib/firebase';
 
 export type AuthUser = Pick<User, 'uid' | 'email'>;
 
-/** Parola minimă acceptată de Firebase e de 6 caractere; cerem puțin mai mult. */
-export const MIN_PASSWORD_LENGTH = 8;
 
 function requireAuth() {
   if (!auth) throw new Error('Firebase nu e configurat (lipsește .env.local).');
@@ -107,7 +106,7 @@ function toMessage(e: unknown): string {
     case 'auth/email-already-in-use':
       return 'Există deja un cont cu acest email. Încearcă să te loghezi.';
     case 'auth/weak-password':
-      return `Parola e prea slabă. Folosește cel puțin ${MIN_PASSWORD_LENGTH} caractere.`;
+      return `Parola e prea slabă: minim ${MIN_PASSWORD_LENGTH} caractere, o literă mică și o literă mare.`;
     case 'auth/too-many-requests':
       return 'Prea multe încercări. Așteaptă puțin și încearcă din nou.';
     case 'auth/network-request-failed':
