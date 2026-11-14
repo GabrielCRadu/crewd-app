@@ -1,5 +1,15 @@
-import { Fragment, useState } from 'react';
-import { Alert, KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Fragment, useRef, useState } from 'react';
+import type { ComponentRef } from 'react';
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -12,6 +22,8 @@ import Avatar from '../components/Avatar';
 import Chip from '../components/Chip';
 import PhotoViewer from '../components/PhotoViewer';
 import DeleteAccount from '../components/DeleteAccount';
+import ProfileMenu from '../components/ProfileMenu';
+import type { MenuAnchor } from '../components/ProfileMenu';
 import InviteQrSheet from '../components/InviteQrSheet';
 import ReputationStats from '../components/ReputationStats';
 import BadgesCard from '../components/badges/BadgesCard';
@@ -59,6 +71,10 @@ export default function ProfileScreen() {
   const [openMemoryId, setOpenMemoryId] = useState<string | null>(null);
   const [photoOpen, setPhotoOpen] = useState(false);
   const [qrOpen, setQrOpen] = useState(false);
+  // Meniul cu trei linii: unde se deschide (null = închis).
+  const [menuAnchor, setMenuAnchor] = useState<MenuAnchor | null>(null);
+  const menuButton = useRef<ComponentRef<typeof View>>(null);
+  const { width: windowWidth } = useWindowDimensions();
   // Badge-uri: cele votate sunt încă mock (badgesService); cele automate vin din istoricul tău.
   const badgeProgress = autoBadgeProgress(pastEvents);
 
@@ -85,10 +101,17 @@ export default function ProfileScreen() {
   };
 
   const confirmSignOut = () =>
-    Alert.alert('Ieși din cont?', 'Te poți loga din nou oricând cu emailul și parola.', [
-      { text: 'Anulează', style: 'cancel' },
-      { text: 'Ieși', style: 'destructive', onPress: () => void signOut() },
+    Alert.alert('Ești sigur că vrei să ieși din cont?', 'Te poți loga din nou oricând cu emailul și parola.', [
+      { text: 'Nu', style: 'cancel' },
+      { text: 'Da', style: 'destructive', onPress: () => void signOut() },
     ]);
+
+  // Meniul se deschide chiar sub butonul cu trei linii, aliniat la marginea lui din dreapta.
+  const openMenu = () => {
+    menuButton.current?.measureInWindow((x, y, width, height) => {
+      setMenuAnchor({ top: y + height + 8, right: Math.max(12, windowWidth - (x + width)) });
+    });
+  };
 
   return (
     // Fundal complet negru; culoarea apare doar în câteva carduri (identitate, „Despre mine”, conturul „Ce îți place”).
@@ -111,11 +134,14 @@ export default function ProfileScreen() {
             >
               <Ionicons name="qr-code-outline" size={18} color={colors.text} />
             </Pressable>
+            {/* Meniul (trei linii, ca pe Instagram): Editează, Setări, Delogare */}
             <Pressable
-              onPress={() => navigation.navigate('EditProfile')}
-              style={({ pressed }) => [styles.editButton, pressed && styles.pressed]}
+              ref={menuButton}
+              onPress={openMenu}
+              accessibilityLabel="Meniu"
+              style={({ pressed }) => [styles.qrButton, pressed && styles.qrPressed]}
             >
-              <Text style={styles.editText}>Editează</Text>
+              <Ionicons name="menu" size={20} color={colors.text} />
             </Pressable>
           </View>
         </View>
@@ -280,6 +306,13 @@ export default function ProfileScreen() {
         caption={profile.name}
         onClose={() => setPhotoOpen(false)}
       />
+      <ProfileMenu
+        anchor={menuAnchor}
+        onClose={() => setMenuAnchor(null)}
+        onEdit={() => navigation.navigate('EditProfile')}
+        onSettings={() => navigation.navigate('Settings')}
+        onSignOut={confirmSignOut}
+      />
       <InviteQrSheet
         visible={qrOpen}
         uid={profile.uid}
@@ -291,7 +324,7 @@ export default function ProfileScreen() {
   );
 }
 
-/** Înălțimea butoanelor din antet (iconița QR și „Editează”), ca să stea la aceeași linie. */
+/** Înălțimea butoanelor din antet (codul QR și meniul), ca să stea la aceeași linie. */
 const HEADER_BUTTON_HEIGHT = 40;
 
 const styles = StyleSheet.create({
@@ -311,14 +344,6 @@ const styles = StyleSheet.create({
   },
   qrPressed: { backgroundColor: colors.cardStrong },
   title: { ...type.screenTitle, fontSize: 32 },
-  editButton: {
-    ...glass,
-    height: HEADER_BUTTON_HEIGHT,
-    paddingHorizontal: 18,
-    justifyContent: 'center',
-    borderRadius: radii.pill,
-  },
-  editText: { color: colors.text, fontWeight: '500' },
   pressed: { backgroundColor: colors.cardStrong },
   identity: { ...glass, borderRadius: radii.card, overflow: 'hidden' },
   identityRow: { flexDirection: 'row', alignItems: 'center', gap: 16, padding: 18 },

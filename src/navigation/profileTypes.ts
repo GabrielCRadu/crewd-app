@@ -9,4 +9,6 @@ export type ProfileStackParamList = {
   PersonProfile: { personId: string };
   /** Prietenii unei persoane (toți sau doar cei comuni). */
   PersonFriends: { personId: string };
+  /** Setările contului (din meniul cu trei linii de pe profil). */
+  Settings: undefined;
 };

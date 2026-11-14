@@ -49,7 +49,7 @@ const theme: Theme = {
 };
 
 /** Ecranele care se deschid peste tab-uri și ascund bara de jos (vezi docs/layout-guide.md). */
-const FULLSCREEN_ROUTES = ['ChatRoom', 'EventDetails', 'RateEvent', 'PersonProfile', 'EditProfile', 'FriendsList', 'EventGroups', 'ProposeGroup', 'PersonFriends', 'DirectChat', 'GroupDetails'];
+const FULLSCREEN_ROUTES = ['ChatRoom', 'EventDetails', 'RateEvent', 'PersonProfile', 'EditProfile', 'FriendsList', 'EventGroups', 'ProposeGroup', 'PersonFriends', 'DirectChat', 'GroupDetails', 'Settings'];
 
 /** Evenimente · Hartă · Chat · Profil (Descoperă a fost scos: recomandările sunt grupulețele de la evenimente). Primul tab e cel implicit. */
 const TABS: {
