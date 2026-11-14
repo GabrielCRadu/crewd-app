@@ -88,7 +88,39 @@ service cloud.firestore {
           && request.resource.data.memberUids == resource.data.memberUids.removeAll([request.auth.uid])
           && request.resource.data.members.diff(resource.data.members).affectedKeys().hasOnly([request.auth.uid]);
 
+        // Miniatura: un membru își schimbă doar `photo` din propria intrare (când își schimbă poza de profil).
+        allow update: if request.auth != null
+          && request.auth.uid in resource.data.memberUids
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members'])
+          && request.resource.data.members.diff(resource.data.members).affectedKeys().hasOnly([request.auth.uid])
+          && request.resource.data.members[request.auth.uid].diff(resource.data.members[request.auth.uid]).affectedKeys().hasOnly(['photo'])
+          && (request.resource.data.members[request.auth.uid].photo == null
+              || (request.resource.data.members[request.auth.uid].photo is string
+                  && request.resource.data.members[request.auth.uid].photo.size() <= 20000));
+
         allow delete: if false;
+
+        // Conversația grupului (docs/superpowers/specs/2026-11-14-chat-grup-design.md): doar membrii o citesc și scriu.
+        // Mesajele nu se pot modifica sau șterge din aplicație.
+        match /messages/{messageId} {
+          function isMember() {
+            return request.auth != null
+              && request.auth.uid in get(/databases/$(database)/documents/events/$(eventId)/groups/$(groupId)).data.memberUids;
+          }
+
+          allow read: if isMember();
+
+          allow create: if isMember()
+            && request.resource.data.keys().hasOnly(['authorUid', 'authorName', 'text', 'createdAt'])
+            && request.resource.data.authorUid == request.auth.uid
+            && request.resource.data.authorName is string
+            && request.resource.data.authorName.size() > 0 && request.resource.data.authorName.size() <= 50
+            && request.resource.data.text is string
+            && request.resource.data.text.size() > 0 && request.resource.data.text.size() <= 1000
+            && request.resource.data.createdAt == request.time;
+
+          allow update, delete: if false;
+        }
       }
     }
 
@@ -113,6 +145,8 @@ service cloud.firestore {
           && (!('bio' in d) || (d.bio is string && d.bio.size() <= 500))
           // Poza e un data URI JPEG mic (~400px); limita ține documentul mult sub 1 MB.
           && (!('photoUrl' in d) || d.photoUrl == null || (d.photoUrl is string && d.photoUrl.size() <= 300000))
+          // Miniatura (~96px) din aceeași poză, copiată și în grupuri (members.<uid>.photo).
+          && (!('photoThumb' in d) || d.photoThumb == null || (d.photoThumb is string && d.photoThumb.size() <= 20000))
           && (!('joinedEventIds' in d) || (d.joinedEventIds is list && d.joinedEventIds.size() <= 500))
           && (!('groupByEvent' in d) || d.groupByEvent is map)
           && (!('tagScores' in d) || d.tagScores is map);
