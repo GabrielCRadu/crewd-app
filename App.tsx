@@ -5,6 +5,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AuthProvider } from './src/context/AuthContext';
 import { loadLanguage, useLanguage } from './src/i18n';
+import LogoSplash from './src/components/LogoSplash';
 import RootNavigator from './src/navigation/RootNavigator';
 import { appearance, colors } from './src/theme/colors';
 import { loadThemeChoice, useActiveScheme } from './src/theme/themeChoice';
@@ -21,7 +22,8 @@ export default function App() {
   useEffect(() => {
     SystemUI.setBackgroundColorAsync(colors.background).catch(() => {});
   }, [scheme]);
-  if (!settingsLoaded) return null;
+  // Cât se citesc setările: logo-ul animat (ecranul de încărcare).
+  if (!settingsLoaded) return <LogoSplash />;
 
   return (
     <SafeAreaProvider>

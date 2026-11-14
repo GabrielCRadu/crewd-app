@@ -2,6 +2,7 @@ import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
+import Logo from '../components/Logo';
 import Avatar from '../components/Avatar';
 import DirectThreadsSection from '../components/DirectThreadsSection';
 import LastMessageLine from '../components/chat/LastMessageLine';
@@ -53,7 +54,7 @@ export default function ChatsScreen({ navigation }: Props) {
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.title}>{tr('Chat-uri')}</Text>
+        <Logo height={30} accessibilityLabel={tr('Chat-uri')} />
         {/* Conversațiile doar cu un prieten (ex. un eveniment trimis) */}
         <DirectThreadsSection onOpen={(personId) => navigation.navigate('DirectChat', { personId })} />
         <Text style={styles.sectionTitle}>{tr('Grupurile tale')}</Text>
@@ -109,7 +110,6 @@ const makeStyles = () =>
   StyleSheet.create({
     safe: { flex: 1, backgroundColor: colors.background },
     content: { padding: 20, paddingBottom: 32, gap: 12 },
-    title: { ...type.screenTitle, fontSize: 32, marginBottom: 4 },
     sectionTitle: { ...type.label, marginTop: 12 },
     empty: { fontSize: 14, color: colors.muted },
     card: { ...glass, padding: 14, gap: 12, borderRadius: radii.card },
