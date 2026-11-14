@@ -4,6 +4,7 @@ import type { Transaction } from 'firebase/firestore';
 import { PEOPLE } from '../data/mockSocial';
 import { db } from '../lib/firebase';
 import { canonicalUsername, usernameError } from '../utils/usernameRules';
+import { tr } from '../i18n';
 
 /*
  * Username-urile unice (docs/superpowers/specs/2026-11-14-username-parola-design.md).
@@ -24,7 +25,7 @@ export interface PublicCard {
 /** Username-ul a fost luat (între timp) de altcineva. */
 export class UsernameTakenError extends Error {
   constructor() {
-    super('Username-ul e deja luat.');
+    super(tr('Username-ul e deja luat.'));
   }
 }
 

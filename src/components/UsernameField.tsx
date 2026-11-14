@@ -4,6 +4,7 @@ import TextField from './TextField';
 import type { UsernameStatus } from '../hooks/useUsernameAvailability';
 import { colors } from '../theme/colors';
 import { normalizeUsernameInput, usernameError } from '../utils/usernameRules';
+import { tr } from '../i18n';
 
 interface Props {
   value: string;
@@ -19,16 +20,16 @@ interface Props {
  */
 export default function UsernameField({ value, onChange, status, error }: Props) {
   const problem =
-    error ?? (status === 'invalid' ? usernameError(value) : status === 'taken' ? 'Username-ul e deja luat.' : null);
+    error ?? (status === 'invalid' ? usernameError(value) : status === 'taken' ? tr('Username-ul e deja luat.') : null);
 
   return (
     <>
       <TextField
-        label="Username"
+        label={tr('Username')}
         value={value}
         onChangeText={(text) => onChange(normalizeUsernameInput(text))}
         error={problem}
-        placeholder="ex. nume.prenume"
+        placeholder={tr('ex. nume.prenume')}
         autoCapitalize="none"
         autoCorrect={false}
         autoComplete="username"
@@ -38,10 +39,10 @@ export default function UsernameField({ value, onChange, status, error }: Props)
       {!problem ? (
         <Text style={[styles.status, status === 'available' && styles.available]}>
           {status === 'available'
-            ? `@${value} e disponibil`
+            ? tr('@{username} e disponibil', { username: value })
             : status === 'checking'
-              ? 'Se verifică…'
-              : 'Doar litere mici, cifre, punct și underscore. Apare în codul tău QR.'}
+              ? tr('Se verifică…')
+              : tr('Doar litere mici, cifre, punct și underscore. Apare în codul tău QR.')}
         </Text>
       ) : null}
     </>

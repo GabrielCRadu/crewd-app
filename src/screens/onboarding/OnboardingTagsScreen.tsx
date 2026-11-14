@@ -54,8 +54,8 @@ export default function OnboardingTagsScreen({ navigation, route }: Props) {
       setSaving(false);
       if (e instanceof UsernameTakenError) {
         // Cineva l-a luat între timp: înapoi la pasul 1, ca să alegi altul.
-        Alert.alert('Username-ul e deja luat', 'Între timp l-a ales altcineva. Alege altul.', [
-          { text: 'OK', onPress: () => navigation.popTo('OnboardingIdentity', { takenUsername: identity.username }) },
+        Alert.alert(tr('Username-ul e deja luat'), tr('Între timp l-a ales altcineva. Alege altul.'), [
+          { text: tr('OK'), onPress: () => navigation.popTo('OnboardingIdentity', { takenUsername: identity.username }) },
         ]);
         return;
       }

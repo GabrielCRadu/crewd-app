@@ -1,3 +1,5 @@
+import { tr } from '../i18n';
+
 /*
  * Username-ul unic (spec 2026-11-14-username-parola-design.md): strict litere mici, separat de nume.
  * Aceleași reguli sunt și în firestore.rules (formatul și numele rezervate).
@@ -29,10 +31,10 @@ export function canonicalUsername(username: string): string {
 
 /** De ce nu e valid username-ul, sau null dacă e valid. */
 export function usernameError(username: string): string | null {
-  if (username.length < USERNAME_MIN) return `Username-ul are cel puțin ${USERNAME_MIN} caractere.`;
-  if (username.length > USERNAME_MAX) return `Username-ul are cel mult ${USERNAME_MAX} de caractere.`;
-  if (!USERNAME_PATTERN.test(username)) return FORMAT_MESSAGE;
-  if (RESERVED_USERNAMES.includes(canonicalUsername(username))) return 'Username-ul e rezervat.';
+  if (username.length < USERNAME_MIN) return tr('Username-ul are cel puțin {min} caractere.', { min: USERNAME_MIN });
+  if (username.length > USERNAME_MAX) return tr('Username-ul are cel mult {max} de caractere.', { max: USERNAME_MAX });
+  if (!USERNAME_PATTERN.test(username)) return tr(FORMAT_MESSAGE);
+  if (RESERVED_USERNAMES.includes(canonicalUsername(username))) return tr('Username-ul e rezervat.');
   return null;
 }
 
