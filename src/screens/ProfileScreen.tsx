@@ -21,7 +21,6 @@ import Aurora from '../components/Aurora';
 import Avatar from '../components/Avatar';
 import Chip from '../components/Chip';
 import PhotoViewer from '../components/PhotoViewer';
-import DeleteAccount from '../components/DeleteAccount';
 import ProfileMenu from '../components/ProfileMenu';
 import type { MenuAnchor } from '../components/ProfileMenu';
 import InviteQrSheet from '../components/InviteQrSheet';
@@ -58,7 +57,7 @@ import { sortMemories } from '../utils/memoryRules';
  * Datele vin din profilul utilizatorului logat (AuthContext → Firestore users/{uid}).
  */
 export default function ProfileScreen() {
-  const { profile, user, updateBio, removeLearnedTag, signOut } = useAuth();
+  const { profile, updateBio, removeLearnedTag } = useAuth();
   const pastEvents = usePastEvents();
   const friends = useFriends();
   const { groups: myGroups } = useMyGroups();
@@ -99,12 +98,6 @@ export default function ProfileScreen() {
   const saveBio = (bio: string) => {
     updateBio(bio).catch(() => Alert.alert('Nu am putut salva', 'Verifică conexiunea și încearcă din nou.'));
   };
-
-  const confirmSignOut = () =>
-    Alert.alert('Ești sigur că vrei să ieși din cont?', 'Te poți loga din nou oricând cu emailul și parola.', [
-      { text: 'Nu', style: 'cancel' },
-      { text: 'Da', style: 'destructive', onPress: () => void signOut() },
-    ]);
 
   // Meniul se deschide chiar sub butonul cu trei linii, aliniat la marginea lui din dreapta.
   const openMenu = () => {
@@ -280,17 +273,7 @@ export default function ProfileScreen() {
             onAddMemory={(eventId) => setAddMemory({ eventId })}
           />
         </View>
-
-        {/* Contul: emailul și ieșirea */}
-        <View style={styles.accountCard}>
-          {user?.email ? <Text style={styles.accountEmail}>{user.email}</Text> : null}
-          <Pressable onPress={confirmSignOut} style={({ pressed }) => [styles.signOutButton, pressed && styles.pressed]}>
-            <Ionicons name="log-out-outline" size={18} color={colors.text} />
-            <Text style={styles.signOutText}>Ieși din cont</Text>
-          </Pressable>
-          {/* Ștergerea definitivă a contului (cere parola) */}
-          <DeleteAccount />
-        </View>
+        {/* Contul (emailul, ieșirea, ștergerea) s-a mutat în Setări (meniul cu trei linii). */}
       </ScrollView>
       </KeyboardAvoidingView>
 
@@ -311,7 +294,6 @@ export default function ProfileScreen() {
         onClose={() => setMenuAnchor(null)}
         onEdit={() => navigation.navigate('EditProfile')}
         onSettings={() => navigation.navigate('Settings')}
-        onSignOut={confirmSignOut}
       />
       <InviteQrSheet
         visible={qrOpen}
@@ -399,16 +381,4 @@ const styles = StyleSheet.create({
   learnedCard: { gap: 10 },
   hint: { fontSize: 13, color: colors.muted },
   privateRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 },
-  accountCard: { alignItems: 'center', gap: 12, marginTop: 8 },
-  accountEmail: { color: colors.faint, fontSize: 13 },
-  signOutButton: {
-    ...glass,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: radii.pill,
-  },
-  signOutText: { color: colors.text, fontWeight: '500' },
 });

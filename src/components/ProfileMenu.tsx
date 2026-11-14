@@ -17,7 +17,6 @@ interface Props {
   onClose: () => void;
   onEdit: () => void;
   onSettings: () => void;
-  onSignOut: () => void;
 }
 
 type IconName = ComponentProps<typeof Ionicons>['name'];
@@ -27,9 +26,9 @@ const CLOSE_DELAY_MS = 250;
 
 /**
  * Meniul de pe profil (butonul cu trei linii, ca pe Instagram): un pătrățel mic în colț
- * cu Editează, Setări și Delogare. O atingere în afara lui îl închide.
+ * cu Editează profilul și Setări (delogarea e în Setări). O atingere în afara lui îl închide.
  */
-export default function ProfileMenu({ anchor, onClose, onEdit, onSettings, onSignOut }: Props) {
+export default function ProfileMenu({ anchor, onClose, onEdit, onSettings }: Props) {
   // Fiecare opțiune închide întâi meniul, apoi face ce trebuie, după ce meniul a dispărut
   // (altfel întrebarea „Ești sigur…?” se pierdea pe Android, deschisă în timp ce meniul se închidea).
   const choose = (action: () => void) => () => {
@@ -37,10 +36,10 @@ export default function ProfileMenu({ anchor, onClose, onEdit, onSettings, onSig
     setTimeout(action, CLOSE_DELAY_MS);
   };
 
-  const items: { label: string; icon: IconName; onPress: () => void; danger?: boolean }[] = [
+  // Delogarea e în Setări.
+  const items: { label: string; icon: IconName; onPress: () => void }[] = [
     { label: 'Editează profilul', icon: 'create-outline', onPress: choose(onEdit) },
     { label: 'Setări', icon: 'settings-outline', onPress: choose(onSettings) },
-    { label: 'Delogare', icon: 'log-out-outline', onPress: choose(onSignOut), danger: true },
   ];
 
   return (
@@ -56,8 +55,8 @@ export default function ProfileMenu({ anchor, onClose, onEdit, onSettings, onSig
               accessibilityRole="menuitem"
               style={({ pressed }) => [styles.row, i > 0 && styles.rowBorder, pressed && styles.rowPressed]}
             >
-              <Ionicons name={item.icon} size={18} color={item.danger ? colors.nope : colors.text} />
-              <Text style={[styles.label, item.danger && styles.danger]}>{item.label}</Text>
+              <Ionicons name={item.icon} size={18} color={colors.text} />
+              <Text style={styles.label}>{item.label}</Text>
             </Pressable>
           ))}
         </View>
@@ -81,5 +80,4 @@ const styles = StyleSheet.create({
   rowBorder: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border },
   rowPressed: { backgroundColor: colors.cardStrong },
   label: { color: colors.text, fontSize: 15, fontWeight: '500' },
-  danger: { color: colors.nope },
 });
