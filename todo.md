@@ -6,7 +6,10 @@ Actualizează lista când rezolvi ceva sau adaugi un mock nou.
 ## Date mock (de înlocuit cu Firestore / date reale)
 
 - [x] ~~Chat: grupurile mock~~: Chat arată grupulețele reale (`useMyGroups`).
-- [ ] **Mesajele din chat** (`MESSAGES` din `src/data/mockSocial.ts`): mock; mesajele trimise rămân doar local, în ecranul deschis (`ChatRoomScreen`).
+- [x] ~~Mesajele din chat (mock)~~: conversațiile grupurilor sunt acum în Firestore (`chatService`, `events/{e}/groups/{g}/messages`). Fără `.env.local` rămân în memorie, cu 3 mesaje demo în grupurile mock formate.
+- [ ] **Conversații inventate în grupurile de test** (`scripts/seed-groups.mjs`: `messages/demo-1` … `demo-4` și pozele membrilor demo de pe Unsplash): de șters înainte de lansare, împreună cu grupurile demo.
+- [ ] **Chat-ul de grup** n-are încă notificări pentru mesaje noi, număr de necitite, poze sau ștergerea mesajelor. Moderarea automată cu AI vine mai târziu (pe backend).
+- [ ] **Membrii din Detaliile grupului** nu deschid încă profilul persoanei (vine cu profilul public, odată cu prietenii pe Firestore).
 - [x] ~~Grupuri pe gustul tău (mock)~~: înlocuite de grupulețele reale (`EventGroupsSection`, `groupsService`).
 - [ ] **Blocarea după raportări** la grupulețe folosește reputația mock (`ratingsService`, `ME_ID`); se verifică doar în aplicație, nu în regulile Firestore.
 - [ ] **Anunțul „grupulețul nu s-a format”**: grupulețele expirate doar dispar din listă; nu există încă un mesaj/notificare pentru membri.
@@ -53,7 +56,7 @@ Actualizează lista când rezolvi ceva sau adaugi un mock nou.
 
 ## Date și drepturi
 
-- [ ] **ÎNAINTE DE PREZENTARE: șterge pozele de test de pe Unsplash**: `photoUrl` din `src/data/mockSocial.ts` (profilurile persoanelor de test). Se încarcă direct de pe images.unsplash.com. (Afișele evenimentelor de test vin acum din baza de date.)
+- [ ] **ÎNAINTE DE PREZENTARE: șterge pozele de test de pe Unsplash**: `photoUrl` din `src/data/mockSocial.ts` (profilurile persoanelor de test) și `photo` din `scripts/seed-groups.mjs` (membrii grupurilor demo din Firestore). Se încarcă direct de pe images.unsplash.com. (Afișele evenimentelor de test vin acum din baza de date.)
 
 - [ ] **Evenimentele din Firestore** (din `evenimente-timisoara-verificate.json`) sunt doar pentru **demo intern**. Înainte de o lansare publică trebuie acordul surselor (iaBilet, Zile și Nopți, OnEvent etc.) sau o sursă cu licență (ex. acord scris de la OMD Timișoara / Visit Timișoara).
 - [ ] **Imaginile evenimentelor** sunt încărcate direct de pe site-urile organizatorilor (cu „Foto: …”). Pentru producție: acordul organizatorilor sau imagini proprii.
