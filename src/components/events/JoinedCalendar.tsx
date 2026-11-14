@@ -69,7 +69,7 @@ export default function JoinedCalendar({ events, onOpenEvent, onBrowse }: Props)
       <View style={styles.emptyCard}>
         <Ionicons name="calendar-outline" size={28} color={colors.text} />
         <Text style={styles.emptyTitle}>{tr('Calendarul tău e gol')}</Text>
-        <Text style={styles.emptyText}>{tr('Apasă „Vin și eu” la un eveniment și apare aici, la ziua și ora lui.')}</Text>
+        <Text style={styles.emptyText}>{tr('Apasă „Înscrie-te” la un eveniment și apare aici, la ziua și ora lui.')}</Text>
         <Pressable onPress={onBrowse} style={({ pressed }) => [styles.emptyButton, pressed && styles.pressed]}>
           <Text style={styles.emptyButtonText}>{tr('Vezi evenimentele')}</Text>
         </Pressable>

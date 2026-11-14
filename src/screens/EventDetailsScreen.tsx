@@ -257,7 +257,7 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
                 style={({ pressed }) => [styles.ticketButton, pressed && styles.pressed]}
               >
                 <Ionicons name="ticket-outline" size={18} color={colors.text} />
-                <Text style={styles.ticketText}>{event.priceInfo?.isFree ? tr('Înscriere') : 'Bilete'}</Text>
+                <Text style={styles.ticketText}>{event.priceInfo?.isFree ? tr('Înscriere') : tr('Bilete')}</Text>
               </Pressable>
             ) : null}
             <GradientButton label={tr('Înscrie-te')} icon="arrow-forward" onPress={() => saveJoin(joinEvent)} style={styles.ctaMain} />

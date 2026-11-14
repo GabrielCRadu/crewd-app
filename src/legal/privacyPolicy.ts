@@ -3,7 +3,7 @@
  * Sursa e Crewd_Politica_de_Confidentialitate.md (fără anexa internă). Când schimbi documentul, regenerează și acest fișier.
  * Câmpurile [__] trebuie completate înainte de publicare.
  */
-export const PRIVACY_POLICY_RO = `da nu imi# Politica de Confidențialitate – Crewd
+export const PRIVACY_POLICY_RO = `# Politica de Confidențialitate – Crewd
 
 **Data intrării în vigoare:** [__]
 
