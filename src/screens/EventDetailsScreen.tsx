@@ -32,6 +32,7 @@ import { glass, radii } from '../theme/shape';
 import type { IconName } from '../types/events';
 import { formatLongDay, formatTime, hasEnded, isLive } from '../utils/dates';
 import { formatDistance, haversineKm } from '../utils/distance';
+import { tr } from '../i18n';
 
 type Props = NativeStackScreenProps<EventsStackParamList, 'EventDetails'>;
 
@@ -61,7 +62,7 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
         {loading ? (
           <ActivityIndicator color={colors.text} />
         ) : (
-          <Text style={styles.muted}>Evenimentul nu a fost găsit.</Text>
+          <Text style={styles.muted}>{tr('Evenimentul nu a fost găsit.')}</Text>
         )}
       </View>
     );
@@ -79,7 +80,7 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
   const openRating = () => navigation.navigate('RateEvent', { eventId: event.id });
   // Înscrierea se salvează imediat în contul tău; dacă nu merge (ex. fără internet), revine și te anunțăm.
   const saveJoin = (action: typeof joinEvent) => {
-    action(event).catch((e: Error) => Alert.alert('Înscrierea nu s-a salvat', e.message));
+    action(event).catch((e: Error) => Alert.alert(tr('Înscrierea nu s-a salvat'), e.message));
   };
 
   const openGroups = () => navigation.navigate('EventGroups', { eventId: event.id });
@@ -88,25 +89,25 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
     const uid = user?.uid ?? profile?.uid;
     (uid ? leaveGroupForEvent(event.id, uid) : Promise.resolve())
       .then(() => leaveEvent(event))
-      .catch((e: Error) => Alert.alert('Nu ai ieșit din eveniment', e.message));
+      .catch((e: Error) => Alert.alert(tr('Nu ai ieșit din eveniment'), e.message));
   };
   const confirmLeave = () =>
     Alert.alert(
-      'Ieși din eveniment?',
-      myGroup ? 'Ieși și din grupul tău de la acest eveniment.' : 'Te poți înscrie din nou oricând.',
+      tr('Ieși din eveniment?'),
+      myGroup ? tr('Ieși și din grupul tău de la acest eveniment.') : tr('Te poți înscrie din nou oricând.'),
       [
-        { text: 'Rămân', style: 'cancel' },
-        { text: 'Ies', style: 'destructive', onPress: leaveEventAndGroup },
+        { text: tr('Rămân'), style: 'cancel' },
+        { text: tr('Ies'), style: 'destructive', onPress: leaveEventAndGroup },
       ],
     );
   // Ce scrie pe butonul „Vezi grupulețele”, după starea grupulețului meu.
   const groupsHint = !myGroup
-    ? 'Alege un grup cu care să mergi.'
+    ? tr('Alege un grup cu care să mergi.')
     : canOpenChat(myGroup)
-      ? `Ești într-un grup de ${myGroup.memberUids.length} · chat-ul e deschis.`
+      ? tr('Ești într-un grup de {length} · chat-ul e deschis.', { length: myGroup.memberUids.length })
       : myGroupStatus === 'expired'
-        ? 'Grupul tău nu s-a format. Alege altul.'
-        : `Grupul tău se formează: mai e nevoie de ${missing}.`;
+        ? tr('Grupul tău nu s-a format. Alege altul.')
+        : tr('Grupul tău se formează: mai e nevoie de {missing}.', { missing: missing });
 
   return (
     <View style={styles.screen}>
@@ -119,12 +120,13 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
           {/* Umbrire sus, ca butoanele și bara telefonului să se vadă și pe afișe albe */}
           <LinearGradient colors={gradients.scrimTop} style={[styles.scrimTop, { height: insets.top + 90 }]} />
           {event.imageUrl && event.imageCredit ? (
-            <Text style={styles.imageCredit}>Foto: {event.imageCredit}</Text>
+            <Text style={styles.imageCredit}>{tr('Foto:')}{' '}{event.imageCredit}</Text>
           ) : null}
           <GlassIconButton
             icon="chevron-back"
             onPress={() => navigation.goBack()}
             style={[styles.back, styles.onPhoto, { top: insets.top + 8 }]}
+            color={colors.photo.text}
           />
           {/* Trimite evenimentul unui prieten, în conversația voastră directă */}
           {!ended ? (
@@ -132,12 +134,13 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
               icon="paper-plane-outline"
               onPress={() => setShareOpen(true)}
               style={[styles.share, styles.onPhoto, { top: insets.top + 8 }]}
+            color={colors.photo.text}
             />
           ) : null}
           <View style={styles.heroBadges}>
             <GlassBadge icon={category.icon} label={category.label} />
-            {isLive(event) ? <GlassBadge icon="radio-button-on" label="ACUM" /> : null}
-            {ended ? <GlassBadge icon="checkmark-done" label="S-A TERMINAT" /> : null}
+            {isLive(event) ? <GlassBadge icon="radio-button-on" label={tr('ACUM')} /> : null}
+            {ended ? <GlassBadge icon="checkmark-done" label={tr('S-A TERMINAT')} /> : null}
           </View>
         </View>
 
@@ -149,7 +152,7 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
           <View style={styles.infoRow}>
             <InfoBox
               icon="calendar-outline"
-              label="Când"
+              label={tr('Când')}
               main={formatLongDay(event.startsAt)}
               secondary={
                 event.endsAtEstimated
@@ -157,7 +160,7 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
                   : `${formatTime(event.startsAt)} – ${formatTime(event.endsAt)}`
               }
             />
-            <InfoBox icon="location-outline" label="Unde" main={event.venueName} secondary={formatDistance(distanceKm)} />
+            <InfoBox icon="location-outline" label={tr('Unde')} main={event.venueName} secondary={formatDistance(distanceKm)} />
           </View>
           {event.timeNote ? <Text style={styles.muted}>{event.timeNote}</Text> : null}
 
@@ -171,8 +174,8 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
                 </Fact>
               ) : null}
               {event.address ? <Fact icon="map-outline">{event.address}</Fact> : null}
-              {event.organizer ? <Fact icon="people-outline">Organizator: {event.organizer}</Fact> : null}
-              {event.ageRestriction ? <Fact icon="alert-circle-outline">Vârstă: {event.ageRestriction}</Fact> : null}
+              {event.organizer ? <Fact icon="people-outline">{tr('Organizator:')}{' '}{event.organizer}</Fact> : null}
+              {event.ageRestriction ? <Fact icon="alert-circle-outline">{tr('Vârstă:')}{' '}{event.ageRestriction}</Fact> : null}
             </View>
           ) : null}
 
@@ -183,9 +186,7 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
           {event.source ? (
             <Pressable onPress={() => Linking.openURL(event.source!.url)} hitSlop={6} style={styles.sourceRow}>
               <Ionicons name="open-outline" size={14} color={colors.faint} />
-              <Text style={styles.sourceText}>
-                Sursa: <Text style={styles.sourceLink}>{event.source.name}</Text> · verifică detaliile acolo
-              </Text>
+              <Text style={styles.sourceText}>{tr('Sursa:')}{' '}<Text style={styles.sourceLink}>{event.source.name}</Text>{' '}{tr('· verifică detaliile acolo')}</Text>
             </Pressable>
           ) : null}
 
@@ -207,7 +208,7 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
         {ended ? (
           !joined ? (
             <View style={styles.joinedPill}>
-              <Text style={styles.endedText}>Evenimentul s-a terminat</Text>
+              <Text style={styles.endedText}>{tr('Evenimentul s-a terminat')}</Text>
             </View>
           ) : (
             /* Ai fost la eveniment: adaugi o amintire și evaluezi oamenii */
@@ -217,19 +218,19 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
                 style={({ pressed }) => [styles.memoryButton, pressed && styles.pressed]}
               >
                 <Ionicons name="image-outline" size={18} color={colors.text} />
-                <Text style={styles.memoryButtonText}>Adaugă amintire</Text>
+                <Text style={styles.memoryButtonText}>{tr('Adaugă amintire')}</Text>
               </Pressable>
               {rated ? (
                 <View style={styles.joinedRow}>
                   <View style={styles.joinedPill}>
-                    <Text style={styles.joinedText}>Evaluat ✓</Text>
+                    <Text style={styles.joinedText}>{tr('Evaluat ✓')}</Text>
                   </View>
                   <Pressable onPress={openRating} hitSlop={8}>
-                    <Text style={styles.cancel}>Modifică</Text>
+                    <Text style={styles.cancel}>{tr('Modifică')}</Text>
                   </Pressable>
                 </View>
               ) : (
-                <GradientButton label="Evaluează oamenii" icon="people" onPress={openRating} />
+                <GradientButton label={tr('Evaluează oamenii')} icon="people" onPress={openRating} />
               )}
             </View>
           )
@@ -238,9 +239,9 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
           <View style={styles.ctaRow}>
             <Pressable onPress={confirmLeave} style={({ pressed }) => [styles.ticketButton, pressed && styles.pressed]}>
               <Ionicons name="exit-outline" size={18} color={colors.text} />
-              <Text style={styles.ticketText}>Ieși</Text>
+              <Text style={styles.ticketText}>{tr('Ieși')}</Text>
             </Pressable>
-            <GradientButton label="Vezi grupurile" icon="people" onPress={openGroups} style={styles.ctaMain} />
+            <GradientButton label={tr('Vezi grupurile')} icon="people" onPress={openGroups} style={styles.ctaMain} />
           </View>
         ) : (
           <View style={styles.ctaRow}>
@@ -250,10 +251,10 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
                 style={({ pressed }) => [styles.ticketButton, pressed && styles.pressed]}
               >
                 <Ionicons name="ticket-outline" size={18} color={colors.text} />
-                <Text style={styles.ticketText}>{event.priceInfo?.isFree ? 'Înscriere' : 'Bilete'}</Text>
+                <Text style={styles.ticketText}>{event.priceInfo?.isFree ? tr('Înscriere') : 'Bilete'}</Text>
               </Pressable>
             ) : null}
-            <GradientButton label="Înscrie-te" icon="arrow-forward" onPress={() => saveJoin(joinEvent)} style={styles.ctaMain} />
+            <GradientButton label={tr('Înscrie-te')} icon="arrow-forward" onPress={() => saveJoin(joinEvent)} style={styles.ctaMain} />
           </View>
         )}
       </View>
@@ -313,7 +314,7 @@ function Fact({ icon, children }: { icon: IconName; children: React.ReactNode })
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
-  imageCredit: { position: 'absolute', right: 12, bottom: 8, fontSize: 10, color: colors.faint },
+  imageCredit: { position: 'absolute', right: 12, bottom: 8, fontSize: 10, color: colors.photo.faint },
   factsCard: { ...glass, padding: 14, gap: 10, borderRadius: radii.inner },
   factRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
   factText: { flex: 1, fontSize: 14, lineHeight: 20, color: colors.text },
@@ -341,7 +342,7 @@ const styles = StyleSheet.create({
   scrimTop: { position: 'absolute', left: 0, right: 0, top: 0 },
   back: { position: 'absolute', left: 20 },
   // Butoanele de pe poză: fundal închis (nu sticlă albă), ca să rămână vizibile pe afișe deschise la culoare.
-  onPhoto: { backgroundColor: colors.backdrop },
+  onPhoto: { backgroundColor: colors.photo.glass, borderColor: colors.photo.glassBorder },
   share: { position: 'absolute', right: 20 },
   heroBadges: { position: 'absolute', left: 20, bottom: 16, flexDirection: 'row', gap: 8 },
   body: { padding: 20, gap: 16 },

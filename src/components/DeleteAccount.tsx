@@ -8,6 +8,7 @@ import { useAuth } from '../context/AuthContext';
 import { colors } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
 import { type } from '../theme/typography';
+import { tr } from '../i18n';
 
 /**
  * „Șterge contul” din Profil: un link discret care deschide o confirmare cu parola.
@@ -29,7 +30,7 @@ export default function DeleteAccount() {
 
   const confirm = async () => {
     if (!password) {
-      setError('Introdu parola ca să confirmi.');
+      setError(tr('Introdu parola ca să confirmi.'));
       return;
     }
     setError(null);
@@ -46,7 +47,7 @@ export default function DeleteAccount() {
   return (
     <>
       <Pressable onPress={() => setOpen(true)} hitSlop={8} accessibilityRole="button">
-        <Text style={styles.link}>Șterge contul</Text>
+        <Text style={styles.link}>{tr('Șterge contul')}</Text>
       </Pressable>
 
       <Modal visible={open} transparent animationType="fade" onRequestClose={close}>
@@ -55,13 +56,11 @@ export default function DeleteAccount() {
           <View style={styles.sheet}>
             <View style={styles.titleRow}>
               <Ionicons name="warning-outline" size={20} color={colors.nope} />
-              <Text style={styles.title}>Ștergi contul definitiv?</Text>
+              <Text style={styles.title}>{tr('Ștergi contul definitiv?')}</Text>
             </View>
-            <Text style={styles.text}>
-              Se șterg profilul tău, înscrierile la evenimente și locul tău în grupuri. Nu se poate anula.
-            </Text>
+            <Text style={styles.text}>{tr('Se șterg profilul tău, înscrierile la evenimente și locul tău în grupuri. Nu se poate anula.')}</Text>
             <TextField
-              label="Confirmă cu parola"
+              label={tr('Confirmă cu parola')}
               value={password}
               onChangeText={setPassword}
               password
@@ -73,7 +72,7 @@ export default function DeleteAccount() {
             {error ? <FormMessage text={error} /> : null}
             <View style={styles.actions}>
               <Pressable onPress={close} disabled={busy} style={({ pressed }) => [styles.cancel, pressed && styles.pressed]}>
-                <Text style={styles.cancelText}>Anulează</Text>
+                <Text style={styles.cancelText}>{tr('Anulează')}</Text>
               </Pressable>
               <Pressable
                 onPress={confirm}
@@ -81,7 +80,7 @@ export default function DeleteAccount() {
                 style={({ pressed }) => [styles.delete, (pressed || busy) && styles.pressed]}
                 accessibilityRole="button"
               >
-                <Text style={styles.deleteText}>{busy ? 'Se șterge…' : 'Șterge definitiv'}</Text>
+                <Text style={styles.deleteText}>{busy ? tr('Se șterge…') : tr('Șterge definitiv')}</Text>
               </Pressable>
             </View>
           </View>

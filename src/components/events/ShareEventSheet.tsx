@@ -14,6 +14,7 @@ import { glass, radii } from '../../theme/shape';
 import type { Event } from '../../types/events';
 import type { Person } from '../../types/social';
 import { formatEventDate } from '../../utils/dates';
+import { tr } from '../../i18n';
 
 interface Props {
   event: Event;
@@ -49,13 +50,13 @@ export default function ShareEventSheet({ event, visible, onClose, onSent }: Pro
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel="Închide" />
+      <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel={tr('Închide')} />
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={[styles.sheet, { paddingBottom: insets.bottom + 16 }]}>
           <View style={styles.handle} />
           <View style={styles.header}>
-            <Text style={styles.title}>Trimite unui prieten</Text>
-            <Pressable onPress={onClose} hitSlop={10} accessibilityLabel="Închide">
+            <Text style={styles.title}>{tr('Trimite unui prieten')}</Text>
+            <Pressable onPress={onClose} hitSlop={10} accessibilityLabel={tr('Închide')}>
               <Ionicons name="close" size={22} color={colors.muted} />
             </Pressable>
           </View>
@@ -74,16 +75,16 @@ export default function ShareEventSheet({ event, visible, onClose, onSent }: Pro
           <TextInput
             value={note}
             onChangeText={setNote}
-            placeholder="Adaugă un mesaj (opțional)"
+            placeholder={tr('Adaugă un mesaj (opțional)')}
             placeholderTextColor={colors.faint}
             selectionColor={colors.text}
             maxLength={200}
             style={styles.input}
           />
 
-          <Text style={styles.label}>PRIETENII TĂI</Text>
+          <Text style={styles.label}>{tr('PRIETENII TĂI')}</Text>
           {people.length === 0 ? (
-            <Text style={styles.muted}>Încă nu ai prieteni. Adaugă oameni din profilul lor.</Text>
+            <Text style={styles.muted}>{tr('Încă nu ai prieteni. Adaugă oameni din profilul lor.')}</Text>
           ) : (
             <ScrollView style={styles.list} contentContainerStyle={styles.listContent}>
               {people.map((p) => (
@@ -92,7 +93,7 @@ export default function ShareEventSheet({ event, visible, onClose, onSent }: Pro
                   <Text style={styles.friendName}>{p.name}</Text>
                   <View style={styles.sendPill}>
                     <Ionicons name="paper-plane" size={14} color={colors.onLight} />
-                    <Text style={styles.sendText}>Trimite</Text>
+                    <Text style={styles.sendText}>{tr('Trimite')}</Text>
                   </View>
                 </Pressable>
               ))}

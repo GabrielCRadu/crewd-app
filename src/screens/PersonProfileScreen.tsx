@@ -32,6 +32,7 @@ import { radii } from '../theme/shape';
 import { formatEventDate } from '../utils/dates';
 import { isUpcomingOrLive, sortByDate } from '../utils/eventFilters';
 import { hiddenMemoriesCount, sortMemories, visibleMemories } from '../utils/memoryRules';
+import { tr } from '../i18n';
 
 /**
  * Parametrii ecranului. Profilul unei persoane e înregistrat în mai multe stive
@@ -75,7 +76,7 @@ export default function PersonProfileScreen() {
   if (!person) {
     return (
       <View style={styles.center}>
-        <Text style={styles.muted}>Persoana nu a fost găsită.</Text>
+        <Text style={styles.muted}>{tr('Persoana nu a fost găsită.')}</Text>
       </View>
     );
   }
@@ -102,37 +103,37 @@ export default function PersonProfileScreen() {
 
   const confirmReport = () => {
     if (hasReportedPerson(myRatings, person.id)) {
-      Alert.alert('Ai raportat deja această persoană', 'Raportul tău a fost înregistrat, anonim.');
+      Alert.alert(tr('Ai raportat deja această persoană'), tr('Raportul tău a fost înregistrat, anonim.'));
       return;
     }
     Alert.alert(
-      `Raportezi pe ${person.name}?`,
-      'Persoana nu va afla cine a raportat-o. Pe profilul ei apare doar numărul total de rapoarte.',
+      tr('Raportezi pe {name}?', { name: person.name }),
+      tr('Persoana nu va afla cine a raportat-o. Pe profilul ei apare doar numărul total de rapoarte.'),
       [
-        { text: 'Renunță', style: 'cancel' },
-        { text: 'Raportează', style: 'destructive', onPress: () => void reportPerson(person.id) },
+        { text: tr('Renunță'), style: 'cancel' },
+        { text: tr('Raportează'), style: 'destructive', onPress: () => void reportPerson(person.id) },
       ],
     );
   };
 
   const confirmBlock = () =>
     Alert.alert(
-      `Blochezi pe ${person.name}?`,
-      'Prietenia și cererile se șterg, iar persoana nu te mai poate adăuga. Nu află că ai blocat-o.',
+      tr('Blochezi pe {name}?', { name: person.name }),
+      tr('Prietenia și cererile se șterg, iar persoana nu te mai poate adăuga. Nu află că ai blocat-o.'),
       [
-        { text: 'Renunță', style: 'cancel' },
-        { text: 'Blochează', style: 'destructive', onPress: () => void blockPerson(person.id) },
+        { text: tr('Renunță'), style: 'cancel' },
+        { text: tr('Blochează'), style: 'destructive', onPress: () => void blockPerson(person.id) },
       ],
     );
 
   // Meniul ⋯: Raportează / Blochează (sau Deblochează).
   const openMenu = () =>
     Alert.alert(person.name, undefined, [
-      { text: 'Raportează', onPress: confirmReport },
+      { text: tr('Raportează'), onPress: confirmReport },
       blocked
-        ? { text: 'Deblochează', onPress: () => void unblockPerson(person.id) }
-        : { text: 'Blochează', style: 'destructive', onPress: confirmBlock },
-      { text: 'Renunță', style: 'cancel' },
+        ? { text: tr('Deblochează'), onPress: () => void unblockPerson(person.id) }
+        : { text: tr('Blochează'), style: 'destructive', onPress: confirmBlock },
+      { text: tr('Renunță'), style: 'cancel' },
     ]);
 
   const meta = [`${person.age} ani`, person.city].filter(Boolean).join(' · ');
@@ -151,7 +152,7 @@ export default function PersonProfileScreen() {
           <View style={styles.identity}>
             {/* Poza de profil; fără poză, un pătrat de sticlă cu inițiala */}
             {person.photoUrl ? (
-              <Pressable onPress={() => setPhotoOpen(true)} accessibilityLabel="Mărește poza">
+              <Pressable onPress={() => setPhotoOpen(true)} accessibilityLabel={tr('Mărește poza')}>
                 <Image source={{ uri: person.photoUrl }} style={styles.photo} />
               </Pressable>
             ) : (
@@ -173,7 +174,7 @@ export default function PersonProfileScreen() {
               <Ionicons name="people-outline" size={15} color={colors.text} />
               <Text style={styles.friendsLinkText}>
                 {personFriends.length} {personFriends.length === 1 ? 'prieten' : 'prieteni'}
-                <Text style={styles.friendsLinkMuted}> · {mutualCount} comuni</Text>
+                <Text style={styles.friendsLinkMuted}> · {mutualCount}{' '}{tr('comuni')}</Text>
               </Text>
               <Ionicons name="chevron-forward" size={14} color={colors.muted} />
             </Pressable>
@@ -185,15 +186,13 @@ export default function PersonProfileScreen() {
         {/* Restul paginii */}
         <View style={styles.content}>
           {blocked ? (
-            <Text style={styles.muted}>
-              Ai blocat această persoană. Nu te mai poate adăuga și nu vă vedeți activitatea.
-            </Text>
+            <Text style={styles.muted}>{tr('Ai blocat această persoană. Nu te mai poate adăuga și nu vă vedeți activitatea.')}</Text>
           ) : (
             <>
               {/* Despre */}
               {person.bio ? (
                 <View style={styles.section}>
-                  <Text style={styles.label}>DESPRE</Text>
+                  <Text style={styles.label}>{tr('DESPRE')}</Text>
                   <View style={styles.card}>
                     <Text style={styles.bio}>{person.bio}</Text>
                   </View>
@@ -202,8 +201,7 @@ export default function PersonProfileScreen() {
 
               {/* Ce aveți în comun: tag-urile comune albe, restul estompate */}
               <View style={styles.section}>
-                <Text style={styles.label}>
-                  ÎN COMUN · {shared.length === 0 ? 'NICIUN TAG' : shared.length === 1 ? '1 TAG' : `${shared.length} TAG-URI`}
+                <Text style={styles.label}>{tr('ÎN COMUN ·')}{' '}{shared.length === 0 ? tr('NICIUN TAG') : shared.length === 1 ? '1 TAG' : `${shared.length} TAG-URI`}
                 </Text>
                 <View style={styles.tags}>
                   {shared.map((t) => (
@@ -219,17 +217,17 @@ export default function PersonProfileScreen() {
 
               {/* După evenimente: totaluri anonime */}
               <View style={styles.section}>
-                <Text style={styles.label}>DUPĂ EVENIMENTE</Text>
+                <Text style={styles.label}>{tr('DUPĂ EVENIMENTE')}</Text>
                 {/* Un singur card: trei tag-uri primite + rapoartele, despărțite de linii subțiri */}
                 <View style={[styles.card, styles.statsCard]}>
                   {[
                     ...RATING_TAGS.map((t) => ({
                       key: t.id,
                       value: reputation.tagCounts[t.id],
-                      label: t.id === 'again' ? 'Aș mai ieși' : t.label,
+                      label: t.id === 'again' ? tr('Aș mai ieși') : t.label,
                       alert: false,
                     })),
-                    { key: 'reports', value: reputation.reportsCount, label: 'Rapoarte', alert: reputation.reportsCount > 0 },
+                    { key: 'reports', value: reputation.reportsCount, label: tr('Rapoarte'), alert: reputation.reportsCount > 0 },
                   ].map((s, i) => (
                     <Fragment key={s.key}>
                       {i > 0 ? <View style={styles.statDivider} /> : null}
@@ -242,23 +240,23 @@ export default function PersonProfileScreen() {
                     </Fragment>
                   ))}
                 </View>
-                <Text style={styles.muted}>Anonim: se văd doar totalurile.</Text>
+                <Text style={styles.muted}>{tr('Anonim: se văd doar totalurile.')}</Text>
               </View>
 
               {/* Badge-uri: doar cele câștigate (votate de cel puțin 3 persoane sau din activitate) */}
               <View style={styles.section}>
-                <Text style={styles.label}>BADGE-URI</Text>
+                <Text style={styles.label}>{tr('BADGE-URI')}</Text>
                 <BadgesCard
                   voted={getVotedBadges(myBadgeProposals, person.id)}
                   auto={getAutoBadges(person.id)}
-                  emptyText="Încă niciun badge."
+                  emptyText={tr('Încă niciun badge.')}
                 />
               </View>
 
               {/* Ați fost împreună la… */}
               {together.length > 0 ? (
                 <View style={styles.section}>
-                  <Text style={styles.label}>AȚI FOST ÎMPREUNĂ LA</Text>
+                  <Text style={styles.label}>{tr('AȚI FOST ÎMPREUNĂ LA')}</Text>
                   <EventHistoryCarousel events={together} onOpen={openEvent} />
                 </View>
               ) : null}
@@ -266,15 +264,15 @@ export default function PersonProfileScreen() {
               {/* Amintiri: doar de văzut; cele de la evenimentele comune sunt evidențiate */}
               {personMemories.length > 0 ? (
                 <View style={styles.section}>
-                  <Text style={styles.label}>AMINTIRI</Text>
+                  <Text style={styles.label}>{tr('AMINTIRI')}</Text>
                   {memories.length > 0 ? (
                     <MemoriesGrid memories={memories} sharedEventIds={togetherIds} onOpen={(m) => setOpenMemoryId(m.id)} />
                   ) : null}
                   {hiddenMemories > 0 ? (
                     <Text style={styles.muted}>
                       {hiddenMemories === 1
-                        ? 'Mai are o amintire doar pentru prieteni.'
-                        : `Mai are ${hiddenMemories} amintiri doar pentru prieteni.`}
+                        ? tr('Mai are o amintire doar pentru prieteni.')
+                        : tr('Mai are {hiddenMemories} amintiri doar pentru prieteni.', { hiddenMemories: hiddenMemories })}
                     </Text>
                   ) : null}
                 </View>
@@ -282,14 +280,14 @@ export default function PersonProfileScreen() {
 
               {/* Merge la… (doar prietenii văd) */}
               <View style={styles.section}>
-                <Text style={styles.label}>MERGE LA</Text>
+                <Text style={styles.label}>{tr('MERGE LA')}</Text>
                 {!isFriend ? (
                   <View style={styles.lockedRow}>
                     <Ionicons name="lock-closed-outline" size={16} color={colors.muted} />
-                    <Text style={[styles.muted, styles.flex]}>Doar prietenii văd la ce evenimente merge.</Text>
+                    <Text style={[styles.muted, styles.flex]}>{tr('Doar prietenii văd la ce evenimente merge.')}</Text>
                   </View>
                 ) : goingTo.length === 0 ? (
-                  <Text style={styles.muted}>Nu e înscris(ă) la niciun eveniment acum.</Text>
+                  <Text style={styles.muted}>{tr('Nu e înscris(ă) la niciun eveniment acum.')}</Text>
                 ) : (
                   goingTo.map((e) => (
                     <Pressable

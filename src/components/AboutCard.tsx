@@ -6,6 +6,7 @@ import TintedCard from './TintedCard';
 import { colors } from '../theme/colors';
 import { gradients } from '../theme/gradients';
 import { glass, radii } from '../theme/shape';
+import { tr } from '../i18n';
 
 interface Props {
   bio: string;
@@ -31,7 +32,7 @@ export default function AboutCard({ bio, onSave }: Props) {
   return (
     <TintedCard tint={gradients.tintWarm} style={styles.card}>
       <View style={styles.header}>
-        <Text style={styles.title}>Despre mine</Text>
+        <Text style={styles.title}>{tr('Despre mine')}</Text>
         {editing ? null : <GlassIconButton icon="pencil" size={34} round onPress={startEditing} />}
       </View>
 
@@ -40,7 +41,7 @@ export default function AboutCard({ bio, onSave }: Props) {
           <TextInput
             value={draft}
             onChangeText={setDraft}
-            placeholder="Ce îți place, cum îți petreci serile, ce cauți la evenimente…"
+            placeholder={tr('Ce îți place, cum îți petreci serile, ce cauți la evenimente…')}
             placeholderTextColor={colors.faint}
             selectionColor={colors.primary}
             multiline
@@ -53,10 +54,10 @@ export default function AboutCard({ bio, onSave }: Props) {
               {draft.length}/{MAX_LENGTH}
             </Text>
             <Pressable onPress={() => setEditing(false)} hitSlop={8}>
-              <Text style={styles.cancel}>Renunță</Text>
+              <Text style={styles.cancel}>{tr('Renunță')}</Text>
             </Pressable>
             <Pressable onPress={save} style={({ pressed }) => [styles.saveButton, pressed && styles.pressed]}>
-              <Text style={styles.saveText}>Salvează</Text>
+              <Text style={styles.saveText}>{tr('Salvează')}</Text>
             </Pressable>
           </View>
         </>
@@ -64,7 +65,7 @@ export default function AboutCard({ bio, onSave }: Props) {
         <Text style={styles.bio}>{bio}</Text>
       ) : (
         <Pressable onPress={startEditing}>
-          <Text style={styles.placeholder}>Scrie câteva cuvinte despre tine, ca oamenii să știe cu cine merg.</Text>
+          <Text style={styles.placeholder}>{tr('Scrie câteva cuvinte despre tine, ca oamenii să știe cu cine merg.')}</Text>
         </Pressable>
       )}
     </TintedCard>

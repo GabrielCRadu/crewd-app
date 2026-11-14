@@ -2,6 +2,7 @@ import type { CrewGroup, GroupStatus, JoinContext, MemberSummary, ProposalDraft 
 import type { UserProfile } from '../types/user';
 import { ageFromBirthDate } from './birthDate';
 import { allProfileTags } from './profileTags';
+import { tr } from '../i18n';
 
 /*
  * Regulile grupulețelor, ca funcții pure (testate în __tests__/groupRules.test.ts).
@@ -67,15 +68,15 @@ export function isVisibleTo(g: CrewGroup, viewer: { uid: string; age: number }, 
 
 /** De ce nu poate intra (mesaj pentru utilizator), sau null dacă poate. */
 export function joinBlockReason(g: CrewGroup, ctx: JoinContext, now: Date): string | null {
-  if (ctx.currentGroupId === g.id) return 'Ești deja în acest grup.';
-  if (g.memberUids.length === 0) return 'Grupul nu mai există.';
-  if (!ctx.isRegistered) return 'Înscrie-te întâi la eveniment.';
-  if (ctx.isBlocked) return 'Nu poți intra în grupuri o perioadă, din cauza raportărilor.';
+  if (ctx.currentGroupId === g.id) return tr('Ești deja în acest grup.');
+  if (g.memberUids.length === 0) return tr('Grupul nu mai există.');
+  if (!ctx.isRegistered) return tr('Înscrie-te întâi la eveniment.');
+  if (ctx.isBlocked) return tr('Nu poți intra în grupuri o perioadă, din cauza raportărilor.');
   const status = groupStatus(g, now);
-  if (status === 'closed') return 'Întâlnirea a început deja.';
-  if (status === 'full') return 'Grupul s-a umplut.';
-  if (status === 'expired') return 'Grupul nu s-a format la timp.';
-  if (ctx.age < g.minAge || ctx.age > g.maxAge) return 'Nu te încadrezi în intervalul de vârstă al grupului.';
+  if (status === 'closed') return tr('Întâlnirea a început deja.');
+  if (status === 'full') return tr('Grupul s-a umplut.');
+  if (status === 'expired') return tr('Grupul nu s-a format la timp.');
+  if (ctx.age < g.minAge || ctx.age > g.maxAge) return tr('Nu te încadrezi în intervalul de vârstă al grupului.');
   return null;
 }
 
@@ -101,25 +102,25 @@ export function proposalErrors(
   const errors: Partial<Record<keyof ProposalDraft, string>> = {};
 
   const vibe = d.vibe.trim();
-  if (!vibe) errors.vibe = 'Scrie o propoziție despre vibe-ul grupului.';
-  else if (vibe.length > VIBE_MAX_LENGTH) errors.vibe = `Maxim ${VIBE_MAX_LENGTH} de caractere.`;
+  if (!vibe) errors.vibe = tr('Scrie o propoziție despre vibe-ul grupului.');
+  else if (vibe.length > VIBE_MAX_LENGTH) errors.vibe = tr('Maxim {VIBE_MAX_LENGTH} de caractere.', { VIBE_MAX_LENGTH: VIBE_MAX_LENGTH });
 
-  if (!d.meetupPlace.trim()) errors.meetupPlace = 'Scrie unde vă vedeți.';
+  if (!d.meetupPlace.trim()) errors.meetupPlace = tr('Scrie unde vă vedeți.');
 
   if (!Number.isInteger(d.maxSize) || d.maxSize < MIN_GROUP_SIZE || d.maxSize > MAX_GROUP_SIZE) {
-    errors.maxSize = `Alege între ${MIN_GROUP_SIZE} și ${MAX_GROUP_SIZE} persoane.`;
+    errors.maxSize = tr('Alege între {MIN_GROUP_SIZE} și {MAX_GROUP_SIZE} persoane.', { MIN_GROUP_SIZE: MIN_GROUP_SIZE, MAX_GROUP_SIZE: MAX_GROUP_SIZE });
   }
 
-  if (d.minAge < MIN_MEMBER_AGE) errors.minAge = `Vârsta minimă e ${MIN_MEMBER_AGE} ani.`;
-  else if (d.maxAge < d.minAge) errors.maxAge = 'Vârsta maximă trebuie să fie cel puțin cea minimă.';
+  if (d.minAge < MIN_MEMBER_AGE) errors.minAge = tr('Vârsta minimă e {MIN_MEMBER_AGE} ani.', { MIN_MEMBER_AGE: MIN_MEMBER_AGE });
+  else if (d.maxAge < d.minAge) errors.maxAge = tr('Vârsta maximă trebuie să fie cel puțin cea minimă.');
   else if (proposerAge < d.minAge || proposerAge > d.maxAge) {
-    errors.minAge = 'Intervalul trebuie să includă și vârsta ta.';
+    errors.minAge = tr('Intervalul trebuie să includă și vârsta ta.');
   }
 
   if (d.meetupAt.getTime() > eventStartsAt.getTime()) {
-    errors.meetupAt = 'Întâlnirea trebuie să fie înainte de începutul evenimentului.';
+    errors.meetupAt = tr('Întâlnirea trebuie să fie înainte de începutul evenimentului.');
   } else if (d.meetupAt.getTime() - now.getTime() <= PROPOSE_CUTOFF_MS + PROPOSE_MARGIN_MS) {
-    errors.meetupAt = 'Întâlnirea e prea aproape: alege cu cel puțin 30 de minute înainte.';
+    errors.meetupAt = tr('Întâlnirea e prea aproape: alege cu cel puțin 30 de minute înainte.');
   }
 
   return errors;

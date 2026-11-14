@@ -3,6 +3,7 @@ import * as Location from 'expo-location';
 
 import type { LatLng } from '../types/events';
 import { haversineKm } from '../utils/distance';
+import { tr } from '../i18n';
 
 /** Centrul Timișoarei (Piața Victoriei), orașul evenimentelor. Folosit dacă nu avem locația reală. */
 export const CITY_CENTER: LatLng = { latitude: 45.7537, longitude: 21.2257 };
@@ -67,11 +68,11 @@ export function useUserLocation(): UserLocation {
 export function getLocationNotice(status: LocationStatus): string | null {
   switch (status) {
     case 'denied':
-      return 'Fără acces la locație: distanțele sunt calculate de la centrul Timișoarei.';
+      return tr('Fără acces la locație: distanțele sunt calculate de la centrul Timișoarei.');
     case 'outside-city':
-      return 'Ești în afara Timișoarei: distanțele sunt calculate de la centrul orașului.';
+      return tr('Ești în afara Timișoarei: distanțele sunt calculate de la centrul orașului.');
     case 'error':
-      return 'Nu am putut afla locația: folosim centrul Timișoarei.';
+      return tr('Nu am putut afla locația: folosim centrul Timișoarei.');
     default:
       return null;
   }

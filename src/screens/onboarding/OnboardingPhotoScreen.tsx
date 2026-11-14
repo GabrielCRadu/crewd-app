@@ -10,6 +10,7 @@ import ScreenGlow from '../../components/ScreenGlow';
 import type { OnboardingStackParamList } from '../../navigation/authTypes';
 import { colors } from '../../theme/colors';
 import { type } from '../../theme/typography';
+import { tr } from '../../i18n';
 
 type Props = NativeStackScreenProps<OnboardingStackParamList, 'OnboardingPhoto'>;
 
@@ -25,15 +26,17 @@ export default function OnboardingPhotoScreen({ navigation, route }: Props) {
         <OnboardingHeader step={2} onBack={() => navigation.goBack()} />
 
         <View style={styles.heading}>
-          <Text style={styles.title}>Adaugă o poză cu tine</Text>
-          <Text style={styles.subtitle}>Ceilalți te recunosc la întâlnire după ea. O poți înlocui oricând, dar nu șterge.</Text>
+          <Text style={styles.title}>{tr('Adaugă o poză cu tine')}</Text>
+          <Text style={styles.subtitle}>
+            {tr('Ceilalți te recunosc la întâlnire după ea. O poți înlocui oricând, dar nu șterge.')}
+          </Text>
         </View>
 
         <ProfilePhotoPicker photoUrl={photoUrl} name={identity.name} onChange={setPhotoUrl} />
 
         <View style={styles.bottom}>
           <GradientButton
-            label="Continuă"
+            label={tr('Continuă')}
             icon="arrow-forward"
             disabled={!photoUrl}
             onPress={() => photoUrl && navigation.navigate('OnboardingTags', { identity, photoUrl })}

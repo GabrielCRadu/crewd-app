@@ -4,6 +4,7 @@ import type { LayoutChangeEvent } from 'react-native';
 
 import { colors } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
+import { tr } from '../i18n';
 
 interface Props<T extends string> {
   options: { value: T; label: string }[];
@@ -56,7 +57,7 @@ export default function SegmentedControl<T extends string>({ options, value, onC
             accessibilityState={{ selected: active }}
             style={styles.segment}
           >
-            <Text style={[styles.label, active && styles.labelActive]}>{o.label}</Text>
+            <Text style={[styles.label, active && styles.labelActive]}>{tr(o.label)}</Text>
           </Pressable>
         );
       })}

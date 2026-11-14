@@ -7,6 +7,7 @@ import { glass, radii } from '../../theme/shape';
 import type { CrewGroup, GroupStatus } from '../../types/groups';
 import { formatTime } from '../../utils/dates';
 import { MIN_FORM_MEMBERS } from '../../utils/groupRules';
+import { tr } from '../../i18n';
 
 interface Props {
   group: CrewGroup;
@@ -33,15 +34,15 @@ export default function GroupCard({ group, status, common, isMine, blockReason, 
   const members = Object.values(group.members);
 
   const badge = isMine
-    ? 'Ești aici'
+    ? tr('Ești aici')
     : status === 'forming'
-      ? `Se formează · mai e nevoie de ${missing}`
+      ? tr('Se formează · mai e nevoie de {missing}', { missing: missing })
       : status === 'full'
         ? 'Complet'
         : status === 'closed'
-          ? 'Închis'
+          ? tr('Închis')
           : status === 'expired'
-            ? 'Nu s-a format'
+            ? tr('Nu s-a format')
             : null;
 
   return (
@@ -63,8 +64,7 @@ export default function GroupCard({ group, status, common, isMine, blockReason, 
       <Text style={styles.vibe}>„{group.vibe}”</Text>
 
       <Text style={styles.meta}>
-        {group.minAge}–{group.maxAge} ani · {group.memberUids.length}/{group.maxSize} persoane
-        {common.length > 0 ? ` · ${common.length} ${common.length === 1 ? 'tag comun' : 'tag-uri comune'}` : ''}
+        {group.minAge}–{group.maxAge}{' '}{tr('ani ·')}{' '}{group.memberUids.length}/{group.maxSize}{' '}{tr('persoane')}{common.length > 0 ? ` · ${common.length} ${common.length === 1 ? 'tag comun' : 'tag-uri comune'}` : ''}
       </Text>
 
       <View style={styles.bottomRow}>
@@ -82,7 +82,7 @@ export default function GroupCard({ group, status, common, isMine, blockReason, 
             style={({ pressed }) => [styles.join, (pressed || busy) && styles.pressed]}
             accessibilityRole="button"
           >
-            <Text style={styles.joinText}>{busy ? '…' : 'Intră'}</Text>
+            <Text style={styles.joinText}>{busy ? '…' : tr('Intră|grup')}</Text>
           </Pressable>
         ) : null}
         {isMine && onOpenChat ? (
@@ -92,7 +92,7 @@ export default function GroupCard({ group, status, common, isMine, blockReason, 
             accessibilityRole="button"
           >
             <Ionicons name="chatbubbles" size={16} color={colors.onLight} />
-            <Text style={styles.joinText}>Deschide chat-ul</Text>
+            <Text style={styles.joinText}>{tr('Deschide chat-ul')}</Text>
           </Pressable>
         ) : null}
       </View>

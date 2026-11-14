@@ -10,7 +10,7 @@ import { type } from '../../theme/typography';
 import { glass, radii } from '../../theme/shape';
 import type { EventWithDistance } from '../../types/events';
 import {
-  WEEKDAY_INITIALS,
+  weekdayInitials,
   addMonths,
   dayKey,
   formatMonthName,
@@ -23,6 +23,7 @@ import {
 } from '../../utils/calendar';
 import { formatLongDay, formatTime, formatWeekdayShort, hasEnded, isLive } from '../../utils/dates';
 import { formatDistance } from '../../utils/distance';
+import { tr } from '../../i18n';
 
 interface Props {
   /** Evenimentele la care ești înscris (și cele trecute, ca să-ți vezi luna întreagă). */
@@ -67,12 +68,10 @@ export default function JoinedCalendar({ events, onOpenEvent, onBrowse }: Props)
     return (
       <View style={styles.emptyCard}>
         <Ionicons name="calendar-outline" size={28} color={colors.text} />
-        <Text style={styles.emptyTitle}>Calendarul tău e gol</Text>
-        <Text style={styles.emptyText}>
-          Apasă „Vin și eu” la un eveniment și apare aici, la ziua și ora lui.
-        </Text>
+        <Text style={styles.emptyTitle}>{tr('Calendarul tău e gol')}</Text>
+        <Text style={styles.emptyText}>{tr('Apasă „Vin și eu” la un eveniment și apare aici, la ziua și ora lui.')}</Text>
         <Pressable onPress={onBrowse} style={({ pressed }) => [styles.emptyButton, pressed && styles.pressed]}>
-          <Text style={styles.emptyButtonText}>Vezi evenimentele</Text>
+          <Text style={styles.emptyButtonText}>{tr('Vezi evenimentele')}</Text>
         </Pressable>
       </View>
     );
@@ -87,7 +86,7 @@ export default function JoinedCalendar({ events, onOpenEvent, onBrowse }: Props)
           <View style={styles.monthNav}>
             {!isCurrentMonth || selectedKey !== todayKey ? (
               <Pressable onPress={goToday} hitSlop={6} style={({ pressed }) => [styles.todayPill, pressed && styles.pressed]}>
-                <Text style={styles.todayText}>Azi</Text>
+                <Text style={styles.todayText}>{tr('Azi')}</Text>
               </Pressable>
             ) : null}
             <GlassIconButton icon="chevron-back" size={36} onPress={() => changeMonth(-1)} />
@@ -96,8 +95,8 @@ export default function JoinedCalendar({ events, onOpenEvent, onBrowse }: Props)
         </View>
 
         <View style={styles.weekRow}>
-          {WEEKDAY_INITIALS.map((d) => (
-            <Text key={d} style={styles.weekday}>
+          {weekdayInitials().map((d, i) => (
+            <Text key={i} style={styles.weekday}>
               {d}
             </Text>
           ))}
@@ -148,18 +147,18 @@ export default function JoinedCalendar({ events, onOpenEvent, onBrowse }: Props)
       {/* Programul */}
       <View style={styles.agendaHeader}>
         <Text style={styles.sectionTitle}>
-          {selectedKey ? formatLongDay(new Date(`${selectedKey}T12:00:00`)).toUpperCase() : `TOATĂ LUNA ${formatMonthName(month).toUpperCase()}`}
+          {selectedKey ? formatLongDay(new Date(`${selectedKey}T12:00:00`)).toUpperCase() : tr('TOATĂ LUNA {p}', { p: formatMonthName(month).toUpperCase() })}
         </Text>
         {selectedKey ? (
           <Pressable onPress={() => setSelectedKey(null)} hitSlop={8}>
-            <Text style={styles.link}>Toată luna</Text>
+            <Text style={styles.link}>{tr('Toată luna')}</Text>
           </Pressable>
         ) : null}
       </View>
 
       {shownDays.length === 0 || shownDays.every(([, list]) => list.length === 0) ? (
         <Text style={styles.nothing}>
-          {selectedKey ? 'Nimic programat în ziua asta.' : `Nu ai nimic programat în ${formatMonthName(month)}.`}
+          {selectedKey ? tr('Nimic programat în ziua asta.') : tr('Nu ai nimic programat în {p}.', { p: formatMonthName(month) })}
         </Text>
       ) : (
         shownDays.map(([key, list]) => {
@@ -202,8 +201,8 @@ export default function JoinedCalendar({ events, onOpenEvent, onBrowse }: Props)
                           </Text>
                           <View style={styles.eventTags}>
                             <Text style={styles.eventCategory}>{getCategory(e.category).label}</Text>
-                            {live ? <Text style={styles.badgeLive}>ACUM</Text> : null}
-                            {ended ? <Text style={styles.badgeEnded}>Încheiat</Text> : null}
+                            {live ? <Text style={styles.badgeLive}>{tr('ACUM')}</Text> : null}
+                            {ended ? <Text style={styles.badgeEnded}>{tr('Încheiat')}</Text> : null}
                           </View>
                         </View>
                         {/* Evenimentele care urmează se pot pune și în Google Calendar */}

@@ -13,6 +13,7 @@ import { idsWithStatus } from '../services/friendsService';
 import { friendsOfPerson, getPerson } from '../services/peopleService';
 import { colors } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
+import { tr } from '../i18n';
 
 /** Ruta e înregistrată în toate stivele unde există profilul unei persoane, cu același parametru. */
 type PersonFriendsParams = { PersonFriends: { personId: string } };
@@ -39,18 +40,17 @@ export default function PersonFriendsScreen() {
       <View style={styles.header}>
         <GlassIconButton icon="chevron-back" onPress={() => navigation.goBack()} />
         <View style={styles.headerText}>
-          <Text style={styles.title}>Prietenii lui {person?.name ?? ''}</Text>
+          <Text style={styles.title}>{tr('Prietenii lui')}{' '}{person?.name ?? ''}</Text>
           <Text style={styles.subtitle}>
-            {all.length} {all.length === 1 ? 'prieten' : 'prieteni'} · {mutual.length} comuni
-          </Text>
+            {all.length} {all.length === 1 ? 'prieten' : 'prieteni'} · {mutual.length}{' '}{tr('comuni')}</Text>
         </View>
       </View>
 
       <View style={styles.filter}>
         <SegmentedControl
           options={[
-            { value: 'all', label: `Toți · ${all.length}` },
-            { value: 'mutual', label: `Comuni · ${mutual.length}` },
+            { value: 'all', label: tr('Toți · {length}', { length: all.length }) },
+            { value: 'mutual', label: tr('Comuni · {length}', { length: mutual.length }) },
           ]}
           value={filter}
           onChange={setFilter}
@@ -60,7 +60,7 @@ export default function PersonFriendsScreen() {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {shown.length === 0 ? (
           <Text style={styles.empty}>
-            {filter === 'mutual' ? 'Nu aveți prieteni comuni încă.' : 'Nu are prieteni în aplicație încă.'}
+            {filter === 'mutual' ? tr('Nu aveți prieteni comuni încă.') : tr('Nu are prieteni în aplicație încă.')}
           </Text>
         ) : (
           shown.map((p) => {
@@ -79,7 +79,7 @@ export default function PersonFriendsScreen() {
                 {/* Prietenii comuni sunt marcați și în lista „Toți” */}
                 {isMutual ? (
                   <View style={styles.mutualBadge}>
-                    <Text style={styles.mutualText}>Prieten comun</Text>
+                    <Text style={styles.mutualText}>{tr('Prieten comun')}</Text>
                   </View>
                 ) : null}
                 <Ionicons name="chevron-forward" size={18} color={colors.faint} />

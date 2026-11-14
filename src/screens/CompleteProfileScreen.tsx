@@ -13,6 +13,7 @@ import { UsernameTakenError } from '../services/usernamesService';
 import { colors } from '../theme/colors';
 import { type } from '../theme/typography';
 import { missingProfileParts } from '../utils/profileCompleteness';
+import { tr } from '../i18n';
 
 /**
  * Conturile create înainte de username-uri și de poza obligatorie: aleg ce le lipsește
@@ -43,11 +44,11 @@ export default function CompleteProfileScreen() {
       setSaving(false);
       if (e instanceof UsernameTakenError) {
         setTakenNames((prev) => [...prev, username]);
-        setMessage('Între timp altcineva a ales acest username. Alege altul.');
+        setMessage(tr('Între timp altcineva a ales acest username. Alege altul.'));
         return;
       }
       console.warn('Nu am putut completa profilul:', e);
-      setMessage('Nu am putut salva. Verifică conexiunea și încearcă din nou.');
+      setMessage(tr('Nu am putut salva. Verifică conexiunea și încearcă din nou.'));
     }
   };
 
@@ -57,9 +58,9 @@ export default function CompleteProfileScreen() {
       void save();
       return;
     }
-    Alert.alert('Username-ul tău', `Așa te vor găsi ceilalți: @${username}. Nu se mai poate schimba.`, [
-      { text: 'Schimb', style: 'cancel' },
-      { text: 'Confirm', onPress: () => void save() },
+    Alert.alert(tr('Username-ul tău'), tr('Așa te vor găsi ceilalți: @{username}. Nu se mai poate schimba.', { username }), [
+      { text: tr('Schimb'), style: 'cancel' },
+      { text: tr('Confirm'), onPress: () => void save() },
     ]);
   };
 
@@ -69,13 +70,13 @@ export default function CompleteProfileScreen() {
       <KeyboardAvoidingView style={styles.flex} behavior="padding">
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           <View style={styles.heading}>
-            <Text style={styles.title}>Completează-ți profilul</Text>
+            <Text style={styles.title}>{tr('Completează-ți profilul')}</Text>
             <Text style={styles.subtitle}>
               {missing.username && missing.photo
-                ? 'Avem nevoie de un username și de o poză cu tine.'
+                ? tr('Avem nevoie de un username și de o poză cu tine.')
                 : missing.username
-                  ? 'Avem nevoie de un username: apare în codul tău QR.'
-                  : 'Avem nevoie de o poză cu tine: ceilalți te recunosc după ea la întâlnire.'}
+                  ? tr('Avem nevoie de un username: apare în codul tău QR.')
+                  : tr('Avem nevoie de o poză cu tine: ceilalți te recunosc după ea la întâlnire.')}
             </Text>
           </View>
 
@@ -85,9 +86,9 @@ export default function CompleteProfileScreen() {
           {message ? <FormMessage text={message} /> : null}
 
           <View style={styles.bottom}>
-            <GradientButton label="Gata" icon="checkmark" disabled={!ready} loading={saving} onPress={finish} />
+            <GradientButton label={tr('Gata')} icon="checkmark" disabled={!ready} loading={saving} onPress={finish} />
             <Pressable onPress={() => void signOut()} hitSlop={8} style={styles.signOut}>
-              <Text style={styles.signOutText}>Ieși din cont</Text>
+              <Text style={styles.signOutText}>{tr('Ieși din cont')}</Text>
             </Pressable>
           </View>
         </ScrollView>

@@ -18,12 +18,13 @@ import { useFriendsOnMap } from '../hooks/useFriendsOnMap';
 import { useLocationVisibility } from '../hooks/useLocationVisibility';
 import { useUserLocation } from '../hooks/useUserLocation';
 import { findPersonByName } from '../services/peopleService';
-import { colors } from '../theme/colors';
+import { colorScheme, colors, isDark } from '../theme/colors';
 import { type } from '../theme/typography';
 import { cardShadow } from '../theme/shadows';
 import { darkMapStyle } from '../theme/mapStyle';
 import { glass, radii } from '../theme/shape';
 import { formatDistance } from '../utils/distance';
+import { tr } from '../i18n';
 
 type Mode = 'friends' | 'events';
 
@@ -76,11 +77,11 @@ export default function FriendsMapScreen() {
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.header}>
-        <Text style={styles.title}>Hartă</Text>
+        <Text style={styles.title}>{tr('Hartă')}</Text>
         <SegmentedControl
           options={[
-            { value: 'friends', label: 'Prieteni' },
-            { value: 'events', label: 'Evenimente' },
+            { value: 'friends', label: tr('Prieteni') },
+            { value: 'events', label: tr('Evenimente') },
           ]}
           value={mode}
           onChange={setMode}
@@ -106,15 +107,15 @@ export default function FriendsMapScreen() {
           showsUserLocation={false}
           showsMyLocationButton={false}
           toolbarEnabled={false}
-          userInterfaceStyle="dark"
-          customMapStyle={darkMapStyle}
+          userInterfaceStyle={colorScheme}
+          customMapStyle={isDark ? darkMapStyle : undefined}
         >
           {/* Poziția mea: doar când avem locația reală (altfel `coords` e centrul orașului). */}
           {location.status === 'granted' ? (
             <Marker coordinate={location.coords} anchor={{ x: 0.5, y: 0.5 }} zIndex={1}>
               <View style={styles.meMarker}>
                 <View style={styles.meDot} />
-                <Text style={styles.friendLabel}>Tu</Text>
+                <Text style={styles.friendLabel}>{tr('Tu')}</Text>
               </View>
             </Marker>
           ) : null}
@@ -138,7 +139,7 @@ export default function FriendsMapScreen() {
               <Avatar name={selected.name} size={44} />
               <View style={styles.cardText}>
                 <Text style={styles.cardName}>
-                  {selected.name} · la {formatDistance(selected.distanceKm)}
+                  {selected.name}{' '}{tr('· la')}{' '}{formatDistance(selected.distanceKm)}
                 </Text>
                 <Text style={styles.cardStatus}>{selected.status}</Text>
               </View>
@@ -150,10 +151,10 @@ export default function FriendsMapScreen() {
                 accessibilityRole="button"
                 style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
               >
-                <Text style={styles.buttonText}>Scrie-i</Text>
+                <Text style={styles.buttonText}>{tr('Scrie-i')}</Text>
               </Pressable>
               <GradientButton
-                label="Vezi evenimentul"
+                label={tr('Vezi evenimentul')}
                 compact
                 style={styles.buttonCta}
                 disabled={!selected.eventId}
@@ -162,7 +163,7 @@ export default function FriendsMapScreen() {
             </View>
             <View style={styles.separator} />
             <View style={styles.visibilityRow}>
-              <Text style={styles.visibilityText}>Locația mea e vizibilă pentru prieteni</Text>
+              <Text style={styles.visibilityText}>{tr('Locația mea e vizibilă pentru prieteni')}</Text>
               <Switch
                 value={isVisible}
                 onValueChange={setIsVisible}

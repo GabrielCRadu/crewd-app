@@ -40,6 +40,7 @@ import {
   normalizeMessageText,
 } from '../utils/chatRules';
 import { formatDay, formatTime, startOfDay } from '../utils/dates';
+import { tr } from '../i18n';
 
 type Props = NativeStackScreenProps<ChatsStackParamList, 'ChatRoom'>;
 
@@ -82,10 +83,10 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
         ) : (
           <>
             <Text style={styles.emptyText}>
-              {state === 'forming' ? 'Chat-ul se deschide când grupul are cel puțin 3 persoane.' : LEFT_GROUP_MESSAGE}
+              {state === 'forming' ? tr('Chat-ul se deschide când grupul are cel puțin 3 persoane.') : tr(LEFT_GROUP_MESSAGE)}
             </Text>
             <Pressable onPress={() => navigation.goBack()} style={styles.bannerButton}>
-              <Text style={styles.bannerButtonText}>Înapoi</Text>
+              <Text style={styles.bannerButtonText}>{tr('Înapoi')}</Text>
             </Pressable>
           </>
         )}
@@ -110,7 +111,7 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
     sendGroupMessage(eventId, groupId, { uid, name: authorNameFor(group.members, uid, profile?.name ?? '') }, text).catch((e: unknown) => {
       // Textul nu se pierde: revine în câmp, ca să poți încerca din nou.
       setDraft((current) => current || text);
-      Alert.alert('Mesajul nu s-a trimis', chatErrorMessage(e));
+      Alert.alert(tr('Mesajul nu s-a trimis'), chatErrorMessage(e));
     });
   };
 
@@ -134,8 +135,7 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
             <Ionicons name="chevron-forward" size={16} color={colors.muted} />
           </View>
           <Text style={styles.headerSubtitle} numberOfLines={1}>
-            {group.memberUids.length} persoane
-          </Text>
+            {group.memberUids.length}{' '}{tr('persoane')}</Text>
         </Pressable>
       </View>
 
@@ -144,13 +144,13 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
         <View style={styles.bannerScrim} />
         <Ionicons name="location-outline" size={22} color={colors.text} />
         <View style={styles.bannerText}>
-          <Text style={styles.bannerLabel}>NE VEDEM</Text>
+          <Text style={styles.bannerLabel}>{tr('NE VEDEM')}</Text>
           <Text style={styles.bannerWhen}>
-            {formatDay(group.meetupAt)} la {formatTime(group.meetupAt)} · {group.meetupPlace}
+            {formatDay(group.meetupAt)}{' '}{tr('la')}{' '}{formatTime(group.meetupAt)} · {group.meetupPlace}
           </Text>
         </View>
         <Pressable onPress={openMap} style={styles.bannerButton}>
-          <Text style={styles.bannerButtonText}>Pe hartă</Text>
+          <Text style={styles.bannerButtonText}>{tr('Pe hartă')}</Text>
         </Pressable>
       </View>
 
@@ -173,7 +173,7 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
           <TextInput
             value={draft}
             onChangeText={setDraft}
-            placeholder="Scrie un mesaj…"
+            placeholder={tr('Scrie un mesaj…')}
             placeholderTextColor={colors.muted}
             style={styles.input}
             maxLength={MAX_MESSAGE_LENGTH}

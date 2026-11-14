@@ -9,6 +9,7 @@ import type { ProfileStackParamList } from '../navigation/profileTypes';
 import { colors } from '../theme/colors';
 import { radii } from '../theme/shape';
 import { type } from '../theme/typography';
+import { tr } from '../i18n';
 
 type Props = NativeStackScreenProps<ProfileStackParamList, 'PublicProfile'>;
 
@@ -35,13 +36,13 @@ export default function PublicProfileScreen({ navigation, route }: Props) {
             <Avatar name={card.name} size={112} square photoUrl={card.photoThumb} />
             <Text style={styles.name}>{card.name}</Text>
             <Text style={styles.username}>@{card.username}</Text>
-            <Text style={styles.note}>Adăugarea la prieteni vine în curând.</Text>
+            <Text style={styles.note}>{tr('Adăugarea la prieteni vine în curând.')}</Text>
           </>
         ) : (
           <>
-            <Text style={styles.note}>Contul nu mai există.</Text>
+            <Text style={styles.note}>{tr('Contul nu mai există.')}</Text>
             <Pressable onPress={() => navigation.goBack()} style={styles.pill}>
-              <Text style={styles.pillText}>Înapoi</Text>
+              <Text style={styles.pillText}>{tr('Înapoi')}</Text>
             </Pressable>
           </>
         )}

@@ -7,6 +7,7 @@ import { PhotoPermissionError, pickProfilePhoto } from '../services/photoService
 import type { PhotoSource } from '../services/photoService';
 import { colors } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
+import { tr } from '../i18n';
 
 interface Props {
   photoUrl: string | null;
@@ -25,8 +26,8 @@ export default function ProfilePhotoPicker({ photoUrl, name, onChange }: Props) 
       const picked = await pickProfilePhoto(source);
       if (picked) onChange(picked);
     } catch (e) {
-      const message = e instanceof PhotoPermissionError ? e.message : 'Nu am putut încărca fotografia.';
-      Alert.alert('Fotografia de profil', `${message} Poți da acces din setările telefonului.`);
+      const message = e instanceof PhotoPermissionError ? e.message : tr('Nu am putut încărca fotografia.');
+      Alert.alert(tr('Fotografia de profil'), tr('{message} Poți da acces din setările telefonului.', { message }));
     } finally {
       setBusy(false);
     }
@@ -36,8 +37,8 @@ export default function ProfilePhotoPicker({ photoUrl, name, onChange }: Props) 
     <View style={styles.block}>
       <Avatar name={name || '?'} size={140} square photoUrl={photoUrl} />
       <View style={styles.actions}>
-        <PhotoButton icon="camera-outline" label="Cameră" disabled={busy} onPress={() => choose('camera')} />
-        <PhotoButton icon="images-outline" label="Galerie" disabled={busy} onPress={() => choose('library')} />
+        <PhotoButton icon="camera-outline" label={tr('Cameră')} disabled={busy} onPress={() => choose('camera')} />
+        <PhotoButton icon="images-outline" label={tr('Galerie')} disabled={busy} onPress={() => choose('library')} />
       </View>
     </View>
   );

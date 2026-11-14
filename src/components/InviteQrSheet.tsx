@@ -19,6 +19,7 @@ import GradientButton from './GradientButton';
 import { copyInvite, inviteUrl, shareInvite } from '../services/inviteService';
 import { colors } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
+import { tr } from '../i18n';
 
 interface Props {
   visible: boolean;
@@ -77,20 +78,20 @@ export default function InviteQrSheet({ visible, username, name, photoUrl, onClo
   const copy = () => {
     copyInvite(username)
       .then(() => setCopied(true))
-      .catch(() => Alert.alert('Nu am putut copia linkul', 'Încearcă din nou.'));
+      .catch(() => Alert.alert(tr('Nu am putut copia linkul'), tr('Încearcă din nou.')));
   };
 
   // Dacă meniul de share nu merge, linkul se copiază în schimb.
   const share = () => {
     shareInvite(username)
       .then((result) => result === 'copied' && setCopied(true))
-      .catch(() => Alert.alert('Nu am putut trimite linkul', 'Încearcă din nou.'));
+      .catch(() => Alert.alert(tr('Nu am putut trimite linkul'), tr('Încearcă din nou.')));
   };
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent>
       <View style={styles.root}>
-        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel="Închide" />
+        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel={tr('Închide')} />
 
         <Animated.View
           style={[styles.sheet, { paddingBottom: insets.bottom + 20, transform: [{ translateY: dragY }] }]}
@@ -102,32 +103,32 @@ export default function InviteQrSheet({ visible, username, name, photoUrl, onClo
           </View>
 
           {/* Codul: mereu negru pe alb, ca să-l citească orice cameră; poza ta în mijloc */}
-          <View style={styles.qrCard} accessibilityLabel={`Codul QR al lui ${name}`}>
+          <View style={styles.qrCard} accessibilityLabel={tr('Codul QR al lui {name}', { name: name })}>
             <QRCode
               value={url}
               size={qrSize}
-              color={colors.onLight}
-              backgroundColor={colors.text}
+              color={colors.qr.dark}
+              backgroundColor={colors.qr.light}
               ecl="H"
               logo={photoUrl ? { uri: photoUrl } : undefined}
               logoSize={qrSize * 0.2}
               logoMargin={3}
               logoBorderRadius={8}
-              logoBackgroundColor={colors.text}
+              logoBackgroundColor={colors.qr.light}
             />
           </View>
           <Text style={styles.username}>@{username}</Text>
-          <Text style={styles.hint}>Scanează ca să mă adaugi ca prieten</Text>
+          <Text style={styles.hint}>{tr('Scanează ca să mă adaugi ca prieten')}</Text>
 
           <View style={styles.actions}>
-            <GradientButton label="Distribuie linkul de invitație" icon="share-outline" iconFirst onPress={share} />
+            <GradientButton label={tr('Distribuie linkul de invitație')} icon="share-outline" iconFirst onPress={share} />
             <Pressable
               onPress={copy}
               style={({ pressed }) => [styles.copyButton, pressed && styles.copyPressed]}
-              accessibilityLabel="Copiază linkul"
+              accessibilityLabel={tr('Copiază linkul')}
             >
               <Ionicons name={copied ? 'checkmark' : 'copy-outline'} size={18} color={colors.text} />
-              <Text style={styles.copyText}>{copied ? 'Link copiat!' : 'Copiază linkul'}</Text>
+              <Text style={styles.copyText}>{copied ? tr('Link copiat!') : tr('Copiază linkul')}</Text>
             </Pressable>
           </View>
         </Animated.View>
@@ -152,7 +153,7 @@ const styles = StyleSheet.create({
   grabber: { width: 40, height: 4, borderRadius: radii.pill, backgroundColor: colors.border },
   top: { position: 'absolute', top: 14, right: 16 },
   // Loc deasupra codului pentru butonul X din colț.
-  qrCard: { backgroundColor: colors.text, borderRadius: radii.card, padding: 18, marginTop: 40 },
+  qrCard: { backgroundColor: colors.qr.light, borderRadius: radii.card, padding: 18, marginTop: 40 },
   username: { color: colors.text, fontSize: 18, fontWeight: '700', textAlign: 'center' },
   hint: { color: colors.muted, fontSize: 15, textAlign: 'center' },
   actions: { alignSelf: 'stretch', gap: 10, marginTop: 4 },

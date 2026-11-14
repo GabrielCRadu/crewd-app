@@ -1,4 +1,5 @@
 import type { Gender } from '../types/user';
+import { tr } from '../i18n';
 
 /** Textele ferestrei de confirmare „elimină din prieteni”. */
 export interface RemoveFriendWording {
@@ -17,10 +18,10 @@ const MESSAGE = 'Nu vă veți mai vedea evenimentele la care mergeți.';
  */
 export function removeFriendWording(gender: Gender | null | undefined): RemoveFriendWording {
   if (gender === 'female') {
-    return { title: 'Vrei să îți elimini prietena?', message: MESSAGE, confirm: 'Elimină prietena' };
+    return { title: tr('Vrei să îți elimini prietena?'), message: tr(MESSAGE), confirm: tr('Elimină prietena') };
   }
   if (gender === 'male') {
-    return { title: 'Vrei să îți elimini prietenul?', message: MESSAGE, confirm: 'Elimină prietenul' };
+    return { title: tr('Vrei să îți elimini prietenul?'), message: tr(MESSAGE), confirm: tr('Elimină prietenul') };
   }
-  return { title: 'Vrei să elimini această persoană din prieteni?', message: MESSAGE, confirm: 'Elimină din prieteni' };
+  return { title: tr('Vrei să elimini această persoană din prieteni?'), message: tr(MESSAGE), confirm: tr('Elimină din prieteni') };
 }

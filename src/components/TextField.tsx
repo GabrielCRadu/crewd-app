@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../theme/colors';
 import { type } from '../theme/typography';
 import { glass, radii } from '../theme/shape';
+import { tr } from '../i18n';
 
 interface Props extends TextInputProps {
   label: string;
@@ -49,7 +50,7 @@ const TextField = forwardRef<TextInputInstance, Props>(function TextField(
           <Pressable
             onPress={() => setHidden((h) => !h)}
             hitSlop={10}
-            accessibilityLabel={hidden ? 'Arată parola' : 'Ascunde parola'}
+            accessibilityLabel={hidden ? tr('Arată parola') : tr('Ascunde parola')}
           >
             <Ionicons name={hidden ? 'eye-outline' : 'eye-off-outline'} size={20} color={colors.muted} />
           </Pressable>

@@ -12,6 +12,7 @@ import type { User } from 'firebase/auth';
 
 import { auth } from '../lib/firebase';
 import { MIN_PASSWORD_LENGTH } from '../utils/passwordRules';
+import { tr } from '../i18n';
 
 /*
  * Autentificarea cu email și parolă (Firebase Auth). Ecranele folosesc doar funcțiile de aici
@@ -60,7 +61,7 @@ export async function signOut(): Promise<void> {
  */
 export async function confirmPassword(password: string): Promise<void> {
   const user = requireAuth().currentUser;
-  if (!user?.email) throw new Error('Nu ești logat.');
+  if (!user?.email) throw new Error(tr('Nu ești logat.'));
   try {
     await reauthenticateWithCredential(user, EmailAuthProvider.credential(user.email, password));
   } catch (e) {
@@ -71,7 +72,7 @@ export async function confirmPassword(password: string): Promise<void> {
 /** Șterge contul din Firebase Auth (după confirmPassword și după ce datele au fost șterse). */
 export async function deleteCurrentUser(): Promise<void> {
   const user = requireAuth().currentUser;
-  if (!user) throw new Error('Nu ești logat.');
+  if (!user) throw new Error(tr('Nu ești logat.'));
   try {
     await deleteUser(user);
   } catch (e) {
@@ -98,26 +99,26 @@ function toMessage(e: unknown): string {
   const code = typeof e === 'object' && e !== null && 'code' in e ? String((e as { code: unknown }).code) : '';
   switch (code) {
     case 'auth/invalid-email':
-      return 'Adresa de email nu e validă.';
+      return tr('Adresa de email nu e validă.');
     case 'auth/invalid-credential':
     case 'auth/wrong-password':
     case 'auth/user-not-found':
-      return 'Email sau parolă greșită.';
+      return tr('Email sau parolă greșită.');
     case 'auth/email-already-in-use':
-      return 'Există deja un cont cu acest email. Încearcă să te loghezi.';
+      return tr('Există deja un cont cu acest email. Încearcă să te loghezi.');
     case 'auth/weak-password':
-      return `Parola e prea slabă: minim ${MIN_PASSWORD_LENGTH} caractere, o literă mică și o literă mare.`;
+      return tr('Parola e prea slabă: minim {min} caractere, o literă mică și o literă mare.', { min: MIN_PASSWORD_LENGTH });
     case 'auth/too-many-requests':
-      return 'Prea multe încercări. Așteaptă puțin și încearcă din nou.';
+      return tr('Prea multe încercări. Așteaptă puțin și încearcă din nou.');
     case 'auth/network-request-failed':
-      return 'Nu există conexiune la internet.';
+      return tr('Nu există conexiune la internet.');
     case 'auth/requires-recent-login':
-      return 'Din motive de siguranță, confirmă din nou parola.';
+      return tr('Din motive de siguranță, confirmă din nou parola.');
     case 'auth/missing-password':
-      return 'Introdu parola.';
+      return tr('Introdu parola.');
     case 'auth/operation-not-allowed':
-      return 'Autentificarea cu email nu e activată în Firebase.';
+      return tr('Autentificarea cu email nu e activată în Firebase.');
     default:
-      return 'Ceva n-a mers. Încearcă din nou.';
+      return tr('Ceva n-a mers. Încearcă din nou.');
   }
 }

@@ -7,12 +7,14 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import Aurora from '../../components/Aurora';
 import FormMessage from '../../components/FormMessage';
 import GradientButton from '../../components/GradientButton';
+import LanguageSwitch from '../../components/LanguageSwitch';
 import TextField from '../../components/TextField';
 import type { AuthStackParamList } from '../../navigation/authTypes';
 import { isValidEmail, resetPassword, signIn } from '../../services/authService';
 import { colors } from '../../theme/colors';
 import { type } from '../../theme/typography';
 import { radii } from '../../theme/shape';
+import { tr } from '../../i18n';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
@@ -27,8 +29,8 @@ export default function LoginScreen({ navigation }: Props) {
 
   const submit = async () => {
     const nextErrors = {
-      email: isValidEmail(email) ? undefined : 'Introdu o adresă de email validă.',
-      password: password ? undefined : 'Introdu parola.',
+      email: isValidEmail(email) ? undefined : tr('Introdu o adresă de email validă.'),
+      password: password ? undefined : tr('Introdu parola.'),
     };
     setErrors(nextErrors);
     setMessage(null);
@@ -46,13 +48,13 @@ export default function LoginScreen({ navigation }: Props) {
 
   const forgotPassword = async () => {
     if (!isValidEmail(email)) {
-      setErrors({ email: 'Scrie mai întâi emailul contului, apoi apasă din nou.' });
+      setErrors({ email: tr('Scrie mai întâi emailul contului, apoi apasă din nou.') });
       return;
     }
     setErrors({});
     try {
       await resetPassword(email);
-      setMessage({ text: `Ți-am trimis un email la ${email.trim()} cu un link pentru o parolă nouă.`, tone: 'success' });
+      setMessage({ text: tr('Ți-am trimis un email la {p} cu un link pentru o parolă nouă.', { p: email.trim() }), tone: 'success' });
     } catch (e) {
       setMessage({ text: (e as Error).message, tone: 'error' });
     }
@@ -64,16 +66,21 @@ export default function LoginScreen({ navigation }: Props) {
       <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
         <KeyboardAvoidingView style={styles.flex} behavior="padding">
           <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+            {/* Limba aplicației: se poate alege de aici și, mai târziu, din Setări */}
+            <View style={styles.language}>
+              <LanguageSwitch />
+            </View>
+
             <View style={styles.brand}>
               <Text style={styles.logo}>crewd</Text>
-              <Text style={styles.tagline}>Găsește-ți crew-ul pentru diseară.</Text>
+              <Text style={styles.tagline}>{tr('Găsește-ți crew-ul pentru diseară.')}</Text>
             </View>
 
             <View style={styles.form}>
-              <Text style={styles.title}>Intră în cont</Text>
+              <Text style={styles.title}>{tr('Intră în cont')}</Text>
 
               <TextField
-                label="Email"
+                label={tr('Email')}
                 value={email}
                 onChangeText={setEmail}
                 error={errors.email}
@@ -87,7 +94,7 @@ export default function LoginScreen({ navigation }: Props) {
               />
               <TextField
                 ref={passwordRef}
-                label="Parolă"
+                label={tr('Parolă')}
                 value={password}
                 onChangeText={setPassword}
                 error={errors.password}
@@ -99,18 +106,18 @@ export default function LoginScreen({ navigation }: Props) {
               />
 
               <Pressable onPress={forgotPassword} hitSlop={8} style={styles.forgot}>
-                <Text style={styles.link}>Am uitat parola</Text>
+                <Text style={styles.link}>{tr('Am uitat parola')}</Text>
               </Pressable>
 
               {message ? <FormMessage text={message.text} tone={message.tone} /> : null}
 
-              <GradientButton label={loading ? 'Se conectează…' : 'Intră'} icon="arrow-forward" loading={loading} onPress={submit} />
+              <GradientButton label={loading ? tr('Se conectează…') : tr('Intră')} icon="arrow-forward" loading={loading} onPress={submit} />
             </View>
 
             <View style={styles.footer}>
-              <Text style={styles.footerText}>Nu ai cont?</Text>
+              <Text style={styles.footerText}>{tr('Nu ai cont?')}</Text>
               <Pressable onPress={() => navigation.navigate('SignUp')} hitSlop={8}>
-                <Text style={styles.footerLink}>Creează unul</Text>
+                <Text style={styles.footerLink}>{tr('Creează unul')}</Text>
               </Pressable>
             </View>
           </ScrollView>
@@ -126,7 +133,8 @@ const styles = StyleSheet.create({
   safe: { flex: 1 },
   flex: { flex: 1 },
   content: { flexGrow: 1, padding: 24, gap: 28, justifyContent: 'space-between' },
-  brand: { marginTop: 48, gap: 6 },
+  language: { alignSelf: 'flex-end', width: 220 },
+  brand: { marginTop: 8, gap: 6 },
   logo: { ...type.screenTitle, fontSize: 44 },
   tagline: { fontSize: 17, color: colors.text, opacity: 0.85 },
   form: { gap: 16 },

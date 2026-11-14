@@ -12,6 +12,7 @@ import { cardShadow } from '../../theme/shadows';
 import { type } from '../../theme/typography';
 import { formatEventDate } from '../../utils/dates';
 import { formatDistance } from '../../utils/distance';
+import { tr } from '../../i18n';
 
 interface Props {
   event: EventWithDistance;
@@ -50,10 +51,10 @@ export default function EventMapPreview({ event, onOpen, onClose }: Props) {
         <GlassIconButton icon="close" size={36} round onPress={onClose} />
       </View>
 
-      <GradientButton label="Vezi detalii" icon="arrow-forward" compact onPress={onOpen} />
+      <GradientButton label={tr('Vezi detalii')} icon="arrow-forward" compact onPress={onOpen} />
 
       {/* Atribuirea afișului (obligatorie pentru imaginile din surse externe) */}
-      {event.imageUrl && event.imageCredit ? <Text style={styles.credit}>Foto: {event.imageCredit}</Text> : null}
+      {event.imageUrl && event.imageCredit ? <Text style={styles.credit}>{tr('Foto:')}{' '}{event.imageCredit}</Text> : null}
     </View>
   );
 }

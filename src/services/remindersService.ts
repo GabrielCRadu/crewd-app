@@ -4,6 +4,7 @@ import * as Notifications from 'expo-notifications';
 import type { Event } from '../types/events';
 import { formatTime } from '../utils/dates';
 import { formatDistance } from '../utils/distance';
+import { tr } from '../i18n';
 
 /*
  * Reamintiri locale: cu o oră înainte de un eveniment la care te-ai înscris, telefonul îți arată
@@ -48,7 +49,11 @@ async function ensurePermission(): Promise<boolean> {
 }
 
 function reminderBody(event: Event, distanceKm: number): string {
-  return `${event.title} începe la ${formatTime(event.startsAt)}, e la ${formatDistance(distanceKm)}.`;
+  return tr('{title} începe la {time}, e la {distance}.', {
+    title: event.title,
+    time: formatTime(event.startsAt),
+    distance: formatDistance(distanceKm),
+  });
 }
 
 async function sync(upcomingJoined: Event[], distanceKm: (event: Event) => number): Promise<void> {
@@ -71,7 +76,7 @@ async function sync(upcomingJoined: Event[], distanceKm: (event: Event) => numbe
         ? { type: Notifications.SchedulableTriggerInputTypes.DATE, date: new Date(remindAt), channelId: CHANNEL_ID }
         : { type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL, seconds: SOON_SECONDS, channelId: CHANNEL_ID };
     const id = await Notifications.scheduleNotificationAsync({
-      content: { title: 'Reamintire', body: reminderBody(event, distanceKm(event)), data: { eventId: event.id } },
+      content: { title: tr('Reamintire'), body: reminderBody(event, distanceKm(event)), data: { eventId: event.id } },
       trigger,
     });
     scheduled.set(event.id, id);

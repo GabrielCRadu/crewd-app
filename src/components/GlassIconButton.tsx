@@ -13,10 +13,12 @@ interface Props {
   /** Cerc în loc de pătrat rotunjit. */
   round?: boolean;
   style?: StyleProp<ViewStyle>;
+  /** Culoarea iconiței (implicit textul temei; peste poze: colors.photo.text). */
+  color?: string;
 }
 
 /** Buton-iconiță de sticlă (înapoi, filtre, ✕). */
-export default function GlassIconButton({ icon, onPress, size = 44, round = false, style }: Props) {
+export default function GlassIconButton({ icon, onPress, size = 44, round = false, style, color = colors.text }: Props) {
   return (
     <Pressable
       onPress={onPress}
@@ -28,7 +30,7 @@ export default function GlassIconButton({ icon, onPress, size = 44, round = fals
         style,
       ]}
     >
-      <Ionicons name={icon} size={size * 0.48} color={colors.text} />
+      <Ionicons name={icon} size={size * 0.48} color={color} />
     </Pressable>
   );
 }

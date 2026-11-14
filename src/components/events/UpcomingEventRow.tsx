@@ -7,6 +7,7 @@ import { getCategory } from '../../data/categories';
 import { colors } from '../../theme/colors';
 import { glass, radii } from '../../theme/shape';
 import { formatTime, formatWeekdayShort } from '../../utils/dates';
+import { tr } from '../../i18n';
 
 interface Props {
   event: EventWithDistance;
@@ -41,7 +42,7 @@ export default function UpcomingEventRow({ event, joined, onPress }: Props) {
         </Text>
         <Text style={styles.category}>
           {getCategory(event.category).label}
-          {joined ? ' · Înscris' : ''}
+          {joined ? tr(' · Înscris') : ''}
         </Text>
       </View>
 

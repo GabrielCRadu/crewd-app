@@ -3,6 +3,7 @@ import * as Clipboard from 'expo-clipboard';
 import * as Linking from 'expo-linking';
 
 import { invitePath, usernameFromLink } from '../utils/inviteLink';
+import { tr } from '../i18n';
 
 /*
  * Invitațiile de pe profil: codul QR și linkul trimis pe alte aplicații conțin username-ul tău unic
@@ -17,7 +18,7 @@ export function inviteUrl(username: string): string {
 
 /** Mesajul precompletat trimis împreună cu linkul. */
 export function inviteMessage(username: string): string {
-  return `Hai să fim prieteni pe Crewd! @${username} ${inviteUrl(username)}`;
+  return tr('Hai să fim prieteni pe Crewd! @{username} {url}', { username, url: inviteUrl(username) });
 }
 
 /** Copiază linkul de invitație în clipboard. */

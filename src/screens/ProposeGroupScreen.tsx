@@ -29,6 +29,7 @@ import {
   profileAge,
   proposalErrors,
 } from '../utils/groupRules';
+import { tr } from '../i18n';
 
 type Props = NativeStackScreenProps<EventsStackParamList, 'ProposeGroup'>;
 
@@ -100,7 +101,7 @@ export default function ProposeGroupScreen({ navigation, route }: Props) {
       <View style={styles.header}>
         <GlassIconButton icon="chevron-back" onPress={() => navigation.goBack()} />
         <View style={styles.headerText}>
-          <Text style={styles.title}>Propune un grup</Text>
+          <Text style={styles.title}>{tr('Propune un grup')}</Text>
           <Text style={styles.subtitle} numberOfLines={1}>
             {event.title}
           </Text>
@@ -111,7 +112,7 @@ export default function ProposeGroupScreen({ navigation, route }: Props) {
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           {/* Ora întâlnirii (în ziua evenimentului) */}
           <View style={styles.block}>
-            <Text style={styles.label}>Ne vedem la</Text>
+            <Text style={styles.label}>{tr('Ne vedem la')}</Text>
             {Platform.OS === 'android' ? (
               <Pressable onPress={pickTime} style={({ pressed }) => [styles.field, pressed && styles.pressed]}>
                 <Text style={styles.fieldText}>
@@ -136,12 +137,12 @@ export default function ProposeGroupScreen({ navigation, route }: Props) {
                 />
               </View>
             )}
-            <Text style={styles.hint}>Evenimentul începe la {formatTime(event.startsAt)}.</Text>
+            <Text style={styles.hint}>{tr('Evenimentul începe la')}{' '}{formatTime(event.startsAt)}.</Text>
             {errors.meetupAt ? <Text style={styles.error}>{errors.meetupAt}</Text> : null}
           </View>
 
           <TextField
-            label="Unde"
+            label={tr('Unde')}
             value={current.meetupPlace}
             onChangeText={(meetupPlace) => update({ meetupPlace })}
             error={errors.meetupPlace}
@@ -150,17 +151,17 @@ export default function ProposeGroupScreen({ navigation, route }: Props) {
 
           {/* Intervalul de vârstă */}
           <View style={styles.block}>
-            <Text style={styles.label}>Vârstă</Text>
+            <Text style={styles.label}>{tr('Vârstă')}</Text>
             <View style={styles.ageRow}>
               <Stepper
-                label="de la"
+                label={tr('de la')}
                 value={current.minAge}
                 onChange={(minAge) => update({ minAge })}
                 min={MIN_MEMBER_AGE}
                 max={current.maxAge}
               />
               <Stepper
-                label="până la"
+                label={tr('până la')}
                 value={current.maxAge}
                 onChange={(maxAge) => update({ maxAge })}
                 min={current.minAge}
@@ -172,7 +173,7 @@ export default function ProposeGroupScreen({ navigation, route }: Props) {
 
           {/* Mărimea maximă */}
           <View style={styles.block}>
-            <Text style={styles.label}>Câți oameni, maxim</Text>
+            <Text style={styles.label}>{tr('Câți oameni, maxim')}</Text>
             <View style={styles.chips}>
               {SIZES.map((n) => (
                 <Chip key={n} label={String(n)} active={current.maxSize === n} onPress={() => update({ maxSize: n })} />
@@ -183,11 +184,11 @@ export default function ProposeGroupScreen({ navigation, route }: Props) {
 
           <View style={styles.block}>
             <TextField
-              label="Vibe-ul grupului"
+              label={tr('Vibe-ul grupului')}
               value={current.vibe}
               onChangeText={(vibe) => update({ vibe })}
               error={errors.vibe}
-              placeholder="ex. venim pentru muzică, nu pentru băut"
+              placeholder={tr('ex. venim pentru muzică, nu pentru băut')}
               maxLength={VIBE_MAX_LENGTH}
             />
             <Text style={styles.counter}>
@@ -197,7 +198,7 @@ export default function ProposeGroupScreen({ navigation, route }: Props) {
 
           {tags.length > 0 ? (
             <View style={styles.block}>
-              <Text style={styles.label}>Tag-urile grupului (din profilul tău)</Text>
+              <Text style={styles.label}>{tr('Tag-urile grupului (din profilul tău)')}</Text>
               <View style={styles.chips}>
                 {tags.map((t) => (
                   <Chip key={t} label={t} />
@@ -206,12 +207,10 @@ export default function ProposeGroupScreen({ navigation, route }: Props) {
             </View>
           ) : null}
 
-          <Text style={styles.hint}>
-            Devii primul membru. Grupul se formează când sunteți cel puțin 3, iar chat-ul se deschide atunci.
-          </Text>
+          <Text style={styles.hint}>{tr('Devii primul membru. Grupul se formează când sunteți cel puțin 3, iar chat-ul se deschide atunci.')}</Text>
 
           {formError ? <FormMessage text={formError} /> : null}
-          <GradientButton label="Propune grupul" icon="arrow-forward" loading={saving} onPress={submit} />
+          <GradientButton label={tr('Propune grupul')} icon="arrow-forward" loading={saving} onPress={submit} />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

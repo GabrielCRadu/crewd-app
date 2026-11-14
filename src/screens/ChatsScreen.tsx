@@ -19,6 +19,7 @@ import { glass, radii } from '../theme/shape';
 import type { CrewGroup } from '../types/groups';
 import { formatDay, formatTime } from '../utils/dates';
 import { MIN_FORM_MEMBERS, canOpenChat, groupStatus } from '../utils/groupRules';
+import { tr } from '../i18n';
 
 type Props = NativeStackScreenProps<ChatsStackParamList, 'ChatsHome'>;
 
@@ -40,9 +41,9 @@ export default function ChatsScreen({ navigation }: Props) {
   const open = (g: CrewGroup) => {
     if (!canOpenChat(g)) {
       if (groupStatus(g, now) === 'expired') {
-        Alert.alert('Grupul nu s-a format', 'Nu s-au strâns 3 persoane la timp. Alege alt grup de la eveniment.');
+        Alert.alert(tr('Grupul nu s-a format'), tr('Nu s-au strâns 3 persoane la timp. Alege alt grup de la eveniment.'));
       } else {
-        Alert.alert('Grupul se formează', `Chat-ul se deschide când sunteți cel puțin ${MIN_FORM_MEMBERS}.`);
+        Alert.alert(tr('Grupul se formează'), tr('Chat-ul se deschide când sunteți cel puțin {MIN_FORM_MEMBERS}.', { MIN_FORM_MEMBERS: MIN_FORM_MEMBERS }));
       }
       return;
     }
@@ -52,14 +53,14 @@ export default function ChatsScreen({ navigation }: Props) {
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.title}>Chat-uri</Text>
+        <Text style={styles.title}>{tr('Chat-uri')}</Text>
         {/* Conversațiile doar cu un prieten (ex. un eveniment trimis) */}
         <DirectThreadsSection onOpen={(personId) => navigation.navigate('DirectChat', { personId })} />
-        <Text style={styles.sectionTitle}>Grupurile tale</Text>
+        <Text style={styles.sectionTitle}>{tr('Grupurile tale')}</Text>
 
         {loading ? <ActivityIndicator color={colors.text} /> : null}
         {!loading && sorted.length === 0 ? (
-          <Text style={styles.empty}>Intră într-un grup de la un eveniment ca să-l vezi aici.</Text>
+          <Text style={styles.empty}>{tr('Intră într-un grup de la un eveniment ca să-l vezi aici.')}</Text>
         ) : null}
 
         {sorted.map((g) => {
@@ -87,14 +88,13 @@ export default function ChatsScreen({ navigation }: Props) {
                 {!canOpenChat(g) ? (
                   <View style={styles.badge}>
                     <Text style={styles.badgeText}>
-                      {status === 'expired' ? 'Nu s-a format' : `Se formează · ${g.memberUids.length}/${MIN_FORM_MEMBERS}`}
+                      {status === 'expired' ? tr('Nu s-a format') : tr('Se formează · {length}/{MIN_FORM_MEMBERS}', { length: g.memberUids.length, MIN_FORM_MEMBERS: MIN_FORM_MEMBERS })}
                     </Text>
                   </View>
                 ) : null}
               </View>
               <View style={styles.meetupBand}>
-                <Text style={styles.meetupText}>
-                  Ne vedem {formatDay(g.meetupAt, now).toLowerCase()} la {formatTime(g.meetupAt)} · {g.meetupPlace}
+                <Text style={styles.meetupText}>{tr('Ne vedem')}{' '}{formatDay(g.meetupAt, now).toLowerCase()}{' '}{tr('la')}{' '}{formatTime(g.meetupAt)} · {g.meetupPlace}
                 </Text>
               </View>
             </Pressable>
