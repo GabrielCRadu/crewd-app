@@ -16,6 +16,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
+import Logo from '../components/Logo';
 import AboutCard from '../components/AboutCard';
 import Aurora from '../components/Aurora';
 import Avatar from '../components/Avatar';
@@ -106,7 +107,7 @@ export default function ProfileScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.header}>
-          <Text style={styles.title}>{tr('Profil')}</Text>
+          <Logo height={30} accessibilityLabel={tr('Profil')} />
           <View style={styles.headerActions}>
             {/* Codul tău QR (cu username-ul), mic; apăsat se deschide mare, cu linkul de invitație */}
             {profile.username ? (
@@ -282,7 +283,6 @@ const makeStyles = () =>
       justifyContent: 'center',
     },
     qrPressed: { backgroundColor: colors.cardStrong },
-    title: { ...type.screenTitle, fontSize: 32 },
     pressed: { backgroundColor: colors.cardStrong },
     identity: { ...glass, borderRadius: radii.card, overflow: 'hidden' },
     identityRow: { flexDirection: 'row', alignItems: 'center', gap: 16, padding: 18 },

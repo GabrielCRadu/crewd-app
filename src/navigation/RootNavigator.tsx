@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { ComponentProps, ComponentType } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import {
   DarkTheme,
   DefaultTheme,
@@ -23,6 +23,7 @@ import EventReminders from '../components/EventReminders';
 import FriendRequestPopup from '../components/FriendRequestPopup';
 import InviteLinkHandler from '../components/InviteLinkHandler';
 import GradientButton from '../components/GradientButton';
+import LogoSplash from '../components/LogoSplash';
 import { useAuth } from '../context/AuthContext';
 import { getPerson } from '../services/peopleService';
 import { appearance, colors, onThemeChange } from '../theme/colors';
@@ -185,7 +186,7 @@ function LoadingScreen({ error, onRetry, onSignOut }: { error: string | null; on
           </Pressable>
         </View>
       ) : (
-        <ActivityIndicator color={colors.text} />
+        <LogoSplash />
       )}
     </View>
   );

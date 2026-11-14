@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
+import Logo from '../components/Logo';
 import ScreenGlow from '../components/ScreenGlow';
 import SegmentedControl from '../components/SegmentedControl';
 import CategoryChips from '../components/events/CategoryChips';
@@ -71,7 +72,7 @@ export default function EventsScreen({ navigation }: Props) {
       <ScreenGlow />
 
       <View style={styles.header}>
-        <Text style={styles.title}>{tr('Evenimente')}</Text>
+        <Logo height={30} accessibilityLabel={tr('Evenimente')} />
         <SegmentedControl
           options={[
             { value: 'all', label: tr('Toate') },
@@ -138,7 +139,6 @@ const makeStyles = () =>
   StyleSheet.create({
     safe: { flex: 1, backgroundColor: colors.background },
     header: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 14, gap: 14 },
-    title: { ...type.screenTitle, fontSize: 32 },
     notice: {
       ...glass,
       flexDirection: 'row',

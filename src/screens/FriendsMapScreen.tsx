@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 
+import Logo from '../components/Logo';
 import Avatar from '../components/Avatar';
 import GradientButton from '../components/GradientButton';
 import SegmentedControl from '../components/SegmentedControl';
@@ -77,7 +78,7 @@ export default function FriendsMapScreen() {
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.header}>
-        <Text style={styles.title}>{tr('Hartă')}</Text>
+        <Logo height={30} accessibilityLabel={tr('Hartă')} />
         <SegmentedControl
           options={[
             { value: 'friends', label: tr('Prieteni') },
@@ -183,7 +184,6 @@ const makeStyles = () =>
   StyleSheet.create({
     safe: { flex: 1, backgroundColor: colors.background },
     header: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 12, gap: 12 },
-    title: { ...type.screenTitle, fontSize: 32 },
     mapWrap: { flex: 1, backgroundColor: colors.backgroundAlt },
     friendMarker: { alignItems: 'center', gap: 2 },
     meMarker: { alignItems: 'center', gap: 2 },
