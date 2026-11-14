@@ -137,3 +137,13 @@ export function profileAge(p: { birthDate: string | null; age: number }, now: Da
 export function memberSummary(me: UserProfile, now: Date): MemberSummary {
   return { name: me.name, age: profileAge(me, now), tags: allProfileTags(me), photo: me.photoThumb ?? null };
 }
+
+/**
+ * Lista celorlalte grupuri de la eveniment e deschisă de la început? Nu, cât timp ești într-un grup care
+ * se formează sau s-a format (ca să nu sari dintr-un grup în altul); da, dacă n-ai grup sau al tău nu s-a format.
+ */
+export function otherGroupsOpenByDefault(myGroup: CrewGroup | null, now: Date): boolean {
+  if (!myGroup) return true;
+  const status = groupStatus(myGroup, now);
+  return status === 'expired' || status === 'closed';
+}

@@ -18,13 +18,17 @@ interface Props {
   blockReason: string | null;
   busy?: boolean;
   onJoin: () => void;
+  /** Doar pe grupul tău format: butonul „Deschide chat-ul” din card. */
+  onOpenChat?: () => void;
+  /** Un rând de stare sub card (ex. „Așteptăm încă 1 persoană…” pe grupul tău). */
+  note?: string | null;
 }
 
 /**
  * Cardul unui grupuleț în detaliile evenimentului: ora și locul, vârsta, vibe-ul,
  * tag-urile comune, membrii și starea (se formează / complet / ești aici).
  */
-export default function GroupCard({ group, status, common, isMine, blockReason, busy = false, onJoin }: Props) {
+export default function GroupCard({ group, status, common, isMine, blockReason, busy = false, onJoin, onOpenChat, note }: Props) {
   const missing = Math.max(0, MIN_FORM_MEMBERS - group.memberUids.length);
   const members = Object.values(group.members);
 
@@ -67,7 +71,7 @@ export default function GroupCard({ group, status, common, isMine, blockReason, 
         <View style={styles.avatars}>
           {members.slice(0, 5).map((m, i) => (
             <View key={`${m.name}-${i}`} style={[styles.avatarRing, i > 0 && styles.avatarOverlap]}>
-              <Avatar name={m.name} size={30} />
+              <Avatar name={m.name} size={30} photoUrl={m.photo ?? null} />
             </View>
           ))}
         </View>
@@ -81,7 +85,18 @@ export default function GroupCard({ group, status, common, isMine, blockReason, 
             <Text style={styles.joinText}>{busy ? '…' : 'Intră'}</Text>
           </Pressable>
         ) : null}
+        {isMine && onOpenChat ? (
+          <Pressable
+            onPress={onOpenChat}
+            style={({ pressed }) => [styles.join, styles.openChat, pressed && styles.pressed]}
+            accessibilityRole="button"
+          >
+            <Ionicons name="chatbubbles" size={16} color={colors.onLight} />
+            <Text style={styles.joinText}>Deschide chat-ul</Text>
+          </Pressable>
+        ) : null}
       </View>
+      {note ? <Text style={styles.meta}>{note}</Text> : null}
     </View>
   );
 }
@@ -104,5 +119,6 @@ const styles = StyleSheet.create({
   avatarOverlap: { marginLeft: -10 },
   join: { paddingHorizontal: 22, paddingVertical: 10, borderRadius: radii.pill, backgroundColor: colors.text },
   joinText: { color: colors.onLight, fontWeight: '600' },
+  openChat: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 16 },
   pressed: { opacity: 0.8 },
 });
