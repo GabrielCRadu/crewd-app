@@ -48,7 +48,7 @@ export function groupStatus(g: CrewGroup, now: Date): GroupStatus {
 }
 
 /** Chat-ul se deschide doar pentru grupulețele care s-au format (au ajuns cândva la 3 membri). */
-export function canOpenChat(g: CrewGroup): boolean {
+export function canOpenChat(g: Pick<CrewGroup, 'formedAt'>): boolean {
   return g.formedAt !== null;
 }
 

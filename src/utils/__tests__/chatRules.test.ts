@@ -1,7 +1,15 @@
 import { describe, expect, it } from '@jest/globals';
 
 import type { ChatRow, GroupMessage } from '../../types/chat';
-import { authorNameFor, buildChatRows, dayLabel, lastMessagePreview, normalizeMessageText } from '../chatRules';
+import {
+  LEFT_GROUP_MESSAGE,
+  authorNameFor,
+  buildChatRows,
+  chatRoomState,
+  dayLabel,
+  lastMessagePreview,
+  normalizeMessageText,
+} from '../chatRules';
 
 // Ore locale (nu UTC), ca testele să nu depindă de fusul orar al calculatorului.
 const now = new Date(2026, 10, 14, 18, 0);
@@ -148,5 +156,41 @@ describe('authorNameFor', () => {
 
   it('falls back to the profile name when the member entry is missing', () => {
     expect(authorNameFor({}, 'u1', 'Radu Gabriel')).toBe('Radu Gabriel');
+  });
+});
+
+describe('chatRoomState', () => {
+  const formed = { memberUids: ['me', 'ana', 'mihai'], formedAt: new Date(2026, 10, 13) };
+
+  it('is loading while my groups are still loading', () => {
+    expect(chatRoomState({ groupsLoading: true, group: null, uid: 'me', messagesError: null })).toBe('loading');
+  });
+
+  it('is left when the group is no longer among mine', () => {
+    expect(chatRoomState({ groupsLoading: false, group: null, uid: 'me', messagesError: null })).toBe('left');
+  });
+
+  it('is left when I am not a member any more', () => {
+    expect(
+      chatRoomState({ groupsLoading: false, group: { ...formed, memberUids: ['ana', 'mihai'] }, uid: 'me', messagesError: null }),
+    ).toBe('left');
+  });
+
+  it('is forming when the group has not formed yet', () => {
+    expect(
+      chatRoomState({ groupsLoading: false, group: { memberUids: ['me'], formedAt: null }, uid: 'me', messagesError: null }),
+    ).toBe('forming');
+  });
+
+  it('is ready for a member of a formed group', () => {
+    expect(chatRoomState({ groupsLoading: false, group: formed, uid: 'me', messagesError: null })).toBe('ready');
+  });
+
+  it('is left when the server refuses the conversation', () => {
+    expect(chatRoomState({ groupsLoading: false, group: formed, uid: 'me', messagesError: LEFT_GROUP_MESSAGE })).toBe('left');
+  });
+
+  it('stays ready on other errors (e.g. no internet), which are shown separately', () => {
+    expect(chatRoomState({ groupsLoading: false, group: formed, uid: 'me', messagesError: 'Verifică conexiunea.' })).toBe('ready');
   });
 });

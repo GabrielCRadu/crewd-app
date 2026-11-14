@@ -1,5 +1,9 @@
 import type { ChatRow, GroupMessage } from '../types/chat';
 import { addDays, formatDay, formatTime, startOfDay } from './dates';
+import { canOpenChat } from './groupRules';
+
+/** Ce vede cine a ieșit (sau a fost scos) din grup cu conversația deschisă. */
+export const LEFT_GROUP_MESSAGE = 'Nu mai ești în acest grup.';
 
 /** Lungimea maximă a unui mesaj (aceeași limită e și în `firestore.rules`). */
 export const MAX_MESSAGE_LENGTH = 1000;
@@ -73,4 +77,25 @@ export function authorNameFor(members: Record<string, { name: string }>, uid: st
 export function lastMessagePreview(message: GroupMessage, myUid: string): string {
   const who = message.authorUid === myUid ? 'Tu' : message.authorName;
   return `${who}: ${message.text}`;
+}
+
+export type ChatRoomState = 'loading' | 'left' | 'forming' | 'ready';
+
+/**
+ * Ce arată ecranul conversației: se încarcă, nu mai ești în grup, grupul încă se formează, sau conversația.
+ * Contează doar ce știm acum (grupurile mele și eroarea ascultării de acum), ca după o reintrare în grup
+ * ecranul să revină singur la conversație.
+ */
+export function chatRoomState(input: {
+  groupsLoading: boolean;
+  group: { memberUids: string[]; formedAt: Date | null } | null;
+  uid: string | null;
+  messagesError: string | null;
+}): ChatRoomState {
+  const { groupsLoading, group, uid, messagesError } = input;
+  if (!group) return groupsLoading ? 'loading' : 'left';
+  if (!uid || !group.memberUids.includes(uid)) return 'left';
+  if (!canOpenChat(group)) return 'forming';
+  if (messagesError === LEFT_GROUP_MESSAGE) return 'left';
+  return 'ready';
 }

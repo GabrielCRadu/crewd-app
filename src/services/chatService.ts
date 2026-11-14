@@ -14,7 +14,7 @@ import type { DocumentData, QueryDocumentSnapshot } from 'firebase/firestore';
 import { PEOPLE } from '../data/mockSocial';
 import { db } from '../lib/firebase';
 import type { GroupMessage } from '../types/chat';
-import { normalizeMessageText } from '../utils/chatRules';
+import { LEFT_GROUP_MESSAGE, normalizeMessageText } from '../utils/chatRules';
 
 /*
  * Conversația unui grup (docs/superpowers/specs/2026-11-14-chat-grup-design.md).
@@ -29,8 +29,7 @@ import { normalizeMessageText } from '../utils/chatRules';
 /** Eroare cu mesaj pentru utilizator. */
 export class ChatActionError extends Error {}
 
-/** Ce vede cine a ieșit (sau a fost scos) din grup cu conversația deschisă. */
-export const LEFT_GROUP_MESSAGE = 'Nu mai ești în acest grup.';
+export { LEFT_GROUP_MESSAGE };
 
 const NETWORK_MESSAGE = 'Verifică conexiunea la internet și încearcă din nou.';
 const EMPTY_MESSAGE = 'Mesajul e gol sau prea lung.';

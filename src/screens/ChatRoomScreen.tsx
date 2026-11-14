@@ -26,14 +26,20 @@ import { useMyGroups } from '../hooks/useMyGroups';
 import { useUserLocation } from '../hooks/useUserLocation';
 import { isFirebaseConfigured } from '../lib/firebase';
 import type { ChatsStackParamList } from '../navigation/chatsTypes';
-import { LEFT_GROUP_MESSAGE, chatErrorMessage, sendGroupMessage } from '../services/chatService';
+import { chatErrorMessage, sendGroupMessage } from '../services/chatService';
 import { MOCK_UID } from '../services/groupsService';
 import { colors } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
 import type { ChatRow } from '../types/chat';
-import { MAX_MESSAGE_LENGTH, authorNameFor, buildChatRows, normalizeMessageText } from '../utils/chatRules';
+import {
+  LEFT_GROUP_MESSAGE,
+  MAX_MESSAGE_LENGTH,
+  authorNameFor,
+  buildChatRows,
+  chatRoomState,
+  normalizeMessageText,
+} from '../utils/chatRules';
 import { formatDay, formatTime } from '../utils/dates';
-import { canOpenChat } from '../utils/groupRules';
 
 type Props = NativeStackScreenProps<ChatsStackParamList, 'ChatRoom'>;
 
@@ -50,11 +56,12 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
   const { user, profile } = useAuth();
   const location = useUserLocation();
   const { events } = useEvents(location.coords);
-  const { messages, error } = useGroupMessages(eventId, groupId);
   const [draft, setDraft] = useState('');
   const group = groups.find((g) => g.id === groupId) ?? null;
   const event = events.find((e) => e.id === eventId) ?? null;
   const uid = isFirebaseConfigured ? (user?.uid ?? null) : MOCK_UID;
+  const isMember = !!uid && !!group?.memberUids.includes(uid);
+  const { messages, error } = useGroupMessages(eventId, groupId, isMember);
 
   const members = group?.members;
   const rows = useMemo(() => buildChatRows(messages, uid ?? '', members ?? {}), [messages, uid, members]);
@@ -78,18 +85,18 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
     listRef.current?.scrollToEnd({ animated: true });
   };
 
-  const leftGroup = error === LEFT_GROUP_MESSAGE;
+  const state = chatRoomState({ groupsLoading: loading, group, uid, messagesError: error });
 
   // Încă se încarcă, nu mai ești în grup, sau grupul nu s-a format: mesaj + „înapoi”, nu ecran gol.
-  if (leftGroup || !group || !canOpenChat(group)) {
+  if (state !== 'ready' || !group || !uid) {
     return (
       <SafeAreaView style={[styles.safe, styles.center]} edges={['top', 'bottom']}>
-        {loading && !leftGroup ? (
+        {state === 'loading' ? (
           <ActivityIndicator color={colors.text} />
         ) : (
           <>
             <Text style={styles.emptyText}>
-              {group && !leftGroup ? 'Chat-ul se deschide când grupul are cel puțin 3 persoane.' : LEFT_GROUP_MESSAGE}
+              {state === 'forming' ? 'Chat-ul se deschide când grupul are cel puțin 3 persoane.' : LEFT_GROUP_MESSAGE}
             </Text>
             <Pressable onPress={() => navigation.goBack()} style={styles.bannerButton}>
               <Text style={styles.bannerButtonText}>Înapoi</Text>
@@ -110,7 +117,7 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
 
   const send = () => {
     const text = normalizeMessageText(draft);
-    if (!text || !uid) return;
+    if (!text) return;
     setDraft('');
     // Mesajul tău apare imediat (scrierea locală a Firestore); lista coboară la el.
     scrollAfterSend.current = true;
@@ -177,6 +184,9 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
           keyboardShouldPersistTaps="handled"
         />
 
+        {/* Altă eroare decât ieșirea din grup (ex. fără internet): o spunem, nu lăsăm conversația goală. */}
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
         <View style={styles.composer}>
           <TextInput
             value={draft}
@@ -201,6 +211,7 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   center: { alignItems: 'center', justifyContent: 'center', gap: 16, padding: 32 },
   emptyText: { color: colors.muted, fontSize: 15, textAlign: 'center' },
+  errorText: { color: colors.nope, fontSize: 13, textAlign: 'center', paddingHorizontal: 16, paddingBottom: 6 },
   flex: { flex: 1 },
   header: {
     flexDirection: 'row',
