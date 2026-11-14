@@ -1,52 +1,95 @@
-import { useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, KeyboardAvoidingView, Linking, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  KeyboardAvoidingView,
+  Linking,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
+import type { NativeScrollEvent, NativeSyntheticEvent } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import Aurora from '../components/Aurora';
-import Avatar from '../components/Avatar';
 import GlassIconButton from '../components/GlassIconButton';
-import { MESSAGES } from '../data/mockSocial';
+import MessageRow, { DayRow } from '../components/chat/MessageRow';
+import { useAuth } from '../context/AuthContext';
 import { useEvents } from '../hooks/useEvents';
+import { useGroupMessages } from '../hooks/useGroupMessages';
 import { useMyGroups } from '../hooks/useMyGroups';
 import { useUserLocation } from '../hooks/useUserLocation';
-import { formatDay, formatTime } from '../utils/dates';
-import { canOpenChat } from '../utils/groupRules';
-import { useAuth } from '../context/AuthContext';
-import { leaveGroup } from '../services/groupsService';
+import { isFirebaseConfigured } from '../lib/firebase';
 import type { ChatsStackParamList } from '../navigation/chatsTypes';
-import { findPersonByName } from '../services/peopleService';
+import { LEFT_GROUP_MESSAGE, chatErrorMessage, sendGroupMessage } from '../services/chatService';
+import { MOCK_UID } from '../services/groupsService';
 import { colors } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
-import type { ChatMessage } from '../types/social';
+import type { ChatRow } from '../types/chat';
+import { MAX_MESSAGE_LENGTH, buildChatRows, normalizeMessageText } from '../utils/chatRules';
+import { formatDay, formatTime } from '../utils/dates';
+import { canOpenChat } from '../utils/groupRules';
 
 type Props = NativeStackScreenProps<ChatsStackParamList, 'ChatRoom'>;
 
+/** Cât de aproape de capăt (în px) contează ca „ești jos” în conversație. */
+const NEAR_BOTTOM_PX = 120;
+
 /**
- * Conversația unui grupuleț: antet, banner „Ne vedem” (ora și locul din grupuleț), mesaje, bara de scriere
- * (docs/layout-guide.md). Mesajele sunt încă mock (vezi todo.md).
+ * Conversația unui grup: antet (numele grupului deschide Detaliile), banner „Ne vedem”, mesajele din
+ * Firestore în timp real, bara de scriere (docs/layout-guide.md, spec 2026-11-14-chat-grup-design.md).
  */
 export default function ChatRoomScreen({ navigation, route }: Props) {
+  const { eventId, groupId } = route.params;
   const { groups, loading } = useMyGroups();
   const { user, profile } = useAuth();
   const location = useUserLocation();
   const { events } = useEvents(location.coords);
-  const group = groups.find((g) => g.id === route.params.groupId) ?? null;
-  const event = events.find((e) => e.id === route.params.eventId) ?? null;
-  const [messages, setMessages] = useState<ChatMessage[]>(MESSAGES[route.params.groupId] ?? []);
+  const { messages, error } = useGroupMessages(eventId, groupId);
   const [draft, setDraft] = useState('');
+  const group = groups.find((g) => g.id === groupId) ?? null;
+  const event = events.find((e) => e.id === eventId) ?? null;
+  const uid = isFirebaseConfigured ? (user?.uid ?? null) : MOCK_UID;
 
-  // Încă se încarcă, nu mai ești în grupuleț, sau grupulețul nu s-a format: mesaj + „înapoi”, nu ecran gol.
-  if (!group || !canOpenChat(group)) {
+  const members = group?.members;
+  const rows = useMemo(() => buildChatRows(messages, uid ?? '', members ?? {}), [messages, uid, members]);
+
+  // Lista coboară singură la ultimul mesaj: la deschidere, când trimiți și când vine un mesaj nou
+  // cât timp ești deja jos (dacă ai urcat să citești mesaje mai vechi, nu te trage în jos).
+  const listRef = useRef<FlatList<ChatRow>>(null);
+  const nearBottom = useRef(true);
+  const scrollAfterSend = useRef(false);
+  useEffect(() => {
+    nearBottom.current = true;
+  }, [groupId]);
+
+  const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent;
+    nearBottom.current = contentSize.height - (contentOffset.y + layoutMeasurement.height) < NEAR_BOTTOM_PX;
+  };
+  const scrollToBottomIfNeeded = () => {
+    if (!nearBottom.current && !scrollAfterSend.current) return;
+    scrollAfterSend.current = false;
+    listRef.current?.scrollToEnd({ animated: true });
+  };
+
+  const leftGroup = error === LEFT_GROUP_MESSAGE;
+
+  // Încă se încarcă, nu mai ești în grup, sau grupul nu s-a format: mesaj + „înapoi”, nu ecran gol.
+  if (leftGroup || !group || !canOpenChat(group)) {
     return (
       <SafeAreaView style={[styles.safe, styles.center]} edges={['top', 'bottom']}>
-        {loading ? (
+        {loading && !leftGroup ? (
           <ActivityIndicator color={colors.text} />
         ) : (
           <>
             <Text style={styles.emptyText}>
-              {group ? 'Chat-ul se deschide când grupulețul are cel puțin 3 persoane.' : 'Nu mai ești în acest grupuleț.'}
+              {group && !leftGroup ? 'Chat-ul se deschide când grupul are cel puțin 3 persoane.' : LEFT_GROUP_MESSAGE}
             </Text>
             <Pressable onPress={() => navigation.goBack()} style={styles.bannerButton}>
               <Text style={styles.bannerButtonText}>Înapoi</Text>
@@ -57,24 +100,6 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
     );
   }
 
-  // Ieși din grupuleț din conversație: rămâi înscris la eveniment.
-  const confirmLeave = () => {
-    const uid = user?.uid ?? profile?.uid;
-    if (!uid) return;
-    Alert.alert('Ieși din grupuleț?', 'Ieși și din chat-ul lui (e același lucru). Rămâi înscris la eveniment și poți alege alt grupuleț.', [
-      { text: 'Rămân', style: 'cancel' },
-      {
-        text: 'Ies',
-        style: 'destructive',
-        onPress: () => {
-          leaveGroup(group.eventId, group.id, uid)
-            .then(() => navigation.goBack())
-            .catch((e: Error) => Alert.alert('Nu ai ieșit din grupuleț', e.message));
-        },
-      },
-    ]);
-  };
-
   // „Pe hartă”: deschide locul evenimentului în aplicația de hărți (Google Maps / Apple Maps).
   const openMap = () => {
     const query = event
@@ -84,28 +109,42 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
   };
 
   const send = () => {
-    const text = draft.trim();
-    if (!text) return;
-    setMessages((prev) => [...prev, { id: `local-${Date.now()}`, author: null, text }]);
+    const text = normalizeMessageText(draft);
+    if (!text || !uid) return;
     setDraft('');
+    // Mesajul tău apare imediat (scrierea locală a Firestore); lista coboară la el.
+    scrollAfterSend.current = true;
+    listRef.current?.scrollToEnd({ animated: true });
+    sendGroupMessage(eventId, groupId, { uid, name: profile?.name ?? '' }, text).catch((e: unknown) => {
+      // Textul nu se pierde: revine în câmp, ca să poți încerca din nou.
+      setDraft((current) => current || text);
+      Alert.alert('Mesajul nu s-a trimis', chatErrorMessage(e));
+    });
   };
+
+  const title = event?.title ?? 'Grup';
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <View style={styles.header}>
         <GlassIconButton icon="chevron-back" size={40} onPress={() => navigation.goBack()} />
-        <View style={styles.headerText}>
-          <Text style={styles.headerTitle} numberOfLines={1}>
-            {event?.title ?? 'Grupuleț'}
-          </Text>
+        <Pressable
+          style={({ pressed }) => [styles.headerText, pressed && styles.pressed]}
+          onPress={() => navigation.navigate('GroupDetails', { eventId, groupId })}
+          accessibilityRole="button"
+          accessibilityLabel={`${title}, detaliile grupului`}
+          hitSlop={6}
+        >
+          <View style={styles.titleRow}>
+            <Text style={[styles.headerTitle, styles.titleText]} numberOfLines={1}>
+              {title}
+            </Text>
+            <Ionicons name="chevron-forward" size={16} color={colors.muted} />
+          </View>
           <Text style={styles.headerSubtitle} numberOfLines={1}>
-            {group.memberUids.length} persoane ·{' '}
-            {Object.values(group.members)
-              .map((m) => m.name)
-              .join(', ')}
+            {group.memberUids.length} persoane{event ? ` · ${event.title}` : ''}
           </Text>
-        </View>
-        <GlassIconButton icon="exit-outline" size={40} onPress={confirmLeave} />
+        </Pressable>
       </View>
 
       <View style={styles.banner}>
@@ -125,37 +164,17 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
 
       <KeyboardAvoidingView style={styles.flex} behavior="padding">
         <FlatList
+          ref={listRef}
           style={styles.flex}
           contentContainerStyle={styles.messages}
-          data={messages}
-          keyExtractor={(m) => m.id}
-          ListHeaderComponent={<Text style={styles.day}>Azi</Text>}
-          renderItem={({ item, index }) => {
-            const isMine = item.author === null;
-            const showName = !isMine && messages[index - 1]?.author !== item.author;
-            // Numele sau avatarul autorului deschide profilul lui.
-            const person = isMine ? undefined : findPersonByName(item.author!);
-            const openAuthor = person ? () => navigation.navigate('PersonProfile', { personId: person.id }) : undefined;
-            return (
-              <View style={[styles.messageRow, isMine && styles.messageRowMine]}>
-                {!isMine ? (
-                  <Pressable onPress={openAuthor} disabled={!openAuthor} hitSlop={4}>
-                    <Avatar name={item.author!} size={30} />
-                  </Pressable>
-                ) : null}
-                <View style={styles.messageBody}>
-                  {showName ? (
-                    <Pressable onPress={openAuthor} disabled={!openAuthor} hitSlop={4}>
-                      <Text style={styles.author}>{item.author}</Text>
-                    </Pressable>
-                  ) : null}
-                  <View style={[styles.bubble, isMine ? styles.bubbleMine : styles.bubbleOther]}>
-                    <Text style={[styles.bubbleText, isMine && styles.bubbleTextMine]}>{item.text}</Text>
-                  </View>
-                </View>
-              </View>
-            );
-          }}
+          data={rows}
+          keyExtractor={(r) => r.key}
+          renderItem={({ item }) => (item.kind === 'day' ? <DayRow label={item.label} /> : <MessageRow row={item} />)}
+          onScroll={onScroll}
+          scrollEventThrottle={100}
+          onContentSizeChange={scrollToBottomIfNeeded}
+          onLayout={scrollToBottomIfNeeded}
+          keyboardShouldPersistTaps="handled"
         />
 
         <View style={styles.composer}>
@@ -167,6 +186,7 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
             style={styles.input}
             onSubmitEditing={send}
             returnKeyType="send"
+            maxLength={MAX_MESSAGE_LENGTH}
           />
           <Pressable onPress={send} style={({ pressed }) => [styles.sendButton, pressed && styles.pressed]}>
             <Ionicons name="arrow-up" size={22} color={colors.onLight} />
@@ -192,6 +212,8 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.border,
   },
   headerText: { flex: 1 },
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  titleText: { flexShrink: 1 },
   headerTitle: { fontSize: 18, fontWeight: '600', color: colors.text },
   headerSubtitle: { fontSize: 12, color: colors.muted },
   banner: {
@@ -209,17 +231,7 @@ const styles = StyleSheet.create({
   bannerWhen: { color: colors.text, fontSize: 16, fontWeight: '600' },
   bannerButton: { paddingHorizontal: 14, paddingVertical: 9, borderRadius: radii.pill, backgroundColor: colors.text },
   bannerButtonText: { color: colors.onLight, fontWeight: '600', fontSize: 13 },
-  messages: { paddingHorizontal: 16, paddingBottom: 12, gap: 10, flexGrow: 1, justifyContent: 'flex-end' },
-  day: { alignSelf: 'center', color: colors.faint, fontSize: 12, marginBottom: 4 },
-  messageRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8, maxWidth: '85%' },
-  messageRowMine: { alignSelf: 'flex-end' },
-  messageBody: { flexShrink: 1, gap: 4 },
-  author: { color: colors.muted, fontSize: 12, fontWeight: '500' },
-  bubble: { paddingHorizontal: 14, paddingVertical: 10, borderRadius: 20 },
-  bubbleOther: { ...glass, borderBottomLeftRadius: 6 },
-  bubbleMine: { backgroundColor: colors.text, borderBottomRightRadius: 6 },
-  bubbleText: { color: colors.text, fontSize: 15 },
-  bubbleTextMine: { color: colors.onLight },
+  messages: { paddingHorizontal: 16, paddingBottom: 12, gap: 6, flexGrow: 1, justifyContent: 'flex-end' },
   pressed: { opacity: 0.85 },
   composer: {
     flexDirection: 'row',
