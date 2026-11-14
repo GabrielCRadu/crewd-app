@@ -37,7 +37,6 @@ export const PEOPLE: Person[] = [
   {
     id: 'p1',
     name: 'Maria',
-    gender: 'female',
     age: 21,
     distanceKm: 1.2,
     tags: ['Board games', 'Concerte', 'Drumeții', 'Fotografie'],
@@ -49,7 +48,6 @@ export const PEOPLE: Person[] = [
   {
     id: 'p2',
     name: 'Andrei',
-    gender: 'male',
     age: 23,
     distanceKm: 0.6,
     tags: ['Jazz', 'Electronică', 'Party-uri', 'Gaming'],
@@ -61,7 +59,6 @@ export const PEOPLE: Person[] = [
   {
     id: 'p3',
     name: 'Ioana',
-    gender: 'female',
     age: 20,
     distanceKm: 2.4,
     tags: ['Teatru', 'Socializare', 'Gătit'],
@@ -73,7 +70,6 @@ export const PEOPLE: Person[] = [
   {
     id: 'p4',
     name: 'Victor',
-    gender: 'male',
     age: 24,
     distanceKm: 3.1,
     tags: ['Rock', 'Sport', 'Drumeții'],
@@ -85,7 +81,6 @@ export const PEOPLE: Person[] = [
   {
     id: 'p5',
     name: 'Bianca',
-    gender: 'female',
     age: 22,
     distanceKm: 1.8,
     tags: ['Concerte', 'Jazz', 'Board games', 'Pop'],
@@ -97,7 +92,6 @@ export const PEOPLE: Person[] = [
   {
     id: 'p6',
     name: 'Tudor',
-    gender: 'male',
     age: 25,
     distanceKm: 4.2,
     tags: ['Electronică', 'Party-uri', 'Fotografie'],
@@ -109,7 +103,6 @@ export const PEOPLE: Person[] = [
   {
     id: 'p7',
     name: 'Ana',
-    gender: 'female',
     age: 23,
     distanceKm: 2.9,
     tags: ['Teatru', 'Concerte', 'Fotografie'],
@@ -121,7 +114,6 @@ export const PEOPLE: Person[] = [
   {
     id: 'p8',
     name: 'Mihai',
-    gender: 'male',
     age: 24,
     distanceKm: 5.6,
     tags: ['Sport', 'Drumeții', 'Rock'],

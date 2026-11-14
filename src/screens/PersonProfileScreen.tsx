@@ -161,7 +161,7 @@ export default function PersonProfileScreen() {
             </Pressable>
           </View>
 
-          <FriendButton personId={person.id} name={person.name} status={status} gender={person.gender} />
+          <FriendButton personId={person.id} name={person.name} status={status} />
         </View>
 
         {/* Restul paginii */}
