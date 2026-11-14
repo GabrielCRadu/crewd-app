@@ -18,6 +18,7 @@ import ChatsNavigator from './ChatsNavigator';
 import ProfileNavigator from './ProfileNavigator';
 import EventReminders from '../components/EventReminders';
 import FriendRequestPopup from '../components/FriendRequestPopup';
+import InviteLinkHandler from '../components/InviteLinkHandler';
 import GradientButton from '../components/GradientButton';
 import { useAuth } from '../context/AuthContext';
 import { colors } from '../theme/colors';
@@ -117,6 +118,8 @@ export default function RootNavigator() {
       ) : (
         <LoadingScreen error={error} onRetry={retry} onSignOut={signOut} />
       )}
+      {/* Linkurile de invitație (codul QR de pe profil): montat mereu, ca să supraviețuiască înregistrării */}
+      <InviteLinkHandler onOpenProfile={openPersonProfile} />
     </NavigationContainer>
   );
 }
