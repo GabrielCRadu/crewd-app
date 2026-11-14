@@ -15,7 +15,7 @@
 
 ## Non-obiective
 
-- Profil public complet (descriere, oraș, badge-uri, amintiri) pentru conturile reale: cere date publice noi și reguli noi.
+- Badge-uri, amintiri și prieteni pentru conturile reale (rămân doar la persoanele de test până trec în Firestore).
 - „Adaugă prieten” din profilul membrului (vine cu prietenii pe Firestore).
 - Tema schimbată fără reîncărcare (ar cere ca toate stilurile să fie dinamice).
 
@@ -30,3 +30,27 @@
 
 - Rândul „tu” nu e apăsabil. Membrii de test din grupurile demo din Firestore (`demo-*`) deschid „Profilul membrului” cu ce știe grupul.
 - Pe ecranul profilului membrului, poza e miniatura din grup (~96 px), afișată la 112 px.
+
+## Completare: profilul complet al conturilor reale, tema peste tot, avatarele din chat
+
+Cerut după prima variantă: „vreau ca apăsarea pe un membru să deschidă profilul lui complet”; vizibil pentru **orice utilizator logat**; conținut: **ce e real acum**. Apoi: tema să se aplice în toată aplicația și imediat (chiar cu repornire), iar avatarele mici din chat să deschidă profilul.
+
+### Profilul public: `profiles/{uid}`
+
+- Câmpuri: `name`, `age` (calculată, fără data nașterii), `city`, `bio`, `photoUrl` (poza de ~400px, data URI JPEG), `username` (sau `null`), `tags` (tag-urile alese + cele învățate), `updatedAt`. Emailul, data nașterii, genul, înscrierile și scorurile rămân private în `users/{uid}`.
+- Reguli: `get` pentru orice utilizator logat, `list` interzis. Scrie și șterge doar proprietarul; câmpuri fixe, limite de mărime (aceleași ca în `users/`), poza trebuie să fie `data:image/jpeg;base64`, iar `username` (dacă e pus) trebuie să fie al tău în `usernames/`. Regulile le publică utilizatorul.
+- Ținut la zi din AuthContext: de câte ori profilul tău (complet) se schimbă în aplicație, se rescrie documentul public, doar dacă s-a schimbat ceva. Asta acoperă crearea contului, completarea profilului, „Editează profilul”, „Despre mine”, tag-urile învățate și conturile existente (la primul login după actualizare). La ștergerea contului se șterge și el.
+
+### Ecranul
+
+- Din lista de membri (Detaliile grupului) și din chat-ul grupului: persoană de test → `PersonProfile`, ca până acum; cont real → profilul complet: poza mare (se mărește la apăsare), numele, vârsta și orașul, `@username`, „Despre”, tag-urile (cele comune cu tine evidențiate), plus „A propus grupul” / „În grupul tău pentru …”.
+- Din codul QR (`PublicProfile`): același profil complet, cu nota „Adăugarea la prieteni vine în curând.”
+- Fără profil public încă (cont care nu s-a mai logat, membri demo): se arată ce știe grupul (sau fișa username-ului).
+- În chat-ul grupului, avatarul mic și numele de deasupra bulei sunt apăsabile. Autorul care a ieșit din grup își păstrează profilul (se deschide după `uid`).
+
+### Tema în toată aplicația
+
+- Alegerea din Setări se dă și sistemului (`Appearance.setColorScheme`: `light` / `dark` / `unspecified` pentru „Ca telefonul”), la pornire și la schimbare. Așa dialogurile native, tastatura și calendarele urmează tema aleasă, nu pe cea a telefonului.
+- Calendarele de dată (data nașterii, ora întâlnirii) folosesc tema activă, nu „dark” fix.
+- Fundalul de sub ecrane (`expo-system-ui`) ia culoarea temei, ca să nu clipească alb/negru la tranziții.
+- Schimbarea se aplică imediat: aplicația se reîncarcă singură (`reloadAppAsync`).
