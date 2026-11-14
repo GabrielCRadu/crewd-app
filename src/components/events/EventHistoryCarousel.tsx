@@ -13,6 +13,8 @@ import { formatShortDate } from '../../utils/dates';
 interface Props {
   events: Event[];
   onOpen: (eventId: string) => void;
+  /** Dacă e dat, fiecare carte are și pastila „+ Amintire” (istoricul tău). */
+  onAddMemory?: (eventId: string) => void;
 }
 
 const CARD_WIDTH = 200;
@@ -23,7 +25,7 @@ const GAP = 12;
  * Istoricul din Profil ca un carusel de cărți mici: poza evenimentului,
  * data sus, numele și pastila „Evaluează” / „Evaluat ✓” jos.
  */
-export default function EventHistoryCarousel({ events, onOpen }: Props) {
+export default function EventHistoryCarousel({ events, onOpen, onAddMemory }: Props) {
   const myRatings = useRatings();
 
   if (events.length === 0) {
@@ -59,10 +61,23 @@ export default function EventHistoryCarousel({ events, onOpen }: Props) {
               <Text style={styles.title} numberOfLines={2}>
                 {item.title}
               </Text>
-              <View style={[styles.status, !rated && styles.statusTodo]}>
-                <Text style={[styles.statusText, !rated && styles.statusTextTodo]}>
-                  {rated ? 'Evaluat ✓' : 'Evaluează'}
-                </Text>
+              <View style={styles.actions}>
+                <View style={[styles.status, !rated && styles.statusTodo]}>
+                  <Text style={[styles.statusText, !rated && styles.statusTextTodo]}>
+                    {rated ? 'Evaluat ✓' : 'Evaluează'}
+                  </Text>
+                </View>
+                {onAddMemory ? (
+                  <Pressable
+                    onPress={() => onAddMemory(item.id)}
+                    hitSlop={6}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Adaugă amintire de la ${item.title}`}
+                    style={({ pressed }) => [styles.status, styles.memoryPill, pressed && styles.pressed]}
+                  >
+                    <Text style={styles.statusText}>+ Amintire</Text>
+                  </Pressable>
+                ) : null}
               </View>
             </View>
           </Pressable>
@@ -92,6 +107,9 @@ const styles = StyleSheet.create({
   top: { flexDirection: 'row' },
   bottom: { gap: 8 },
   title: { color: colors.text, fontSize: 16, fontWeight: '600', letterSpacing: -0.2 },
+  actions: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  // Fundal opac, ca pastila să se citească și peste afișe deschise la culoare.
+  memoryPill: { backgroundColor: colors.surface },
   status: { ...glass, alignSelf: 'flex-start', paddingHorizontal: 10, paddingVertical: 5, borderRadius: radii.pill },
   statusTodo: { backgroundColor: colors.text, borderColor: colors.text },
   statusText: { fontSize: 12, fontWeight: '500', color: colors.text },

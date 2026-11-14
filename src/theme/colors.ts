@@ -15,6 +15,8 @@ export const colors = {
   surface: '#161616',
   /** Conturul fin al cardurilor. */
   border: 'rgba(255,255,255,0.12)',
+  /** Întunecarea din spatele unei foi de jos (restul ecranului rămâne vizibil, dar estompat). */
+  backdrop: 'rgba(0,0,0,0.6)',
   text: '#FFFFFF',
   muted: 'rgba(255,255,255,0.62)',
   faint: 'rgba(255,255,255,0.40)',

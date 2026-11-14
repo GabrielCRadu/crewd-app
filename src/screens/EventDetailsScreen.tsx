@@ -9,6 +9,7 @@ import Aurora from '../components/Aurora';
 import Avatar from '../components/Avatar';
 import GlassIconButton from '../components/GlassIconButton';
 import ShareEventSheet from '../components/events/ShareEventSheet';
+import AddMemorySheet from '../components/memories/AddMemorySheet';
 import GradientButton from '../components/GradientButton';
 import GlassBadge from '../components/events/GlassBadge';
 import { useAuth } from '../context/AuthContext';
@@ -52,6 +53,7 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
   const { groups: myGroups } = useMyGroups();
   const now = useNow();
   const [shareOpen, setShareOpen] = useState(false);
+  const [addMemoryOpen, setAddMemoryOpen] = useState(false);
 
   const event = useMemo(() => events.find((e) => e.id === eventId) ?? null, [events, eventId]);
 
@@ -236,17 +238,29 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
             <View style={styles.joinedPill}>
               <Text style={styles.endedText}>Evenimentul s-a terminat</Text>
             </View>
-          ) : rated ? (
-            <View style={styles.joinedRow}>
-              <View style={styles.joinedPill}>
-                <Text style={styles.joinedText}>Evaluat ✓</Text>
-              </View>
-              <Pressable onPress={openRating} hitSlop={8}>
-                <Text style={styles.cancel}>Modifică</Text>
-              </Pressable>
-            </View>
           ) : (
-            <GradientButton label="Evaluează oamenii" icon="people" onPress={openRating} />
+            /* Ai fost la eveniment: adaugi o amintire și evaluezi oamenii */
+            <View style={styles.endedActions}>
+              <Pressable
+                onPress={() => setAddMemoryOpen(true)}
+                style={({ pressed }) => [styles.memoryButton, pressed && styles.pressed]}
+              >
+                <Ionicons name="image-outline" size={18} color={colors.text} />
+                <Text style={styles.memoryButtonText}>Adaugă amintire</Text>
+              </Pressable>
+              {rated ? (
+                <View style={styles.joinedRow}>
+                  <View style={styles.joinedPill}>
+                    <Text style={styles.joinedText}>Evaluat ✓</Text>
+                  </View>
+                  <Pressable onPress={openRating} hitSlop={8}>
+                    <Text style={styles.cancel}>Modifică</Text>
+                  </Pressable>
+                </View>
+              ) : (
+                <GradientButton label="Evaluează oamenii" icon="people" onPress={openRating} />
+              )}
+            </View>
           )
         ) : joined ? (
           /* După înscriere, butonul se împarte în două: ieși din eveniment / vezi grupulețele */
@@ -282,6 +296,14 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
           setShareOpen(false);
           navigation.getParent()?.navigate('Chats', { screen: 'DirectChat', params: { personId }, initial: false });
         }}
+      />
+
+      {/* Amintirea se leagă de acest eveniment (doar dacă ai fost și s-a terminat) */}
+      <AddMemorySheet
+        visible={addMemoryOpen}
+        events={[event]}
+        initialEventId={event.id}
+        onClose={() => setAddMemoryOpen(false)}
       />
     </View>
   );
@@ -374,6 +396,17 @@ const styles = StyleSheet.create({
     borderTopColor: colors.border,
   },
   joinedRow: { flexDirection: 'row', alignItems: 'center', gap: 16 },
+  endedActions: { gap: 10 },
+  memoryButton: {
+    ...glass,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    height: 48,
+    borderRadius: radii.pill,
+  },
+  memoryButtonText: { color: colors.text, fontSize: 15, fontWeight: '500' },
   joinedPill: {
     ...glass,
     flex: 1,
