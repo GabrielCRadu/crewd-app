@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { canonicalUsername, normalizeUsernameInput, usernameError, usernameFromName } from '../usernameRules';
+import { canonicalUsername, isKnownTaken, normalizeUsernameInput, usernameError, usernameFromName } from '../usernameRules';
 
 describe('normalizeUsernameInput', () => {
   it('turns capitals into lowercase and drops spaces', () => {
@@ -59,5 +59,17 @@ describe('usernameFromName', () => {
   it('derives a username for the test people', () => {
     expect(usernameFromName('Maria')).toBe('maria');
     expect(usernameFromName('Ana-Maria')).toBe('anamaria');
+  });
+});
+
+describe('isKnownTaken', () => {
+  it('remembers a username that turned out to be taken, in any dot/underscore form', () => {
+    expect(isKnownTaken('radu.g', ['radu_g'])).toBe(true);
+    expect(isKnownTaken('radu.g', ['radu.g'])).toBe(true);
+  });
+
+  it('does not flag other usernames', () => {
+    expect(isKnownTaken('radu.h', ['radu_g'])).toBe(false);
+    expect(isKnownTaken('radu.g', [])).toBe(false);
   });
 });

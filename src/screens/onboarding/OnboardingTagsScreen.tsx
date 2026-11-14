@@ -24,7 +24,7 @@ const MIN_TAGS = 3;
 type Selection = Record<TagGroup['id'], string[]>;
 
 /**
- * Onboarding, pasul 2 din 2: „Ce îți place?” (docs/layout-guide.md).
+ * Onboarding, pasul 3 din 3: „Ce îți place?” (docs/layout-guide.md).
  * Trei grupuri de tag-uri (alegere multiplă) → „Gata, hai în Crewd” → profilul se salvează în Firestore.
  */
 export default function OnboardingTagsScreen({ navigation, route }: Props) {
@@ -54,7 +54,7 @@ export default function OnboardingTagsScreen({ navigation, route }: Props) {
       if (e instanceof UsernameTakenError) {
         // Cineva l-a luat între timp: înapoi la pasul 1, ca să alegi altul.
         Alert.alert('Username-ul e deja luat', 'Între timp l-a ales altcineva. Alege altul.', [
-          { text: 'OK', onPress: () => navigation.popTo('OnboardingIdentity') },
+          { text: 'OK', onPress: () => navigation.popTo('OnboardingIdentity', { takenUsername: identity.username }) },
         ]);
         return;
       }

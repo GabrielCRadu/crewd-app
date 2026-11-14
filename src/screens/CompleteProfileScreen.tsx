@@ -22,7 +22,8 @@ export default function CompleteProfileScreen() {
   const { profile, completeProfile, signOut } = useAuth();
   const missing = missingProfileParts(profile ?? { username: null, photoUrl: null });
   const [username, setUsername] = useState('');
-  const usernameStatus = useUsernameAvailability(username);
+  const [takenNames, setTakenNames] = useState<string[]>([]);
+  const usernameStatus = useUsernameAvailability(username, takenNames);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -41,6 +42,7 @@ export default function CompleteProfileScreen() {
     } catch (e) {
       setSaving(false);
       if (e instanceof UsernameTakenError) {
+        setTakenNames((prev) => [...prev, username]);
         setMessage('Între timp altcineva a ales acest username. Alege altul.');
         return;
       }

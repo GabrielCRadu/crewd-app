@@ -40,3 +40,9 @@ export function usernameError(username: string): string | null {
 export function usernameFromName(name: string): string {
   return normalizeUsernameInput(name.normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
 }
+
+/** Username-ul s-a dovedit deja luat (ex. la salvare, după ce părea disponibil)? `.` și `_` contează la fel. */
+export function isKnownTaken(username: string, takenNames: string[]): boolean {
+  const key = canonicalUsername(username);
+  return takenNames.some((name) => canonicalUsername(name) === key);
+}

@@ -49,8 +49,18 @@ describe('usernamesService (in memory)', () => {
 
   it('frees a username when the account is deleted', async () => {
     await claimUsername('u5', { username: 'elena.d', name: 'Elena', photoThumb: null });
-    await releaseUsername('elena.d');
+    await releaseUsername('elena.d', 'u5');
     expect(await isUsernameAvailable('elena.d')).toBe(true);
+  });
+
+  it("does not free someone else's username", async () => {
+    await claimUsername('u6', { username: 'tudor.e', name: 'Tudor', photoThumb: null });
+    await releaseUsername('tudor.e', 'intrus');
+    expect(await isUsernameAvailable('tudor.e')).toBe(false);
+  });
+
+  it('releasing an already free username does nothing (retried account deletion)', async () => {
+    await expect(releaseUsername('nimeni.aici', 'u7')).resolves.toBeUndefined();
   });
 });
 

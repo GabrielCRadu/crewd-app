@@ -103,12 +103,18 @@ export async function updatePublicCard(
   await updateDoc(cardRef(username), changes);
 }
 
-/** La ștergerea contului: username-ul se eliberează. */
-export async function releaseUsername(username: string): Promise<void> {
+/**
+ * La ștergerea contului: username-ul se eliberează. Dacă fișa nu mai există sau nu e a ta
+ * (ex. o ștergere de cont reluată după o eroare), nu face nimic, ca ștergerea să poată continua.
+ */
+export async function releaseUsername(username: string, uid: string): Promise<void> {
   if (!db) {
-    mockCards.delete(canonicalUsername(username));
+    const key = canonicalUsername(username);
+    if (mockCards.get(key)?.uid === uid) mockCards.delete(key);
     return;
   }
+  const snap = await getDoc(cardRef(username));
+  if (!snap.exists() || snap.data().uid !== uid) return;
   await deleteDoc(cardRef(username));
 }
 

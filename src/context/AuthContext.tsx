@@ -214,7 +214,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await confirmPassword(password);
       await leaveAllGroups(user.uid);
       // Username-ul se eliberează înainte de profil (regulile verifică proprietarul din fișa publică).
-      if (profile?.username) await releaseUsername(profile.username);
+      if (profile?.username) await releaseUsername(profile.username, user.uid);
       await deleteProfile(user.uid);
       // Ultimul pas: contul din Firebase Auth. După el, sesiunea se închide și apare ecranul de login.
       await deleteCurrentUser();

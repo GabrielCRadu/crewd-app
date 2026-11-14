@@ -34,16 +34,18 @@ type Errors = { name?: string; username?: string; birthDate?: string; city?: str
 const LOCKED_HINT = 'Nu mai poate fi modificat după crearea profilului.';
 
 /**
- * Onboarding, pasul 1 din 2: „Salut, eu sunt…” (docs/layout-guide.md).
+ * Onboarding, pasul 1 din 3: „Salut, eu sunt…” (docs/layout-guide.md).
  * Nume pe toată lățimea → Data nașterii + Oraș pe un rând → Gen (3 butoane) → „Continuă” jos.
  * Data nașterii și genul se blochează după crearea profilului (regulile Firestore), așa că o spunem pe ecran.
  */
-export default function OnboardingIdentityScreen({ navigation }: Props) {
+export default function OnboardingIdentityScreen({ navigation, route }: Props) {
   const { signOut } = useAuth();
   const cityRef = useRef<TextInputInstance>(null);
   const [name, setName] = useState('');
   const [username, setUsername] = useState('');
-  const usernameStatus = useUsernameAvailability(username);
+  // Un username luat de altcineva între timp (revenire de la ultimul pas) apare direct „ocupat”.
+  const takenUsername = route.params?.takenUsername;
+  const usernameStatus = useUsernameAvailability(username, takenUsername ? [takenUsername] : []);
   const [birthDate, setBirthDate] = useState<string | null>(null);
   const [city, setCity] = useState('');
   const [gender, setGender] = useState<Gender | null>(null);
