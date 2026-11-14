@@ -5,7 +5,7 @@ export type ChatsStackParamList = {
   ChatRoom: { eventId: string; groupId: string };
   /** Detaliile grupului (deschise din antetul conversației): întâlnirea, vibe-ul, membrii, ieșirea. */
   GroupDetails: { eventId: string; groupId: string };
-  /** Profilul autorului unui mesaj. */
+  /** Profilul unei persoane (din conversațiile directe și din lista de prieteni). */
   PersonProfile: { personId: string };
   /** Prietenii unei persoane (toți sau doar cei comuni). */
   PersonFriends: { personId: string };

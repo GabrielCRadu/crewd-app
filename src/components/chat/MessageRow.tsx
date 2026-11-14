@@ -64,5 +64,5 @@ const styles = StyleSheet.create({
   text: { color: colors.text, fontSize: 15 },
   textMine: { color: colors.onLight },
   time: { color: colors.faint, fontSize: 11 },
-  timeMine: { color: colors.accentMagenta, fontSize: 11 },
+  timeMine: { color: colors.onLightMuted, fontSize: 11 },
 });
