@@ -1,6 +1,7 @@
 import type { ChatRow, GroupMessage } from '../types/chat';
 import { addDays, formatDay, formatTime, startOfDay } from './dates';
 import { canOpenChat } from './groupRules';
+import { tr } from '../i18n';
 
 /** Ce vede cine a ieșit (sau a fost scos) din grup cu conversația deschisă. */
 export const LEFT_GROUP_MESSAGE = 'Nu mai ești în acest grup.';
@@ -76,7 +77,39 @@ export function authorNameFor(members: Record<string, { name: string }>, uid: st
 /** Previzualizarea din lista de chat-uri: „Tu: …” sau „Ana: …”. */
 export function lastMessagePreview(message: GroupMessage, myUid: string): string {
   const who = message.authorUid === myUid ? 'Tu' : message.authorName;
-  return `${who}: ${message.text}`;
+  return `${who}: ${message.removed ? removedMessageText(message.removed.category, false) : message.text}`;
+}
+
+/** Numele categoriilor de moderare (functions/src/moderation/rules.ts), pentru autorul mesajului eliminat. */
+function categoryLabel(category: string): string | null {
+  switch (category) {
+    case 'threat':
+      return tr('amenințare');
+    case 'harassment':
+      return tr('hărțuire');
+    case 'hate':
+      return tr('discurs de ură');
+    case 'sexual':
+      return tr('conținut sexual');
+    case 'scam':
+      return tr('înșelătorie');
+    case 'personal_data':
+      return tr('date personale');
+    case 'spam':
+      return tr('spam');
+    default:
+      return null;
+  }
+}
+
+/**
+ * Ce apare în locul unui mesaj eliminat de moderare: ceilalți văd doar că a fost eliminat;
+ * autorul vede și motivul.
+ */
+export function removedMessageText(category: string, isMine: boolean): string {
+  if (!isMine) return tr('Mesaj eliminat de moderare');
+  const label = categoryLabel(category);
+  return label ? tr('Mesajul tău a fost eliminat ({reason})', { reason: label }) : tr('Mesajul tău a fost eliminat');
 }
 
 export type ChatRoomState = 'loading' | 'left' | 'forming' | 'ready';

@@ -393,6 +393,9 @@ service cloud.firestore {
       }
     }
 
+    // moderation/{id}: jurnalul moderării automate, scris doar de Cloud Functions (admin); închis pentru aplicație
+    // prin regula de mai jos. Câmpul `removed` din mesaje îl scrie tot doar funcția (regulile de creare nu îl permit).
+
     // Orice altceva e închis până adăugăm reguli explicite.
     match /{document=**} {
       allow read, write: if false;

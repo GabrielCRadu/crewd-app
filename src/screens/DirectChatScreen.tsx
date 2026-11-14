@@ -18,6 +18,7 @@ import { getPerson } from '../services/peopleService';
 import { colors, onThemeChange } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
 import type { Event } from '../types/events';
+import { removedMessageText } from '../utils/chatRules';
 import { formatEventDate, formatTime } from '../utils/dates';
 import { tr } from '../i18n';
 
@@ -55,6 +56,16 @@ export default function DirectChatScreen({ navigation, route }: Props) {
     navigation.getParent()?.navigate('Events', { screen: 'EventDetails', params: { eventId }, initial: false });
 
   const renderMessage = ({ item }: { item: DirectMessage }) => {
+    if (item.removed) {
+      return (
+        <View style={[styles.messageRow, item.fromMe && styles.messageRowMine]}>
+          <View style={[styles.bubble, styles.bubbleRemoved]}>
+            <Text style={styles.removedText}>{removedMessageText(item.removed.category, item.fromMe)}</Text>
+          </View>
+          <Text style={styles.time}>{formatTime(item.sentAt)}</Text>
+        </View>
+      );
+    }
     const event = item.eventId ? events.find((e) => e.id === item.eventId) : undefined;
     return (
       <View style={[styles.messageRow, item.fromMe && styles.messageRowMine]}>
@@ -165,6 +176,8 @@ const makeStyles = () =>
     messageRowMine: { alignSelf: 'flex-end', alignItems: 'flex-end' },
     bubble: { paddingHorizontal: 14, paddingVertical: 10, borderRadius: 20 },
     bubbleOther: { ...glass, borderBottomLeftRadius: 6 },
+    bubbleRemoved: { borderWidth: 1, borderColor: colors.border, borderStyle: 'dashed' },
+    removedText: { color: colors.muted, fontSize: 14, fontStyle: 'italic' },
     bubbleMine: { backgroundColor: colors.text, borderBottomRightRadius: 6 },
     bubbleText: { color: colors.text, fontSize: 15 },
     bubbleTextMine: { color: colors.onLight },

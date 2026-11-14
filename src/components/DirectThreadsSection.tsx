@@ -5,6 +5,7 @@ import { useDirectThreads } from '../hooks/useDirectThreads';
 import { sortedThreads } from '../services/directMessagesService';
 import type { DirectMessage } from '../services/directMessagesService';
 import { getPerson } from '../services/peopleService';
+import { removedMessageText } from '../utils/chatRules';
 import { usePublicProfiles } from '../hooks/usePublicProfiles';
 import { colors, onThemeChange } from '../theme/colors';
 import { type } from '../theme/typography';
@@ -19,6 +20,8 @@ interface Props {
 /** Ultimul mesaj, pe scurt: textul sau „Ai trimis un eveniment”. */
 function preview(message: DirectMessage): string {
   const who = message.fromMe ? 'Tu: ' : '';
+  // Lista vine din dms/{a_b}: un ultim mesaj eliminat are textul și evenimentul golite.
+  if (message.removed || (!message.text && !message.eventId)) return who + removedMessageText(message.removed?.category ?? '', false);
   if (message.text) return who + message.text;
   return message.fromMe ? tr('Ai trimis un eveniment') : tr('Ți-a trimis un eveniment');
 }

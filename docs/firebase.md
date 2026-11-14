@@ -137,6 +137,10 @@ Blocările: `blocker`, `blocked`, `createdAt`. Le vede și le șterge doar cine 
 
 Mesajele directe între conturi reale, doar între prieteni. O conversație pe pereche (id-ul: uid-urile sortate, unite cu `_`), creată la primul mesaj: `users`, `lastText`, `lastEventId`, `lastBy`, `lastAt` (ultimul mesaj, pentru lista din tab-ul Chat). Mesajele: `authorUid`, `text` (1–1000 caractere) și/sau `eventId` (un eveniment trimis), `createdAt`. Le citesc și le scriu doar cei doi, iar scrierea cere o prietenie acceptată; nimeni nu poate semna în numele celuilalt. La ștergerea contului se șterg mesajele tale și conversațiile tale. Scrie `src/services/dmFirestore.ts` (prin `src/services/directMessagesService.ts`).
 
+### `moderation/{id}`
+
+Jurnalul moderării automate (`docs/superpowers/specs/2026-11-14-moderare-mesaje-design.md`), scris doar de Cloud Functions (`functions/src/index.ts`); aplicația nu îl poate citi sau scrie (regula implicită `if false`). Id-ul e calea mesajului cu `/` înlocuit prin `__`. Câmpuri: `path`, `authorUid`, `text` (originalul), `verdict` (`flag` sau `remove`), `category`, `confidence`, `reason`, `checkedAt`, `expireAt` (+30 de zile; politica TTL a Firestore pe acest câmp le șterge automat). Un mesaj eliminat primește `text: ''` (la DM și `eventId` șters) și `removed: { category, at }`; la DM, dacă era ultimul, `dms/{a_b}.lastText` devine gol.
+
 ### `meta/eventsImport`
 
 Data colectării, intervalul de date, numărul de evenimente, notele sursei și data importului.

@@ -22,6 +22,8 @@ export interface DirectMessage {
   /** Evenimentul trimis, afișat ca un card cu afiș. */
   eventId?: string;
   sentAt: Date;
+  /** Ascuns de moderarea automată (conturile reale). */
+  removed?: { category: string };
 }
 
 /** personId → mesajele, de la cel mai vechi la cel mai nou. */
@@ -67,7 +69,14 @@ function isReal(personId: string): boolean {
 }
 
 function fromRemote(m: RemoteDm, uid: string): DirectMessage {
-  return { id: m.id, fromMe: m.authorUid === uid, text: m.text, eventId: m.eventId, sentAt: m.sentAt };
+  return {
+    id: m.id,
+    fromMe: m.authorUid === uid,
+    text: m.text,
+    eventId: m.eventId,
+    sentAt: m.sentAt,
+    ...(m.removed ? { removed: m.removed } : {}),
+  };
 }
 
 /** Pornește lista conversațiilor contului real (la login). */

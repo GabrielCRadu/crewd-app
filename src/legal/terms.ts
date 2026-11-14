@@ -58,6 +58,7 @@ Nu răspundem pentru comportamentul altor utilizatori, în aplicație sau în af
 
 ## 6. Raportări, evaluări și sancțiuni
 
+- Mesajele din chatul de grup și cele directe sunt verificate automat de un serviciu AI. Cele clar periculoase sunt ascunse; autorul vede motivul. Sistemul poate greși: dacă un mesaj de-al tău a fost ascuns pe nedrept, scrie-ne la [__].
 - Poți raporta un utilizator sau un conținut. Raportările sunt confidențiale: persoana raportată nu află cine a raportat-o.
 - Dacă încalci acești termeni, putem, după caz: să ștergem conținutul, să limităm temporar unele funcții (de exemplu intrarea în grupuri), să suspendăm sau să închidem contul. Unele limitări se pot aplica automat, de exemplu după mai multe raportări.
 - Îți spunem ce decizie am luat și de ce, cu excepția cazurilor în care legea ne interzice. Poți contesta decizia scriindu-ne la [__]; contestația o verifică o persoană.
