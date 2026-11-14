@@ -4,11 +4,15 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import Avatar from '../components/Avatar';
 import DirectThreadsSection from '../components/DirectThreadsSection';
+import LastMessageLine from '../components/chat/LastMessageLine';
+import { useAuth } from '../context/AuthContext';
 import { useEvents } from '../hooks/useEvents';
 import { useMyGroups } from '../hooks/useMyGroups';
 import { useNow } from '../hooks/useNow';
 import { useUserLocation } from '../hooks/useUserLocation';
+import { isFirebaseConfigured } from '../lib/firebase';
 import type { ChatsStackParamList } from '../navigation/chatsTypes';
+import { MOCK_UID } from '../services/groupsService';
 import { colors } from '../theme/colors';
 import { type } from '../theme/typography';
 import { glass, radii } from '../theme/shape';
@@ -27,6 +31,8 @@ export default function ChatsScreen({ navigation }: Props) {
   const location = useUserLocation();
   const { events } = useEvents(location.coords);
   const now = useNow();
+  const { user } = useAuth();
+  const myUid = isFirebaseConfigured ? (user?.uid ?? '') : MOCK_UID;
 
   const titleOf = (g: CrewGroup) => events.find((e) => e.id === g.eventId)?.title ?? 'Eveniment';
   const sorted = [...groups].sort((a, b) => a.meetupAt.getTime() - b.meetupAt.getTime());
@@ -59,6 +65,9 @@ export default function ChatsScreen({ navigation }: Props) {
         {sorted.map((g) => {
           const status = groupStatus(g, now);
           const title = titleOf(g);
+          const memberNames = Object.values(g.members)
+            .map((m) => m.name)
+            .join(', ');
           return (
             <Pressable key={g.id} onPress={() => open(g)} style={({ pressed }) => [styles.card, pressed && styles.pressed]}>
               <View style={styles.groupRow}>
@@ -67,11 +76,13 @@ export default function ChatsScreen({ navigation }: Props) {
                   <Text style={styles.groupName} numberOfLines={1}>
                     {title}
                   </Text>
-                  <Text style={styles.members} numberOfLines={1}>
-                    {Object.values(g.members)
-                      .map((m) => m.name)
-                      .join(', ')}
-                  </Text>
+                  {canOpenChat(g) ? (
+                    <LastMessageLine eventId={g.eventId} groupId={g.id} myUid={myUid} fallback={memberNames} />
+                  ) : (
+                    <Text style={styles.members} numberOfLines={1}>
+                      {memberNames}
+                    </Text>
+                  )}
                 </View>
                 {!canOpenChat(g) ? (
                   <View style={styles.badge}>
