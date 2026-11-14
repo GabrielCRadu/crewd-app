@@ -11,4 +11,6 @@ export type ProfileStackParamList = {
   PersonFriends: { personId: string };
   /** Setările contului (din meniul cu trei linii de pe profil). */
   Settings: undefined;
+  /** Politica de confidențialitate (din Setări). */
+  PrivacyPolicy: undefined;
 };

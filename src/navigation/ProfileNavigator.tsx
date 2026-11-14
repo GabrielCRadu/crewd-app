@@ -5,6 +5,7 @@ import FriendsListScreen from '../screens/FriendsListScreen';
 import PersonFriendsScreen from '../screens/PersonFriendsScreen';
 import PersonProfileScreen from '../screens/PersonProfileScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import PrivacyPolicyScreen from '../screens/PrivacyPolicyScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import { colors } from '../theme/colors';
 import type { ProfileStackParamList } from './profileTypes';
@@ -21,6 +22,7 @@ export default function ProfileNavigator() {
       <Stack.Screen name="PersonProfile" component={PersonProfileScreen} />
       <Stack.Screen name="PersonFriends" component={PersonFriendsScreen} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
+      <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
     </Stack.Navigator>
   );
 }

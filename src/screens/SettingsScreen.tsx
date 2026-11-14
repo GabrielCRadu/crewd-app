@@ -2,11 +2,13 @@ import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-nati
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import DeleteAccount from '../components/DeleteAccount';
 import GlassIconButton from '../components/GlassIconButton';
 import LanguageSwitch from '../components/LanguageSwitch';
 import { useAuth } from '../context/AuthContext';
+import type { ProfileStackParamList } from '../navigation/profileTypes';
 import { colors } from '../theme/colors';
 import { type } from '../theme/typography';
 import { glass, radii } from '../theme/shape';
@@ -17,7 +19,7 @@ import { tr } from '../i18n';
  * Contul: emailul, ieșirea din cont (cu confirmare Da / Nu) și ștergerea definitivă.
  */
 export default function SettingsScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NativeStackNavigationProp<ProfileStackParamList, 'Settings'>>();
   const { user, signOut } = useAuth();
 
   const confirmSignOut = () =>
@@ -37,6 +39,20 @@ export default function SettingsScreen() {
         {/* Limba: toată aplicația trece pe limba aleasă */}
         <Text style={styles.label}>{tr('LIMBĂ')}</Text>
         <LanguageSwitch />
+
+        {/* Documentele legale */}
+        <Text style={[styles.label, styles.sectionGap]}>{tr('LEGAL')}</Text>
+        <View style={styles.card}>
+          <Pressable
+            onPress={() => navigation.navigate('PrivacyPolicy')}
+            accessibilityRole="button"
+            style={({ pressed }) => [styles.row, pressed && styles.pressed]}
+          >
+            <Ionicons name="shield-checkmark-outline" size={18} color={colors.text} />
+            <Text style={styles.rowText}>{tr('Politica de confidențialitate')}</Text>
+            <Ionicons name="chevron-forward" size={16} color={colors.faint} />
+          </Pressable>
+        </View>
 
         <Text style={[styles.label, styles.sectionGap]}>{tr('CONT')}</Text>
         <View style={styles.card}>
@@ -79,6 +95,7 @@ const styles = StyleSheet.create({
   rowBorder: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border },
   pressed: { backgroundColor: colors.cardStrong },
   email: { flex: 1, color: colors.muted, fontSize: 15 },
+  rowText: { flex: 1, color: colors.text, fontSize: 15, fontWeight: '500' },
   signOut: { color: colors.nope, fontSize: 15, fontWeight: '600' },
   delete: { alignItems: 'center', marginTop: 16 },
 });
