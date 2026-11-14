@@ -5,7 +5,7 @@ import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/d
 import type { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
 
-import { colors } from '../theme/colors';
+import { colorScheme, colors } from '../theme/colors';
 import { type } from '../theme/typography';
 import { glass, radii } from '../theme/shape';
 import {
@@ -102,7 +102,7 @@ export default function BirthDateField({ label, value, onChange, error, hint, co
               value={iosDraft}
               mode="date"
               display="spinner"
-              themeVariant="dark"
+              themeVariant={colorScheme}
               locale="ro-RO"
               maximumDate={maximumDate}
               minimumDate={minimumDate}

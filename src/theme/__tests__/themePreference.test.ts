@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { isThemePreference, resolveColorScheme } from '../themePreference';
+import { isThemePreference, nativeColorScheme, resolveColorScheme } from '../themePreference';
 
 describe('resolveColorScheme', () => {
   it('follows the phone when the choice is "system"', () => {
@@ -25,5 +25,16 @@ describe('isThemePreference', () => {
     expect(isThemePreference('system')).toBe(true);
     expect(isThemePreference('blue')).toBe(false);
     expect(isThemePreference(null)).toBe(false);
+  });
+});
+
+describe('nativeColorScheme', () => {
+  it('passes an explicit choice to the system', () => {
+    expect(nativeColorScheme('light')).toBe('light');
+    expect(nativeColorScheme('dark')).toBe('dark');
+  });
+
+  it('lets the phone decide for "system"', () => {
+    expect(nativeColorScheme('system')).toBe('unspecified');
   });
 });

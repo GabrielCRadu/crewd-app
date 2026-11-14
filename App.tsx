@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
+import * as SystemUI from 'expo-system-ui';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AuthProvider } from './src/context/AuthContext';
 import { loadLanguage, useLanguage } from './src/i18n';
 import RootNavigator from './src/navigation/RootNavigator';
-import { isDark } from './src/theme/colors';
+import { colors, isDark } from './src/theme/colors';
 
 export default function App() {
   // Limba salvată se citește înainte de primul ecran, ca să nu clipească întâi în română.
@@ -13,6 +14,8 @@ export default function App() {
   const language = useLanguage();
   useEffect(() => {
     void loadLanguage().finally(() => setLanguageLoaded(true));
+    // Fundalul de sub ecrane, în culoarea temei (altfel clipește alb/negru la tranziții și la tastatură).
+    SystemUI.setBackgroundColorAsync(colors.background).catch(() => {});
   }, []);
   if (!languageLoaded) return null;
 

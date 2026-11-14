@@ -26,6 +26,7 @@ import { useNow } from '../hooks/useNow';
 import { useUserLocation } from '../hooks/useUserLocation';
 import { isFirebaseConfigured } from '../lib/firebase';
 import type { ChatsStackParamList } from '../navigation/chatsTypes';
+import { openMemberProfile } from '../navigation/openMemberProfile';
 import { chatErrorMessage, sendGroupMessage } from '../services/chatService';
 import { MOCK_UID } from '../services/groupsService';
 import { colors } from '../theme/colors';
@@ -161,7 +162,13 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
           contentContainerStyle={styles.messages}
           data={rows}
           keyExtractor={(r) => r.key}
-          renderItem={({ item }) => (item.kind === 'day' ? <DayRow label={item.label} /> : <MessageRow row={item} />)}
+          renderItem={({ item }) =>
+            item.kind === 'day' ? (
+              <DayRow label={item.label} />
+            ) : (
+              <MessageRow row={item} onOpenAuthor={(authorUid) => openMemberProfile(navigation, authorUid, eventId, groupId)} />
+            )
+          }
           inverted
           keyboardShouldPersistTaps="handled"
         />

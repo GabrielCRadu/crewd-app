@@ -29,6 +29,14 @@ export function resolveColorScheme(preference: ThemePreference, system: string |
   return system === 'light' ? 'light' : 'dark';
 }
 
+/**
+ * Ce i se spune sistemului (`Appearance.setColorScheme`), ca dialogurile native, tastatura și calendarele
+ * să urmeze tema aleasă: `unspecified` = „Ca telefonul”.
+ */
+export function nativeColorScheme(preference: ThemePreference): 'light' | 'dark' | 'unspecified' {
+  return preference === 'system' ? 'unspecified' : preference;
+}
+
 /** Alegerea curentă (citită la pornire). */
 export function getThemePreference(): ThemePreference {
   return current;

@@ -1,15 +1,16 @@
 import { useState } from 'react';
-import { Alert } from 'react-native';
+import { Alert, Appearance } from 'react-native';
 import { reloadAppAsync } from 'expo';
 
 import SegmentedControl from './SegmentedControl';
 import { tr } from '../i18n';
-import { getThemePreference, saveThemePreference } from '../theme/themePreference';
+import { getThemePreference, nativeColorScheme, saveThemePreference } from '../theme/themePreference';
 import type { ThemePreference } from '../theme/themePreference';
 
 /**
  * Alegerea temei în Setări: Luminoasă | Întunecată | Ca telefonul.
- * Culorile se calculează la pornire, așa că după alegere aplicația se reîncarcă (rămâi logat).
+ * Culorile se calculează la pornire, așa că după alegere aplicația se reîncarcă imediat (rămâi logat).
+ * Tema se dă și sistemului (dialoguri native, tastatură, calendare).
  */
 export default function ThemeSwitch() {
   const [value, setValue] = useState<ThemePreference>(getThemePreference());
@@ -19,6 +20,7 @@ export default function ThemeSwitch() {
     setValue(next);
     try {
       await saveThemePreference(next);
+      Appearance.setColorScheme(nativeColorScheme(next));
       await reloadAppAsync(tr('Tema s-a schimbat'));
     } catch (e) {
       console.warn('Nu am putut aplica tema:', e);

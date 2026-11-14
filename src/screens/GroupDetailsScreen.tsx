@@ -15,7 +15,7 @@ import { isFirebaseConfigured } from '../lib/firebase';
 import type { ChatsStackParamList } from '../navigation/chatsTypes';
 import { MOCK_UID, leaveGroup } from '../services/groupsService';
 import { LEFT_GROUP_MESSAGE } from '../services/chatService';
-import { getPerson } from '../services/peopleService';
+import { openMemberProfile } from '../navigation/openMemberProfile';
 import { colors } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
 import { type } from '../theme/typography';
@@ -131,15 +131,11 @@ export default function GroupDetailsScreen({ navigation, route }: Props) {
         <View style={styles.card}>
           <Text style={type.label}>{tr('Membri ·')}{' '}{group.memberUids.length}</Text>
           {members.map(([memberUid, m], i) => (
-            // Apăsat: persoanele de test își deschid profilul complet, conturile reale profilul de membru; „tu” nu se deschide.
+            // Apăsat: se deschide profilul complet al persoanei (src/navigation/openMemberProfile.ts); „tu” nu se deschide.
             <Pressable
               key={memberUid}
               disabled={memberUid === uid}
-              onPress={() =>
-                getPerson(memberUid)
-                  ? navigation.navigate('PersonProfile', { personId: memberUid })
-                  : navigation.navigate('MemberProfile', { eventId: group.eventId, groupId: group.id, uid: memberUid })
-              }
+              onPress={() => openMemberProfile(navigation, memberUid, group.eventId, group.id)}
               accessibilityRole="button"
               accessibilityLabel={tr('Profilul lui {name}', { name: m.name })}
               style={({ pressed }) => [styles.member, i > 0 && styles.memberDivider, pressed && styles.pressed]}

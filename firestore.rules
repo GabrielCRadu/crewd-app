@@ -244,6 +244,32 @@ service cloud.firestore {
       allow delete: if request.auth != null && (resource == null || resource.data.uid == request.auth.uid);
     }
 
+    // Profilul public (spec 2026-11-14-profil-membru-tema-design.md): copia câmpurilor publice din users/{uid},
+    // ținută la zi de aplicație. Oricine logat poate citi un profil anume (din grup, chat sau codul QR),
+    // dar nu poate lista colecția. Data nașterii, genul, emailul și înscrierile rămân în users/{uid}.
+    match /profiles/{uid} {
+      function validPublicProfile(d) {
+        return d.keys().hasOnly(['name', 'age', 'city', 'bio', 'photoUrl', 'username', 'tags', 'updatedAt'])
+          && d.name is string && d.name.size() > 0 && d.name.size() <= 50
+          && (d.age == null || (d.age is int && d.age >= 0 && d.age <= 130))
+          && d.city is string && d.city.size() <= 60
+          && d.bio is string && d.bio.size() <= 500
+          && (d.photoUrl == null
+            || (d.photoUrl is string && d.photoUrl.size() <= 600000 && d.photoUrl.matches('data:image/jpeg;base64,.*')))
+          // Username-ul, dacă e pus, trebuie să fie al tău (fișa lui din usernames/).
+          && (d.username == null
+            || (d.username is string
+              && get(/databases/$(database)/documents/usernames/$(usernameKey(d.username))).data.uid == uid))
+          && d.tags is list && d.tags.size() <= 60
+          && d.updatedAt == request.time;
+      }
+
+      allow get: if request.auth != null;
+      allow list: if false;
+      allow create, update: if request.auth != null && request.auth.uid == uid && validPublicProfile(request.resource.data);
+      allow delete: if request.auth != null && request.auth.uid == uid;
+    }
+
     // Orice altceva e închis până adăugăm reguli explicite.
     match /{document=**} {
       allow read, write: if false;

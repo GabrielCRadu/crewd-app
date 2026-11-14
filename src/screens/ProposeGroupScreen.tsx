@@ -15,7 +15,7 @@ import { useEvents } from '../hooks/useEvents';
 import { useUserLocation } from '../hooks/useUserLocation';
 import type { EventsStackParamList } from '../navigation/eventsTypes';
 import { proposeGroup } from '../services/groupsService';
-import { colors } from '../theme/colors';
+import { colorScheme, colors } from '../theme/colors';
 import { type } from '../theme/typography';
 import { glass, radii } from '../theme/shape';
 import type { ProposalDraft } from '../types/groups';
@@ -127,7 +127,7 @@ export default function ProposeGroupScreen({ navigation, route }: Props) {
                   value={current.meetupAt}
                   mode="time"
                   display="compact"
-                  themeVariant="dark"
+                  themeVariant={colorScheme}
                   onChange={(_e, date) => {
                     if (!date) return;
                     const next = new Date(event.startsAt);

@@ -553,11 +553,11 @@ export const EN: Record<string, string> = {
   'Contul nu mai există.': 'This account no longer exists.',
   'Hai să fim prieteni pe Crewd! @{username} {url}': "Let's be friends on Crewd! @{username} {url}",
   // ---------- Profilul membrului, tema ----------
-  'Persoana nu mai e în acest grup.': 'This person is no longer in this group.',
   'A propus grupul': 'Proposed the group',
-  'Îi place': 'Likes',
   'În grupul tău pentru {event}': 'In your group for {event}',
   'Profilul lui {name}': "{name}'s profile",
+  '{age} ani': '{age} years',
+  'Profilul nu e disponibil.': 'This profile is not available.',
   'TEMĂ': 'THEME',
   'Luminoasă': 'Light',
   'Întunecată': 'Dark',

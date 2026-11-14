@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 
 import { MY_PROFILE } from '../data/mockSocial';
@@ -22,6 +22,8 @@ import { isNewPhoto } from '../utils/profilePhoto';
 import { isProfileComplete } from '../utils/profileCompleteness';
 import { usernameFromName } from '../utils/usernameRules';
 import { claimUsername, releaseUsername, updatePublicCard } from '../services/usernamesService';
+import { deletePublicProfile, savePublicProfile } from '../services/publicProfileService';
+import { publicProfileKey, toPublicProfile } from '../utils/publicProfile';
 import { allProfileTags } from '../utils/profileTags';
 import { tr } from '../i18n';
 
@@ -80,6 +82,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<AuthStatus>(isFirebaseConfigured ? 'loading' : 'ready');
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
+  // Amprenta ultimului profil public scris (src/utils/publicProfile.ts).
+  const publishedKey = useRef<string | null>(null);
 
   useEffect(() => {
     if (!isFirebaseConfigured) return;
@@ -89,6 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(nextUser);
       setError(null);
       if (!nextUser) {
+        publishedKey.current = null;
         setProfile(null);
         loadUserPreferences(null, null, []);
         setStatus('signedOut');
@@ -115,6 +120,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       unsubscribe();
     };
   }, [attempt]);
+
+  // Profilul public (profiles/{uid}) urmează profilul tău complet: se rescrie doar când se schimbă ceva
+  // din el, deci și o dată după login (așa îl primesc și conturile de dinainte).
+  useEffect(() => {
+    if (!isFirebaseConfigured || status !== 'ready' || !profile || !user || profile.uid !== user.uid) return;
+    const pub = toPublicProfile(profile);
+    const key = publicProfileKey(pub);
+    if (key === publishedKey.current) return;
+    publishedKey.current = key;
+    savePublicProfile(pub).catch((e: unknown) => {
+      publishedKey.current = null;
+      console.warn('Nu am putut actualiza profilul public:', e);
+    });
+  }, [status, profile, user]);
 
   // Fără Firebase (profil demo): scorurile pornesc o dată de la tag-urile profilului demo.
   useEffect(() => {
@@ -216,6 +235,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await leaveAllGroups(user.uid);
       // Username-ul se eliberează înainte de profil (regulile verifică proprietarul din fișa publică).
       if (profile?.username) await releaseUsername(profile.username, user.uid);
+      await deletePublicProfile(user.uid);
+      publishedKey.current = null;
       await deleteProfile(user.uid);
       // Ultimul pas: contul din Firebase Auth. După el, sesiunea se închide și apare ecranul de login.
       await deleteCurrentUser();
