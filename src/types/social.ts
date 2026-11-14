@@ -23,6 +23,8 @@ export interface Person {
   bio?: string;
   /** Fotografia de profil (URL). Lipsă = se afișează inițiala. */
   photoUrl?: string;
+  /** Username-ul unic (persoanele de test îl primesc din nume, în src/data/mockSocial.ts). */
+  username?: string;
   /** Genul ales de persoană în profilul ei; după el alegem „prietena” / „prietenul” în texte. */
   gender?: Gender;
 }

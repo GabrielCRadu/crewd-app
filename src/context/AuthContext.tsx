@@ -116,7 +116,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const completeOnboarding = useCallback(
     async (draft: ProfileDraft) => {
       if (!user) throw new Error('Nu ești logat.');
-      const created = await createProfile(user.uid, draft);
+      const created = await createProfile(user.uid, draft, await makeThumbnail(draft.photoUrl));
       loadUserPreferences(user.uid, null, allProfileTags(created));
       setProfile(created);
       setStatus('ready');

@@ -13,10 +13,12 @@ export interface IdentityDraft {
   birthDate: string;
   city: string;
   gender: Gender;
+  /** Username-ul unic ales la pasul 1 (strict litere mici). */
+  username: string;
 }
 
 /** Cei doi pași de onboarding (după crearea contului, înainte de tab-uri). */
 export type OnboardingStackParamList = {
   OnboardingIdentity: undefined;
-  OnboardingTags: { identity: IdentityDraft };
+  OnboardingTags: { identity: IdentityDraft; photoUrl: string };
 };

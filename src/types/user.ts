@@ -31,6 +31,8 @@ export interface UserProfile {
    * ca ceilalți membri să o vadă în chat fără acces la profil. Lipsește la profilurile de dinainte de chat.
    */
   photoThumb?: string | null;
+  /** Username-ul unic, strict litere mici; ales o singură dată. Lipsește la conturile de dinainte de username-uri. */
+  username?: string | null;
   /** Tag-urile alese la onboarding, pe grupuri (src/data/tags.ts). */
   chosenTags: Record<TagGroup['id'], string[]>;
   /** Tag-uri adăugate automat din evenimentele la care s-a înscris. */
@@ -38,7 +40,12 @@ export interface UserProfile {
 }
 
 /** Ce se completează în onboarding (restul câmpurilor le pune aplicația). */
-export type ProfileDraft = Omit<UserProfile, 'uid' | 'learnedTags' | 'bio' | 'photoUrl' | 'photoThumb' | 'age'> & { birthDate: string };
+export type ProfileDraft = Omit<UserProfile, 'uid' | 'learnedTags' | 'bio' | 'photoUrl' | 'photoThumb' | 'age' | 'username'> & {
+  birthDate: string;
+  username: string;
+  /** Poza de profil e obligatorie la înscriere. */
+  photoUrl: string;
+};
 
 /** Ce se poate schimba din „Editează profilul”. */
 /** Data nașterii și genul NU se pot schimba după onboarding. */

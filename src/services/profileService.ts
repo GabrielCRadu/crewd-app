@@ -1,9 +1,10 @@
-import { Timestamp, deleteDoc, doc, getDoc, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
+import { Timestamp, deleteDoc, doc, getDoc, runTransaction, serverTimestamp, updateDoc } from 'firebase/firestore';
 
 import { db } from '../lib/firebase';
 import type { UserPreferences } from '../types/events';
 import type { ProfileChanges, ProfileDraft, UserProfile } from '../types/user';
 import { ageFromBirthDate } from '../utils/birthDate';
+import { reserveUsernameInTransaction } from './usernamesService';
 
 /*
  * Profilul utilizatorului în Firestore: users/{uid}.
@@ -46,6 +47,7 @@ export async function getProfile(uid: string): Promise<UserProfile | null> {
     bio: d.bio ?? '',
     photoUrl: d.photoUrl ?? null,
     photoThumb: d.photoThumb ?? null,
+    username: d.username ?? null,
     chosenTags: {
       events: d.chosenTags?.events ?? [],
       music: d.chosenTags?.music ?? [],
@@ -55,29 +57,38 @@ export async function getProfile(uid: string): Promise<UserProfile | null> {
   };
 }
 
-/** Creează profilul la finalul onboarding-ului. */
-export async function createProfile(uid: string, draft: ProfileDraft): Promise<UserProfile> {
+/**
+ * Creează profilul la finalul onboarding-ului, într-o tranzacție cu rezervarea username-ului
+ * (usernames/{key}); dacă username-ul a fost luat între timp, aruncă UsernameTakenError și nu scrie nimic.
+ */
+export async function createProfile(uid: string, draft: ProfileDraft, photoThumb: string | null): Promise<UserProfile> {
   const profile: UserProfile = {
     uid,
     ...draft,
     age: ageFromBirthDate(draft.birthDate),
     bio: '',
-    photoUrl: null,
+    photoThumb,
     learnedTags: [],
   };
-  await setDoc(doc(requireDb(), 'users', uid), {
-    name: profile.name,
-    birthDate: birthDateToTimestamp(draft.birthDate),
-    city: profile.city,
-    gender: profile.gender,
-    bio: '',
-    photoUrl: null,
-    chosenTags: profile.chosenTags,
-    learnedTags: [],
-    joinedEventIds: [],
-    tagScores: {},
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
+  const database = requireDb();
+  await runTransaction(database, async (tx) => {
+    await reserveUsernameInTransaction(tx, uid, { username: draft.username, name: draft.name, photoThumb });
+    tx.set(doc(database, 'users', uid), {
+      name: profile.name,
+      username: draft.username,
+      birthDate: birthDateToTimestamp(draft.birthDate),
+      city: profile.city,
+      gender: profile.gender,
+      bio: '',
+      photoUrl: draft.photoUrl,
+      photoThumb,
+      chosenTags: profile.chosenTags,
+      learnedTags: [],
+      joinedEventIds: [],
+      tagScores: {},
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
   });
   return profile;
 }

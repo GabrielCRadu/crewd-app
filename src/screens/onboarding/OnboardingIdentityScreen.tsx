@@ -60,7 +60,8 @@ export default function OnboardingIdentityScreen({ navigation }: Props) {
     setErrors(nextErrors);
     if (Object.values(nextErrors).some(Boolean) || !gender || !birthDate) return;
     navigation.navigate('OnboardingTags', {
-      identity: { name: name.trim(), birthDate, city: city.trim(), gender },
+      identity: { name: name.trim(), birthDate, city: city.trim(), gender, username: '' },
+      photoUrl: '',
     });
   };
 

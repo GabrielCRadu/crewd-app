@@ -27,7 +27,7 @@ type Selection = Record<TagGroup['id'], string[]>;
  * Trei grupuri de tag-uri (alegere multiplă) → „Gata, hai în Crewd” → profilul se salvează în Firestore.
  */
 export default function OnboardingTagsScreen({ navigation, route }: Props) {
-  const { identity } = route.params;
+  const { identity, photoUrl } = route.params;
   const { completeOnboarding } = useAuth();
   const [selected, setSelected] = useState<Selection>({ events: [], music: [], hobbies: [] });
   const [saving, setSaving] = useState(false);
@@ -50,7 +50,7 @@ export default function OnboardingTagsScreen({ navigation, route }: Props) {
     setError(null);
     setSaving(true);
     try {
-      await completeOnboarding({ ...identity, chosenTags: selected });
+      await completeOnboarding({ ...identity, photoUrl, chosenTags: selected });
       // Profilul e salvat: RootNavigator trece singur la tab-uri.
     } catch (e) {
       console.warn('Nu am putut salva profilul:', e);
