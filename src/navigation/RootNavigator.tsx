@@ -17,6 +17,7 @@ import EventsNavigator from './EventsNavigator';
 import FriendsMapScreen from '../screens/FriendsMapScreen';
 import ChatsNavigator from './ChatsNavigator';
 import ProfileNavigator from './ProfileNavigator';
+import CompleteProfileScreen from '../screens/CompleteProfileScreen';
 import EventReminders from '../components/EventReminders';
 import FriendRequestPopup from '../components/FriendRequestPopup';
 import InviteLinkHandler from '../components/InviteLinkHandler';
@@ -123,6 +124,8 @@ export default function RootNavigator() {
         <AuthNavigator />
       ) : status === 'needsProfile' ? (
         <OnboardingNavigator />
+      ) : status === 'needsCompletion' ? (
+        <CompleteProfileScreen />
       ) : (
         <LoadingScreen error={error} onRetry={retry} onSignOut={signOut} />
       )}
