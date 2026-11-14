@@ -14,7 +14,7 @@
  */
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -58,6 +58,20 @@ function findSdkDir() {
     process.env.LOCALAPPDATA && join(process.env.LOCALAPPDATA, 'Android', 'Sdk'),
   ];
   return candidates.find((dir) => dir && existsSync(dir)) ?? null;
+}
+
+/** Cel mai nou CMake instalat în SDK (ex. `<sdk>\cmake\3.31.6`), sau null dacă e doar unul / niciunul. */
+function newestCmakeDir(sdkDir) {
+  const root = join(sdkDir, 'cmake');
+  if (!existsSync(root)) return null;
+  const versions = readdirSync(root)
+    .filter((v) => /^\d+\.\d+\.\d+$/.test(v))
+    .sort((a, b) => {
+      const pa = a.split('.').map(Number);
+      const pb = b.split('.').map(Number);
+      return pa[0] - pb[0] || pa[1] - pb[1] || pa[2] - pb[2];
+    });
+  return versions.length > 1 ? join(root, versions[versions.length - 1]) : null;
 }
 
 function hasJava() {
@@ -120,9 +134,16 @@ function main() {
   step('Generez proiectul Android (expo prebuild)');
   run('npx expo prebuild --platform android --clean --no-install', { cwd: SRC, env });
   const androidDir = join(SRC, 'android');
-  if (!process.env.ANDROID_HOME && !process.env.ANDROID_SDK_ROOT) {
-    writeFileSync(join(androidDir, 'local.properties'), `sdk.dir=${sdkDir.replace(/\\/g, '\\\\').replace(/:/g, '\\:')}\n`);
+  // local.properties: calea SDK-ului și CMake-ul nou. CMake 3.22.1 vine cu ninja 1.10, care nu acceptă căi
+  // de peste 260 de caractere (codul nativ generat le depășește); cel mai nou CMake din SDK o face.
+  const escapePath = (p) => p.replace(/\\/g, '\\\\').replace(/:/g, '\\:');
+  const properties = [`sdk.dir=${escapePath(sdkDir)}`];
+  const cmakeDir = newestCmakeDir(sdkDir);
+  if (cmakeDir) {
+    properties.push(`cmake.dir=${escapePath(cmakeDir)}`);
+    console.log(`  CMake: ${cmakeDir}`);
   }
+  writeFileSync(join(androidDir, 'local.properties'), `${properties.join('\n')}\n`);
 
   // 8. Build-ul (primul durează mult: descarcă Gradle și dependențele)
   step('Construiesc APK-ul (Gradle assembleRelease); primul build poate dura 10–20 de minute');
