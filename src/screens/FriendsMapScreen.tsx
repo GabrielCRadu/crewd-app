@@ -18,7 +18,7 @@ import { useFriendsOnMap } from '../hooks/useFriendsOnMap';
 import { useLocationVisibility } from '../hooks/useLocationVisibility';
 import { useUserLocation } from '../hooks/useUserLocation';
 import { findPersonByName } from '../services/peopleService';
-import { colorScheme, colors, isDark } from '../theme/colors';
+import { appearance, colors, onThemeChange } from '../theme/colors';
 import { type } from '../theme/typography';
 import { cardShadow } from '../theme/shadows';
 import { darkMapStyle } from '../theme/mapStyle';
@@ -107,8 +107,8 @@ export default function FriendsMapScreen() {
           showsUserLocation={false}
           showsMyLocationButton={false}
           toolbarEnabled={false}
-          userInterfaceStyle={colorScheme}
-          customMapStyle={isDark ? darkMapStyle : undefined}
+          userInterfaceStyle={appearance.scheme}
+          customMapStyle={appearance.isDark ? darkMapStyle : undefined}
         >
           {/* Poziția mea: doar când avem locația reală (altfel `coords` e centrul orașului). */}
           {location.status === 'granted' ? (
@@ -179,55 +179,61 @@ export default function FriendsMapScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  header: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 12, gap: 12 },
-  title: { ...type.screenTitle, fontSize: 32 },
-  mapWrap: { flex: 1, backgroundColor: colors.backgroundAlt },
-  friendMarker: { alignItems: 'center', gap: 2 },
-  meMarker: { alignItems: 'center', gap: 2 },
-  meDot: {
-    width: 18,
-    height: 18,
-    borderRadius: radii.pill,
-    backgroundColor: colors.primary,
-    borderWidth: 3,
-    borderColor: colors.text,
-  },
-  friendLabel: {
-    color: colors.text,
-    backgroundColor: colors.surface,
-    fontSize: 11,
-    fontWeight: '600',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: radii.pill,
-    overflow: 'hidden',
-  },
-  card: {
-    position: 'absolute',
-    left: 16,
-    right: 16,
-    bottom: 16,
-    padding: 16,
-    gap: 14,
-    borderRadius: radii.card,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    ...cardShadow,
-  },
-  cardTop: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  cardTopPressed: { opacity: 0.7 },
-  cardText: { flex: 1, gap: 2 },
-  cardName: { color: colors.text, fontSize: 17, fontWeight: '600' },
-  cardStatus: { color: colors.muted, fontSize: 13 },
-  cardButtons: { flexDirection: 'row', gap: 10 },
-  button: { ...glass, flex: 1, alignItems: 'center', justifyContent: 'center', height: 42, borderRadius: radii.pill },
-  buttonPressed: { backgroundColor: colors.cardStrong },
-  buttonText: { color: colors.text, fontWeight: '500' },
-  buttonCta: { flex: 1 },
-  separator: { height: 1, backgroundColor: colors.border },
-  visibilityRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
-  visibilityText: { flex: 1, color: colors.muted, fontSize: 13 },
+const makeStyles = () =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    header: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 12, gap: 12 },
+    title: { ...type.screenTitle, fontSize: 32 },
+    mapWrap: { flex: 1, backgroundColor: colors.backgroundAlt },
+    friendMarker: { alignItems: 'center', gap: 2 },
+    meMarker: { alignItems: 'center', gap: 2 },
+    meDot: {
+      width: 18,
+      height: 18,
+      borderRadius: radii.pill,
+      backgroundColor: colors.primary,
+      borderWidth: 3,
+      borderColor: colors.text,
+    },
+    friendLabel: {
+      color: colors.text,
+      backgroundColor: colors.surface,
+      fontSize: 11,
+      fontWeight: '600',
+      paddingHorizontal: 8,
+      paddingVertical: 2,
+      borderRadius: radii.pill,
+      overflow: 'hidden',
+    },
+    card: {
+      position: 'absolute',
+      left: 16,
+      right: 16,
+      bottom: 16,
+      padding: 16,
+      gap: 14,
+      borderRadius: radii.card,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      ...cardShadow,
+    },
+    cardTop: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+    cardTopPressed: { opacity: 0.7 },
+    cardText: { flex: 1, gap: 2 },
+    cardName: { color: colors.text, fontSize: 17, fontWeight: '600' },
+    cardStatus: { color: colors.muted, fontSize: 13 },
+    cardButtons: { flexDirection: 'row', gap: 10 },
+    button: { ...glass, flex: 1, alignItems: 'center', justifyContent: 'center', height: 42, borderRadius: radii.pill },
+    buttonPressed: { backgroundColor: colors.cardStrong },
+    buttonText: { color: colors.text, fontWeight: '500' },
+    buttonCta: { flex: 1 },
+    separator: { height: 1, backgroundColor: colors.border },
+    visibilityRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
+    visibilityText: { flex: 1, color: colors.muted, fontSize: 13 },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

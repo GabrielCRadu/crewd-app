@@ -5,25 +5,27 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider } from './src/context/AuthContext';
 import { loadLanguage, useLanguage } from './src/i18n';
 import RootNavigator from './src/navigation/RootNavigator';
-import { isDark } from './src/theme/colors';
+import { appearance } from './src/theme/colors';
+import { loadThemeChoice, useActiveScheme } from './src/theme/themeChoice';
 
 export default function App() {
-  // Limba salvată se citește înainte de primul ecran, ca să nu clipească întâi în română.
-  const [languageLoaded, setLanguageLoaded] = useState(false);
+  // Limba și tema salvate se citesc înainte de primul ecran, ca să nu clipească întâi altfel.
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
   const language = useLanguage();
+  const scheme = useActiveScheme();
   useEffect(() => {
-    void loadLanguage().finally(() => setLanguageLoaded(true));
+    void Promise.all([loadLanguage(), loadThemeChoice()]).finally(() => setSettingsLoaded(true));
   }, []);
-  if (!languageLoaded) return null;
+  if (!settingsLoaded) return null;
 
   return (
     <SafeAreaProvider>
       <AuthProvider>
-        {/* La schimbarea limbii, ecranele se redesenează în noua limbă (navigarea rămâne unde era) */}
-        <RootNavigator key={language} />
+        {/* La schimbarea limbii sau a temei, ecranele se redesenează (navigarea rămâne unde era) */}
+        <RootNavigator key={`${language}-${scheme}`} />
       </AuthProvider>
       {/* Textul barei de sus: alb pe tema închisă, negru pe cea deschisă (src/theme/colors.ts) */}
-      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <StatusBar style={appearance.isDark ? 'light' : 'dark'} />
     </SafeAreaProvider>
   );
 }

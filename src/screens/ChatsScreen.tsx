@@ -13,7 +13,7 @@ import { useUserLocation } from '../hooks/useUserLocation';
 import { isFirebaseConfigured } from '../lib/firebase';
 import type { ChatsStackParamList } from '../navigation/chatsTypes';
 import { MOCK_UID } from '../services/groupsService';
-import { colors } from '../theme/colors';
+import { colors, onThemeChange } from '../theme/colors';
 import { type } from '../theme/typography';
 import { glass, radii } from '../theme/shape';
 import type { CrewGroup } from '../types/groups';
@@ -105,20 +105,26 @@ export default function ChatsScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  content: { padding: 20, paddingBottom: 32, gap: 12 },
-  title: { ...type.screenTitle, fontSize: 32, marginBottom: 4 },
-  sectionTitle: { ...type.label, marginTop: 12 },
-  empty: { fontSize: 14, color: colors.muted },
-  card: { ...glass, padding: 14, gap: 12, borderRadius: radii.card },
-  pressed: { opacity: 0.8 },
-  groupRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  groupText: { flex: 1, gap: 3 },
-  groupName: { fontSize: 16, fontWeight: '600', color: colors.text },
-  members: { fontSize: 13, color: colors.muted },
-  badge: { backgroundColor: colors.cardStrong, paddingHorizontal: 10, paddingVertical: 4, borderRadius: radii.pill },
-  badgeText: { color: colors.text, fontSize: 11, fontWeight: '600' },
-  meetupBand: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: radii.inner, backgroundColor: colors.card },
-  meetupText: { fontSize: 12, fontWeight: '500', color: colors.text },
+const makeStyles = () =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    content: { padding: 20, paddingBottom: 32, gap: 12 },
+    title: { ...type.screenTitle, fontSize: 32, marginBottom: 4 },
+    sectionTitle: { ...type.label, marginTop: 12 },
+    empty: { fontSize: 14, color: colors.muted },
+    card: { ...glass, padding: 14, gap: 12, borderRadius: radii.card },
+    pressed: { opacity: 0.8 },
+    groupRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+    groupText: { flex: 1, gap: 3 },
+    groupName: { fontSize: 16, fontWeight: '600', color: colors.text },
+    members: { fontSize: 13, color: colors.muted },
+    badge: { backgroundColor: colors.cardStrong, paddingHorizontal: 10, paddingVertical: 4, borderRadius: radii.pill },
+    badgeText: { color: colors.text, fontSize: 11, fontWeight: '600' },
+    meetupBand: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: radii.inner, backgroundColor: colors.card },
+    meetupText: { fontSize: 12, fontWeight: '500', color: colors.text },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

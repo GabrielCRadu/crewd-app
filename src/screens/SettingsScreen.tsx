@@ -7,9 +7,10 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import DeleteAccount from '../components/DeleteAccount';
 import GlassIconButton from '../components/GlassIconButton';
 import LanguageSwitch from '../components/LanguageSwitch';
+import ThemeSwitch from '../components/ThemeSwitch';
 import { useAuth } from '../context/AuthContext';
 import type { ProfileStackParamList } from '../navigation/profileTypes';
-import { colors } from '../theme/colors';
+import { colors, onThemeChange } from '../theme/colors';
 import { type } from '../theme/typography';
 import { glass, radii } from '../theme/shape';
 import { tr } from '../i18n';
@@ -39,6 +40,10 @@ export default function SettingsScreen() {
         {/* Limba: toată aplicația trece pe limba aleasă */}
         <Text style={styles.label}>{tr('LIMBĂ')}</Text>
         <LanguageSwitch />
+
+        {/* Tema: Automat urmează telefonul; Deschisă / Închisă schimbă toată aplicația pe loc */}
+        <Text style={[styles.label, styles.sectionGap]}>{tr('TEMĂ')}</Text>
+        <ThemeSwitch />
 
         {/* Documentele legale */}
         <Text style={[styles.label, styles.sectionGap]}>{tr('LEGAL')}</Text>
@@ -92,19 +97,25 @@ export default function SettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  header: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 20, paddingTop: 12, paddingBottom: 12 },
-  title: { ...type.screenTitle, fontSize: 32 },
-  content: { padding: 20, paddingTop: 8, gap: 10 },
-  label: { ...type.label },
-  sectionGap: { marginTop: 16 },
-  card: { ...glass, borderRadius: radii.inner, overflow: 'hidden' },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingVertical: 15 },
-  rowBorder: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border },
-  pressed: { backgroundColor: colors.cardStrong },
-  email: { flex: 1, color: colors.muted, fontSize: 15 },
-  rowText: { flex: 1, color: colors.text, fontSize: 15, fontWeight: '500' },
-  signOut: { color: colors.nope, fontSize: 15, fontWeight: '600' },
-  delete: { alignItems: 'center', marginTop: 16 },
+const makeStyles = () =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    header: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 20, paddingTop: 12, paddingBottom: 12 },
+    title: { ...type.screenTitle, fontSize: 32 },
+    content: { padding: 20, paddingTop: 8, gap: 10 },
+    label: { ...type.label },
+    sectionGap: { marginTop: 16 },
+    card: { ...glass, borderRadius: radii.inner, overflow: 'hidden' },
+    row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingVertical: 15 },
+    rowBorder: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border },
+    pressed: { backgroundColor: colors.cardStrong },
+    email: { flex: 1, color: colors.muted, fontSize: 15 },
+    rowText: { flex: 1, color: colors.text, fontSize: 15, fontWeight: '500' },
+    signOut: { color: colors.nope, fontSize: 15, fontWeight: '600' },
+    delete: { alignItems: 'center', marginTop: 16 },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

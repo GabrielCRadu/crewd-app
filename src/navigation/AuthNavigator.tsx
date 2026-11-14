@@ -13,12 +13,13 @@ import type { AuthStackParamList, OnboardingStackParamList } from './authTypes';
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 const OnboardingStack = createNativeStackNavigator<OnboardingStackParamList>();
 
-const screenOptions = { headerShown: false, contentStyle: { backgroundColor: colors.background } } as const;
+/** Opțiunile ecranelor (calculate la randare, ca fundalul să urmeze tema activă). */
+const screenOptions = () => ({ headerShown: false, contentStyle: { backgroundColor: colors.background } }) as const;
 
 /** Înainte de login: Login ↔ Creare cont. */
 export function AuthNavigator() {
   return (
-    <AuthStack.Navigator screenOptions={screenOptions}>
+    <AuthStack.Navigator screenOptions={screenOptions()}>
       <AuthStack.Screen name="Login" component={LoginScreen} />
       <AuthStack.Screen name="SignUp" component={SignUpScreen} />
       <AuthStack.Screen name="Terms" component={TermsScreen} />
@@ -30,7 +31,7 @@ export function AuthNavigator() {
 /** După crearea contului, până la salvarea profilului: pasul 1 → pasul 2. */
 export function OnboardingNavigator() {
   return (
-    <OnboardingStack.Navigator screenOptions={screenOptions}>
+    <OnboardingStack.Navigator screenOptions={screenOptions()}>
       <OnboardingStack.Screen name="OnboardingIdentity" component={OnboardingIdentityScreen} />
       <OnboardingStack.Screen name="OnboardingPhoto" component={OnboardingPhotoScreen} />
       <OnboardingStack.Screen name="OnboardingTags" component={OnboardingTagsScreen} />

@@ -13,7 +13,7 @@ import ScreenGlow from '../../components/ScreenGlow';
 import TextField from '../../components/TextField';
 import type { AuthStackParamList } from '../../navigation/authTypes';
 import { isValidEmail, signUp } from '../../services/authService';
-import { colors } from '../../theme/colors';
+import { colors, onThemeChange } from '../../theme/colors';
 import { type } from '../../theme/typography';
 import { isStrongPassword } from '../../utils/passwordRules';
 import { tr } from '../../i18n';
@@ -146,16 +146,22 @@ export default function SignUpScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  flex: { flex: 1 },
-  content: { flexGrow: 1, padding: 24, gap: 24 },
-  heading: { gap: 8 },
-  title: { ...type.screenTitle, fontSize: 34 },
-  subtitle: { fontSize: 15, lineHeight: 22, color: colors.muted },
-  form: { gap: 16 },
-  bottom: { marginTop: 'auto', gap: 16 },
-  footer: { flexDirection: 'row', justifyContent: 'center', gap: 6 },
-  footerText: { color: colors.muted, fontSize: 15 },
-  footerLink: { color: colors.text, fontSize: 15, fontWeight: '600' },
+const makeStyles = () =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    flex: { flex: 1 },
+    content: { flexGrow: 1, padding: 24, gap: 24 },
+    heading: { gap: 8 },
+    title: { ...type.screenTitle, fontSize: 34 },
+    subtitle: { fontSize: 15, lineHeight: 22, color: colors.muted },
+    form: { gap: 16 },
+    bottom: { marginTop: 'auto', gap: 16 },
+    footer: { flexDirection: 'row', justifyContent: 'center', gap: 6 },
+    footerText: { color: colors.muted, fontSize: 15 },
+    footerLink: { color: colors.text, fontSize: 15, fontWeight: '600' },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

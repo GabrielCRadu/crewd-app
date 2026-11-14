@@ -4,7 +4,7 @@ import { Marker } from 'react-native-maps';
 
 import EventPoster from './EventPoster';
 import type { EventWithDistance } from '../../types/events';
-import { colors } from '../../theme/colors';
+import { colors, onThemeChange } from '../../theme/colors';
 import { radii } from '../../theme/shape';
 import { getDistanceColor } from '../../utils/distance';
 
@@ -66,13 +66,19 @@ export default function EventMapMarker({ event, selected, onPress }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  frame: {
-    borderWidth: 2,
-    borderRadius: radii.icon,
-    backgroundColor: colors.surface,
-    overflow: 'hidden',
-  },
-  frameSelected: { borderWidth: 3 },
-  poster: { flex: 1 },
+const makeStyles = () =>
+  StyleSheet.create({
+    frame: {
+      borderWidth: 2,
+      borderRadius: radii.icon,
+      backgroundColor: colors.surface,
+      overflow: 'hidden',
+    },
+    frameSelected: { borderWidth: 3 },
+    poster: { flex: 1 },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

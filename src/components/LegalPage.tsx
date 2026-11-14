@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import GlassIconButton from './GlassIconButton';
 import LegalText from './LegalText';
 import { tr, useLanguage } from '../i18n';
-import { colors } from '../theme/colors';
+import { colors, onThemeChange } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
 
 /**
@@ -34,10 +34,16 @@ export default function LegalPage({ markdown }: { markdown: string }) {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  header: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 8 },
-  content: { padding: 20, paddingTop: 8, paddingBottom: 40 },
-  notice: { ...glass, borderRadius: radii.inner, padding: 14, marginBottom: 16 },
-  noticeText: { color: colors.text, fontSize: 14 },
+const makeStyles = () =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    header: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 8 },
+    content: { padding: 20, paddingTop: 8, paddingBottom: 40 },
+    notice: { ...glass, borderRadius: radii.inner, padding: 14, marginBottom: 16 },
+    noticeText: { color: colors.text, fontSize: 14 },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

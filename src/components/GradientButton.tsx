@@ -4,7 +4,7 @@ import type { StyleProp, ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 
-import { colors } from '../theme/colors';
+import { colors, onThemeChange } from '../theme/colors';
 import { gradients } from '../theme/gradients';
 import { radii } from '../theme/shape';
 
@@ -60,19 +60,25 @@ export default function GradientButton({
   );
 }
 
-const styles = StyleSheet.create({
-  button: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    height: 58,
-    paddingHorizontal: 24,
-    borderRadius: radii.pill,
-  },
-  compact: { height: 42, paddingHorizontal: 16 },
-  label: { color: colors.onLight, fontSize: 17, fontWeight: '600' },
-  labelCompact: { fontSize: 14 },
-  pressed: { opacity: 0.85 },
-  disabled: { opacity: 0.5 },
+const makeStyles = () =>
+  StyleSheet.create({
+    button: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      height: 58,
+      paddingHorizontal: 24,
+      borderRadius: radii.pill,
+    },
+    compact: { height: 42, paddingHorizontal: 16 },
+    label: { color: colors.onLight, fontSize: 17, fontWeight: '600' },
+    labelCompact: { fontSize: 14 },
+    pressed: { opacity: 0.85 },
+    disabled: { opacity: 0.5 },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

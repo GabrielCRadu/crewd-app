@@ -6,7 +6,7 @@ import Avatar from '../components/Avatar';
 import GlassIconButton from '../components/GlassIconButton';
 import { usePublicCard } from '../hooks/usePublicCard';
 import type { ProfileStackParamList } from '../navigation/profileTypes';
-import { colors } from '../theme/colors';
+import { colors, onThemeChange } from '../theme/colors';
 import { radii } from '../theme/shape';
 import { type } from '../theme/typography';
 import { tr } from '../i18n';
@@ -51,13 +51,19 @@ export default function PublicProfileScreen({ navigation, route }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  header: { paddingHorizontal: 20, paddingTop: 8 },
-  body: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 10, padding: 32 },
-  name: { ...type.screenTitle, fontSize: 30, marginTop: 8 },
-  username: { color: colors.muted, fontSize: 17 },
-  note: { color: colors.muted, fontSize: 14, textAlign: 'center', marginTop: 12 },
-  pill: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: radii.pill, backgroundColor: colors.text, marginTop: 8 },
-  pillText: { color: colors.onLight, fontWeight: '600' },
+const makeStyles = () =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    header: { paddingHorizontal: 20, paddingTop: 8 },
+    body: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 10, padding: 32 },
+    name: { ...type.screenTitle, fontSize: 30, marginTop: 8 },
+    username: { color: colors.muted, fontSize: 17 },
+    note: { color: colors.muted, fontSize: 14, textAlign: 'center', marginTop: 12 },
+    pill: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: radii.pill, backgroundColor: colors.text, marginTop: 8 },
+    pillText: { color: colors.onLight, fontWeight: '600' },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

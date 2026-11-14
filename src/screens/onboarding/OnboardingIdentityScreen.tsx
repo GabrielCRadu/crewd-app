@@ -14,7 +14,7 @@ import UsernameField from '../../components/UsernameField';
 import { useAuth } from '../../context/AuthContext';
 import { useUsernameAvailability } from '../../hooks/useUsernameAvailability';
 import type { OnboardingStackParamList } from '../../navigation/authTypes';
-import { colors } from '../../theme/colors';
+import { colors, onThemeChange } from '../../theme/colors';
 import { type } from '../../theme/typography';
 import { glass, radii } from '../../theme/shape';
 import type { Gender } from '../../types/user';
@@ -166,27 +166,33 @@ export default function OnboardingIdentityScreen({ navigation, route }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  flex: { flex: 1 },
-  content: { flexGrow: 1, padding: 24, gap: 22 },
-  heading: { gap: 8 },
-  title: { ...type.screenTitle, fontSize: 36 },
-  subtitle: { fontSize: 15, lineHeight: 22, color: colors.muted },
-  row: { flexDirection: 'row', gap: 12, alignItems: 'flex-start' },
-  ageField: { flex: 3 },
-  cityField: { flex: 2 },
-  hintRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginLeft: 6 },
-  hint: { flex: 1, color: colors.faint, fontSize: 12 },
-  genderBlock: { gap: 8 },
-  label: { ...type.label },
-  genderRow: { flexDirection: 'row', gap: 10 },
-  genderOption: { ...glass, flex: 1, height: 50, alignItems: 'center', justifyContent: 'center', borderRadius: radii.pill },
-  genderActive: { backgroundColor: colors.text, borderColor: colors.text },
-  genderText: { color: colors.text, fontSize: 15, fontWeight: '500' },
-  genderTextActive: { color: colors.onLight, fontWeight: '600' },
-  error: { color: colors.nope, fontSize: 12, marginLeft: 6 },
-  bottom: { marginTop: 'auto', gap: 14 },
-  signOut: { alignSelf: 'center' },
-  signOutText: { color: colors.faint, fontSize: 13 },
+const makeStyles = () =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    flex: { flex: 1 },
+    content: { flexGrow: 1, padding: 24, gap: 22 },
+    heading: { gap: 8 },
+    title: { ...type.screenTitle, fontSize: 36 },
+    subtitle: { fontSize: 15, lineHeight: 22, color: colors.muted },
+    row: { flexDirection: 'row', gap: 12, alignItems: 'flex-start' },
+    ageField: { flex: 3 },
+    cityField: { flex: 2 },
+    hintRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginLeft: 6 },
+    hint: { flex: 1, color: colors.faint, fontSize: 12 },
+    genderBlock: { gap: 8 },
+    label: { ...type.label },
+    genderRow: { flexDirection: 'row', gap: 10 },
+    genderOption: { ...glass, flex: 1, height: 50, alignItems: 'center', justifyContent: 'center', borderRadius: radii.pill },
+    genderActive: { backgroundColor: colors.text, borderColor: colors.text },
+    genderText: { color: colors.text, fontSize: 15, fontWeight: '500' },
+    genderTextActive: { color: colors.onLight, fontWeight: '600' },
+    error: { color: colors.nope, fontSize: 12, marginLeft: 6 },
+    bottom: { marginTop: 'auto', gap: 14 },
+    signOut: { alignSelf: 'center' },
+    signOutText: { color: colors.faint, fontSize: 13 },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

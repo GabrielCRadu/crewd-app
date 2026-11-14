@@ -14,7 +14,7 @@ import { isFirebaseConfigured } from '../lib/firebase';
 import type { ChatsStackParamList } from '../navigation/chatsTypes';
 import { MOCK_UID, leaveGroup } from '../services/groupsService';
 import { LEFT_GROUP_MESSAGE } from '../services/chatService';
-import { colors } from '../theme/colors';
+import { colors, onThemeChange } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
 import { type } from '../theme/typography';
 import type { GroupStatus } from '../types/groups';
@@ -155,25 +155,31 @@ export default function GroupDetailsScreen({ navigation, route }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  center: { alignItems: 'center', justifyContent: 'center', gap: 16, padding: 32 },
-  emptyText: { color: colors.muted, fontSize: 15, textAlign: 'center' },
-  pill: { paddingHorizontal: 14, paddingVertical: 9, borderRadius: radii.pill, backgroundColor: colors.text },
-  pillText: { color: colors.onLight, fontWeight: '600', fontSize: 13 },
-  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10 },
-  content: { paddingHorizontal: 16, paddingBottom: 32, gap: 14 },
-  titleBlock: { gap: 4, marginBottom: 4 },
-  title: { ...type.screenTitle, fontSize: 30 },
-  subtitle: { color: colors.muted, fontSize: 14 },
-  card: { ...glass, borderRadius: radii.card, padding: 16, gap: 8 },
-  body: { color: colors.text, fontSize: 15 },
-  muted: { color: colors.muted, fontSize: 13 },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
-  member: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 8 },
-  memberDivider: { borderTopWidth: 1, borderTopColor: colors.border },
-  memberText: { flex: 1, gap: 2 },
-  leave: { alignSelf: 'center', paddingVertical: 12, marginTop: 4 },
-  leaveText: { color: colors.nope, fontSize: 15, fontWeight: '600', textDecorationLine: 'underline' },
-  pressed: { opacity: 0.7 },
+const makeStyles = () =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    center: { alignItems: 'center', justifyContent: 'center', gap: 16, padding: 32 },
+    emptyText: { color: colors.muted, fontSize: 15, textAlign: 'center' },
+    pill: { paddingHorizontal: 14, paddingVertical: 9, borderRadius: radii.pill, backgroundColor: colors.text },
+    pillText: { color: colors.onLight, fontWeight: '600', fontSize: 13 },
+    header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10 },
+    content: { paddingHorizontal: 16, paddingBottom: 32, gap: 14 },
+    titleBlock: { gap: 4, marginBottom: 4 },
+    title: { ...type.screenTitle, fontSize: 30 },
+    subtitle: { color: colors.muted, fontSize: 14 },
+    card: { ...glass, borderRadius: radii.card, padding: 16, gap: 8 },
+    body: { color: colors.text, fontSize: 15 },
+    muted: { color: colors.muted, fontSize: 13 },
+    chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+    member: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 8 },
+    memberDivider: { borderTopWidth: 1, borderTopColor: colors.border },
+    memberText: { flex: 1, gap: 2 },
+    leave: { alignSelf: 'center', paddingVertical: 12, marginTop: 4 },
+    leaveText: { color: colors.nope, fontSize: 15, fontWeight: '600', textDecorationLine: 'underline' },
+    pressed: { opacity: 0.7 },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

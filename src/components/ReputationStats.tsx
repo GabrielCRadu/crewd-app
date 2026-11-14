@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { RATING_TAGS } from '../data/ratingTags';
-import { colors } from '../theme/colors';
+import { colors, onThemeChange } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
 import type { Reputation } from '../types/ratings';
 import { tr } from '../i18n';
@@ -28,9 +28,15 @@ export default function ReputationStats({ reputation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  row: { flexDirection: 'row', gap: 10 },
-  tile: { ...glass, flex: 1, alignItems: 'center', gap: 4, paddingVertical: 14, paddingHorizontal: 8, borderRadius: radii.inner },
-  value: { fontSize: 24, fontWeight: '600', color: colors.text },
-  label: { fontSize: 12, color: colors.muted, textAlign: 'center' },
+const makeStyles = () =>
+  StyleSheet.create({
+    row: { flexDirection: 'row', gap: 10 },
+    tile: { ...glass, flex: 1, alignItems: 'center', gap: 4, paddingVertical: 14, paddingHorizontal: 8, borderRadius: radii.inner },
+    value: { fontSize: 24, fontWeight: '600', color: colors.text },
+    label: { fontSize: 12, color: colors.muted, textAlign: 'center' },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

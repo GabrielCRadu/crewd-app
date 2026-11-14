@@ -2,7 +2,7 @@ import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import GlassBadge from '../events/GlassBadge';
-import { colors } from '../../theme/colors';
+import { colors, onThemeChange } from '../../theme/colors';
 import { radii } from '../../theme/shape';
 import type { Memory } from '../../types/memories';
 import { formatShortDate } from '../../utils/dates';
@@ -54,33 +54,39 @@ export default function MemoriesGrid({ memories, sharedEventIds = [], showVisibi
   );
 }
 
-const styles = StyleSheet.create({
-  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 16 },
-  tile: { width: '48%', gap: 4 },
-  pressed: { opacity: 0.8 },
-  photoFrame: {
-    aspectRatio: 1,
-    marginBottom: 4,
-    borderRadius: radii.inner,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    overflow: 'hidden',
-  },
-  topLeft: { position: 'absolute', top: 8, left: 8 },
-  lock: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 26,
-    height: 26,
-    borderRadius: radii.pill,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  title: { color: colors.text, fontSize: 14, fontWeight: '600' },
-  date: { color: colors.muted, fontSize: 12 },
+const makeStyles = () =>
+  StyleSheet.create({
+    grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 16 },
+    tile: { width: '48%', gap: 4 },
+    pressed: { opacity: 0.8 },
+    photoFrame: {
+      aspectRatio: 1,
+      marginBottom: 4,
+      borderRadius: radii.inner,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+      overflow: 'hidden',
+    },
+    topLeft: { position: 'absolute', top: 8, left: 8 },
+    lock: {
+      position: 'absolute',
+      top: 8,
+      right: 8,
+      width: 26,
+      height: 26,
+      borderRadius: radii.pill,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    title: { color: colors.text, fontSize: 14, fontWeight: '600' },
+    date: { color: colors.muted, fontSize: 12 },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

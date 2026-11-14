@@ -16,7 +16,7 @@ import {
   idsWithStatus,
 } from '../services/friendsService';
 import { commonTags, getPerson } from '../services/peopleService';
-import { colors } from '../theme/colors';
+import { colors, onThemeChange } from '../theme/colors';
 import { type } from '../theme/typography';
 import { glass, radii } from '../theme/shape';
 import type { Person } from '../types/social';
@@ -138,32 +138,38 @@ function PersonInfo({ person, subtitle, onPress }: { person: Person; subtitle: s
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  header: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 20, paddingTop: 8, paddingBottom: 12 },
-  title: { ...type.screenTitle, flex: 1, fontSize: 28 },
-  content: { padding: 20, paddingTop: 8, paddingBottom: 32, gap: 24 },
-  section: { gap: 10 },
-  sectionTitle: { ...type.label },
-  row: {
-    ...glass,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    padding: 12,
-    borderRadius: radii.card,
-  },
-  requestRow: { flexWrap: 'wrap' },
-  info: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12, minWidth: 180 },
-  infoText: { flex: 1, gap: 2 },
-  name: { fontSize: 16, fontWeight: '600', color: colors.text },
-  muted: { fontSize: 13, color: colors.muted },
-  requestActions: { flexDirection: 'row', gap: 8 },
-  acceptButton: { paddingHorizontal: 16, paddingVertical: 9, borderRadius: radii.pill, backgroundColor: colors.text },
-  acceptText: { color: colors.onLight, fontWeight: '600' },
-  declineButton: { ...glass, paddingHorizontal: 16, paddingVertical: 9, borderRadius: radii.pill },
-  declineText: { color: colors.text, fontWeight: '500' },
-  pressed: { backgroundColor: colors.cardStrong },
-  pressedLight: { opacity: 0.85 },
-  link: { color: colors.muted, fontSize: 14, textDecorationLine: 'underline' },
+const makeStyles = () =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    header: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 20, paddingTop: 8, paddingBottom: 12 },
+    title: { ...type.screenTitle, flex: 1, fontSize: 28 },
+    content: { padding: 20, paddingTop: 8, paddingBottom: 32, gap: 24 },
+    section: { gap: 10 },
+    sectionTitle: { ...type.label },
+    row: {
+      ...glass,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      padding: 12,
+      borderRadius: radii.card,
+    },
+    requestRow: { flexWrap: 'wrap' },
+    info: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12, minWidth: 180 },
+    infoText: { flex: 1, gap: 2 },
+    name: { fontSize: 16, fontWeight: '600', color: colors.text },
+    muted: { fontSize: 13, color: colors.muted },
+    requestActions: { flexDirection: 'row', gap: 8 },
+    acceptButton: { paddingHorizontal: 16, paddingVertical: 9, borderRadius: radii.pill, backgroundColor: colors.text },
+    acceptText: { color: colors.onLight, fontWeight: '600' },
+    declineButton: { ...glass, paddingHorizontal: 16, paddingVertical: 9, borderRadius: radii.pill },
+    declineText: { color: colors.text, fontWeight: '500' },
+    pressed: { backgroundColor: colors.cardStrong },
+    pressedLight: { opacity: 0.85 },
+    link: { color: colors.muted, fontSize: 14, textDecorationLine: 'underline' },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

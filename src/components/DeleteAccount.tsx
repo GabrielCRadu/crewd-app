@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import FormMessage from './FormMessage';
 import TextField from './TextField';
 import { useAuth } from '../context/AuthContext';
-import { colors } from '../theme/colors';
+import { colors, onThemeChange } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
 import { type } from '../theme/typography';
 import { tr } from '../i18n';
@@ -90,26 +90,32 @@ export default function DeleteAccount() {
   );
 }
 
-const styles = StyleSheet.create({
-  link: { color: colors.nope, fontSize: 13, textDecorationLine: 'underline' },
-  backdrop: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.6)' },
-  sheet: {
-    gap: 14,
-    padding: 22,
-    paddingBottom: 34,
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: radii.card,
-    borderTopRightRadius: radii.card,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  title: { ...type.screenTitle, fontSize: 20 },
-  text: { color: colors.muted, fontSize: 14, lineHeight: 20 },
-  actions: { flexDirection: 'row', gap: 10, marginTop: 4 },
-  cancel: { ...glass, flex: 1, height: 50, alignItems: 'center', justifyContent: 'center', borderRadius: radii.pill },
-  cancelText: { color: colors.text, fontSize: 15, fontWeight: '600' },
-  delete: { flex: 1, height: 50, alignItems: 'center', justifyContent: 'center', borderRadius: radii.pill, backgroundColor: colors.nope },
-  deleteText: { color: colors.text, fontSize: 15, fontWeight: '700' },
-  pressed: { opacity: 0.75 },
+const makeStyles = () =>
+  StyleSheet.create({
+    link: { color: colors.nope, fontSize: 13, textDecorationLine: 'underline' },
+    backdrop: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.6)' },
+    sheet: {
+      gap: 14,
+      padding: 22,
+      paddingBottom: 34,
+      backgroundColor: colors.surface,
+      borderTopLeftRadius: radii.card,
+      borderTopRightRadius: radii.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    title: { ...type.screenTitle, fontSize: 20 },
+    text: { color: colors.muted, fontSize: 14, lineHeight: 20 },
+    actions: { flexDirection: 'row', gap: 10, marginTop: 4 },
+    cancel: { ...glass, flex: 1, height: 50, alignItems: 'center', justifyContent: 'center', borderRadius: radii.pill },
+    cancelText: { color: colors.text, fontSize: 15, fontWeight: '600' },
+    delete: { flex: 1, height: 50, alignItems: 'center', justifyContent: 'center', borderRadius: radii.pill, backgroundColor: colors.nope },
+    deleteText: { color: colors.text, fontSize: 15, fontWeight: '700' },
+    pressed: { opacity: 0.75 },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

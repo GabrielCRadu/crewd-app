@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Animated, Image, Modal, Pressable, StyleSheet, Text, useWindowDimensions } from 'react-native';
 
-import { colors } from '../theme/colors';
+import { colors, onThemeChange } from '../theme/colors';
 import { radii } from '../theme/shape';
 import { tr } from '../i18n';
 
@@ -66,15 +66,21 @@ export default function PhotoViewer({ photoUrl, caption, onClose }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: colors.background,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 16,
-  },
-  photo: { borderRadius: radii.card, backgroundColor: colors.surface },
-  full: { position: 'absolute', top: 0, left: 0, backgroundColor: 'transparent' },
-  caption: { color: colors.text, fontSize: 17, fontWeight: '600' },
+const makeStyles = () =>
+  StyleSheet.create({
+    backdrop: {
+      flex: 1,
+      backgroundColor: colors.background,
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 16,
+    },
+    photo: { borderRadius: radii.card, backgroundColor: colors.surface },
+    full: { position: 'absolute', top: 0, left: 0, backgroundColor: 'transparent' },
+    caption: { color: colors.text, fontSize: 17, fontWeight: '600' },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

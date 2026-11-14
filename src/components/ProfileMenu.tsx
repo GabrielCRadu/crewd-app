@@ -2,7 +2,7 @@ import type { ComponentProps } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-import { colors } from '../theme/colors';
+import { colors, onThemeChange } from '../theme/colors';
 import { radii } from '../theme/shape';
 import { tr } from '../i18n';
 
@@ -66,19 +66,25 @@ export default function ProfileMenu({ anchor, onClose, onEdit, onSettings }: Pro
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    position: 'absolute',
-    minWidth: 200,
-    borderRadius: radii.inner,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    overflow: 'hidden',
-    boxShadow: '0 12px 32px rgba(0,0,0,0.6)',
-  },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingVertical: 14 },
-  rowBorder: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border },
-  rowPressed: { backgroundColor: colors.cardStrong },
-  label: { color: colors.text, fontSize: 15, fontWeight: '500' },
+const makeStyles = () =>
+  StyleSheet.create({
+    card: {
+      position: 'absolute',
+      minWidth: 200,
+      borderRadius: radii.inner,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+      overflow: 'hidden',
+      boxShadow: '0 12px 32px rgba(0,0,0,0.6)',
+    },
+    row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingVertical: 14 },
+    rowBorder: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border },
+    rowPressed: { backgroundColor: colors.cardStrong },
+    label: { color: colors.text, fontSize: 15, fontWeight: '500' },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

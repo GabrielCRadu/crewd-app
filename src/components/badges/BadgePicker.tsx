@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { VOTED_BADGES } from '../../data/badges';
-import { colors } from '../../theme/colors';
+import { colors, onThemeChange } from '../../theme/colors';
 import type { VotedBadgeId } from '../../types/badges';
 import { MAX_BADGES_PER_PERSON, canPropose } from '../../utils/badgeRules';
 import BadgePill from './BadgePill';
@@ -58,11 +58,17 @@ export default function BadgePicker({ selected, onToggle }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { gap: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: colors.border },
-  header: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  pressed: { opacity: 0.7 },
-  title: { flex: 1, fontSize: 14, fontWeight: '600', color: colors.text },
-  count: { fontSize: 13, color: colors.muted },
-  pills: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+const makeStyles = () =>
+  StyleSheet.create({
+    container: { gap: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: colors.border },
+    header: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    pressed: { opacity: 0.7 },
+    title: { flex: 1, fontSize: 14, fontWeight: '600', color: colors.text },
+    count: { fontSize: 13, color: colors.muted },
+    pills: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

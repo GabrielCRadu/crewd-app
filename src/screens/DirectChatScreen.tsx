@@ -14,7 +14,7 @@ import type { ChatsStackParamList } from '../navigation/chatsTypes';
 import { sendDirectText } from '../services/directMessagesService';
 import type { DirectMessage } from '../services/directMessagesService';
 import { getPerson } from '../services/peopleService';
-import { colors } from '../theme/colors';
+import { colors, onThemeChange } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
 import type { Event } from '../types/events';
 import { formatEventDate, formatTime } from '../utils/dates';
@@ -130,49 +130,55 @@ function EventCard({ event, onOpen }: { event: Event; onOpen: () => void }) {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  flex: { flex: 1 },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  headerPerson: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 },
-  headerText: { flex: 1 },
-  headerTitle: { fontSize: 18, fontWeight: '700', color: colors.text },
-  headerSubtitle: { fontSize: 12, color: colors.muted },
-  messages: { padding: 16, gap: 12, flexGrow: 1, justifyContent: 'flex-end' },
-  empty: { alignSelf: 'center', textAlign: 'center', color: colors.muted, fontSize: 14 },
-  messageRow: { alignItems: 'flex-start', gap: 4, maxWidth: '85%' },
-  messageRowMine: { alignSelf: 'flex-end', alignItems: 'flex-end' },
-  bubble: { paddingHorizontal: 14, paddingVertical: 10, borderRadius: 20 },
-  bubbleOther: { ...glass, borderBottomLeftRadius: 6 },
-  bubbleMine: { backgroundColor: colors.text, borderBottomRightRadius: 6 },
-  bubbleText: { color: colors.text, fontSize: 15 },
-  bubbleTextMine: { color: colors.onLight },
-  time: { fontSize: 11, color: colors.faint },
-  eventCard: { ...glass, width: 250, borderRadius: radii.card, overflow: 'hidden' },
-  eventPoster: { width: '100%', height: 130 },
-  eventInfo: { padding: 12, gap: 4 },
-  eventTitle: { fontSize: 15, fontWeight: '700', color: colors.text },
-  eventMeta: { fontSize: 12, color: colors.muted },
-  eventLink: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
-  eventLinkText: { fontSize: 13, fontWeight: '600', color: colors.text },
-  pressed: { opacity: 0.8 },
-  composer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-  },
-  input: { ...glass, flex: 1, color: colors.text, borderRadius: radii.pill, paddingHorizontal: 18, paddingVertical: 12, fontSize: 15 },
-  sendButton: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.text },
+const makeStyles = () =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    flex: { flex: 1 },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    headerPerson: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 },
+    headerText: { flex: 1 },
+    headerTitle: { fontSize: 18, fontWeight: '700', color: colors.text },
+    headerSubtitle: { fontSize: 12, color: colors.muted },
+    messages: { padding: 16, gap: 12, flexGrow: 1, justifyContent: 'flex-end' },
+    empty: { alignSelf: 'center', textAlign: 'center', color: colors.muted, fontSize: 14 },
+    messageRow: { alignItems: 'flex-start', gap: 4, maxWidth: '85%' },
+    messageRowMine: { alignSelf: 'flex-end', alignItems: 'flex-end' },
+    bubble: { paddingHorizontal: 14, paddingVertical: 10, borderRadius: 20 },
+    bubbleOther: { ...glass, borderBottomLeftRadius: 6 },
+    bubbleMine: { backgroundColor: colors.text, borderBottomRightRadius: 6 },
+    bubbleText: { color: colors.text, fontSize: 15 },
+    bubbleTextMine: { color: colors.onLight },
+    time: { fontSize: 11, color: colors.faint },
+    eventCard: { ...glass, width: 250, borderRadius: radii.card, overflow: 'hidden' },
+    eventPoster: { width: '100%', height: 130 },
+    eventInfo: { padding: 12, gap: 4 },
+    eventTitle: { fontSize: 15, fontWeight: '700', color: colors.text },
+    eventMeta: { fontSize: 12, color: colors.muted },
+    eventLink: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
+    eventLinkText: { fontSize: 13, fontWeight: '600', color: colors.text },
+    pressed: { opacity: 0.8 },
+    composer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+    },
+    input: { ...glass, flex: 1, color: colors.text, borderRadius: radii.pill, paddingHorizontal: 18, paddingVertical: 12, fontSize: 15 },
+    sendButton: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.text },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

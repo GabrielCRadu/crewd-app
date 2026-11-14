@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import GlassIconButton from '../GlassIconButton';
 import SegmentedControl from '../SegmentedControl';
 import { deleteMemory, isMyMemory, setMemoryVisibility } from '../../services/memoriesService';
-import { colors } from '../../theme/colors';
+import { colors, onThemeChange } from '../../theme/colors';
 import type { Memory } from '../../types/memories';
 import { formatLongDay } from '../../utils/dates';
 import { tr } from '../../i18n';
@@ -80,15 +80,21 @@ export default function MemoryViewer({ memory, onClose }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
-  photo: { flex: 1 },
-  top: { position: 'absolute', top: 0, left: 0, right: 0, flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 20 },
-  bottom: { gap: 8, paddingHorizontal: 20, paddingTop: 16, borderTopWidth: 1, borderTopColor: colors.border },
-  title: { color: colors.text, fontSize: 20, fontWeight: '700', letterSpacing: -0.3 },
-  meta: { color: colors.muted, fontSize: 14 },
-  label: { color: colors.muted, fontSize: 13, marginTop: 8 },
-  visibilityRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  deleteButton: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'center', marginTop: 8, paddingVertical: 6 },
-  deleteText: { color: colors.nope, fontSize: 14, fontWeight: '500' },
+const makeStyles = () =>
+  StyleSheet.create({
+    screen: { flex: 1, backgroundColor: colors.background },
+    photo: { flex: 1 },
+    top: { position: 'absolute', top: 0, left: 0, right: 0, flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 20 },
+    bottom: { gap: 8, paddingHorizontal: 20, paddingTop: 16, borderTopWidth: 1, borderTopColor: colors.border },
+    title: { color: colors.text, fontSize: 20, fontWeight: '700', letterSpacing: -0.3 },
+    meta: { color: colors.muted, fontSize: 14 },
+    label: { color: colors.muted, fontSize: 13, marginTop: 8 },
+    visibilityRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    deleteButton: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'center', marginTop: 8, paddingVertical: 6 },
+    deleteText: { color: colors.nope, fontSize: 14, fontWeight: '500' },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

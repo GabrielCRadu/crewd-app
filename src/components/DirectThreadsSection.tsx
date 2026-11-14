@@ -5,7 +5,7 @@ import { useDirectThreads } from '../hooks/useDirectThreads';
 import { sortedThreads } from '../services/directMessagesService';
 import type { DirectMessage } from '../services/directMessagesService';
 import { getPerson } from '../services/peopleService';
-import { colors } from '../theme/colors';
+import { colors, onThemeChange } from '../theme/colors';
 import { type } from '../theme/typography';
 import { glass, radii } from '../theme/shape';
 import { formatTime } from '../utils/dates';
@@ -50,13 +50,19 @@ export default function DirectThreadsSection({ onOpen }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  section: { gap: 12 },
-  sectionTitle: { ...type.label, marginTop: 12 },
-  row: { ...glass, flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: radii.card },
-  pressed: { opacity: 0.8 },
-  text: { flex: 1, gap: 3 },
-  name: { fontSize: 16, fontWeight: '600', color: colors.text },
-  preview: { fontSize: 13, color: colors.muted },
-  time: { fontSize: 12, color: colors.faint, alignSelf: 'flex-start' },
+const makeStyles = () =>
+  StyleSheet.create({
+    section: { gap: 12 },
+    sectionTitle: { ...type.label, marginTop: 12 },
+    row: { ...glass, flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: radii.card },
+    pressed: { opacity: 0.8 },
+    text: { flex: 1, gap: 3 },
+    name: { fontSize: 16, fontWeight: '600', color: colors.text },
+    preview: { fontSize: 13, color: colors.muted },
+    time: { fontSize: 12, color: colors.faint, alignSelf: 'flex-start' },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

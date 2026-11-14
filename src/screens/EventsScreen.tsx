@@ -15,7 +15,7 @@ import { usePreferences } from '../hooks/usePreferences';
 import { getLocationNotice, useUserLocation } from '../hooks/useUserLocation';
 import type { EventsStackParamList } from '../navigation/eventsTypes';
 import { isJoined } from '../services/preferencesService';
-import { colors } from '../theme/colors';
+import { colors, onThemeChange } from '../theme/colors';
 import { type } from '../theme/typography';
 import { glass, radii } from '../theme/shape';
 import type { CategoryId } from '../types/events';
@@ -134,24 +134,30 @@ export default function EventsScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  header: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 14, gap: 14 },
-  title: { ...type.screenTitle, fontSize: 32 },
-  notice: {
-    ...glass,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginHorizontal: 20,
-    marginTop: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: radii.inner,
-  },
-  noticeText: { flex: 1, fontSize: 13, lineHeight: 18, color: colors.text },
-  content: { padding: 20, paddingTop: 16, paddingBottom: 32, gap: 12 },
-  sectionTitle: { ...type.label, marginTop: 10 },
-  empty: { fontSize: 14, color: colors.muted },
-  loader: { marginTop: 24 },
+const makeStyles = () =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    header: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 14, gap: 14 },
+    title: { ...type.screenTitle, fontSize: 32 },
+    notice: {
+      ...glass,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      marginHorizontal: 20,
+      marginTop: 12,
+      paddingHorizontal: 14,
+      paddingVertical: 10,
+      borderRadius: radii.inner,
+    },
+    noticeText: { flex: 1, fontSize: 13, lineHeight: 18, color: colors.text },
+    content: { padding: 20, paddingTop: 16, paddingBottom: 32, gap: 12 },
+    sectionTitle: { ...type.label, marginTop: 10 },
+    empty: { fontSize: 14, color: colors.muted },
+    loader: { marginTop: 24 },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

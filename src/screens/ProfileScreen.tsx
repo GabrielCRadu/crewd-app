@@ -45,7 +45,7 @@ import { myMemories } from '../services/memoriesService';
 import { getReputation } from '../services/ratingsService';
 import { TAG_GROUP_STYLE as GROUP_STYLE } from '../data/tagGroupStyle';
 import type { ProfileStackParamList } from '../navigation/profileTypes';
-import { colors, tagTints } from '../theme/colors';
+import { colors, onThemeChange, tagTints } from '../theme/colors';
 import { type } from '../theme/typography';
 import { glass, radii } from '../theme/shape';
 import { autoBadgeProgress } from '../utils/badgeRules';
@@ -307,66 +307,72 @@ export default function ProfileScreen() {
 /** Înălțimea butoanelor din antet (codul QR și meniul), ca să stea la aceeași linie. */
 const HEADER_BUTTON_HEIGHT = 40;
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  flex: { flex: 1 },
-  content: { padding: 20, paddingBottom: 32, gap: 22 },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  // Iconița QR și „Editează” au aceeași înălțime fixă și sunt centrate pe același rând.
-  headerActions: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  qrButton: {
-    ...glass,
-    width: HEADER_BUTTON_HEIGHT,
-    height: HEADER_BUTTON_HEIGHT,
-    borderRadius: radii.pill,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  qrPressed: { backgroundColor: colors.cardStrong },
-  title: { ...type.screenTitle, fontSize: 32 },
-  pressed: { backgroundColor: colors.cardStrong },
-  identity: { ...glass, borderRadius: radii.card, overflow: 'hidden' },
-  identityRow: { flexDirection: 'row', alignItems: 'center', gap: 16, padding: 18 },
-  identityText: { flex: 1, gap: 6 },
-  name: { fontSize: 28, fontWeight: '600', letterSpacing: -0.5, color: colors.text },
-  username: { color: colors.muted, fontSize: 15, marginTop: -2 },
-  cityRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  city: { color: colors.text, fontSize: 15, opacity: 0.85 },
-  statsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginHorizontal: 18,
-    marginBottom: 16,
-    paddingVertical: 12,
-    borderRadius: radii.inner,
-    backgroundColor: colors.cardStrong,
-  },
-  stat: { flex: 1, alignItems: 'center', gap: 2, borderRadius: radii.inner },
-  statPressed: { opacity: 0.7 },
-  statValue: { fontSize: 20, fontWeight: '600', color: colors.text },
-  statLabel: { fontSize: 12, color: colors.muted },
-  statDivider: { width: 1, alignSelf: 'stretch', backgroundColor: colors.border },
-  section: { gap: 10 },
-  sectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  addMemoryButton: {
-    ...glass,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: radii.pill,
-  },
-  addMemoryText: { color: colors.text, fontSize: 13, fontWeight: '500' },
-  sectionTitle: { ...type.label },
-  card: { ...glass, padding: 18, borderRadius: radii.card },
-  cardTitle: { fontSize: 16, fontWeight: '600', color: colors.text },
-  tagGroup: { gap: 10 },
-  tagGroupDivided: { marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: colors.border },
-  tagGroupHeader: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  tagGroupLabel: { fontSize: 13, fontWeight: '600', color: colors.text },
-  tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  learnedCard: { gap: 10 },
-  hint: { fontSize: 13, color: colors.muted },
-  privateRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 },
+const makeStyles = () =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    flex: { flex: 1 },
+    content: { padding: 20, paddingBottom: 32, gap: 22 },
+    header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    // Iconița QR și „Editează” au aceeași înălțime fixă și sunt centrate pe același rând.
+    headerActions: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    qrButton: {
+      ...glass,
+      width: HEADER_BUTTON_HEIGHT,
+      height: HEADER_BUTTON_HEIGHT,
+      borderRadius: radii.pill,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    qrPressed: { backgroundColor: colors.cardStrong },
+    title: { ...type.screenTitle, fontSize: 32 },
+    pressed: { backgroundColor: colors.cardStrong },
+    identity: { ...glass, borderRadius: radii.card, overflow: 'hidden' },
+    identityRow: { flexDirection: 'row', alignItems: 'center', gap: 16, padding: 18 },
+    identityText: { flex: 1, gap: 6 },
+    name: { fontSize: 28, fontWeight: '600', letterSpacing: -0.5, color: colors.text },
+    username: { color: colors.muted, fontSize: 15, marginTop: -2 },
+    cityRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+    city: { color: colors.text, fontSize: 15, opacity: 0.85 },
+    statsRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginHorizontal: 18,
+      marginBottom: 16,
+      paddingVertical: 12,
+      borderRadius: radii.inner,
+      backgroundColor: colors.cardStrong,
+    },
+    stat: { flex: 1, alignItems: 'center', gap: 2, borderRadius: radii.inner },
+    statPressed: { opacity: 0.7 },
+    statValue: { fontSize: 20, fontWeight: '600', color: colors.text },
+    statLabel: { fontSize: 12, color: colors.muted },
+    statDivider: { width: 1, alignSelf: 'stretch', backgroundColor: colors.border },
+    section: { gap: 10 },
+    sectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    addMemoryButton: {
+      ...glass,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      paddingHorizontal: 12,
+      paddingVertical: 7,
+      borderRadius: radii.pill,
+    },
+    addMemoryText: { color: colors.text, fontSize: 13, fontWeight: '500' },
+    sectionTitle: { ...type.label },
+    card: { ...glass, padding: 18, borderRadius: radii.card },
+    cardTitle: { fontSize: 16, fontWeight: '600', color: colors.text },
+    tagGroup: { gap: 10 },
+    tagGroupDivided: { marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: colors.border },
+    tagGroupHeader: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    tagGroupLabel: { fontSize: 13, fontWeight: '600', color: colors.text },
+    tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    learnedCard: { gap: 10 },
+    hint: { fontSize: 13, color: colors.muted },
+    privateRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

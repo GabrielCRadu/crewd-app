@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-import { colors } from '../../theme/colors';
+import { colors, onThemeChange } from '../../theme/colors';
 import { glass, radii } from '../../theme/shape';
 import type { AutoBadgeInfo, AutoBadgeProgress, VotedBadgeInfo } from '../../types/badges';
 import { BADGE_THRESHOLD } from '../../utils/badgeRules';
@@ -80,18 +80,24 @@ export default function BadgesCard({ voted, auto, progress, emptyText }: Props) 
   );
 }
 
-const styles = StyleSheet.create({
-  card: { ...glass, gap: 16, padding: 18, borderRadius: radii.card },
-  group: { gap: 10 },
-  divided: { paddingTop: 16, borderTopWidth: 1, borderTopColor: colors.border },
-  groupLabel: { fontSize: 13, fontWeight: '600', color: colors.text },
-  pills: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  progressRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  progressText: { flex: 1, gap: 6 },
-  progressHeader: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: 8 },
-  progressLabel: { flexShrink: 1, fontSize: 14, color: colors.text },
-  track: { height: 4, borderRadius: radii.pill, backgroundColor: colors.cardStrong, overflow: 'hidden' },
-  fill: { height: 4, borderRadius: radii.pill, backgroundColor: colors.text },
-  progressCount: { fontSize: 12, color: colors.muted },
-  hint: { fontSize: 13, lineHeight: 18, color: colors.muted },
+const makeStyles = () =>
+  StyleSheet.create({
+    card: { ...glass, gap: 16, padding: 18, borderRadius: radii.card },
+    group: { gap: 10 },
+    divided: { paddingTop: 16, borderTopWidth: 1, borderTopColor: colors.border },
+    groupLabel: { fontSize: 13, fontWeight: '600', color: colors.text },
+    pills: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    progressRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    progressText: { flex: 1, gap: 6 },
+    progressHeader: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: 8 },
+    progressLabel: { flexShrink: 1, fontSize: 14, color: colors.text },
+    track: { height: 4, borderRadius: radii.pill, backgroundColor: colors.cardStrong, overflow: 'hidden' },
+    fill: { height: 4, borderRadius: radii.pill, backgroundColor: colors.text },
+    progressCount: { fontSize: 12, color: colors.muted },
+    hint: { fontSize: 13, lineHeight: 18, color: colors.muted },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import GlassIconButton from './GlassIconButton';
-import { colors } from '../theme/colors';
+import { colors, onThemeChange } from '../theme/colors';
 import { type } from '../theme/typography';
 import { gradients } from '../theme/gradients';
 import { radii } from '../theme/shape';
@@ -35,12 +35,18 @@ export default function OnboardingHeader({ step, onBack }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { gap: 18 },
-  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 44 },
-  logo: { ...type.screenTitle, fontSize: 26 },
-  step: { fontSize: 13, fontWeight: '500', color: colors.muted },
-  bars: { flexDirection: 'row', gap: 8 },
-  bar: { flex: 1, height: 6, borderRadius: radii.pill },
-  barEmpty: { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border },
+const makeStyles = () =>
+  StyleSheet.create({
+    container: { gap: 18 },
+    row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 44 },
+    logo: { ...type.screenTitle, fontSize: 26 },
+    step: { fontSize: 13, fontWeight: '500', color: colors.muted },
+    bars: { flexDirection: 'row', gap: 8 },
+    bar: { flex: 1, height: 6, borderRadius: radii.pill },
+    barEmpty: { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

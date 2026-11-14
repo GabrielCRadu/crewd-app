@@ -3,7 +3,7 @@ import { Pressable, StyleSheet } from 'react-native';
 import type { StyleProp, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-import { colors } from '../theme/colors';
+import { colors, onThemeChange } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
 
 interface Props {
@@ -35,7 +35,13 @@ export default function GlassIconButton({ icon, onPress, size = 44, round = fals
   );
 }
 
-const styles = StyleSheet.create({
-  button: { ...glass, alignItems: 'center', justifyContent: 'center' },
-  pressed: { backgroundColor: colors.cardStrong },
+const makeStyles = () =>
+  StyleSheet.create({
+    button: { ...glass, alignItems: 'center', justifyContent: 'center' },
+    pressed: { backgroundColor: colors.cardStrong },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

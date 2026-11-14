@@ -10,7 +10,7 @@ import SegmentedControl from '../SegmentedControl';
 import { addMemory } from '../../services/memoriesService';
 import { PhotoPermissionError, pickMemoryPhoto } from '../../services/photoService';
 import type { PhotoSource } from '../../services/photoService';
-import { colors } from '../../theme/colors';
+import { colors, onThemeChange } from '../../theme/colors';
 import { glass, radii } from '../../theme/shape';
 import { type } from '../../theme/typography';
 import type { Event } from '../../types/events';
@@ -145,48 +145,54 @@ function SheetContent({ events, initialEventId, onClose }: Omit<Props, 'visible'
   );
 }
 
-const styles = StyleSheet.create({
-  backdrop: { flex: 1, backgroundColor: colors.backdrop },
-  sheet: {
-    gap: 12,
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    borderTopLeftRadius: radii.card,
-    borderTopRightRadius: radii.card,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  handle: { alignSelf: 'center', width: 40, height: 4, borderRadius: radii.pill, backgroundColor: colors.cardStrong },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  title: { ...type.screenTitle, fontSize: 22 },
-  label: { ...type.label, marginTop: 4 },
-  muted: { color: colors.muted, fontSize: 14, lineHeight: 20 },
-  events: { gap: 8 },
-  sources: { flexDirection: 'row', gap: 10 },
-  source: {
-    ...glass,
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    height: 54,
-    borderRadius: radii.pill,
-  },
-  sourceText: { color: colors.text, fontSize: 15, fontWeight: '500' },
-  pressed: { backgroundColor: colors.cardStrong },
-  previewRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-  preview: { width: 96, height: 96, borderRadius: radii.inner, backgroundColor: colors.backgroundAlt },
-  link: { color: colors.muted, fontSize: 14, textDecorationLine: 'underline' },
-  notice: {
-    ...glass,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: radii.inner,
-  },
-  noticeText: { flex: 1, color: colors.text, fontSize: 13, lineHeight: 18 },
+const makeStyles = () =>
+  StyleSheet.create({
+    backdrop: { flex: 1, backgroundColor: colors.backdrop },
+    sheet: {
+      gap: 12,
+      paddingHorizontal: 20,
+      paddingTop: 10,
+      borderTopLeftRadius: radii.card,
+      borderTopRightRadius: radii.card,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    handle: { alignSelf: 'center', width: 40, height: 4, borderRadius: radii.pill, backgroundColor: colors.cardStrong },
+    header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    title: { ...type.screenTitle, fontSize: 22 },
+    label: { ...type.label, marginTop: 4 },
+    muted: { color: colors.muted, fontSize: 14, lineHeight: 20 },
+    events: { gap: 8 },
+    sources: { flexDirection: 'row', gap: 10 },
+    source: {
+      ...glass,
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      height: 54,
+      borderRadius: radii.pill,
+    },
+    sourceText: { color: colors.text, fontSize: 15, fontWeight: '500' },
+    pressed: { backgroundColor: colors.cardStrong },
+    previewRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+    preview: { width: 96, height: 96, borderRadius: radii.inner, backgroundColor: colors.backgroundAlt },
+    link: { color: colors.muted, fontSize: 14, textDecorationLine: 'underline' },
+    notice: {
+      ...glass,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      paddingHorizontal: 14,
+      paddingVertical: 10,
+      borderRadius: radii.inner,
+    },
+    noticeText: { flex: 1, color: colors.text, fontSize: 13, lineHeight: 18 },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

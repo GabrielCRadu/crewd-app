@@ -4,7 +4,7 @@ import type { NativeScrollEvent, NativeSyntheticEvent } from 'react-native';
 
 import NowCard from './NowCard';
 import type { EventWithDistance } from '../../types/events';
-import { colors } from '../../theme/colors';
+import { colors, onThemeChange } from '../../theme/colors';
 import { radii } from '../../theme/shape';
 
 interface Props {
@@ -64,11 +64,17 @@ export default function NowCarousel({ events, onOpen }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  // Caruselul iese din padding-ul ecranului, ca să poți trage cardurile de la margine la margine.
-  container: { marginHorizontal: -SIDE, gap: 10 },
-  list: { paddingHorizontal: SIDE },
-  dots: { flexDirection: 'row', justifyContent: 'center', gap: 6 },
-  dot: { width: 6, height: 6, borderRadius: radii.pill, backgroundColor: colors.faint },
-  dotActive: { width: 18, backgroundColor: colors.text },
+const makeStyles = () =>
+  StyleSheet.create({
+    // Caruselul iese din padding-ul ecranului, ca să poți trage cardurile de la margine la margine.
+    container: { marginHorizontal: -SIDE, gap: 10 },
+    list: { paddingHorizontal: SIDE },
+    dots: { flexDirection: 'row', justifyContent: 'center', gap: 6 },
+    dot: { width: 6, height: 6, borderRadius: radii.pill, backgroundColor: colors.faint },
+    dotActive: { width: 18, backgroundColor: colors.text },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

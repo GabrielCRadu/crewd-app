@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import type { StyleProp, ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { colors } from '../theme/colors';
+import { colors, onThemeChange } from '../theme/colors';
 import { gradients } from '../theme/gradients';
 import { radii } from '../theme/shape';
 
@@ -25,7 +25,13 @@ export default function GradientBorderCard({ style, children }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  border: { padding: BORDER, borderRadius: radii.card },
-  inner: { padding: 18, borderRadius: radii.card - BORDER, backgroundColor: colors.background },
+const makeStyles = () =>
+  StyleSheet.create({
+    border: { padding: BORDER, borderRadius: radii.card },
+    inner: { padding: 18, borderRadius: radii.card - BORDER, backgroundColor: colors.background },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

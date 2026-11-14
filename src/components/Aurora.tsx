@@ -2,7 +2,7 @@ import { StyleSheet, View } from 'react-native';
 import type { StyleProp, ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { colors } from '../theme/colors';
+import { colors, onThemeChange } from '../theme/colors';
 import { gradients } from '../theme/gradients';
 
 interface Props {
@@ -24,7 +24,13 @@ export default function Aurora({ style, withScrim = false }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { overflow: 'hidden', backgroundColor: colors.backgroundAlt },
-  scrim: { position: 'absolute', left: 0, right: 0, bottom: 0, height: '55%' },
+const makeStyles = () =>
+  StyleSheet.create({
+    container: { overflow: 'hidden', backgroundColor: colors.backgroundAlt },
+    scrim: { position: 'absolute', left: 0, right: 0, bottom: 0, height: '55%' },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

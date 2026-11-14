@@ -10,7 +10,7 @@ import {
   unblockPerson,
 } from '../services/friendsService';
 import type { FriendStatus } from '../services/friendsService';
-import { colors } from '../theme/colors';
+import { colors, onThemeChange } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
 import type { Gender } from '../types/user';
 import { removeFriendWording } from '../utils/friendWording';
@@ -115,24 +115,30 @@ export default function FriendButton({ personId, name, status, gender }: Props) 
   );
 }
 
-const styles = StyleSheet.create({
-  flex: { flex: 1 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-  pill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    height: 52,
-    paddingHorizontal: 20,
-    borderRadius: radii.pill,
-    borderWidth: 1,
-  },
-  pillText: { color: colors.text, fontSize: 16, fontWeight: '600' },
-  primary: { backgroundColor: colors.text, borderColor: colors.text },
-  secondary: { ...glass },
-  pressed: { opacity: 0.8 },
-  link: { color: colors.muted, fontSize: 15, fontWeight: '500', textDecorationLine: 'underline' },
-  incoming: { gap: 10 },
-  incomingText: { color: colors.text, fontSize: 14, fontWeight: '500' },
+const makeStyles = () =>
+  StyleSheet.create({
+    flex: { flex: 1 },
+    row: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+    pill: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      height: 52,
+      paddingHorizontal: 20,
+      borderRadius: radii.pill,
+      borderWidth: 1,
+    },
+    pillText: { color: colors.text, fontSize: 16, fontWeight: '600' },
+    primary: { backgroundColor: colors.text, borderColor: colors.text },
+    secondary: { ...glass },
+    pressed: { opacity: 0.8 },
+    link: { color: colors.muted, fontSize: 15, fontWeight: '500', textDecorationLine: 'underline' },
+    incoming: { gap: 10 },
+    incomingText: { color: colors.text, fontSize: 14, fontWeight: '500' },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

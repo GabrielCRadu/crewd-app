@@ -10,7 +10,7 @@ import UsernameField from '../components/UsernameField';
 import { useAuth } from '../context/AuthContext';
 import { useUsernameAvailability } from '../hooks/useUsernameAvailability';
 import { UsernameTakenError } from '../services/usernamesService';
-import { colors } from '../theme/colors';
+import { colors, onThemeChange } from '../theme/colors';
 import { type } from '../theme/typography';
 import { missingProfileParts } from '../utils/profileCompleteness';
 import { tr } from '../i18n';
@@ -97,14 +97,20 @@ export default function CompleteProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  flex: { flex: 1 },
-  content: { flexGrow: 1, padding: 24, gap: 24 },
-  heading: { gap: 8, marginTop: 12 },
-  title: { ...type.screenTitle, fontSize: 34 },
-  subtitle: { fontSize: 15, lineHeight: 22, color: colors.muted },
-  bottom: { marginTop: 'auto', gap: 16 },
-  signOut: { alignSelf: 'center', padding: 4 },
-  signOutText: { color: colors.muted, fontSize: 14, textDecorationLine: 'underline' },
+const makeStyles = () =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    flex: { flex: 1 },
+    content: { flexGrow: 1, padding: 24, gap: 24 },
+    heading: { gap: 8, marginTop: 12 },
+    title: { ...type.screenTitle, fontSize: 34 },
+    subtitle: { fontSize: 15, lineHeight: 22, color: colors.muted },
+    bottom: { marginTop: 'auto', gap: 16 },
+    signOut: { alignSelf: 'center', padding: 4 },
+    signOutText: { color: colors.muted, fontSize: 14, textDecorationLine: 'underline' },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

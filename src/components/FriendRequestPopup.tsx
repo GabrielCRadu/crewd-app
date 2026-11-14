@@ -14,7 +14,7 @@ import {
 } from '../services/friendsService';
 import type { FriendNotice } from '../services/friendsService';
 import { getPerson } from '../services/peopleService';
-import { colors } from '../theme/colors';
+import { colors, onThemeChange } from '../theme/colors';
 import { radii } from '../theme/shape';
 import type { Person } from '../types/social';
 import { tr, trPlural } from '../i18n';
@@ -212,58 +212,64 @@ export default function FriendRequestPopup({ onOpenProfile, onOpenRequests, show
   );
 }
 
-const styles = StyleSheet.create({
-  // Bara pe toată lățimea ecranului, joasă: totul pe un rând.
-  card: {
-    position: 'absolute',
-    left: 12,
-    right: 12,
-    zIndex: 100,
-    elevation: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    paddingVertical: 10,
-    paddingLeft: 10,
-    paddingRight: 14,
-    borderRadius: radii.inner + 4,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    boxShadow: '0 12px 32px rgba(0,0,0,0.6)',
-  },
-  body: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 },
-  text: { flex: 1, gap: 1 },
-  eyebrow: { color: colors.muted, fontSize: 10, fontWeight: '700', letterSpacing: 1.4 },
-  inlineName: { color: colors.text, fontWeight: '700' },
-  name: { color: colors.text, fontSize: 15, fontWeight: '700' },
-  age: { color: colors.muted, fontWeight: '500' },
-  message: { color: colors.muted, fontSize: 12 },
-  accept: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    height: 32,
-    paddingHorizontal: 12,
-    borderRadius: radii.pill,
-    backgroundColor: colors.text,
-  },
-  pressed: { opacity: 0.8 },
-  acceptText: { color: colors.onLight, fontSize: 13, fontWeight: '700' },
-  // Butonul mic: pastilă albă cu iconița și numărul de cereri.
-  pill: {
-    position: 'absolute',
-    right: 14,
-    zIndex: 100,
-    elevation: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    height: 30,
-    paddingHorizontal: 10,
-    borderRadius: radii.pill,
-    backgroundColor: colors.text,
-    boxShadow: '0 6px 16px rgba(0,0,0,0.5)',
-  },
-  pillText: { color: colors.onLight, fontSize: 13, fontWeight: '700' },
+const makeStyles = () =>
+  StyleSheet.create({
+    // Bara pe toată lățimea ecranului, joasă: totul pe un rând.
+    card: {
+      position: 'absolute',
+      left: 12,
+      right: 12,
+      zIndex: 100,
+      elevation: 12,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      paddingVertical: 10,
+      paddingLeft: 10,
+      paddingRight: 14,
+      borderRadius: radii.inner + 4,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+      boxShadow: '0 12px 32px rgba(0,0,0,0.6)',
+    },
+    body: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 },
+    text: { flex: 1, gap: 1 },
+    eyebrow: { color: colors.muted, fontSize: 10, fontWeight: '700', letterSpacing: 1.4 },
+    inlineName: { color: colors.text, fontWeight: '700' },
+    name: { color: colors.text, fontSize: 15, fontWeight: '700' },
+    age: { color: colors.muted, fontWeight: '500' },
+    message: { color: colors.muted, fontSize: 12 },
+    accept: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      height: 32,
+      paddingHorizontal: 12,
+      borderRadius: radii.pill,
+      backgroundColor: colors.text,
+    },
+    pressed: { opacity: 0.8 },
+    acceptText: { color: colors.onLight, fontSize: 13, fontWeight: '700' },
+    // Butonul mic: pastilă albă cu iconița și numărul de cereri.
+    pill: {
+      position: 'absolute',
+      right: 14,
+      zIndex: 100,
+      elevation: 8,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      height: 30,
+      paddingHorizontal: 10,
+      borderRadius: radii.pill,
+      backgroundColor: colors.text,
+      boxShadow: '0 6px 16px rgba(0,0,0,0.5)',
+    },
+    pillText: { color: colors.onLight, fontSize: 13, fontWeight: '700' },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

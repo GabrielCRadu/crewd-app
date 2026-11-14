@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 
 import Avatar from '../Avatar';
-import { colors } from '../../theme/colors';
+import { colors, onThemeChange } from '../../theme/colors';
 import { glass } from '../../theme/shape';
 import type { ChatRow } from '../../types/chat';
 
@@ -50,19 +50,25 @@ export default function MessageRow({ row }: { row: Extract<ChatRow, { kind: 'mes
   );
 }
 
-const styles = StyleSheet.create({
-  day: { alignSelf: 'center', color: colors.faint, fontSize: 12, marginVertical: 4 },
-  other: { alignSelf: 'flex-start', maxWidth: '85%', gap: 3 },
-  // Numele stă deasupra bulei, aliniat cu ea (după locul avatarului).
-  author: { color: colors.muted, fontSize: 12, fontWeight: '600', marginLeft: AVATAR_SIZE + 8 },
-  row: { flexDirection: 'row', alignItems: 'flex-end', gap: 8 },
-  avatarSpace: { width: AVATAR_SIZE },
-  mine: { alignSelf: 'flex-end', maxWidth: '85%' },
-  bubble: { paddingHorizontal: 14, paddingVertical: 9, borderRadius: 20, flexShrink: 1 },
-  bubbleOther: { ...glass, borderBottomLeftRadius: 6 },
-  bubbleMine: { backgroundColor: colors.text, borderBottomRightRadius: 6 },
-  text: { color: colors.text, fontSize: 15 },
-  textMine: { color: colors.onLight },
-  time: { color: colors.faint, fontSize: 11 },
-  timeMine: { color: colors.onLightMuted, fontSize: 11 },
+const makeStyles = () =>
+  StyleSheet.create({
+    day: { alignSelf: 'center', color: colors.faint, fontSize: 12, marginVertical: 4 },
+    other: { alignSelf: 'flex-start', maxWidth: '85%', gap: 3 },
+    // Numele stă deasupra bulei, aliniat cu ea (după locul avatarului).
+    author: { color: colors.muted, fontSize: 12, fontWeight: '600', marginLeft: AVATAR_SIZE + 8 },
+    row: { flexDirection: 'row', alignItems: 'flex-end', gap: 8 },
+    avatarSpace: { width: AVATAR_SIZE },
+    mine: { alignSelf: 'flex-end', maxWidth: '85%' },
+    bubble: { paddingHorizontal: 14, paddingVertical: 9, borderRadius: 20, flexShrink: 1 },
+    bubbleOther: { ...glass, borderBottomLeftRadius: 6 },
+    bubbleMine: { backgroundColor: colors.text, borderBottomRightRadius: 6 },
+    text: { color: colors.text, fontSize: 15 },
+    textMine: { color: colors.onLight },
+    time: { color: colors.faint, fontSize: 11 },
+    timeMine: { color: colors.onLightMuted, fontSize: 11 },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });
