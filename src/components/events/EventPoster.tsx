@@ -4,7 +4,7 @@ import type { StyleProp, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { getCategory } from '../../data/categories';
-import { colors } from '../../theme/colors';
+import { colors, onThemeChange } from '../../theme/colors';
 import type { CategoryId } from '../../types/events';
 
 interface Props {
@@ -36,6 +36,12 @@ export default function EventPoster({ imageUrl, category, style, iconSize = 28, 
   );
 }
 
-const styles = StyleSheet.create({
-  base: { alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface, overflow: 'hidden' },
+const makeStyles = () =>
+  StyleSheet.create({
+    base: { alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface, overflow: 'hidden' },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

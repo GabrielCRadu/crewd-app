@@ -23,11 +23,11 @@ import { getAutoBadges, getVotedBadges } from '../services/badgesService';
 import { blockPerson, idsWithStatus, statusOf, unblockPerson } from '../services/friendsService';
 import { commonTags, friendsOfPerson, getPerson, mutualFriends } from '../services/peopleService';
 import { getReputation, hasReportedPerson, reportPerson } from '../services/ratingsService';
-import { colors } from '../theme/colors';
+import { colors, onThemeChange } from '../theme/colors';
 import { radii } from '../theme/shape';
 import { formatEventDate } from '../utils/dates';
 import { isUpcomingOrLive, sortByDate } from '../utils/eventFilters';
-import { tr } from '../i18n';
+import { tr, trPlural } from '../i18n';
 
 /**
  * Parametrii ecranului. Profilul unei persoane e înregistrat în mai multe stive
@@ -159,8 +159,8 @@ export default function PersonProfileScreen() {
             >
               <Ionicons name="people-outline" size={15} color={colors.text} />
               <Text style={styles.friendsLinkText}>
-                {personFriends.length} {personFriends.length === 1 ? 'prieten' : 'prieteni'}
-                <Text style={styles.friendsLinkMuted}> · {mutualCount}{' '}{tr('comuni')}</Text>
+                {trPlural(personFriends.length, '{n} prieten', '{n} prieteni')}
+                <Text style={styles.friendsLinkMuted}> · {trPlural(mutualCount, '{n} comun', '{n} comuni')}</Text>
               </Text>
               <Ionicons name="chevron-forward" size={14} color={colors.muted} />
             </Pressable>
@@ -187,7 +187,7 @@ export default function PersonProfileScreen() {
 
               {/* Ce aveți în comun: tag-urile comune albe, restul estompate */}
               <View style={styles.section}>
-                <Text style={styles.label}>{tr('ÎN COMUN ·')}{' '}{shared.length === 0 ? tr('NICIUN TAG') : shared.length === 1 ? '1 TAG' : `${shared.length} TAG-URI`}
+                <Text style={styles.label}>{shared.length === 0 ? tr('ÎN COMUN · NICIUN TAG') : trPlural(shared.length, 'ÎN COMUN · {n} TAG', 'ÎN COMUN · {n} TAG-URI')}
                 </Text>
                 <View style={styles.tags}>
                   {shared.map((t) => (
@@ -289,64 +289,70 @@ export default function PersonProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
-  flex: { flex: 1 },
-  top: { paddingHorizontal: 20, gap: 20 },
-  header: { flexDirection: 'row', justifyContent: 'space-between' },
-  content: { padding: 20, paddingTop: 28, paddingBottom: 40, gap: 28 },
-  identity: { gap: 10 },
-  photo: {
-    width: 96,
-    height: 96,
-    borderRadius: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.card,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  photoInitial: { fontSize: 40, fontWeight: '700', color: colors.text },
-  name: { fontSize: 46, lineHeight: 50, fontWeight: '800', letterSpacing: -1.5, color: colors.text, marginTop: 10 },
-  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  meta: { fontSize: 15, fontWeight: '500', color: colors.text },
-  friendsLink: { flexDirection: 'row', alignItems: 'center', gap: 5, alignSelf: 'flex-start' },
-  friendsLinkText: { fontSize: 15, fontWeight: '600', color: colors.text },
-  friendsLinkMuted: { fontWeight: '500', color: colors.muted },
-  section: { gap: 12 },
-  // Etichete mici, cu majuscule și spațiere: aspect editorial, sobru.
-  label: { fontSize: 12, fontWeight: '700', letterSpacing: 1.6, color: colors.muted },
-  // Carduri neutre (gri închis, contur fin): culoarea o dau pozele, nu interfața.
-  card: {
-    padding: 18,
-    borderRadius: radii.card,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.card,
-  },
-  bio: { fontSize: 16, lineHeight: 24, color: colors.text },
-  tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  faded: { opacity: 0.4 },
-  statsCard: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, paddingVertical: 16 },
-  stat: { flex: 1, alignItems: 'center', gap: 4, paddingHorizontal: 4 },
-  statValue: { fontSize: 24, fontWeight: '700', color: colors.text },
-  statLabel: { fontSize: 12, color: colors.muted },
-  statDivider: { width: 1, alignSelf: 'stretch', backgroundColor: colors.border },
-  reports: { color: colors.nope },
-  lockedRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  eventRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderRadius: radii.inner,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.card,
-  },
-  eventTitle: { fontSize: 15, fontWeight: '600', color: colors.text },
-  pressed: { opacity: 0.75 },
-  muted: { fontSize: 13, color: colors.muted },
+const makeStyles = () =>
+  StyleSheet.create({
+    screen: { flex: 1, backgroundColor: colors.background },
+    center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
+    flex: { flex: 1 },
+    top: { paddingHorizontal: 20, gap: 20 },
+    header: { flexDirection: 'row', justifyContent: 'space-between' },
+    content: { padding: 20, paddingTop: 28, paddingBottom: 40, gap: 28 },
+    identity: { gap: 10 },
+    photo: {
+      width: 96,
+      height: 96,
+      borderRadius: 28,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    photoInitial: { fontSize: 40, fontWeight: '700', color: colors.text },
+    name: { fontSize: 46, lineHeight: 50, fontWeight: '800', letterSpacing: -1.5, color: colors.text, marginTop: 10 },
+    metaRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+    meta: { fontSize: 15, fontWeight: '500', color: colors.text },
+    friendsLink: { flexDirection: 'row', alignItems: 'center', gap: 5, alignSelf: 'flex-start' },
+    friendsLinkText: { fontSize: 15, fontWeight: '600', color: colors.text },
+    friendsLinkMuted: { fontWeight: '500', color: colors.muted },
+    section: { gap: 12 },
+    // Etichete mici, cu majuscule și spațiere: aspect editorial, sobru.
+    label: { fontSize: 12, fontWeight: '700', letterSpacing: 1.6, color: colors.muted },
+    // Carduri neutre (gri închis, contur fin): culoarea o dau pozele, nu interfața.
+    card: {
+      padding: 18,
+      borderRadius: radii.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.card,
+    },
+    bio: { fontSize: 16, lineHeight: 24, color: colors.text },
+    tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    faded: { opacity: 0.4 },
+    statsCard: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, paddingVertical: 16 },
+    stat: { flex: 1, alignItems: 'center', gap: 4, paddingHorizontal: 4 },
+    statValue: { fontSize: 24, fontWeight: '700', color: colors.text },
+    statLabel: { fontSize: 12, color: colors.muted },
+    statDivider: { width: 1, alignSelf: 'stretch', backgroundColor: colors.border },
+    reports: { color: colors.nope },
+    lockedRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    eventRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      borderRadius: radii.inner,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.card,
+    },
+    eventTitle: { fontSize: 15, fontWeight: '600', color: colors.text },
+    pressed: { opacity: 0.75 },
+    muted: { fontSize: 13, color: colors.muted },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

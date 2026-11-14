@@ -17,4 +17,6 @@ export type ProfileStackParamList = {
   Settings: undefined;
   /** Politica de confidențialitate (din Setări). */
   PrivacyPolicy: undefined;
+  /** Termenii și condițiile (din Setări). */
+  Terms: undefined;
 };

@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import GlassIconButton from './GlassIconButton';
 import TintedCard from './TintedCard';
-import { colors } from '../theme/colors';
+import { colors, onThemeChange } from '../theme/colors';
 import { gradients } from '../theme/gradients';
 import { glass, radii } from '../theme/shape';
 import { tr } from '../i18n';
@@ -72,26 +72,32 @@ export default function AboutCard({ bio, onSave }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  card: { gap: 10 },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 34 },
-  title: { fontSize: 16, fontWeight: '600', color: colors.text },
-  bio: { fontSize: 15, lineHeight: 22, color: colors.text },
-  placeholder: { fontSize: 14, lineHeight: 20, color: colors.muted },
-  input: {
-    ...glass,
-    minHeight: 96,
-    padding: 12,
-    borderRadius: radii.inner,
-    fontSize: 15,
-    lineHeight: 21,
-    color: colors.text,
-    textAlignVertical: 'top',
-  },
-  actions: { flexDirection: 'row', alignItems: 'center', gap: 16 },
-  counter: { flex: 1, fontSize: 12, color: colors.faint },
-  cancel: { fontSize: 14, color: colors.muted },
-  saveButton: { paddingHorizontal: 18, paddingVertical: 9, borderRadius: radii.pill, backgroundColor: colors.text },
-  saveText: { color: colors.onLight, fontWeight: '600' },
-  pressed: { opacity: 0.8 },
+const makeStyles = () =>
+  StyleSheet.create({
+    card: { gap: 10 },
+    header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 34 },
+    title: { fontSize: 16, fontWeight: '600', color: colors.text },
+    bio: { fontSize: 15, lineHeight: 22, color: colors.text },
+    placeholder: { fontSize: 14, lineHeight: 20, color: colors.muted },
+    input: {
+      ...glass,
+      minHeight: 96,
+      padding: 12,
+      borderRadius: radii.inner,
+      fontSize: 15,
+      lineHeight: 21,
+      color: colors.text,
+      textAlignVertical: 'top',
+    },
+    actions: { flexDirection: 'row', alignItems: 'center', gap: 16 },
+    counter: { flex: 1, fontSize: 12, color: colors.faint },
+    cancel: { fontSize: 14, color: colors.muted },
+    saveButton: { paddingHorizontal: 18, paddingVertical: 9, borderRadius: radii.pill, backgroundColor: colors.text },
+    saveText: { color: colors.onLight, fontWeight: '600' },
+    pressed: { opacity: 0.8 },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

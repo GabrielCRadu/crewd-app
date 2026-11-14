@@ -5,7 +5,7 @@ import MapView from 'react-native-maps';
 import EventMapMarker from './EventMapMarker';
 import EventMapPreview from './EventMapPreview';
 import type { EventWithDistance, LatLng } from '../../types/events';
-import { colorScheme, colors, isDark } from '../../theme/colors';
+import { appearance, colors, onThemeChange } from '../../theme/colors';
 import { darkMapStyle } from '../../theme/mapStyle';
 import { radii } from '../../theme/shape';
 import { tr } from '../../i18n';
@@ -55,8 +55,8 @@ export default function EventsMap({ events, userLocation, showUserLocation, onOp
         showsUserLocation={showUserLocation}
         showsMyLocationButton={false}
         toolbarEnabled={false}
-        userInterfaceStyle={colorScheme}
-        customMapStyle={isDark ? darkMapStyle : undefined}
+        userInterfaceStyle={appearance.scheme}
+        customMapStyle={appearance.isDark ? darkMapStyle : undefined}
         // O apăsare pe hartă (nu pe un eveniment) închide previzualizarea.
         onPress={(e) => {
           if (e.nativeEvent.action !== 'marker-press') setSelectedId(null);
@@ -81,15 +81,21 @@ export default function EventsMap({ events, userLocation, showUserLocation, onOp
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, marginTop: 12, backgroundColor: colors.backgroundAlt },
-  emptyOverlay: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, alignItems: 'center', justifyContent: 'center' },
-  emptyText: {
-    color: colors.muted,
-    backgroundColor: colors.surface,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: radii.pill,
-    overflow: 'hidden',
-  },
+const makeStyles = () =>
+  StyleSheet.create({
+    container: { flex: 1, marginTop: 12, backgroundColor: colors.backgroundAlt },
+    emptyOverlay: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, alignItems: 'center', justifyContent: 'center' },
+    emptyText: {
+      color: colors.muted,
+      backgroundColor: colors.surface,
+      paddingHorizontal: 14,
+      paddingVertical: 8,
+      borderRadius: radii.pill,
+      overflow: 'hidden',
+    },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

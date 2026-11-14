@@ -17,7 +17,7 @@ import QRCode from 'react-native-qrcode-svg';
 import GlassIconButton from './GlassIconButton';
 import GradientButton from './GradientButton';
 import { copyInvite, inviteUrl, shareInvite } from '../services/inviteService';
-import { colors } from '../theme/colors';
+import { colors, onThemeChange } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
 import { tr } from '../i18n';
 
@@ -137,35 +137,42 @@ export default function InviteQrSheet({ visible, username, name, photoUrl, onClo
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, justifyContent: 'flex-end', backgroundColor: colors.backdrop },
-  sheet: {
-    backgroundColor: colors.backgroundAlt,
-    borderTopLeftRadius: radii.card,
-    borderTopRightRadius: radii.card,
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingHorizontal: 24,
-    paddingTop: 10,
-    alignItems: 'center',
-    gap: 16,
-  },
-  grabber: { width: 40, height: 4, borderRadius: radii.pill, backgroundColor: colors.border },
-  top: { position: 'absolute', top: 14, right: 16 },
-  // Loc deasupra codului pentru butonul X din colț.
-  qrCard: { backgroundColor: colors.qr.light, borderRadius: radii.card, padding: 18, marginTop: 40 },
-  username: { color: colors.text, fontSize: 18, fontWeight: '700', textAlign: 'center' },
-  hint: { color: colors.muted, fontSize: 15, textAlign: 'center' },
-  actions: { alignSelf: 'stretch', gap: 10, marginTop: 4 },
-  copyButton: {
-    ...glass,
-    borderRadius: radii.pill,
-    paddingVertical: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  copyPressed: { backgroundColor: colors.cardStrong },
-  copyText: { color: colors.text, fontSize: 16, fontWeight: '600' },
+const makeStyles = () =>
+  StyleSheet.create({
+    root: { flex: 1, justifyContent: 'flex-end', backgroundColor: colors.backdrop },
+    sheet: {
+      backgroundColor: colors.backgroundAlt,
+      borderTopLeftRadius: radii.card,
+      borderTopRightRadius: radii.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+      paddingHorizontal: 24,
+      paddingTop: 10,
+      alignItems: 'center',
+      gap: 16,
+    },
+    grabber: { width: 40, height: 4, borderRadius: radii.pill, backgroundColor: colors.border },
+    top: { position: 'absolute', top: 14, right: 16 },
+    // Loc deasupra codului pentru butonul X din colț.
+    // Contur fin, ca un card alb să nu se piardă pe fundalul deschis.
+    qrCard: { borderWidth: 1, borderColor: colors.border, backgroundColor: colors.qr.light, borderRadius: radii.card, padding: 18, marginTop: 40 },
+    username: { color: colors.text, fontSize: 18, fontWeight: '700', textAlign: 'center' },
+    hint: { color: colors.muted, fontSize: 15, textAlign: 'center' },
+    actions: { alignSelf: 'stretch', gap: 10, marginTop: 4 },
+    copyButton: {
+      ...glass,
+      borderRadius: radii.pill,
+      paddingVertical: 14,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+    },
+    copyPressed: { backgroundColor: colors.cardStrong },
+    copyText: { color: colors.text, fontSize: 16, fontWeight: '600' },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

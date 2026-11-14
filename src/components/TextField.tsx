@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import type { StyleProp, TextInputInstance, TextInputProps, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-import { colors } from '../theme/colors';
+import { colors, onThemeChange } from '../theme/colors';
 import { type } from '../theme/typography';
 import { glass, radii } from '../theme/shape';
 import { tr } from '../i18n';
@@ -63,20 +63,26 @@ const TextField = forwardRef<TextInputInstance, Props>(function TextField(
 
 export default TextField;
 
-const styles = StyleSheet.create({
-  container: { gap: 8 },
-  label: { ...type.label },
-  field: {
-    ...glass,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    minHeight: 54,
-    paddingHorizontal: 18,
-    borderRadius: radii.pill,
-  },
-  fieldFocused: { borderColor: colors.muted, backgroundColor: colors.cardStrong },
-  fieldError: { borderColor: colors.nope },
-  input: { flex: 1, color: colors.text, fontSize: 16, paddingVertical: 14 },
-  error: { color: colors.nope, fontSize: 12, marginLeft: 6 },
+const makeStyles = () =>
+  StyleSheet.create({
+    container: { gap: 8 },
+    label: { ...type.label },
+    field: {
+      ...glass,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      minHeight: 54,
+      paddingHorizontal: 18,
+      borderRadius: radii.pill,
+    },
+    fieldFocused: { borderColor: colors.muted, backgroundColor: colors.cardStrong },
+    fieldError: { borderColor: colors.nope },
+    input: { flex: 1, color: colors.text, fontSize: 16, paddingVertical: 14 },
+    error: { color: colors.nope, fontSize: 12, marginLeft: 6 },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

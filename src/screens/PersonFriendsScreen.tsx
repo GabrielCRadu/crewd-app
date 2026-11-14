@@ -11,9 +11,9 @@ import SegmentedControl from '../components/SegmentedControl';
 import { useFriends } from '../hooks/useFriends';
 import { idsWithStatus } from '../services/friendsService';
 import { friendsOfPerson, getPerson } from '../services/peopleService';
-import { colors } from '../theme/colors';
+import { colors, onThemeChange } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
-import { tr } from '../i18n';
+import { tr, trPlural } from '../i18n';
 
 /** Ruta e înregistrată în toate stivele unde există profilul unei persoane, cu același parametru. */
 type PersonFriendsParams = { PersonFriends: { personId: string } };
@@ -40,9 +40,9 @@ export default function PersonFriendsScreen() {
       <View style={styles.header}>
         <GlassIconButton icon="chevron-back" onPress={() => navigation.goBack()} />
         <View style={styles.headerText}>
-          <Text style={styles.title}>{tr('Prietenii lui')}{' '}{person?.name ?? ''}</Text>
+          <Text style={styles.title}>{tr('Prietenii lui {name}', { name: person?.name ?? '' })}</Text>
           <Text style={styles.subtitle}>
-            {all.length} {all.length === 1 ? 'prieten' : 'prieteni'} · {mutual.length}{' '}{tr('comuni')}</Text>
+            {trPlural(all.length, '{n} prieten', '{n} prieteni')} · {trPlural(mutual.length, '{n} comun', '{n} comuni')}</Text>
         </View>
       </View>
 
@@ -92,20 +92,26 @@ export default function PersonFriendsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  header: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 20, paddingTop: 8, paddingBottom: 12 },
-  headerText: { flex: 1, gap: 2 },
-  title: { fontSize: 24, fontWeight: '700', letterSpacing: -0.5, color: colors.text },
-  subtitle: { fontSize: 13, color: colors.muted },
-  filter: { paddingHorizontal: 20, paddingBottom: 12 },
-  content: { padding: 20, paddingTop: 4, paddingBottom: 32, gap: 10 },
-  empty: { fontSize: 14, color: colors.muted },
-  row: { ...glass, flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: radii.card },
-  pressed: { backgroundColor: colors.cardStrong },
-  rowText: { flex: 1, gap: 2 },
-  name: { fontSize: 16, fontWeight: '600', color: colors.text },
-  muted: { fontSize: 13, color: colors.muted },
-  mutualBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: radii.pill, backgroundColor: colors.text },
-  mutualText: { fontSize: 11, fontWeight: '700', color: colors.onLight },
+const makeStyles = () =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    header: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 20, paddingTop: 8, paddingBottom: 12 },
+    headerText: { flex: 1, gap: 2 },
+    title: { fontSize: 24, fontWeight: '700', letterSpacing: -0.5, color: colors.text },
+    subtitle: { fontSize: 13, color: colors.muted },
+    filter: { paddingHorizontal: 20, paddingBottom: 12 },
+    content: { padding: 20, paddingTop: 4, paddingBottom: 32, gap: 10 },
+    empty: { fontSize: 14, color: colors.muted },
+    row: { ...glass, flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: radii.card },
+    pressed: { backgroundColor: colors.cardStrong },
+    rowText: { flex: 1, gap: 2 },
+    name: { fontSize: 16, fontWeight: '600', color: colors.text },
+    muted: { fontSize: 13, color: colors.muted },
+    mutualBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: radii.pill, backgroundColor: colors.text },
+    mutualText: { fontSize: 11, fontWeight: '700', color: colors.onLight },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

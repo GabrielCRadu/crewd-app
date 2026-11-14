@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-import { colors } from '../theme/colors';
+import { colors, onThemeChange } from '../theme/colors';
 import { PASSWORD_RULES, passwordChecks } from '../utils/passwordRules';
 import { tr } from '../i18n';
 
@@ -23,9 +23,15 @@ export default function PasswordChecklist({ password }: { password: string }) {
   );
 }
 
-const styles = StyleSheet.create({
-  list: { gap: 6, marginTop: -6 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  text: { color: colors.muted, fontSize: 13 },
-  textOk: { color: colors.text },
+const makeStyles = () =>
+  StyleSheet.create({
+    list: { gap: 6, marginTop: -6 },
+    row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    text: { color: colors.muted, fontSize: 13 },
+    textOk: { color: colors.text },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

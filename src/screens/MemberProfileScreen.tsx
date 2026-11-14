@@ -7,7 +7,7 @@ import { useMyGroups } from '../hooks/useMyGroups';
 import { useUserLocation } from '../hooks/useUserLocation';
 import { tr } from '../i18n';
 import type { ChatsStackParamList } from '../navigation/chatsTypes';
-import { colors } from '../theme/colors';
+import { colors, onThemeChange } from '../theme/colors';
 
 type Props = NativeStackScreenProps<ChatsStackParamList, 'MemberProfile'>;
 
@@ -43,6 +43,13 @@ export default function MemberProfileScreen({ navigation, route }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  note: { color: colors.muted, fontSize: 14 },
+const makeStyles = () =>
+  StyleSheet.create({
+    note: { color: colors.muted, fontSize: 14 },
+  });
+
+let styles = makeStyles();
+// Tema se poate schimba din mers (Setări → Temă): stilurile se refac din noile culori.
+onThemeChange(() => {
+  styles = makeStyles();
 });

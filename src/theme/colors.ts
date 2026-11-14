@@ -1,21 +1,22 @@
 import { Appearance } from 'react-native';
 
-import { getThemePreference, resolveColorScheme } from './themePreference';
-
 /**
  * Paleta aplicației, după docs/design-language.md: stil monocrom.
  * Negru, gri și alb; culoarea o dau pozele, nu interfața. Excepții: erori (roșu) și distanțe pe hartă.
  *
- * Tema (închisă / deschisă) se alege o dată, la pornirea aplicației: cea din Setări (Luminoasă / Întunecată),
- * sau cea a telefonului („Ca telefonul”, implicit; `app.json` → "userInterfaceStyle": "automatic").
- * Alegerea se citește în index.ts înainte să se încarce ecranele (src/theme/themePreference.ts);
- * la schimbarea ei din Setări, aplicația se reîncarcă.
- * Numele culorilor sunt aceleași în ambele teme, deci ecranele nu știu ce temă e activă.
+ * Tema (închisă / deschisă) se poate schimba din mers (Setări → Temă, vezi src/theme/themeChoice.ts):
+ * `applyColorScheme` înlocuiește valorile din `colors` (și din `tagTints`), apoi anunță modulele
+ * care și-au construit stilurile din ele (`onThemeChange`), ca să le refacă. Numele culorilor sunt
+ * aceleași în ambele teme, deci ecranele nu știu ce temă e activă.
+ *
+ * Reguli pentru cod nou:
+ * - folosește `colors.x` / `glass` / `type` / `gradients` în StyleSheet-uri construite ca restul
+ *   ecranelor (`let styles = makeStyles(); onThemeChange(() => { styles = makeStyles(); });`)
+ *   sau direct la randare;
+ * - pentru tema activă citește `appearance.isDark` / `appearance.scheme` la randare.
  */
 
-/** Tema aleasă la pornire: cea din Setări, sau cea a telefonului („Ca telefonul”, implicit). */
-export const colorScheme: 'light' | 'dark' = resolveColorScheme(getThemePreference(), Appearance.getColorScheme());
-export const isDark = colorScheme === 'dark';
+export type ColorScheme = 'light' | 'dark';
 
 const dark = {
   /** Fundalul tuturor ecranelor: negru simplu. */
@@ -60,8 +61,19 @@ const light: typeof dark = {
   primary: '#0A0A0A',
 };
 
+const darkTagTint = { background: 'rgba(255,255,255,0.08)', border: 'rgba(255,255,255,0.22)' };
+const lightTagTint = { background: 'rgba(0,0,0,0.05)', border: 'rgba(0,0,0,0.18)' };
+
+const initialScheme: ColorScheme = Appearance.getColorScheme() === 'light' ? 'light' : 'dark';
+
+/** Tema activă acum (se schimbă cu `applyColorScheme`). Citește-o la randare, nu la încărcarea fișierului. */
+export const appearance = {
+  scheme: initialScheme as ColorScheme,
+  isDark: initialScheme === 'dark',
+};
+
 export const colors = {
-  ...(isDark ? dark : light),
+  ...(initialScheme === 'dark' ? dark : light),
   /** Tonuri de gri (fostele accente calde), pentru elementele care încă le folosesc. */
   accentYellow: '#D9D9D9',
   accentOrange: '#A6A6A6',
@@ -96,14 +108,35 @@ export const colors = {
 };
 
 /** Tag-uri evidențiate (stil monocrom: fundal gri ușor + contur fin). Numele cheilor rămân din varianta colorată. */
-const tagTint = isDark
-  ? { background: 'rgba(255,255,255,0.08)', border: 'rgba(255,255,255,0.22)' }
-  : { background: 'rgba(0,0,0,0.05)', border: 'rgba(0,0,0,0.18)' };
-
+const initialTint = initialScheme === 'dark' ? darkTagTint : lightTagTint;
 export const tagTints = {
-  orange: tagTint,
-  pink: tagTint,
-  magenta: tagTint,
+  orange: { ...initialTint },
+  pink: { ...initialTint },
+  magenta: { ...initialTint },
 };
 
 export type TagTint = (typeof tagTints)[keyof typeof tagTints];
+
+const listeners: (() => void)[] = [];
+
+/**
+ * Cheamă `listener` după fiecare schimbare de temă, ca să refaci ce ai construit din culori
+ * (StyleSheet-uri, obiecte de stil). Ascultătorii rulează în ordinea în care s-au înregistrat:
+ * întâi cei din src/theme (sticla, tipografia, gradienturile), apoi ecranele.
+ */
+export function onThemeChange(listener: () => void): void {
+  listeners.push(listener);
+}
+
+/** Trece toată paleta pe tema dată și anunță modulele să-și refacă stilurile. */
+export function applyColorScheme(scheme: ColorScheme): void {
+  if (scheme === appearance.scheme) return;
+  appearance.scheme = scheme;
+  appearance.isDark = scheme === 'dark';
+  Object.assign(colors, scheme === 'dark' ? dark : light);
+  const tint = scheme === 'dark' ? darkTagTint : lightTagTint;
+  Object.assign(tagTints.orange, tint);
+  Object.assign(tagTints.pink, tint);
+  Object.assign(tagTints.magenta, tint);
+  listeners.forEach((listener) => listener());
+}

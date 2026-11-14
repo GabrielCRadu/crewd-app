@@ -12,10 +12,10 @@ import { useAuth } from '../../context/AuthContext';
 import { useFriends } from '../../hooks/useFriends';
 import { useMutualFriends } from '../../hooks/useMutualFriends';
 import { usePublicProfile } from '../../hooks/usePublicProfile';
-import { tr } from '../../i18n';
+import { tr, trPlural } from '../../i18n';
 import { isFirebaseConfigured } from '../../lib/firebase';
 import { blockPerson, statusOf, unblockPerson } from '../../services/friendsService';
-import { colors } from '../../theme/colors';
+import { colors, onThemeChange } from '../../theme/colors';
 import { radii } from '../../theme/shape';
 import { allProfileTags } from '../../utils/profileTags';
 
@@ -142,7 +142,7 @@ export default function UserProfileView({ uid, fallback, onBack, children }: Pro
             <View style={styles.metaRow}>
               <Ionicons name="people-outline" size={15} color={colors.text} />
               <Text style={styles.meta}>
-                {mutual.count === 1 ? tr('1 prieten în comun') : tr('{count} prieteni în comun', { count: mutual.count })}
+                {trPlural(mutual.count, '{n} prieten în comun', '{n} prieteni în comun')}
               </Text>
             </View>
           ) : null}
@@ -167,8 +167,9 @@ export default function UserProfileView({ uid, fallback, onBack, children }: Pro
           {tags.length > 0 ? (
             <View style={styles.section}>
               <Text style={styles.label}>
-                {tr('ÎN COMUN ·')}{' '}
-                {shared.length === 0 ? tr('NICIUN TAG') : shared.length === 1 ? tr('1 TAG') : tr('{count} TAG-URI', { count: shared.length })}
+                {shared.length === 0
+                  ? tr('ÎN COMUN · NICIUN TAG')
+                  : trPlural(shared.length, 'ÎN COMUN · {n} TAG', 'ÎN COMUN · {n} TAG-URI')}
               </Text>
               <View style={styles.tags}>
                 {shared.map((t) => (
@@ -192,41 +193,48 @@ export default function UserProfileView({ uid, fallback, onBack, children }: Pro
   );
 }
 
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
-  header: { paddingHorizontal: 20, flexDirection: 'row', justifyContent: 'space-between' },
-  friendButton: { marginTop: 10 },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16, padding: 32 },
-  identity: { paddingHorizontal: 20, paddingTop: 20, gap: 10 },
-  photo: {
-    width: 96,
-    height: 96,
-    borderRadius: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.card,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  photoInitial: { fontSize: 40, fontWeight: '700', color: colors.text },
-  name: { fontSize: 46, lineHeight: 50, fontWeight: '800', letterSpacing: -1.5, color: colors.text, marginTop: 10 },
-  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  meta: { fontSize: 15, fontWeight: '500', color: colors.text },
-  username: { fontSize: 15, color: colors.muted },
-  content: { padding: 20, paddingTop: 28, gap: 28 },
-  section: { gap: 12 },
-  label: { fontSize: 12, fontWeight: '700', letterSpacing: 1.6, color: colors.muted },
-  card: {
-    padding: 18,
-    borderRadius: radii.card,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.card,
-  },
-  bio: { fontSize: 16, lineHeight: 24, color: colors.text },
-  tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  faded: { opacity: 0.4 },
-  muted: { fontSize: 13, color: colors.muted, textAlign: 'center' },
-  pill: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: radii.pill, backgroundColor: colors.text },
-  pillText: { color: colors.onLight, fontWeight: '600' },
+const makeStyles = () =>
+  StyleSheet.create({
+    screen: { flex: 1, backgroundColor: colors.background },
+    header: { paddingHorizontal: 20, flexDirection: 'row', justifyContent: 'space-between' },
+    friendButton: { marginTop: 10 },
+    center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16, padding: 32 },
+    identity: { paddingHorizontal: 20, paddingTop: 20, gap: 10 },
+    photo: {
+      width: 96,
+      height: 96,
+      borderRadius: 28,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    photoInitial: { fontSize: 40, fontWeight: '700', color: colors.text },
+    name: { fontSize: 46, lineHeight: 50, fontWeight: '800', letterSpacing: -1.5, color: colors.text, marginTop: 10 },
+    metaRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+    meta: { fontSize: 15, fontWeight: '500', color: colors.text },
+    username: { fontSize: 15, color: colors.muted },
+    content: { padding: 20, paddingTop: 28, gap: 28 },
+    section: { gap: 12 },
+    label: { fontSize: 12, fontWeight: '700', letterSpacing: 1.6, color: colors.muted },
+    card: {
+      padding: 18,
+      borderRadius: radii.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.card,
+    },
+    bio: { fontSize: 16, lineHeight: 24, color: colors.text },
+    tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    faded: { opacity: 0.4 },
+    muted: { fontSize: 13, color: colors.muted, textAlign: 'center' },
+    pill: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: radii.pill, backgroundColor: colors.text },
+    pillText: { color: colors.onLight, fontWeight: '600' },
+  });
+
+let styles = makeStyles();
+// Tema se poate schimba din mers (Setări → Temă): stilurile se refac din noile culori.
+onThemeChange(() => {
+  styles = makeStyles();
 });

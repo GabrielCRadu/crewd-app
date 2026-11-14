@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { colors } from '../theme/colors';
+import { colors, onThemeChange } from '../theme/colors';
 import { type } from '../theme/typography';
 
 /**
@@ -72,15 +72,21 @@ function inline(text: string): ReactNode[] {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { gap: 10 },
-  h1: { ...type.screenTitle, fontSize: 26 },
-  h2: { color: colors.text, fontSize: 18, fontWeight: '700', marginTop: 14 },
-  h3: { color: colors.text, fontSize: 15, fontWeight: '700', marginTop: 6 },
-  paragraph: { color: colors.muted, fontSize: 14, lineHeight: 21 },
-  bold: { color: colors.text, fontWeight: '600' },
-  bulletRow: { flexDirection: 'row', gap: 8, paddingRight: 4 },
-  nested: { paddingLeft: 18 },
-  bulletDot: { color: colors.muted, fontSize: 14, lineHeight: 21 },
-  bulletText: { flex: 1, color: colors.muted, fontSize: 14, lineHeight: 21 },
+const makeStyles = () =>
+  StyleSheet.create({
+    root: { gap: 10 },
+    h1: { ...type.screenTitle, fontSize: 26 },
+    h2: { color: colors.text, fontSize: 18, fontWeight: '700', marginTop: 14 },
+    h3: { color: colors.text, fontSize: 15, fontWeight: '700', marginTop: 6 },
+    paragraph: { color: colors.muted, fontSize: 14, lineHeight: 21 },
+    bold: { color: colors.text, fontWeight: '600' },
+    bulletRow: { flexDirection: 'row', gap: 8, paddingRight: 4 },
+    nested: { paddingLeft: 18 },
+    bulletDot: { color: colors.muted, fontSize: 14, lineHeight: 21 },
+    bulletText: { flex: 1, color: colors.muted, fontSize: 14, lineHeight: 21 },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

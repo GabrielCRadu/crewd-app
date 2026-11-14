@@ -18,7 +18,7 @@ import { useUserLocation } from '../hooks/useUserLocation';
 import type { EventsStackParamList } from '../navigation/eventsTypes';
 import { saveEventBadgeProposals } from '../services/badgesService';
 import { getCompanions, saveEventRatings } from '../services/ratingsService';
-import { colors } from '../theme/colors';
+import { colors, onThemeChange } from '../theme/colors';
 import { type } from '../theme/typography';
 import { glass, radii } from '../theme/shape';
 import type { EventBadgeProposals, VotedBadgeId } from '../types/badges';
@@ -114,7 +114,7 @@ export default function RateEventScreen({ navigation, route }: Props) {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.notice}>
           <Ionicons name="lock-closed-outline" size={16} color={colors.text} />
-          <Text style={styles.noticeText}>{tr('Evaluările sunt anonime: nimeni nu află cine ce a dat. Pe profiluri apar doar totalurile. Un badge apare abia când')}{' '}{BADGE_THRESHOLD}{' '}{tr('persoane diferite l-au propus.')}</Text>
+          <Text style={styles.noticeText}>{tr('Evaluările sunt anonime: nimeni nu află cine ce a dat. Pe profiluri apar doar totalurile. Un badge apare abia când {n} persoane diferite l-au propus.', { n: BADGE_THRESHOLD })}</Text>
         </View>
 
         {companions.length === 0 ? (
@@ -179,42 +179,48 @@ export default function RateEventScreen({ navigation, route }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
-  header: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 20, paddingTop: 8, paddingBottom: 12 },
-  headerText: { flex: 1, gap: 2 },
-  title: { ...type.screenTitle, fontSize: 28 },
-  subtitle: { fontSize: 14, color: colors.muted },
-  content: { padding: 20, paddingTop: 8, paddingBottom: 32, gap: 12 },
-  notice: {
-    ...glass,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: radii.inner,
-  },
-  noticeText: { flex: 1, fontSize: 13, lineHeight: 18, color: colors.text },
-  muted: { fontSize: 13, color: colors.muted },
-  personCard: { ...glass, gap: 12, padding: 14, borderRadius: radii.card },
-  personCardReported: { borderColor: colors.nope },
-  personRow: { flexDirection: 'row', alignItems: 'center', gap: 12, borderRadius: radii.inner },
-  pressed: { opacity: 0.7 },
-  personText: { flex: 1, gap: 2 },
-  personName: { fontSize: 17, fontWeight: '600', color: colors.text },
-  tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  reportButton: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start' },
-  reportText: { fontSize: 13, color: colors.muted },
-  reportedRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  reportedText: { flex: 1, fontSize: 14, fontWeight: '500', color: colors.nope },
-  link: { fontSize: 13, color: colors.muted, textDecorationLine: 'underline' },
-  bottomBar: {
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    backgroundColor: colors.background,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-  },
+const makeStyles = () =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
+    header: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 20, paddingTop: 8, paddingBottom: 12 },
+    headerText: { flex: 1, gap: 2 },
+    title: { ...type.screenTitle, fontSize: 28 },
+    subtitle: { fontSize: 14, color: colors.muted },
+    content: { padding: 20, paddingTop: 8, paddingBottom: 32, gap: 12 },
+    notice: {
+      ...glass,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      paddingHorizontal: 14,
+      paddingVertical: 10,
+      borderRadius: radii.inner,
+    },
+    noticeText: { flex: 1, fontSize: 13, lineHeight: 18, color: colors.text },
+    muted: { fontSize: 13, color: colors.muted },
+    personCard: { ...glass, gap: 12, padding: 14, borderRadius: radii.card },
+    personCardReported: { borderColor: colors.nope },
+    personRow: { flexDirection: 'row', alignItems: 'center', gap: 12, borderRadius: radii.inner },
+    pressed: { opacity: 0.7 },
+    personText: { flex: 1, gap: 2 },
+    personName: { fontSize: 17, fontWeight: '600', color: colors.text },
+    tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    reportButton: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start' },
+    reportText: { fontSize: 13, color: colors.muted },
+    reportedRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    reportedText: { flex: 1, fontSize: 14, fontWeight: '500', color: colors.nope },
+    link: { fontSize: 13, color: colors.muted, textDecorationLine: 'underline' },
+    bottomBar: {
+      paddingHorizontal: 20,
+      paddingTop: 12,
+      backgroundColor: colors.background,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+    },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

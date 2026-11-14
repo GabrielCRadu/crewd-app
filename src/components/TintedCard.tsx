@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import type { StyleProp, ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { colors } from '../theme/colors';
+import { colors, onThemeChange } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
 
 interface Props {
@@ -23,6 +23,12 @@ export default function TintedCard({ tint, style, children }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  card: { ...glass, borderColor: colors.border, padding: 18, borderRadius: radii.card, overflow: 'hidden' },
+const makeStyles = () =>
+  StyleSheet.create({
+    card: { ...glass, borderColor: colors.border, padding: 18, borderRadius: radii.card, overflow: 'hidden' },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

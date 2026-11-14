@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 
 import { useLastMessage } from '../../hooks/useLastMessage';
-import { colors } from '../../theme/colors';
+import { colors, onThemeChange } from '../../theme/colors';
 import { dayLabel, lastMessagePreview } from '../../utils/chatRules';
 import { formatTime } from '../../utils/dates';
 
@@ -40,9 +40,15 @@ export default function LastMessageLine({ eventId, groupId, myUid, fallback }: P
   );
 }
 
-const styles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  text: { fontSize: 13, color: colors.muted },
-  preview: { flex: 1 },
-  time: { fontSize: 12, color: colors.faint },
+const makeStyles = () =>
+  StyleSheet.create({
+    row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    text: { fontSize: 13, color: colors.muted },
+    preview: { flex: 1 },
+    time: { fontSize: 12, color: colors.faint },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });

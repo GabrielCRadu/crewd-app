@@ -1,4 +1,4 @@
-import { colors } from './colors';
+import { colors, onThemeChange } from './colors';
 
 /** Raze de colț, după docs/design-language.md. */
 export const radii = {
@@ -10,9 +10,14 @@ export const radii = {
   pill: 999,
 };
 
-/** Stilul de bază pentru o suprafață de sticlă. */
+/** Stilul de bază pentru o suprafață de sticlă (se reface la schimbarea temei). */
 export const glass = {
   backgroundColor: colors.card,
   borderWidth: 1,
   borderColor: colors.border,
-} as const;
+};
+
+onThemeChange(() => {
+  glass.backgroundColor = colors.card;
+  glass.borderColor = colors.border;
+});

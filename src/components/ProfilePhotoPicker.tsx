@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Avatar from './Avatar';
 import { PhotoPermissionError, pickProfilePhoto } from '../services/photoService';
 import type { PhotoSource } from '../services/photoService';
-import { colors } from '../theme/colors';
+import { colors, onThemeChange } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
 import { tr } from '../i18n';
 
@@ -68,18 +68,24 @@ function PhotoButton({
   );
 }
 
-const styles = StyleSheet.create({
-  block: { alignItems: 'center', gap: 16 },
-  actions: { flexDirection: 'row', gap: 10 },
-  button: {
-    ...glass,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 18,
-    paddingVertical: 11,
-    borderRadius: radii.pill,
-  },
-  buttonText: { color: colors.text, fontSize: 14, fontWeight: '500' },
-  dimmed: { opacity: 0.6 },
+const makeStyles = () =>
+  StyleSheet.create({
+    block: { alignItems: 'center', gap: 16 },
+    actions: { flexDirection: 'row', gap: 10 },
+    button: {
+      ...glass,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      paddingHorizontal: 18,
+      paddingVertical: 11,
+      borderRadius: radii.pill,
+    },
+    buttonText: { color: colors.text, fontSize: 14, fontWeight: '500' },
+    dimmed: { opacity: 0.6 },
+  });
+let styles = makeStyles();
+// Stilurile se refac când se schimbă tema (Setări → Temă).
+onThemeChange(() => {
+  styles = makeStyles();
 });
