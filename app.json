@@ -1,16 +1,17 @@
 {
   "expo": {
-    "name": "meet-up-app",
+    "name": "Crewd",
     "slug": "meet-up-app",
     "scheme": "crewd",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
     "ios": {
       "supportsTablet": true
     },
     "android": {
+      "package": "com.crewd.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
