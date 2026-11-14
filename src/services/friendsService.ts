@@ -39,7 +39,8 @@ let combined: FriendsState = testState;
 const listeners = new Set<() => void>();
 
 function changed() {
-  combined = { ...realState, ...testState };
+  // Contul real vede doar relațiile reale; persoanele de test rămân în modul fără Firebase (audit).
+  combined = me !== null ? realState : testState;
   listeners.forEach((listener) => listener());
 }
 

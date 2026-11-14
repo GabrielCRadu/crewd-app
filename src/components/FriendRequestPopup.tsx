@@ -13,6 +13,7 @@ import {
   subscribeToFriendNotices,
 } from '../services/friendsService';
 import type { FriendNotice } from '../services/friendsService';
+import { isFirebaseConfigured } from '../lib/firebase';
 import { getPerson } from '../services/peopleService';
 import { getPublicProfile } from '../services/publicProfileService';
 import { personFromPublic } from '../utils/publicProfile';
@@ -144,7 +145,7 @@ export default function FriendRequestPopup({ onOpenProfile, onOpenRequests, show
       hideTimer.current = setTimeout(hide, VISIBLE_MS);
     }
     // DEMO: o cerere de la Tudor la câteva secunde după pornire.
-    scheduleDemoFriendRequest();
+    if (!isFirebaseConfigured) scheduleDemoFriendRequest();
     return () => {
       active = false;
       unsubscribe();

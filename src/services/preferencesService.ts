@@ -62,8 +62,8 @@ export function loadUserPreferences(
     savedScores && Object.keys(savedScores).length > 0
       ? savedScores
       : Object.fromEntries(profileTags.map((tag) => [tag, 1]));
-  // DEMO: evenimentele trecute mock (istoricul din Profil) se adaugă doar local, nu se salvează.
-  const joinedEventIds = [...new Set([...(saved?.joinedEventIds ?? []), ...PAST_JOINED_EVENT_IDS])];
+  // Contul real: doar înscrierile lui (fără istoricul demo).
+  const joinedEventIds = [...new Set(saved?.joinedEventIds ?? [])];
   setPreferences({ tagScores, joinedEventIds });
 }
 

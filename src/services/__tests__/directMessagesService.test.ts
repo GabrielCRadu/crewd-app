@@ -32,11 +32,11 @@ const at = new Date('2026-11-14T10:00:00Z');
 afterEach(() => stopDmSync());
 
 describe('direct messages with real accounts', () => {
-  it('lists a real conversation with its last message, next to the test ones', () => {
+  it('lists a real conversation with its last message, without the test ones', () => {
     startDmSync('me');
     onThreads([{ other: 'u1', last: { id: 'x', authorUid: 'u1', text: 'Salut', sentAt: at } }]);
     expect(getDirectThreads().u1).toEqual([{ id: 'x', fromMe: false, text: 'Salut', eventId: undefined, sentAt: at }]);
-    expect(getDirectThreads().p1?.length).toBeGreaterThan(0);
+    expect(getDirectThreads().p1).toBeUndefined();
   });
 
   it('shows all messages of an opened conversation', () => {

@@ -36,6 +36,7 @@ import { formatLongDay, formatTime, hasEnded, isLive } from '../utils/dates';
 import { formatDistance, haversineKm } from '../utils/distance';
 import { tr } from '../i18n';
 import { safeExternalUrl } from '../utils/safeText';
+import { isFirebaseConfigured } from '../lib/firebase';
 
 /** Deschide un link de eveniment doar dacă e https; o eroare la deschidere nu blochează ecranul. */
 function openExternal(url: string | null | undefined) {
@@ -241,7 +242,14 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
                   </Pressable>
                 </View>
               ) : (
-                <GradientButton label={tr('Evaluează oamenii')} icon="people" onPress={openRating} />
+                isFirebaseConfigured ? (
+                  // Evaluarea oamenilor listează încă persoane de test: la conturile reale nu apare (audit).
+                  <View style={styles.joinedPill}>
+                    <Text style={styles.endedText}>{tr('Evenimentul s-a terminat')}</Text>
+                  </View>
+                ) : (
+                  <GradientButton label={tr('Evaluează oamenii')} icon="people" onPress={openRating} />
+                )
               )}
             </View>
           )

@@ -40,10 +40,14 @@ const friends = (other: string, status: FriendshipDoc['status'], requestedBy: st
 afterEach(() => stopFriendsSync());
 
 describe('friendsService with real accounts', () => {
-  it('merges real friendships with test people', () => {
+  it('shows a real account only its real friendships (test people stay out)', () => {
     startFriendsSync('me');
     onChange([friends('u1', 'friends', 'u1')], []);
     expect(getFriendsState().u1).toBe('friends');
+    expect(getFriendsState().p1).toBeUndefined();
+  });
+
+  it('shows test people again without a real account', () => {
     expect(getFriendsState().p1).toBe('friends');
   });
 

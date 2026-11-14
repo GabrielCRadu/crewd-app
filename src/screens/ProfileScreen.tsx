@@ -46,6 +46,7 @@ import { type } from '../theme/typography';
 import { glass, radii } from '../theme/shape';
 import { autoBadgeProgress } from '../utils/badgeRules';
 import { tr } from '../i18n';
+import { isFirebaseConfigured } from '../lib/firebase';
 
 /**
  * Tab-ul Profil (vezi docs/layout-guide.md): identitate cu statistici, „Despre mine”,
@@ -178,7 +179,7 @@ export default function ProfileScreen() {
         {/* Totalurile primite după evenimente (anonime) */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{tr('Ce spun alții despre tine')}</Text>
-          <ReputationStats reputation={reputation} />
+          {isFirebaseConfigured ? null : <ReputationStats reputation={reputation} />}
         </View>
 
         {/* Badge-uri: propuse de oameni după evenimente (de la 3 persoane în sus) și câștigate din activitate */}
