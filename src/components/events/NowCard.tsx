@@ -52,13 +52,13 @@ export default function NowCard({ event, onOpen }: Props) {
           {event.title}
         </Text>
         <View style={styles.footer}>
-          <Text style={styles.until}>{tr('Până la')}{' '}{formatTime(event.endsAt)}</Text>
+          <Text style={styles.until}>{tr('Până la {time}', { time: formatTime(event.endsAt) })}</Text>
           <Pressable onPress={onOpen} style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}>
             <Text style={styles.ctaText}>{tr('Vezi detalii')}</Text>
             <Ionicons name="arrow-forward" size={16} color={colors.photo.onPill} />
           </Pressable>
         </View>
-        {event.imageCredit ? <Text style={styles.credit}>{tr('Foto:')}{' '}{event.imageCredit}</Text> : null}
+        {event.imageCredit ? <Text style={styles.credit}>{tr('Foto: {credit}', { credit: event.imageCredit })}</Text> : null}
       </View>
     </Pressable>
   );

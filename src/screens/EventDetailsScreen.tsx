@@ -120,7 +120,7 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
           {/* Umbrire sus, ca butoanele și bara telefonului să se vadă și pe afișe albe */}
           <LinearGradient colors={gradients.scrimTop} style={[styles.scrimTop, { height: insets.top + 90 }]} />
           {event.imageUrl && event.imageCredit ? (
-            <Text style={styles.imageCredit}>{tr('Foto:')}{' '}{event.imageCredit}</Text>
+            <Text style={styles.imageCredit}>{tr('Foto: {credit}', { credit: event.imageCredit })}</Text>
           ) : null}
           <GlassIconButton
             icon="chevron-back"
@@ -186,7 +186,7 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
           {event.source ? (
             <Pressable onPress={() => Linking.openURL(event.source!.url)} hitSlop={6} style={styles.sourceRow}>
               <Ionicons name="open-outline" size={14} color={colors.faint} />
-              <Text style={styles.sourceText}>{tr('Sursa:')}{' '}<Text style={styles.sourceLink}>{event.source.name}</Text>{' '}{tr('· verifică detaliile acolo')}</Text>
+              <Text style={styles.sourceText}>{tr('Sursa:')} <Text style={styles.sourceLink}>{event.source.name}</Text> {tr('· verifică detaliile acolo')}</Text>
             </Pressable>
           ) : null}
 

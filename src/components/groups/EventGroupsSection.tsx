@@ -25,7 +25,7 @@ import {
 } from '../../utils/groupRules';
 import { getMyRatings, getReputation } from '../../services/ratingsService';
 import { ME_ID } from '../../data/mockRatings';
-import { tr } from '../../i18n';
+import { tr, trPlural } from '../../i18n';
 
 interface Props {
   event: Event;
@@ -81,7 +81,7 @@ export default function EventGroupsSection({ event, joined, myGroup, onPropose, 
     ? null
     : mineStatus === 'expired'
       ? tr('Nu s-au strâns 3 persoane la timp. Alege alt grup de mai jos sau propune unul.')
-      : tr('Așteptăm încă {missing} {p}. Chat-ul se deschide când sunteți cel puțin {MIN_FORM_MEMBERS}.', { missing: missing, p: missing === 1 ? 'persoană' : 'persoane', MIN_FORM_MEMBERS: MIN_FORM_MEMBERS });
+      : trPlural(missing, 'Așteptăm încă o persoană. Chat-ul se deschide când sunteți cel puțin {min}.', 'Așteptăm încă {n} persoane. Chat-ul se deschide când sunteți cel puțin {min}.', { min: MIN_FORM_MEMBERS });
 
   const cardFor = (g: CrewGroup) => (
     <GroupCard
@@ -135,7 +135,7 @@ export default function EventGroupsSection({ event, joined, myGroup, onPropose, 
             accessibilityRole="button"
             accessibilityState={{ expanded: othersOpen }}
           >
-            <Text style={type.label}>{tr('Alte grupuri ·')}{' '}{others.length}</Text>
+            <Text style={type.label}>{tr('Alte grupuri · {n}', { n: others.length })}</Text>
             <Ionicons name={othersOpen ? 'chevron-up' : 'chevron-down'} size={18} color={colors.muted} />
           </Pressable>
         </>

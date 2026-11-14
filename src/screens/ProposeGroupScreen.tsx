@@ -137,7 +137,7 @@ export default function ProposeGroupScreen({ navigation, route }: Props) {
                 />
               </View>
             )}
-            <Text style={styles.hint}>{tr('Evenimentul începe la')}{' '}{formatTime(event.startsAt)}.</Text>
+            <Text style={styles.hint}>{tr('Evenimentul începe la {time}.', { time: formatTime(event.startsAt) })}</Text>
             {errors.meetupAt ? <Text style={styles.error}>{errors.meetupAt}</Text> : null}
           </View>
 

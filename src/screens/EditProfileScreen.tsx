@@ -33,7 +33,7 @@ import { glass, radii } from '../theme/shape';
 import type { TagGroup } from '../types/social';
 import type { Gender, UserProfile } from '../types/user';
 import { formatBirthDate } from '../utils/birthDate';
-import { tr } from '../i18n';
+import { tr, trPlural } from '../i18n';
 
 type Props = NativeStackScreenProps<ProfileStackParamList, 'EditProfile'>;
 
@@ -227,7 +227,7 @@ export default function EditProfileScreen({ navigation }: Props) {
           <View style={styles.block}>
             <View style={styles.labelRow}>
               <Text style={styles.sectionTitle}>{tr('Preferințe')}</Text>
-              <Text style={styles.counter}>{totalTags}{' '}{tr('alese')}</Text>
+              <Text style={styles.counter}>{trPlural(totalTags, '{n} ales', '{n} alese')}</Text>
             </View>
             {TAG_GROUPS.map((group) => {
               const style = TAG_GROUP_STYLE[group.id];

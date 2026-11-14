@@ -85,7 +85,7 @@ export default function DirectChatScreen({ navigation, route }: Props) {
           keyExtractor={(m) => m.id}
           renderItem={renderMessage}
           ListEmptyComponent={
-            <Text style={styles.empty}>{tr('Trimite-i lui')}{' '}{person?.name ?? tr('prietenului tău')}{' '}{tr('un eveniment sau un mesaj.')}</Text>
+            <Text style={styles.empty}>{person ? tr('Trimite-i lui {name} un eveniment sau un mesaj.', { name: person.name }) : tr('Trimite-i prietenului tău un eveniment sau un mesaj.')}</Text>
           }
         />
 

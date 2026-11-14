@@ -65,7 +65,7 @@ export default function FriendButton({ personId, name, status, gender }: Props) 
   if (status === 'incoming') {
     return (
       <View style={styles.incoming}>
-        <Text style={styles.incomingText}>{name}{' '}{tr('ți-a trimis o cerere de prietenie.')}</Text>
+        <Text style={styles.incomingText}>{tr('{name} ți-a trimis o cerere de prietenie.', { name })}</Text>
         <View style={styles.row}>
           <Pressable
             onPress={() => acceptFriendRequest(personId)}

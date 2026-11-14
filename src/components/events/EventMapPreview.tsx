@@ -54,7 +54,7 @@ export default function EventMapPreview({ event, onOpen, onClose }: Props) {
       <GradientButton label={tr('Vezi detalii')} icon="arrow-forward" compact onPress={onOpen} />
 
       {/* Atribuirea afișului (obligatorie pentru imaginile din surse externe) */}
-      {event.imageUrl && event.imageCredit ? <Text style={styles.credit}>{tr('Foto:')}{' '}{event.imageCredit}</Text> : null}
+      {event.imageUrl && event.imageCredit ? <Text style={styles.credit}>{tr('Foto: {credit}', { credit: event.imageCredit })}</Text> : null}
     </View>
   );
 }

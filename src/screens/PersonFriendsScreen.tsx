@@ -13,7 +13,7 @@ import { idsWithStatus } from '../services/friendsService';
 import { friendsOfPerson, getPerson } from '../services/peopleService';
 import { colors } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
-import { tr } from '../i18n';
+import { tr, trPlural } from '../i18n';
 
 /** Ruta e înregistrată în toate stivele unde există profilul unei persoane, cu același parametru. */
 type PersonFriendsParams = { PersonFriends: { personId: string } };
@@ -40,9 +40,9 @@ export default function PersonFriendsScreen() {
       <View style={styles.header}>
         <GlassIconButton icon="chevron-back" onPress={() => navigation.goBack()} />
         <View style={styles.headerText}>
-          <Text style={styles.title}>{tr('Prietenii lui')}{' '}{person?.name ?? ''}</Text>
+          <Text style={styles.title}>{tr('Prietenii lui {name}', { name: person?.name ?? '' })}</Text>
           <Text style={styles.subtitle}>
-            {all.length} {all.length === 1 ? 'prieten' : 'prieteni'} · {mutual.length}{' '}{tr('comuni')}</Text>
+            {trPlural(all.length, '{n} prieten', '{n} prieteni')} · {trPlural(mutual.length, '{n} comun', '{n} comuni')}</Text>
         </View>
       </View>
 

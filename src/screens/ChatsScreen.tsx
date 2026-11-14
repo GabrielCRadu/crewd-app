@@ -94,7 +94,7 @@ export default function ChatsScreen({ navigation }: Props) {
                 ) : null}
               </View>
               <View style={styles.meetupBand}>
-                <Text style={styles.meetupText}>{tr('Ne vedem')}{' '}{formatDay(g.meetupAt, now).toLowerCase()}{' '}{tr('la')}{' '}{formatTime(g.meetupAt)} · {g.meetupPlace}
+                <Text style={styles.meetupText}>{tr('Ne vedem {day} la {time} · {place}', { day: formatDay(g.meetupAt, now).toLowerCase(), time: formatTime(g.meetupAt), place: g.meetupPlace })}
                 </Text>
               </View>
             </Pressable>

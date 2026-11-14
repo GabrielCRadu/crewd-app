@@ -17,7 +17,7 @@ import { getPerson } from '../services/peopleService';
 import { colors } from '../theme/colors';
 import { radii } from '../theme/shape';
 import type { Person } from '../types/social';
-import { tr } from '../i18n';
+import { tr, trPlural } from '../i18n';
 
 interface Props {
   /** Deschide profilul persoanei care a trimis cererea. */
@@ -140,7 +140,7 @@ export default function FriendRequestPopup({ onOpenProfile, onOpenRequests, show
         onPress={onOpenRequests}
         hitSlop={8}
         accessibilityRole="button"
-        accessibilityLabel={`${pendingCount} ${pendingCount === 1 ? 'cerere' : 'cereri'} de prietenie`}
+        accessibilityLabel={trPlural(pendingCount, '{n} cerere de prietenie', '{n} cereri de prietenie')}
         style={({ pressed }) => [styles.pill, { top: insets.top + 10 }, pressed && styles.pressed]}
       >
         <Ionicons name="person-add" size={14} color={colors.onLight} />
@@ -187,7 +187,7 @@ export default function FriendRequestPopup({ onOpenProfile, onOpenRequests, show
           {isMatch ? (
             <>
               <Text style={styles.eyebrow}>{tr('VĂ POTRIVIȚI')}</Text>
-              <Text style={styles.message} numberOfLines={2}>{tr('Și')}{' '}<Text style={styles.inlineName}>{person.name}</Text>{' '}{tr('ar mai ieși cu tine')}</Text>
+              <Text style={styles.message} numberOfLines={2}>{tr('Și {name} ar mai ieși cu tine', { name: person.name })}</Text>
             </>
           ) : (
             <>

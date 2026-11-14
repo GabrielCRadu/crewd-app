@@ -139,7 +139,7 @@ export default function FriendsMapScreen() {
               <Avatar name={selected.name} size={44} />
               <View style={styles.cardText}>
                 <Text style={styles.cardName}>
-                  {selected.name}{' '}{tr('· la')}{' '}{formatDistance(selected.distanceKm)}
+                  {tr('{name} · la {distance}', { name: selected.name, distance: formatDistance(selected.distanceKm) })}
                 </Text>
                 <Text style={styles.cardStatus}>{selected.status}</Text>
               </View>

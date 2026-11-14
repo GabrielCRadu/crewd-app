@@ -62,7 +62,7 @@ export default function FriendsListScreen({ navigation }: Props) {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {incoming.length > 0 ? (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>{tr('Cereri de prietenie ·')}{' '}{incoming.length}</Text>
+            <Text style={styles.sectionTitle}>{tr('Cereri de prietenie · {n}', { n: incoming.length })}</Text>
             {incoming.map((p) => (
               <View key={p.id} style={[styles.row, styles.requestRow]}>
                 <PersonInfo person={p} subtitle={subtitle(p)} onPress={() => openPerson(p.id)} />
@@ -86,7 +86,7 @@ export default function FriendsListScreen({ navigation }: Props) {
         ) : null}
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{tr('Prietenii tăi ·')}{' '}{accepted.length}</Text>
+          <Text style={styles.sectionTitle}>{tr('Prietenii tăi · {n}', { n: accepted.length })}</Text>
           {accepted.length === 0 ? (
             <Text style={styles.muted}>{tr('Încă nu ai prieteni. Adaugă oamenii cunoscuți la evenimente din profilul lor.')}</Text>
           ) : (

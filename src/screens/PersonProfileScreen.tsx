@@ -32,7 +32,7 @@ import { radii } from '../theme/shape';
 import { formatEventDate } from '../utils/dates';
 import { isUpcomingOrLive, sortByDate } from '../utils/eventFilters';
 import { hiddenMemoriesCount, sortMemories, visibleMemories } from '../utils/memoryRules';
-import { tr } from '../i18n';
+import { tr, trPlural } from '../i18n';
 
 /**
  * Parametrii ecranului. Profilul unei persoane e înregistrat în mai multe stive
@@ -173,8 +173,8 @@ export default function PersonProfileScreen() {
             >
               <Ionicons name="people-outline" size={15} color={colors.text} />
               <Text style={styles.friendsLinkText}>
-                {personFriends.length} {personFriends.length === 1 ? 'prieten' : 'prieteni'}
-                <Text style={styles.friendsLinkMuted}> · {mutualCount}{' '}{tr('comuni')}</Text>
+                {trPlural(personFriends.length, '{n} prieten', '{n} prieteni')}
+                <Text style={styles.friendsLinkMuted}> · {trPlural(mutualCount, '{n} comun', '{n} comuni')}</Text>
               </Text>
               <Ionicons name="chevron-forward" size={14} color={colors.muted} />
             </Pressable>
@@ -201,7 +201,7 @@ export default function PersonProfileScreen() {
 
               {/* Ce aveți în comun: tag-urile comune albe, restul estompate */}
               <View style={styles.section}>
-                <Text style={styles.label}>{tr('ÎN COMUN ·')}{' '}{shared.length === 0 ? tr('NICIUN TAG') : shared.length === 1 ? '1 TAG' : `${shared.length} TAG-URI`}
+                <Text style={styles.label}>{shared.length === 0 ? tr('ÎN COMUN · NICIUN TAG') : trPlural(shared.length, 'ÎN COMUN · {n} TAG', 'ÎN COMUN · {n} TAG-URI')}
                 </Text>
                 <View style={styles.tags}>
                   {shared.map((t) => (

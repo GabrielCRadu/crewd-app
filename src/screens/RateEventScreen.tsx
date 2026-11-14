@@ -114,7 +114,7 @@ export default function RateEventScreen({ navigation, route }: Props) {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.notice}>
           <Ionicons name="lock-closed-outline" size={16} color={colors.text} />
-          <Text style={styles.noticeText}>{tr('Evaluările sunt anonime: nimeni nu află cine ce a dat. Pe profiluri apar doar totalurile. Un badge apare abia când')}{' '}{BADGE_THRESHOLD}{' '}{tr('persoane diferite l-au propus.')}</Text>
+          <Text style={styles.noticeText}>{tr('Evaluările sunt anonime: nimeni nu află cine ce a dat. Pe profiluri apar doar totalurile. Un badge apare abia când {n} persoane diferite l-au propus.', { n: BADGE_THRESHOLD })}</Text>
         </View>
 
         {companions.length === 0 ? (

@@ -102,13 +102,13 @@ export default function GroupDetailsScreen({ navigation, route }: Props) {
         <View style={styles.titleBlock}>
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.subtitle}>
-            {tr(STATUS_LABEL[groupStatus(group, now)])} · {group.memberUids.length}{' '}{tr('din')}{' '}{group.maxSize}{' '}{tr('locuri')}</Text>
+            {tr(STATUS_LABEL[groupStatus(group, now)])} · {tr('{count} din {size} locuri', { count: group.memberUids.length, size: group.maxSize })}</Text>
         </View>
 
         <View style={styles.card}>
           <Text style={type.label}>{tr('Ne vedem')}</Text>
           <Text style={styles.body}>
-            {formatDay(group.meetupAt, now)}{' '}{tr('la')}{' '}{formatTime(group.meetupAt)} · {group.meetupPlace}
+            {tr('{day} la {time} · {place}', { day: formatDay(group.meetupAt, now), time: formatTime(group.meetupAt), place: group.meetupPlace })}
           </Text>
         </View>
 
@@ -122,12 +122,12 @@ export default function GroupDetailsScreen({ navigation, route }: Props) {
               ))}
             </View>
           ) : null}
-          <Text style={styles.muted}>{tr('Vârste')}{' '}{group.minAge}–{group.maxAge}
+          <Text style={styles.muted}>{tr('Vârste {min}–{max}', { min: group.minAge, max: group.maxAge })}
           </Text>
         </View>
 
         <View style={styles.card}>
-          <Text style={type.label}>{tr('Membri ·')}{' '}{group.memberUids.length}</Text>
+          <Text style={type.label}>{tr('Membri · {n}', { n: group.memberUids.length })}</Text>
           {members.map(([memberUid, m], i) => (
             <View key={memberUid} style={[styles.member, i > 0 && styles.memberDivider]}>
               <Avatar name={m.name || '?'} size={40} photoUrl={m.photo ?? null} />

@@ -7,7 +7,7 @@ import { glass, radii } from '../../theme/shape';
 import type { CrewGroup, GroupStatus } from '../../types/groups';
 import { formatTime } from '../../utils/dates';
 import { MIN_FORM_MEMBERS } from '../../utils/groupRules';
-import { tr } from '../../i18n';
+import { tr, trPlural } from '../../i18n';
 
 interface Props {
   group: CrewGroup;
@@ -64,7 +64,8 @@ export default function GroupCard({ group, status, common, isMine, blockReason, 
       <Text style={styles.vibe}>„{group.vibe}”</Text>
 
       <Text style={styles.meta}>
-        {group.minAge}–{group.maxAge}{' '}{tr('ani ·')}{' '}{group.memberUids.length}/{group.maxSize}{' '}{tr('persoane')}{common.length > 0 ? ` · ${common.length} ${common.length === 1 ? 'tag comun' : 'tag-uri comune'}` : ''}
+        {tr('{min}–{max} ani · {count}/{size} persoane', { min: group.minAge, max: group.maxAge, count: group.memberUids.length, size: group.maxSize })}
+        {common.length > 0 ? ` · ${trPlural(common.length, '{n} tag comun', '{n} tag-uri comune')}` : ''}
       </Text>
 
       <View style={styles.bottomRow}>

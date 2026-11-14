@@ -164,7 +164,7 @@ export default function RootNavigator() {
 function LoadingScreen({ error, onRetry, onSignOut }: { error: string | null; onRetry: () => void; onSignOut: () => void }) {
   return (
     <View style={styles.loading}>
-      <Text style={styles.logo}>{tr('crewd')}</Text>
+      <Text style={styles.logo}>crewd</Text>
       {error ? (
         <View style={styles.loadingError}>
           <Text style={styles.loadingText}>{error}</Text>

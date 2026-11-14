@@ -63,7 +63,7 @@ export default function BadgesCard({ voted, auto, progress, emptyText }: Props) 
                 <View style={styles.progressHeader}>
                   <Text style={styles.progressLabel}>{badge.label}</Text>
                   <Text style={styles.progressCount}>
-                    {current}{' '}{tr('din')}{' '}{target} {badge.unit}
+                    {tr('{current} din {target} {unit}', { current, target, unit: badge.unit })}
                   </Text>
                 </View>
                 <View style={styles.track}>
@@ -75,7 +75,7 @@ export default function BadgesCard({ voted, auto, progress, emptyText }: Props) 
         </View>
       ) : null}
 
-      <Text style={styles.hint}>{tr('Un badge de la oameni apare abia când')}{' '}{BADGE_THRESHOLD}{' '}{tr('persoane diferite l-au propus. Nu se vede cine.')}</Text>
+      <Text style={styles.hint}>{tr('Un badge de la oameni apare abia când {n} persoane diferite l-au propus. Nu se vede cine.', { n: BADGE_THRESHOLD })}</Text>
     </View>
   );
 }

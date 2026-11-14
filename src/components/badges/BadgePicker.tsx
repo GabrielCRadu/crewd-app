@@ -35,7 +35,7 @@ export default function BadgePicker({ selected, onToggle }: Props) {
         <Ionicons name="ribbon-outline" size={16} color={colors.text} />
         <Text style={styles.title}>{tr('Propune un badge')}</Text>
         <Text style={styles.count}>
-          {selected.length}{' '}{tr('din')}{' '}{MAX_BADGES_PER_PERSON}
+          {tr('{n} din {max}', { n: selected.length, max: MAX_BADGES_PER_PERSON })}
         </Text>
         <Ionicons name={open ? 'chevron-up' : 'chevron-down'} size={16} color={colors.muted} />
       </Pressable>

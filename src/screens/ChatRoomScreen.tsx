@@ -40,7 +40,7 @@ import {
   normalizeMessageText,
 } from '../utils/chatRules';
 import { formatDay, formatTime, startOfDay } from '../utils/dates';
-import { tr } from '../i18n';
+import { tr, trPlural } from '../i18n';
 
 type Props = NativeStackScreenProps<ChatsStackParamList, 'ChatRoom'>;
 
@@ -135,7 +135,7 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
             <Ionicons name="chevron-forward" size={16} color={colors.muted} />
           </View>
           <Text style={styles.headerSubtitle} numberOfLines={1}>
-            {group.memberUids.length}{' '}{tr('persoane')}</Text>
+            {trPlural(group.memberUids.length, '{n} persoană', '{n} persoane')}</Text>
         </Pressable>
       </View>
 
@@ -146,7 +146,7 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
         <View style={styles.bannerText}>
           <Text style={styles.bannerLabel}>{tr('NE VEDEM')}</Text>
           <Text style={styles.bannerWhen}>
-            {formatDay(group.meetupAt)}{' '}{tr('la')}{' '}{formatTime(group.meetupAt)} · {group.meetupPlace}
+            {tr('{day} la {time} · {place}', { day: formatDay(group.meetupAt), time: formatTime(group.meetupAt), place: group.meetupPlace })}
           </Text>
         </View>
         <Pressable onPress={openMap} style={styles.bannerButton}>
