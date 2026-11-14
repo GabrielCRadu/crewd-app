@@ -1,14 +1,6 @@
 import * as ImagePicker from 'expo-image-picker';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import { tr } from '../i18n';
-import {
-  MEMORY_FIRST_QUALITY,
-  MEMORY_PHOTO_MAX,
-  MEMORY_THUMB_MAX,
-  MEMORY_THUMB_WIDTH,
-  fitsLimit,
-  nextQuality,
-} from '../utils/memoryPhotos';
 
 /*
  * Fotografia de profil: o alegi din galerie sau faci una cu camera, o decupezi pătrat,
@@ -95,38 +87,4 @@ export async function pickMemoryPhoto(source: PhotoSource): Promise<string | nul
   const image = await ImageManipulator.manipulate(asset.uri).resize({ width, height: null }).renderAsync();
   const saved = await image.saveAsync({ format: SaveFormat.JPEG, compress: 0.75 });
   return saved.uri;
-}
-
-/** O poză (fișier sau data URI) micșorată la `width` (null = cum e) și salvată ca data URI JPEG. */
-async function jpegDataUri(uri: string, width: number | null, compress: number): Promise<string> {
-  const context = ImageManipulator.manipulate(uri);
-  const image = await (width ? context.resize({ width, height: null }) : context).renderAsync();
-  const saved = await image.saveAsync({ format: SaveFormat.JPEG, compress, base64: true });
-  if (!saved.base64) throw new Error('Fără base64');
-  return `data:image/jpeg;base64,${saved.base64}`;
-}
-
-/** Recomprimă până intră în limită; null dacă nici la calitatea cea mai mică nu intră. */
-async function fitted(uri: string, width: number | null, max: number): Promise<string | null> {
-  let quality: number | null = MEMORY_FIRST_QUALITY;
-  while (quality !== null) {
-    const dataUri = await jpegDataUri(uri, width, quality);
-    if (fitsLimit(dataUri, max)) return dataUri;
-    quality = nextQuality(quality);
-  }
-  return null;
-}
-
-/**
- * Poza unei amintiri pentru Firestore (spec 2026-11-14-prieteni-amintiri-design.md): poza mare (≤ 1080px)
- * și miniatura pentru grilă (320px), ca data URI JPEG în limitele din firestore.rules.
- * `fileUri` e fișierul dat de pickMemoryPhoto (deja micșorat la cel mult 1080px). Aruncă o eroare cu mesaj clar dacă poza nu intră.
- */
-export async function makeMemoryImages(fileUri: string): Promise<{ photo: string; thumb: string }> {
-  const [photo, thumb] = await Promise.all([
-    fitted(fileUri, null, MEMORY_PHOTO_MAX),
-    fitted(fileUri, MEMORY_THUMB_WIDTH, MEMORY_THUMB_MAX),
-  ]);
-  if (!photo || !thumb) throw new Error(tr('Poza e prea mare. Încearcă alta.'));
-  return { photo, thumb };
 }

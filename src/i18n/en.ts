@@ -572,6 +572,5 @@ export const EN: Record<string, string> = {
   'Prietenie': 'Friendship',
   '1 prieten în comun': '1 mutual friend',
   '{count} prieteni în comun': '{count} mutual friends',
-  'Poza e prea mare. Încearcă alta.': 'This photo is too large. Try another one.',
   'Nu a mers. Verifică conexiunea și încearcă din nou.': "That didn't work. Check your connection and try again.",
 };
