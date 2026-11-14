@@ -134,7 +134,7 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
             <Ionicons name="chevron-forward" size={16} color={colors.muted} />
           </View>
           <Text style={styles.headerSubtitle} numberOfLines={1}>
-            {group.memberUids.length} persoane{event ? ` · ${event.title}` : ''}
+            {group.memberUids.length} persoane
           </Text>
         </Pressable>
       </View>
@@ -176,9 +176,10 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
             placeholder="Scrie un mesaj…"
             placeholderTextColor={colors.muted}
             style={styles.input}
-            onSubmitEditing={send}
-            returnKeyType="send"
             maxLength={MAX_MESSAGE_LENGTH}
+            // Câmpul crește pe mai multe rânduri (până la ~5); Enter face rând nou, trimiți cu săgeata.
+            multiline
+            textAlignVertical="top"
           />
           <Pressable onPress={send} style={({ pressed }) => [styles.sendButton, pressed && styles.pressed]}>
             <Ionicons name="arrow-up" size={22} color={colors.onLight} />
@@ -229,7 +230,8 @@ const styles = StyleSheet.create({
   pressed: { opacity: 0.85 },
   composer: {
     flexDirection: 'row',
-    alignItems: 'center',
+    // Săgeata rămâne jos, lângă ultimul rând, când câmpul crește.
+    alignItems: 'flex-end',
     gap: 10,
     paddingHorizontal: 16,
     paddingVertical: 10,
@@ -240,10 +242,15 @@ const styles = StyleSheet.create({
     ...glass,
     flex: 1,
     color: colors.text,
-    borderRadius: radii.pill,
+    // Colțuri fixe (nu pastilă), ca să arate bine și când câmpul are mai multe rânduri.
+    borderRadius: 24,
     paddingHorizontal: 18,
-    paddingVertical: 12,
+    paddingTop: 12,
+    paddingBottom: 12,
     fontSize: 15,
+    lineHeight: 20,
+    // ~5 rânduri, apoi textul se derulează în câmp.
+    maxHeight: 124,
   },
   sendButton: {
     width: 48,
