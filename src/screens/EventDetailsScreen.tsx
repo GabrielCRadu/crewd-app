@@ -7,6 +7,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import Aurora from '../components/Aurora';
 import GlassIconButton from '../components/GlassIconButton';
+import AddToGoogleCalendar from '../components/events/AddToGoogleCalendar';
 import ShareEventSheet from '../components/events/ShareEventSheet';
 import AddMemorySheet from '../components/memories/AddMemorySheet';
 import GradientButton from '../components/GradientButton';
@@ -195,6 +196,9 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
               <Text style={styles.groupsHintText}>{groupsHint}</Text>
             </View>
           ) : null}
+
+          {/* Te-ai înscris: îl poți pune și în Google Calendar */}
+          {!ended && joined ? <AddToGoogleCalendar event={event} /> : null}
         </View>
       </ScrollView>
 

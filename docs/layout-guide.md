@@ -87,6 +87,8 @@ Evenimentele la care ești înscris, ca într-un calendar:
 2. **Programul**, sub card: „TOATĂ LUNA NOIEMBRIE” sau ziua aleasă (cu „Toată luna” în dreapta).
    Pe fiecare zi: ziua săptămânii și numărul în stânga, iar în dreapta câte un card pe eveniment,
    cu ora de început și de final, titlul, „Loc · distanță” și categoria („ACUM” / „Încheiat” când e cazul).
+   Evenimentele care urmează au în dreapta un buton rotund „G” care le adaugă în Google Calendar
+   (la cele încheiate rămâne chevronul ›).
 3. Fără înscrieri: un card gol cu „Calendarul tău e gol” și butonul „Vezi evenimentele”.
 
 ### Detalii eveniment
@@ -102,6 +104,7 @@ Evenimentele la care ești înscris, ca într-un calendar:
    - în stânga: numele grupului, „N persoane · N tag-uri comune” și „Se văd la HH:MM, loc”;
    - în dreapta: butonul „Intră”.
 7. **Butonul „Înscrie-te”**, fix în partea de jos, pe toată lățimea, separat de conținut.
+8. După înscriere, la un eveniment care n-a trecut: sub conținut, butonul secundar „Adaugă în Google Calendar”.
 
 ## Tab Hartă (prieteni și evenimente)
 
