@@ -66,6 +66,8 @@ export async function createProfile(uid: string, draft: ProfileDraft, photoThumb
   const profile: UserProfile = {
     uid,
     ...draft,
+    name: sanitizeText(draft.name, 50),
+    city: sanitizeText(draft.city, 60),
     age: ageFromBirthDate(draft.birthDate),
     bio: '',
     photoThumb,
@@ -75,10 +77,10 @@ export async function createProfile(uid: string, draft: ProfileDraft, photoThumb
   await runTransaction(database, async (tx) => {
     await reserveUsernameInTransaction(tx, uid, { username: draft.username, name: draft.name, photoThumb });
     tx.set(doc(database, 'users', uid), {
-      name: sanitizeText(profile.name, 50),
+      name: profile.name,
       username: draft.username,
       birthDate: birthDateToTimestamp(draft.birthDate),
-      city: sanitizeText(profile.city, 60),
+      city: profile.city,
       gender: profile.gender,
       bio: '',
       photoUrl: draft.photoUrl,

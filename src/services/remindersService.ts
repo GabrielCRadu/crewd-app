@@ -57,20 +57,65 @@ function reminderBody(event: Event, distanceKm: number): string {
   });
 }
 
+const SHOWN_KEY = 'crewd.remindersShown';
+
+/** Stocarea telefonului, încărcată doar când e nevoie. */
+async function storage() {
+  return (await import('@react-native-async-storage/async-storage')).default;
+}
+
+/** Evenimentele a căror reamintire a apărut deja (sau a fost programată „imediat”): nu se mai programează. */
+async function shownIds(): Promise<string[]> {
+  try {
+    const raw = await (await storage()).getItem(SHOWN_KEY);
+    const parsed: unknown = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed.filter((x): x is string => typeof x === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
+async function rememberShown(ids: string[]): Promise<void> {
+  try {
+    await (await storage()).setItem(SHOWN_KEY, JSON.stringify(ids.slice(-200)));
+  } catch {
+    // Nu e grav: în cel mai rău caz, o reamintire mai apare o dată.
+  }
+}
+
 async function sync(upcomingJoined: Event[], distanceKm: (event: Event) => number): Promise<void> {
   // Starea vine din telefon (supraviețuiește repornirii), nu din memorie.
-  const programmed = (await Notifications.getAllScheduledNotificationsAsync()).map((n) => n.identifier);
+  const all = await Notifications.getAllScheduledNotificationsAsync();
+  const programmed = all.map((n) => n.identifier);
+  // Reamintiri din versiuni vechi (fără id fix): se anulează o dată, ca să nu se dubleze.
+  const legacy = all
+    .filter((n) => !n.identifier.startsWith('reminder-') && typeof n.content.data?.eventId === 'string')
+    .map((n) => n.identifier);
+  const now = Date.now();
+  // Evenimentele pentru care am programat deja o reamintire (ținute minte pe telefon). Dacă ora ei a trecut,
+  // a apărut deja: nu se mai programează (altfel ar reveni la fiecare pornire în ultima oră).
+  const ever = new Set(await shownIds());
+  const joinedIds = new Set(upcomingJoined.map((e) => e.id));
+  const shown = upcomingJoined
+    .filter((e) => ever.has(e.id) && e.startsAt.getTime() - REMIND_BEFORE_MS <= now + SOON_SECONDS * 1000)
+    .map((e) => e.id);
   const plan = reminderPlan(
     upcomingJoined.map((e) => e.id),
     programmed,
+    shown,
+    legacy,
   );
   // Anulăm reamintirile evenimentelor la care nu mai ești înscris.
   for (const id of plan.cancel) await Notifications.cancelScheduledNotificationAsync(id);
 
+  // Ținem minte doar evenimentele la care ești încă înscris (dacă ieși și reintri, primești din nou reamintirea).
+  const remembered = [...ever].filter((id) => joinedIds.has(id));
   const missing = upcomingJoined.filter((e) => plan.add.includes(e.id));
-  if (missing.length === 0 || !(await ensurePermission())) return;
+  if (missing.length === 0 || !(await ensurePermission())) {
+    if (remembered.length !== ever.size) await rememberShown(remembered);
+    return;
+  }
 
-  const now = Date.now();
   for (const event of missing) {
     const remindAt = event.startsAt.getTime() - REMIND_BEFORE_MS;
     const trigger: Notifications.NotificationTriggerInput =
@@ -82,7 +127,9 @@ async function sync(upcomingJoined: Event[], distanceKm: (event: Event) => numbe
       content: { title: tr('Reamintire'), body: reminderBody(event, distanceKm(event)), data: { eventId: event.id } },
       trigger,
     });
+    remembered.push(event.id);
   }
+  await rememberShown(remembered);
 }
 
 /**

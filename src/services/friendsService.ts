@@ -99,6 +99,7 @@ export function startFriendsSync(uid: string): void {
   if (me === uid && stopSync) return;
   stopFriendsSync();
   me = uid;
+  changed();
   stopSync = subscribeToMyFriendships(uid, (docs, blockedUids) => {
     if (me !== uid) return;
     const next = realFriendsState(uid, docs, blockedUids);

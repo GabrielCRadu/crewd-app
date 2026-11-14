@@ -24,19 +24,37 @@ export function useEventGroups(
       return;
     }
     setLoading(true);
-    return subscribeToEventGroups(
-      eventId,
-      (next) => {
-        setGroups(next);
-        setError(null);
-        setLoading(false);
-      },
-      (e) => {
-        console.warn('Nu am putut încărca grupulețele:', e);
-        setError(tr('Nu am putut încărca grupurile. Verifică conexiunea la internet.'));
-        setLoading(false);
-      },
-    );
+    let stop: () => void = () => {};
+    let retry: ReturnType<typeof setTimeout> | null = null;
+    let attempts = 0;
+    const listen = () => {
+      stop = subscribeToEventGroups(
+        eventId,
+        (next) => {
+          setGroups(next);
+          setError(null);
+          setLoading(false);
+        },
+        (e) => {
+          // Imediat după „Înscrie-te”, înscrierea poate să nu fie încă salvată, iar regulile refuză citirea:
+          // reîncercăm de câteva ori înainte să arătăm eroarea (audit).
+          const denied = (e as { code?: string }).code === 'permission-denied';
+          if (denied && attempts < 4) {
+            attempts += 1;
+            retry = setTimeout(listen, 800 * attempts);
+            return;
+          }
+          console.warn('Nu am putut încărca grupulețele:', e);
+          setError(tr('Nu am putut încărca grupurile. Verifică conexiunea la internet.'));
+          setLoading(false);
+        },
+      );
+    };
+    listen();
+    return () => {
+      if (retry) clearTimeout(retry);
+      stop();
+    };
   }, [eventId, enabled]);
 
   return { groups, loading, error };

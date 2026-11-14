@@ -66,7 +66,8 @@ service cloud.firestore {
         function validEntry(entry) {
           return entry.keys().hasOnly(['name', 'age', 'tags', 'photo', 'username'])
             && entry.name == me().name
-            && entry.age == ageOf(me())
+            // ±1: aplicația calculează în ora României, regulile în UTC (diferă câteva ore de ziua ta).
+            && (entry.age == ageOf(me()) || entry.age == ageOf(me()) + 1)
             && entry.tags is list && entry.tags.size() <= 30
             && (entry.get('username', null) == null || entry.username == me().get('username', null))
             && validPhoto(entry);

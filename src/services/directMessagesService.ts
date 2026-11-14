@@ -85,6 +85,7 @@ export function startDmSync(uid: string): void {
   if (me === uid && stopList) return;
   stopDmSync();
   me = uid;
+  changed();
   stopList = subscribeToMyDms(uid, (list) => {
     if (me !== uid) return;
     const next: DirectThreads = {};

@@ -26,6 +26,7 @@ import { publicProfileKey, toPublicProfile } from '../utils/publicProfile';
 import { startFriendsSync, stopFriendsSync } from '../services/friendsService';
 import { deleteMyFriendData } from '../services/friendshipsFirestore';
 import { cancelAllReminders } from '../services/remindersService';
+import { sanitizeText } from '../utils/safeText';
 import { startDmSync, stopDmSync } from '../services/directMessagesService';
 import { deleteMyDms } from '../services/dmFirestore';
 import { allProfileTags } from '../utils/profileTags';
@@ -219,9 +220,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!profile) return;
       const previous = profile;
       const photoChanged = isNewPhoto(changes, profile.photoUrl);
+      // Numele și orașul curățate aici, ca în memorie să fie exact ce se salvează (regulile grupurilor le compară).
+      const clean: ProfileChanges = {
+        ...changes,
+        ...(changes.name !== undefined ? { name: sanitizeText(changes.name, 50) } : {}),
+        ...(changes.city !== undefined ? { city: sanitizeText(changes.city, 60) } : {}),
+      };
       const full: ProfileChanges = photoChanged
-        ? { ...changes, photoThumb: changes.photoUrl ? await makeThumbnail(changes.photoUrl) : null }
-        : changes;
+        ? { ...clean, photoThumb: changes.photoUrl ? await makeThumbnail(changes.photoUrl) : null }
+        : clean;
       setProfile({ ...profile, ...full });
       if (isFirebaseConfigured) {
         try {

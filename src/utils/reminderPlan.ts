@@ -11,12 +11,21 @@ export function reminderIdFor(eventId: string): string {
   return `${PREFIX}${eventId}`;
 }
 
-/** Evenimentele de programat și reamintirile de anulat, față de ce e deja programat pe telefon. */
-export function reminderPlan(upcomingJoinedIds: string[], scheduledIds: string[]): { add: string[]; cancel: string[] } {
+/**
+ * Evenimentele de programat și reamintirile de anulat, față de ce e deja programat pe telefon.
+ * - `shownEventIds`: evenimentele a căror reamintire a apărut deja (nu se mai programează din nou);
+ * - `legacyIds`: reamintiri din versiuni vechi (fără id fix), care se anulează.
+ */
+export function reminderPlan(
+  upcomingJoinedIds: string[],
+  scheduledIds: string[],
+  shownEventIds: string[] = [],
+  legacyIds: string[] = [],
+): { add: string[]; cancel: string[] } {
   const reminders = scheduledIds.filter((id) => id.startsWith(PREFIX));
   const wanted = new Set(upcomingJoinedIds.map(reminderIdFor));
   return {
-    add: upcomingJoinedIds.filter((eventId) => !reminders.includes(reminderIdFor(eventId))),
-    cancel: reminders.filter((id) => !wanted.has(id)),
+    add: upcomingJoinedIds.filter((eventId) => !reminders.includes(reminderIdFor(eventId)) && !shownEventIds.includes(eventId)),
+    cancel: [...reminders.filter((id) => !wanted.has(id)), ...legacyIds],
   };
 }

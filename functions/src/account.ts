@@ -27,17 +27,34 @@ export const cleanupDeletedUser = functionsV1
   .onDelete(async (user) => {
     const db = getFirestore();
     const uid = user.uid;
+    // Întâi datele personale (profilul): dacă un pas următor eșuează, ele sunt deja șterse.
+    await deleteInBatches([db.collection('profiles').doc(uid), db.collection('users').doc(uid)]);
+    const step = async (name: string, run: () => Promise<void>) => {
+      try {
+        await run();
+      } catch (e) {
+        logger.error('account_cleanup_step_failed', { step: name, error: String(e) });
+      }
+    };
+    let messageCount = 0;
+    let membershipCount = 0;
 
-    // Mesajele din grupuri: rămân în conversația celorlalți, dar fără nume și fără text.
-    const messages = await db.collectionGroup('messages').where('authorUid', '==', uid).get();
-    for (let i = 0; i < messages.docs.length; i += 400) {
-      const batch = db.batch();
-      messages.docs.slice(i, i + 400).forEach((m) => batch.update(m.ref, { authorName: DELETED_NAME, text: '' }));
-      await batch.commit();
-    }
+    // Mesajele din grupuri: rămân în conversația celorlalți, dar fără nume și fără text (DM-urile le șterge aplicația).
+    await step('messages', async () => {
+      const messages = await db.collectionGroup('messages').where('authorUid', '==', uid).get();
+      const groupMessages = messages.docs.filter((m) => m.ref.path.startsWith('events/'));
+      messageCount = groupMessages.length;
+      for (let i = 0; i < groupMessages.length; i += 400) {
+        const batch = db.batch();
+        groupMessages.slice(i, i + 400).forEach((m) => batch.update(m.ref, { authorName: DELETED_NAME, text: '' }));
+        await batch.commit();
+      }
+    });
 
     // Grupurile în care contul a rămas (ex. intrat ocolind aplicația): îl scoatem și de acolo (audit).
+    await step('groups', async () => {
     const memberships = await db.collection('memberships').doc(uid).collection('events').get();
+    membershipCount = memberships.size;
     for (const m of memberships.docs) {
       const groupId = m.data().groupId;
       if (typeof groupId !== 'string') continue;
@@ -50,7 +67,7 @@ export const cleanupDeletedUser = functionsV1
       });
     }
     await deleteInBatches([...memberships.docs.map((d) => d.ref), db.collection('memberships').doc(uid)]);
-    await deleteInBatches([db.collection('profiles').doc(uid), db.collection('users').doc(uid)]);
+    });
 
-    logger.info('account_cleanup', { messages: messages.size, memberships: memberships.size });
+    logger.info('account_cleanup', { messages: messageCount, memberships: membershipCount });
   });

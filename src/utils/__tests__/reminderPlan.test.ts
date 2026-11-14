@@ -16,3 +16,13 @@ describe('reminderPlan', () => {
     expect(reminderPlan([], ['something-else'])).toEqual({ add: [], cancel: [] });
   });
 });
+
+describe('reminderPlan: reminders already shown and old ids', () => {
+  it('does not add again a reminder that already went off', () => {
+    expect(reminderPlan(['e1'], [], ['e1'])).toEqual({ add: [], cancel: [] });
+  });
+
+  it('cancels reminders from older builds (ids without the prefix) once', () => {
+    expect(reminderPlan(['e1'], ['legacy-uuid'], [], ['legacy-uuid'])).toEqual({ add: ['e1'], cancel: ['legacy-uuid'] });
+  });
+});

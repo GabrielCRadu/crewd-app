@@ -17,14 +17,10 @@ export class PhotoPermissionError extends Error {}
 
 /** Deschide camera sau galeria. Întoarce data URI-ul pozei, sau null dacă ai renunțat. */
 export async function pickProfilePhoto(source: PhotoSource): Promise<string | null> {
-  const permission =
-    source === 'camera'
-      ? await ImagePicker.requestCameraPermissionsAsync()
-      : await ImagePicker.requestMediaLibraryPermissionsAsync();
-  if (!permission.granted) {
-    throw new PhotoPermissionError(
-      source === 'camera' ? tr('Ai nevoie de acces la cameră.') : tr('Ai nevoie de acces la galerie.'),
-    );
+  // Galeria se deschide prin selectorul sistemului, fără permisiune (și nu mai cerem acces la stocare: audit).
+  if (source === 'camera') {
+    const permission = await ImagePicker.requestCameraPermissionsAsync();
+    if (!permission.granted) throw new PhotoPermissionError(tr('Ai nevoie de acces la cameră.'));
   }
 
   const options: ImagePicker.ImagePickerOptions = { mediaTypes: ['images'], allowsEditing: true, aspect: [1, 1], quality: 1 };

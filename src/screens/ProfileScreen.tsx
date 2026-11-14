@@ -176,17 +176,20 @@ export default function ProfileScreen() {
 
         <AboutCard bio={profile.bio} onSave={saveBio} />
 
-        {/* Totalurile primite după evenimente (anonime) */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{tr('Ce spun alții despre tine')}</Text>
-          {isFirebaseConfigured ? null : <ReputationStats reputation={reputation} />}
-        </View>
+        {/* Totalurile primite după evenimente (anonime); încă demo, deci doar fără Firebase (audit) */}
+        {isFirebaseConfigured ? null : (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>{tr('Ce spun alții despre tine')}</Text>
+            <ReputationStats reputation={reputation} />
+          </View>
+        )}
 
         {/* Badge-uri: propuse de oameni după evenimente (de la 3 persoane în sus) și câștigate din activitate */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{tr('Badge-uri')}</Text>
           <BadgesCard
-            voted={getMyVotedBadges()}
+            // Badge-urile votate sunt încă demo: conturile reale le văd doar pe cele câștigate din activitate.
+            voted={isFirebaseConfigured ? [] : getMyVotedBadges()}
             auto={badgeProgress.filter((p) => p.earned).map((p) => p.badge)}
             progress={badgeProgress}
             emptyText={tr('Încă niciun badge. Le primești de la oamenii cu care ieși și din evenimentele la care mergi.')}
