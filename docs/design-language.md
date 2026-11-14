@@ -23,7 +23,13 @@ Stilul a pornit de la profilul altei persoane (`PersonProfileScreen`) și se apl
 | Text discret | alb la 40% | placeholder, note mici |
 | Accent / element activ | `#FFFFFF` | butonul principal, segmentul activ, chip-ul ales |
 
-**Singurele culori:** roșu pentru erori și raportări, verde pentru confirmare, iar pe hartă culorile de distanță (aproape, mediu, departe), pentru că transmit informație. Nimic altceva nu e colorat: fără gradienturi calde, fără „aurora”, fără nuanțe pe carduri.
+**Singurele culori:** roșu pentru erori și raportări, verde pentru confirmare, pe hartă culorile de distanță (aproape, mediu, departe), iar în „Calendarul meu” bulina roșie de sub zilele cu evenimente, pentru că transmit informație. Nimic altceva nu e colorat: fără gradienturi calde, fără „aurora”, fără nuanțe pe carduri.
+
+### Tema deschisă
+
+Aplicația urmează tema telefonului (aleasă la pornire). Tema deschisă păstrează aceleași roluri, inversate: fundal alb, carduri gri foarte deschis (negru la ~5%) cu contur fin, text aproape negru, iar elementul activ (butonul principal, segmentul ales) e o pastilă neagră cu text alb. Tabelul de mai sus descrie tema închisă; valorile pentru tema deschisă sunt în `src/theme/colors.ts`.
+
+**Peste poze, culorile nu se schimbă:** afișele și locul lor (când poza lipsește) rămân închise, sub umbrire neagră, cu text și butoane albe (`colors.photo`). Codul QR rămâne mereu negru pe alb (`colors.qr`).
 
 ## Forme
 

@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Linking, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { StatusBar } from 'expo-status-bar';
+import { useIsFocused } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -25,7 +27,7 @@ import { useUserLocation } from '../hooks/useUserLocation';
 import type { EventsStackParamList } from '../navigation/eventsTypes';
 import { isJoined, joinEvent, leaveEvent } from '../services/preferencesService';
 import { hasRated } from '../services/ratingsService';
-import { colors } from '../theme/colors';
+import { colors, isDark } from '../theme/colors';
 import { type } from '../theme/typography';
 import { gradients } from '../theme/gradients';
 import { glass, radii } from '../theme/shape';
@@ -47,6 +49,7 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
   const preferences = usePreferences();
   const myRatings = useRatings();
   const insets = useSafeAreaInsets();
+  const isFocused = useIsFocused();
   const { height } = useWindowDimensions();
   const { profile, user } = useAuth();
   const { groups: myGroups } = useMyGroups();
@@ -111,10 +114,13 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.screen}>
+      {/* Peste zona foto (mereu închisă), iconițele barei de sus rămân albe și pe tema deschisă */}
+      {isFocused ? <StatusBar style="light" /> : null}
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* 1. Zona foto (~1/4 din ecran): aurora sub poză, umbrire jos, butonul „înapoi” și categoria */}
         <View style={[styles.hero, { height: Math.max(200, height * 0.28) }]}>
-          <Aurora style={StyleSheet.absoluteFill} />
+          {/* Aurora e închisă doar pe tema închisă; pe cea deschisă rămâne fundalul închis al pozei */}
+          {isDark ? <Aurora style={StyleSheet.absoluteFill} /> : null}
           {event.imageUrl ? <Image source={{ uri: event.imageUrl }} style={StyleSheet.absoluteFill} /> : null}
           <LinearGradient colors={gradients.scrim} style={styles.scrim} />
           {/* Umbrire sus, ca butoanele și bara telefonului să se vadă și pe afișe albe */}
@@ -337,7 +343,8 @@ const styles = StyleSheet.create({
   ticketText: { color: colors.text, fontSize: 16, fontWeight: '500' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
   content: { paddingBottom: 24 },
-  hero: { overflow: 'hidden', backgroundColor: colors.backgroundAlt },
+  // Locul pozei: închis pe ambele teme, pentru că peste el stă text alb.
+  hero: { overflow: 'hidden', backgroundColor: colors.photo.placeholder },
   scrim: { position: 'absolute', left: 0, right: 0, bottom: 0, height: '60%' },
   scrimTop: { position: 'absolute', left: 0, right: 0, top: 0 },
   back: { position: 'absolute', left: 20 },

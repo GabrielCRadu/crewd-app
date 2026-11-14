@@ -153,7 +153,8 @@ const styles = StyleSheet.create({
   grabber: { width: 40, height: 4, borderRadius: radii.pill, backgroundColor: colors.border },
   top: { position: 'absolute', top: 14, right: 16 },
   // Loc deasupra codului pentru butonul X din colț.
-  qrCard: { backgroundColor: colors.qr.light, borderRadius: radii.card, padding: 18, marginTop: 40 },
+  // Contur fin, ca un card alb să nu se piardă pe fundalul deschis.
+  qrCard: { borderWidth: 1, borderColor: colors.border, backgroundColor: colors.qr.light, borderRadius: radii.card, padding: 18, marginTop: 40 },
   username: { color: colors.text, fontSize: 18, fontWeight: '700', textAlign: 'center' },
   hint: { color: colors.muted, fontSize: 15, textAlign: 'center' },
   actions: { alignSelf: 'stretch', gap: 10, marginTop: 4 },
