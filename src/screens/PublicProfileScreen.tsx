@@ -27,9 +27,7 @@ export default function PublicProfileScreen({ navigation, route }: Props) {
         uid={card.uid}
         fallback={{ name: card.name, photoUrl: card.photoThumb, username: card.username }}
         onBack={() => navigation.goBack()}
-      >
-        <Text style={styles.note}>{tr('Adăugarea la prieteni vine în curând.')}</Text>
-      </UserProfileView>
+      />
     );
   }
 

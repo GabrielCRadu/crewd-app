@@ -14,6 +14,8 @@ import {
 } from '../services/friendsService';
 import type { FriendNotice } from '../services/friendsService';
 import { getPerson } from '../services/peopleService';
+import { getPublicProfile } from '../services/publicProfileService';
+import { personFromPublic } from '../utils/publicProfile';
 import { colors } from '../theme/colors';
 import { radii } from '../theme/shape';
 import type { Person } from '../types/social';
@@ -112,21 +114,38 @@ export default function FriendRequestPopup({ onOpenProfile, onOpenRequests, show
   ).current;
 
   useEffect(() => {
+    let active = true;
     const unsubscribe = subscribeToFriendNotices((notice) => {
-      const sender = getPerson(notice.personId);
-      if (!sender) return;
+      void senderOf(notice.personId).then((sender) => {
+        if (active && sender) show(sender, notice.kind);
+      });
+    });
+    // Persoana de test din memorie sau, pentru un cont real, profilul lui public.
+    async function senderOf(personId: string): Promise<Person | null> {
+      const test = getPerson(personId);
+      if (test) return test;
+      try {
+        const pub = await getPublicProfile(personId);
+        return pub ? personFromPublic(personId, pub) : null;
+      } catch (e) {
+        console.warn('Nu am putut încărca expeditorul cererii:', e);
+        return null;
+      }
+    }
+    function show(sender: Person, kind: FriendNotice['kind']) {
       setPerson(sender);
-      setKind(notice.kind);
+      setKind(kind);
       dragX.setValue(0);
       dragY.setValue(0);
       slide.setValue(0);
       Animated.spring(slide, { toValue: 1, useNativeDriver: true, friction: 8 }).start();
       if (hideTimer.current) clearTimeout(hideTimer.current);
       hideTimer.current = setTimeout(hide, VISIBLE_MS);
-    });
+    }
     // DEMO: o cerere de la Tudor la câteva secunde după pornire.
     scheduleDemoFriendRequest();
     return () => {
+      active = false;
       unsubscribe();
       if (hideTimer.current) clearTimeout(hideTimer.current);
     };
@@ -158,7 +177,9 @@ export default function FriendRequestPopup({ onOpenProfile, onOpenRequests, show
   };
   const isMatch = kind === 'match';
   const accept = () => {
-    void (isMatch ? acceptMatch(person.id) : acceptFriendRequest(person.id));
+    (isMatch ? acceptMatch(person.id) : acceptFriendRequest(person.id)).catch((e: unknown) =>
+      console.warn('Nu am putut accepta cererea:', e),
+    );
     hide();
   };
 

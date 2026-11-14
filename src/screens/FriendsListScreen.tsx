@@ -8,6 +8,7 @@ import Avatar from '../components/Avatar';
 import GlassIconButton from '../components/GlassIconButton';
 import { allProfileTags, useAuth } from '../context/AuthContext';
 import { useFriends } from '../hooks/useFriends';
+import { usePublicProfiles } from '../hooks/usePublicProfiles';
 import type { ProfileStackParamList } from '../navigation/profileTypes';
 import {
   acceptFriendRequest,
@@ -20,15 +21,16 @@ import { colors } from '../theme/colors';
 import { type } from '../theme/typography';
 import { glass, radii } from '../theme/shape';
 import type { Person } from '../types/social';
+import type { PublicProfile } from '../types/user';
+import { personFromPublic } from '../utils/publicProfile';
 import { tr } from '../i18n';
 
 type Props = NativeStackScreenProps<ProfileStackParamList, 'FriendsList'>;
 
-/** Persoanele cu o anumită relație, în ordinea alfabetică a numelui. */
-function peopleOf(ids: string[]): Person[] {
+/** Persoanele cu o anumită relație (de test sau conturi reale), în ordinea alfabetică a numelui. */
+function peopleOf(ids: string[], real: Record<string, PublicProfile | null>): Person[] {
   return ids
-    .map(getPerson)
-    .filter((p): p is Person => p !== undefined)
+    .map((id) => getPerson(id) ?? personFromPublic(id, real[id]))
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
@@ -41,11 +43,15 @@ export default function FriendsListScreen({ navigation }: Props) {
   const { profile } = useAuth();
   const myTags = useMemo(() => allProfileTags(profile), [profile]);
 
-  const incoming = peopleOf(idsWithStatus(friends, 'incoming'));
-  const accepted = peopleOf(idsWithStatus(friends, 'friends'));
-  const outgoing = peopleOf(idsWithStatus(friends, 'outgoing'));
+  // Conturile reale din listă (cele care nu sunt persoane de test): numele și poza din profilul lor public.
+  const realIds = Object.keys(friends).filter((id) => friends[id] !== 'blocked' && !getPerson(id));
+  const real = usePublicProfiles(realIds);
+  const incoming = peopleOf(idsWithStatus(friends, 'incoming'), real);
+  const accepted = peopleOf(idsWithStatus(friends, 'friends'), real);
+  const outgoing = peopleOf(idsWithStatus(friends, 'outgoing'), real);
 
-  const openPerson = (personId: string) => navigation.navigate('PersonProfile', { personId });
+  const openPerson = (personId: string) =>
+    getPerson(personId) ? navigation.navigate('PersonProfile', { personId }) : navigation.navigate('UserProfile', { uid: personId });
 
   const subtitle = (p: Person) => {
     const shared = commonTags(p, myTags).length;

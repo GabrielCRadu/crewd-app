@@ -35,3 +35,8 @@ export function newIncomingRequests(prev: FriendsState | null, next: FriendsStat
   if (!prev) return [];
   return Object.keys(next).filter((id) => next[id] === 'incoming' && prev[id] !== 'incoming');
 }
+
+/** Prietenii tăi (conturi reale) de verificat pentru „în comun” cu `target`. */
+export function mutualCandidates(friends: FriendsState, target: string, isReal: (id: string) => boolean): string[] {
+  return Object.keys(friends).filter((id) => friends[id] === 'friends' && id !== target && isReal(id));
+}

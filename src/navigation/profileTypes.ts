@@ -9,8 +9,10 @@ export type ProfileStackParamList = {
   PersonProfile: { personId: string };
   /** Prietenii unei persoane (toți sau doar cei comuni). */
   PersonFriends: { personId: string };
-  /** Fișa publică a cuiva (poza mică, numele, @username), deschisă din codul lui QR. */
+  /** Profilul cuiva, deschis din codul lui QR (după username). */
   PublicProfile: { username: string };
+  /** Profilul complet al unui cont real (din lista de prieteni sau dintr-o cerere). */
+  UserProfile: { uid: string };
   /** Setările contului (din meniul cu trei linii de pe profil). */
   Settings: undefined;
   /** Politica de confidențialitate (din Setări). */

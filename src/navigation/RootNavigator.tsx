@@ -24,6 +24,7 @@ import FriendRequestPopup from '../components/FriendRequestPopup';
 import InviteLinkHandler from '../components/InviteLinkHandler';
 import GradientButton from '../components/GradientButton';
 import { useAuth } from '../context/AuthContext';
+import { getPerson } from '../services/peopleService';
 import { colors, isDark } from '../theme/colors';
 import { AuthNavigator, OnboardingNavigator } from './AuthNavigator';
 import { tr } from '../i18n';
@@ -54,7 +55,7 @@ const theme: Theme = {
 };
 
 /** Ecranele care se deschid peste tab-uri și ascund bara de jos (vezi docs/layout-guide.md). */
-const FULLSCREEN_ROUTES = ['ChatRoom', 'EventDetails', 'RateEvent', 'PersonProfile', 'EditProfile', 'FriendsList', 'EventGroups', 'ProposeGroup', 'PersonFriends', 'DirectChat', 'GroupDetails', 'MemberProfile', 'PublicProfile', 'Settings', 'PrivacyPolicy'];
+const FULLSCREEN_ROUTES = ['ChatRoom', 'EventDetails', 'RateEvent', 'PersonProfile', 'EditProfile', 'FriendsList', 'EventGroups', 'ProposeGroup', 'PersonFriends', 'DirectChat', 'GroupDetails', 'MemberProfile', 'PublicProfile', 'UserProfile', 'Settings', 'PrivacyPolicy'];
 
 /** Evenimente · Hartă · Chat · Profil (Descoperă a fost scos: recomandările sunt grupulețele de la evenimente). Primul tab e cel implicit. */
 const TABS: {
@@ -76,10 +77,16 @@ let savedNavigationState: NavigationState | undefined;
 /** Navigarea din afara ecranelor (ex. notificarea de cerere de prietenie). */
 const navigationRef = createNavigationContainerRef<Record<string, object | undefined>>();
 
-/** Deschide profilul unei persoane în tab-ul Profil (cu profilul tău dedesubt, pentru „înapoi”). */
+/**
+ * Deschide profilul unei persoane în tab-ul Profil (cu profilul tău dedesubt, pentru „înapoi”):
+ * persoanele de test au profilul lor, conturile reale profilul complet (UserProfile).
+ */
 function openPersonProfile(personId: string) {
-  if (navigationRef.isReady()) {
+  if (!navigationRef.isReady()) return;
+  if (getPerson(personId)) {
     navigationRef.navigate('Profile', { screen: 'PersonProfile', params: { personId }, initial: false });
+  } else {
+    navigationRef.navigate('Profile', { screen: 'UserProfile', params: { uid: personId }, initial: false });
   }
 }
 

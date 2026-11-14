@@ -1,3 +1,4 @@
+import type { Person } from '../types/social';
 import type { PublicProfile, UserProfile } from '../types/user';
 
 /** Câte tag-uri intră în profilul public (aceeași limită ca în firestore.rules). */
@@ -51,4 +52,18 @@ export function profileRouteFor(uid: string, ctx: { isTestPerson: boolean; event
   return ctx.isTestPerson
     ? { name: 'PersonProfile', params: { personId: uid } }
     : { name: 'MemberProfile', params: { eventId: ctx.eventId, groupId: ctx.groupId, uid } };
+}
+
+/** Un cont real, arătat ca o persoană din listă (din profilul lui public; „…” până se încarcă). */
+export function personFromPublic(uid: string, pub: PublicProfile | null | undefined): Person {
+  return {
+    id: uid,
+    name: pub?.name ?? '…',
+    age: pub?.age ?? 0,
+    distanceKm: 0,
+    tags: pub?.tags ?? [],
+    goingTo: null,
+    city: pub?.city,
+    photoUrl: pub?.photoUrl ?? undefined,
+  };
 }

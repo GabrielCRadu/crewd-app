@@ -1,15 +1,20 @@
 import { useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
-import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import Chip from '../Chip';
+import FriendButton from '../FriendButton';
 import GlassIconButton from '../GlassIconButton';
 import PhotoViewer from '../PhotoViewer';
 import { useAuth } from '../../context/AuthContext';
+import { useFriends } from '../../hooks/useFriends';
+import { useMutualFriends } from '../../hooks/useMutualFriends';
 import { usePublicProfile } from '../../hooks/usePublicProfile';
 import { tr } from '../../i18n';
+import { isFirebaseConfigured } from '../../lib/firebase';
+import { blockPerson, statusOf, unblockPerson } from '../../services/friendsService';
 import { colors } from '../../theme/colors';
 import { radii } from '../../theme/shape';
 import { allProfileTags } from '../../utils/profileTags';
@@ -40,8 +45,13 @@ interface Props {
  */
 export default function UserProfileView({ uid, fallback, onBack, children }: Props) {
   const insets = useSafeAreaInsets();
-  const { profile: me } = useAuth();
+  const { profile: me, user } = useAuth();
   const { profile: pub, loading } = usePublicProfile(uid);
+  const friends = useFriends();
+  // Prietenia se poate cere doar între conturi reale, nu cu tine însuți.
+  const canBefriend = isFirebaseConfigured && !!uid && !!user && uid !== user.uid;
+  const friendStatus = canBefriend && uid ? statusOf(friends, uid) : 'none';
+  const mutual = useMutualFriends(canBefriend ? uid : null);
   const [photoOpen, setPhotoOpen] = useState(false);
   const myTags = useMemo(() => allProfileTags(me), [me]);
 
@@ -57,9 +67,31 @@ export default function UserProfileView({ uid, fallback, onBack, children }: Pro
   const others = tags.filter((t) => !myTags.includes(t));
   const meta = [age ? tr('{age} ani', { age }) : '', city].filter(Boolean).join(' · ');
 
+  // „…”: Blochează / Deblochează (blocarea șterge prietenia; persoana nu află).
+  const openMenu = () => {
+    if (!uid) return;
+    const fail = () => Alert.alert(tr('Prietenie'), tr('Nu a mers. Verifică conexiunea și încearcă din nou.'));
+    if (friendStatus === 'blocked') {
+      Alert.alert(name, undefined, [
+        { text: tr('Deblochează'), onPress: () => void unblockPerson(uid).catch(fail) },
+        { text: tr('Renunță'), style: 'cancel' },
+      ]);
+      return;
+    }
+    Alert.alert(
+      tr('Blochezi pe {name}?', { name }),
+      tr('Prietenia și cererile se șterg, iar persoana nu te mai poate adăuga. Nu află că ai blocat-o.'),
+      [
+        { text: tr('Renunță'), style: 'cancel' },
+        { text: tr('Blochează'), style: 'destructive', onPress: () => void blockPerson(uid).catch(fail) },
+      ],
+    );
+  };
+
   const header = (
     <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
       <GlassIconButton icon="chevron-back" onPress={onBack} />
+      {canBefriend ? <GlassIconButton icon="ellipsis-horizontal" onPress={openMenu} /> : null}
     </View>
   );
 
@@ -106,7 +138,20 @@ export default function UserProfileView({ uid, fallback, onBack, children }: Pro
             </View>
           ) : null}
           {username ? <Text style={styles.username}>@{username}</Text> : null}
+          {mutual.count > 0 ? (
+            <View style={styles.metaRow}>
+              <Ionicons name="people-outline" size={15} color={colors.text} />
+              <Text style={styles.meta}>
+                {mutual.count === 1 ? tr('1 prieten în comun') : tr('{count} prieteni în comun', { count: mutual.count })}
+              </Text>
+            </View>
+          ) : null}
           {children}
+          {canBefriend && uid ? (
+            <View style={styles.friendButton}>
+              <FriendButton personId={uid} name={name} status={friendStatus} />
+            </View>
+          ) : null}
         </View>
 
         <View style={styles.content}>
@@ -149,7 +194,8 @@ export default function UserProfileView({ uid, fallback, onBack, children }: Pro
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
-  header: { paddingHorizontal: 20, flexDirection: 'row' },
+  header: { paddingHorizontal: 20, flexDirection: 'row', justifyContent: 'space-between' },
+  friendButton: { marginTop: 10 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16, padding: 32 },
   identity: { paddingHorizontal: 20, paddingTop: 20, gap: 10 },
   photo: {

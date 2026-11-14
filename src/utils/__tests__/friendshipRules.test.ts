@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals';
 
 import type { FriendshipDoc } from '../friendshipRules';
-import { newIncomingRequests, pairId, realFriendsState } from '../friendshipRules';
+import { mutualCandidates, newIncomingRequests, pairId, realFriendsState } from '../friendshipRules';
 
 describe('pairId', () => {
   it('builds the same pair id in both orders', () => {
@@ -38,5 +38,12 @@ describe('newIncomingRequests', () => {
   it('does not announce the same snapshot twice', () => {
     const s = { b: 'incoming' as const };
     expect(newIncomingRequests(s, s)).toEqual([]);
+  });
+});
+
+describe('mutualCandidates', () => {
+  it('keeps only my real friends, without the person I look at', () => {
+    const isReal = (id: string) => id.startsWith('u');
+    expect(mutualCandidates({ p1: 'friends', u1: 'friends', u2: 'incoming', u3: 'friends' }, 'u3', isReal)).toEqual(['u1']);
   });
 });
