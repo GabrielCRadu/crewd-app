@@ -307,6 +307,7 @@ service cloud.firestore {
 
       // Cererea: o trimiți tu, cu id-ul perechii sortate, dacă niciunul nu l-a blocat pe celălalt.
       allow create: if isParty()
+        && pairId == a() + '_' + b()
         && a() < b()
         && request.resource.data.keys().hasOnly(['users', 'status', 'requestedBy', 'createdAt', 'updatedAt'])
         && request.resource.data.users == [a(), b()]

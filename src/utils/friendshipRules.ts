@@ -40,3 +40,16 @@ export function newIncomingRequests(prev: FriendsState | null, next: FriendsStat
 export function mutualCandidates(friends: FriendsState, target: string, isReal: (id: string) => boolean): string[] {
   return Object.keys(friends).filter((id) => friends[id] === 'friends' && id !== target && isReal(id));
 }
+
+/**
+ * Ce face „Adaugă prieten”, după documentul perechii existent: îl creezi (cerere nouă), accepți cererea
+ * pe care ți-a trimis-o deja celălalt, sau nimic (ai cerut deja / sunteți deja prieteni).
+ */
+export function requestAction(
+  existing: { status: string; requestedBy: string } | null,
+  me: string,
+): 'create' | 'accept' | 'none' {
+  if (!existing) return 'create';
+  if (existing.status === 'pending' && existing.requestedBy !== me) return 'accept';
+  return 'none';
+}

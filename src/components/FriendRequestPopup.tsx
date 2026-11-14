@@ -14,6 +14,7 @@ import {
 } from '../services/friendsService';
 import type { FriendNotice } from '../services/friendsService';
 import { getPerson } from '../services/peopleService';
+import { showFriendActionError } from './friendActionError';
 import { getPublicProfile } from '../services/publicProfileService';
 import { personFromPublic } from '../utils/publicProfile';
 import { colors } from '../theme/colors';
@@ -177,9 +178,7 @@ export default function FriendRequestPopup({ onOpenProfile, onOpenRequests, show
   };
   const isMatch = kind === 'match';
   const accept = () => {
-    (isMatch ? acceptMatch(person.id) : acceptFriendRequest(person.id)).catch((e: unknown) =>
-      console.warn('Nu am putut accepta cererea:', e),
-    );
+    (isMatch ? acceptMatch(person.id) : acceptFriendRequest(person.id)).catch(showFriendActionError);
     hide();
   };
 

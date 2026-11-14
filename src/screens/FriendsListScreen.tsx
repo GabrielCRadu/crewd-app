@@ -6,6 +6,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import Avatar from '../components/Avatar';
 import GlassIconButton from '../components/GlassIconButton';
+import { showFriendActionError } from '../components/friendActionError';
 import { allProfileTags, useAuth } from '../context/AuthContext';
 import { useFriends } from '../hooks/useFriends';
 import { usePublicProfiles } from '../hooks/usePublicProfiles';
@@ -74,13 +75,13 @@ export default function FriendsListScreen({ navigation }: Props) {
                 <PersonInfo person={p} subtitle={subtitle(p)} onPress={() => openPerson(p.id)} />
                 <View style={styles.requestActions}>
                   <Pressable
-                    onPress={() => acceptFriendRequest(p.id)}
+                    onPress={() => acceptFriendRequest(p.id).catch(showFriendActionError)}
                     style={({ pressed }) => [styles.acceptButton, pressed && styles.pressedLight]}
                   >
                     <Text style={styles.acceptText}>{tr('Acceptă')}</Text>
                   </Pressable>
                   <Pressable
-                    onPress={() => declineFriendRequest(p.id)}
+                    onPress={() => declineFriendRequest(p.id).catch(showFriendActionError)}
                     style={({ pressed }) => [styles.declineButton, pressed && styles.pressed]}
                   >
                     <Text style={styles.declineText}>{tr('Refuză')}</Text>
@@ -115,7 +116,7 @@ export default function FriendsListScreen({ navigation }: Props) {
             {outgoing.map((p) => (
               <View key={p.id} style={styles.row}>
                 <PersonInfo person={p} subtitle={tr('Așteaptă răspuns')} onPress={() => openPerson(p.id)} />
-                <Pressable onPress={() => cancelFriendRequest(p.id)} hitSlop={8}>
+                <Pressable onPress={() => cancelFriendRequest(p.id).catch(showFriendActionError)} hitSlop={8}>
                   <Text style={styles.link}>{tr('Anulează')}</Text>
                 </Pressable>
               </View>

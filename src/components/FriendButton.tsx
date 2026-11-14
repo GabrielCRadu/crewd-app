@@ -8,8 +8,8 @@ import {
   removeFriend,
   sendFriendRequest,
   unblockPerson,
-  FriendRequestError,
 } from '../services/friendsService';
+import { showFriendActionError } from './friendActionError';
 import type { FriendStatus } from '../services/friendsService';
 import { colors } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
@@ -38,12 +38,7 @@ export default function FriendButton({ personId, name, status, gender }: Props) 
   const linkStyle = styles.link;
   // Pentru conturile reale acțiunea scrie în Firestore; dacă nu merge, spunem (starea revine singură).
   const run = (action: (id: string) => Promise<void>) => () => {
-    action(personId).catch((e: unknown) =>
-      Alert.alert(
-        tr('Prietenie'),
-        e instanceof FriendRequestError ? e.message : tr('Nu a mers. Verifică conexiunea și încearcă din nou.'),
-      ),
-    );
+    action(personId).catch(showFriendActionError);
   };
 
   if (status === 'none') {

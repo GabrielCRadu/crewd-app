@@ -76,7 +76,8 @@ async function change(personId: string, status: FriendStatus, write: (me: string
   try {
     await write(uid, personId);
   } catch (e) {
-    if (me === uid) setStatus(personId, previous);
+    // Înapoi la ce știe serverul (ultimul snapshot), nu la starea dinainte: între timp s-ar fi putut schimba.
+    if (me === uid) setStatus(personId, lastSnapshot ? statusOf(lastSnapshot, personId) : previous);
     throw e;
   }
 }

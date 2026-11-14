@@ -525,7 +525,6 @@ export const EN: Record<string, string> = {
   'Avem nevoie de o poză cu tine: ceilalți te recunosc după ea la întâlnire.': 'We need a photo of you: others recognise you by it when you meet.',
   'Între timp altcineva a ales acest username. Alege altul.': 'Someone else picked this username in the meantime. Choose another one.',
   'Nu am putut salva. Verifică conexiunea și încearcă din nou.': "Couldn't save. Check your connection and try again.",
-  'Adăugarea la prieteni vine în curând.': 'Adding friends is coming soon.',
   'Contul nu mai există.': 'This account no longer exists.',
   'Hai să fim prieteni pe Crewd! @{username} {url}': "Let's be friends on Crewd! @{username} {url}",
   // ---------- Profilul membrului, tema ----------
@@ -546,6 +545,7 @@ export const EN: Record<string, string> = {
   // ---------- Prieteni (conturi reale) ----------
   'Nu am putut trimite cererea. Încearcă mai târziu.': "Couldn't send the request. Try again later.",
   'Prietenie': 'Friendship',
+  'Cererea nu mai există.': 'This request no longer exists.',
   '1 prieten în comun': '1 mutual friend',
   '{count} prieteni în comun': '{count} mutual friends',
   'Nu a mers. Verifică conexiunea și încearcă din nou.': "That didn't work. Check your connection and try again.",

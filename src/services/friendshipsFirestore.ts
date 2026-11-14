@@ -6,15 +6,15 @@ import {
   getDocs,
   onSnapshot,
   query,
+  runTransaction,
   serverTimestamp,
-  setDoc,
   updateDoc,
   where,
   writeBatch,
 } from 'firebase/firestore';
 
 import { db } from '../lib/firebase';
-import { pairId } from '../utils/friendshipRules';
+import { pairId, requestAction } from '../utils/friendshipRules';
 import type { FriendshipDoc } from '../utils/friendshipRules';
 
 /*
@@ -78,14 +78,29 @@ export function subscribeToMyFriendships(
   };
 }
 
-/** Trimite o cerere de prietenie. */
+/**
+ * Trimite o cerere de prietenie. Dacă celălalt ți-a trimis deja una, o accepți (deveniți prieteni);
+ * dacă ai cerut deja sau sunteți prieteni, nu se schimbă nimic.
+ */
 export async function requestFriendship(me: string, other: string): Promise<void> {
-  await setDoc(friendshipRef(me, other), {
-    users: sorted(me, other),
-    status: 'pending',
-    requestedBy: me,
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
+  const ref = friendshipRef(me, other);
+  await runTransaction(requireDb(), async (tx) => {
+    const snap = await tx.get(ref);
+    const existing = snap.exists()
+      ? { status: String(snap.data().status ?? ''), requestedBy: String(snap.data().requestedBy ?? '') }
+      : null;
+    const action = requestAction(existing, me);
+    if (action === 'create') {
+      tx.set(ref, {
+        users: sorted(me, other),
+        status: 'pending',
+        requestedBy: me,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+    } else if (action === 'accept') {
+      tx.update(ref, { status: 'friends', updatedAt: serverTimestamp() });
+    }
   });
 }
 

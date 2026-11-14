@@ -4,6 +4,7 @@ import type { FriendshipDoc } from '../../utils/friendshipRules';
 import * as firestore from '../friendshipsFirestore';
 import {
   FriendRequestError,
+  acceptFriendRequest,
   getFriendsState,
   sendFriendRequest,
   startFriendsSync,
@@ -74,5 +75,17 @@ describe('friendsService with real accounts', () => {
     jest.mocked(firestore.requestFriendship).mockRejectedValueOnce(new Error('permission-denied'));
     await expect(sendFriendRequest('u8')).rejects.toBeInstanceOf(FriendRequestError);
     expect(getFriendsState().u8).toBeUndefined();
+  });
+
+  it('after a failed write, falls back to the server state, not the old one', async () => {
+    startFriendsSync('me');
+    onChange([friends('u5', 'pending', 'u5')], []);
+    // Între timp, u5 și-a anulat cererea: snapshot-ul vine înainte de refuzul serverului.
+    jest.mocked(firestore.acceptFriendship).mockImplementationOnce(async () => {
+      onChange([], []);
+      throw new Error('not-found');
+    });
+    await expect(acceptFriendRequest('u5')).rejects.toThrow('not-found');
+    expect(getFriendsState().u5).toBeUndefined();
   });
 });
