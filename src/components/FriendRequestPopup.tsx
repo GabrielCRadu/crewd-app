@@ -32,12 +32,12 @@ interface Props {
 
 /** Cât stă notificarea mare pe ecran; apoi pleacă și rămâne butonul mic. */
 const VISIBLE_MS = 5000;
-const WIDTH = 300;
 
 /**
- * Noutățile de prietenie, în colțul din dreapta sus, peste orice ecran:
- * 1. când sosește o cerere, intră din dreapta notificarea mare (poza, numele, „Acceptă”, „Vezi profilul”);
- *    la „Vă potriviți” (v-ați dat unul altuia „Aș mai ieși”): „Adăugați-vă” sau „Mai târziu”;
+ * Noutățile de prietenie, sus, peste orice ecran:
+ * 1. când sosește o cerere, intră din dreapta o bară pe toată lățimea, pe un singur rând
+ *    (poza, numele, „Acceptă”, ✕); apăsarea pe poză/nume deschide profilul.
+ *    La „Vă potriviți” (v-ați dat unul altuia „Aș mai ieși”): „Adăugați-vă” sau ✕ (mai târziu);
  * 2. după câteva secunde pleacă, iar în colț rămâne un buton mic cu numărul de cereri primite,
  *    cât timp ai cereri la care n-ai răspuns. Butonul deschide lista de prieteni.
  */
@@ -92,8 +92,8 @@ export default function FriendRequestPopup({ onOpenProfile, onOpenRequests, show
     );
   }
 
-  const cardWidth = Math.min(WIDTH, screenWidth - 24);
-  const translateX = slide.interpolate({ inputRange: [0, 1], outputRange: [cardWidth + 24, 0] });
+  // Bara ocupă toată lățimea; intră din dreapta.
+  const translateX = slide.interpolate({ inputRange: [0, 1], outputRange: [screenWidth, 0] });
 
   const openProfile = () => {
     hide();
@@ -107,7 +107,7 @@ export default function FriendRequestPopup({ onOpenProfile, onOpenRequests, show
 
   return (
     <Animated.View
-      style={[styles.card, { top: insets.top + 8, width: cardWidth, opacity: slide, transform: [{ translateX }] }]}
+      style={[styles.card, { top: insets.top + 8, opacity: slide, transform: [{ translateX }] }]}
       accessibilityRole="alert"
       accessibilityLabel={
         isMatch
@@ -115,14 +115,15 @@ export default function FriendRequestPopup({ onOpenProfile, onOpenRequests, show
           : `${person.name} ți-a trimis o cerere de prietenie`
       }
     >
-      <Pressable onPress={openProfile} style={styles.body}>
-        <Avatar name={person.name} size={48} square photoUrl={person.photoUrl} />
+      {/* Un singur rând: poza și textul (deschid profilul), apoi „Acceptă” și ✕ */}
+      <Pressable onPress={openProfile} style={styles.body} accessibilityLabel={`Vezi profilul lui ${person.name}`}>
+        <Avatar name={person.name} size={40} square photoUrl={person.photoUrl} />
         <View style={styles.text}>
           {isMatch ? (
             <>
               <Text style={styles.eyebrow}>VĂ POTRIVIȚI</Text>
-              <Text style={styles.message}>
-                Și <Text style={styles.inlineName}>{person.name}</Text> ar mai ieși cu tine. Vă adăugați ca prieteni?
+              <Text style={styles.message} numberOfLines={2}>
+                Și <Text style={styles.inlineName}>{person.name}</Text> ar mai ieși cu tine
               </Text>
             </>
           ) : (
@@ -131,69 +132,63 @@ export default function FriendRequestPopup({ onOpenProfile, onOpenRequests, show
                 {person.name}
                 {person.age ? <Text style={styles.age}>, {person.age}</Text> : null}
               </Text>
-              <Text style={styles.message}>ți-a trimis o cerere de prietenie</Text>
+              <Text style={styles.message} numberOfLines={1}>
+                ți-a trimis o cerere de prietenie
+              </Text>
             </>
           )}
         </View>
-        <Pressable onPress={hide} hitSlop={10} accessibilityLabel="Închide" style={styles.close}>
-          <Ionicons name="close" size={18} color={colors.muted} />
-        </Pressable>
       </Pressable>
 
-      <View style={styles.actions}>
-        <Pressable onPress={accept} style={({ pressed }) => [styles.button, styles.accept, pressed && styles.pressed]}>
-          <Ionicons name={isMatch ? 'people' : 'checkmark'} size={16} color={colors.onLight} />
-          <Text style={[styles.buttonText, styles.acceptText]}>{isMatch ? 'Adăugați-vă' : 'Acceptă'}</Text>
-        </Pressable>
-        <Pressable
-          onPress={isMatch ? hide : openProfile}
-          style={({ pressed }) => [styles.button, styles.secondary, pressed && styles.pressed]}
-        >
-          <Text style={styles.buttonText}>{isMatch ? 'Mai târziu' : 'Vezi profilul'}</Text>
-        </Pressable>
-      </View>
+      <Pressable onPress={accept} style={({ pressed }) => [styles.accept, pressed && styles.pressed]}>
+        <Ionicons name={isMatch ? 'people' : 'checkmark'} size={15} color={colors.onLight} />
+        <Text style={styles.acceptText}>{isMatch ? 'Adăugați-vă' : 'Acceptă'}</Text>
+      </Pressable>
+      <Pressable onPress={hide} hitSlop={10} accessibilityLabel={isMatch ? 'Mai târziu' : 'Închide'}>
+        <Ionicons name="close" size={18} color={colors.muted} />
+      </Pressable>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
+  // Bara pe toată lățimea ecranului, joasă: totul pe un rând.
   card: {
     position: 'absolute',
+    left: 12,
     right: 12,
     zIndex: 100,
     elevation: 12,
-    gap: 12,
-    padding: 12,
-    borderRadius: radii.card,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingVertical: 10,
+    paddingLeft: 10,
+    paddingRight: 14,
+    borderRadius: radii.inner + 4,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,
     boxShadow: '0 12px 32px rgba(0,0,0,0.6)',
   },
-  body: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  text: { flex: 1, gap: 2 },
-  eyebrow: { color: colors.muted, fontSize: 11, fontWeight: '700', letterSpacing: 1.4 },
+  body: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 },
+  text: { flex: 1, gap: 1 },
+  eyebrow: { color: colors.muted, fontSize: 10, fontWeight: '700', letterSpacing: 1.4 },
   inlineName: { color: colors.text, fontWeight: '700' },
-  name: { color: colors.text, fontSize: 16, fontWeight: '700' },
+  name: { color: colors.text, fontSize: 15, fontWeight: '700' },
   age: { color: colors.muted, fontWeight: '500' },
-  message: { color: colors.muted, fontSize: 13 },
-  close: { alignSelf: 'flex-start' },
-  actions: { flexDirection: 'row', gap: 8 },
-  button: {
-    flex: 1,
+  message: { color: colors.muted, fontSize: 12 },
+  accept: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    height: 38,
+    gap: 4,
+    height: 32,
+    paddingHorizontal: 12,
     borderRadius: radii.pill,
-    borderWidth: 1,
+    backgroundColor: colors.text,
   },
-  accept: { backgroundColor: colors.text, borderColor: colors.text },
-  secondary: { backgroundColor: colors.card, borderColor: colors.border },
   pressed: { opacity: 0.8 },
-  buttonText: { color: colors.text, fontSize: 14, fontWeight: '600' },
-  acceptText: { color: colors.onLight },
+  acceptText: { color: colors.onLight, fontSize: 13, fontWeight: '700' },
   // Butonul mic: pastilă albă cu iconița și numărul de cereri.
   pill: {
     position: 'absolute',
