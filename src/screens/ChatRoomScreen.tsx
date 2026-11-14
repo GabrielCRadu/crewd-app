@@ -39,9 +39,12 @@ import {
   buildChatRows,
   chatRoomState,
   normalizeMessageText,
+  withoutBlocked,
 } from '../utils/chatRules';
 import { formatDay, formatTime, startOfDay } from '../utils/dates';
 import { tr, trPlural } from '../i18n';
+import { useFriends } from '../hooks/useFriends';
+import { idsWithStatus } from '../services/friendsService';
 
 type Props = NativeStackScreenProps<ChatsStackParamList, 'ChatRoom'>;
 
@@ -67,9 +70,13 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
   // mesaj, fără să coboare animat, iar mesajele noi apar jos cât timp ești acolo.
   // Ziua de azi intră în calcul, ca după miezul nopții „Azi” să devină „Ieri” și cu conversația deschisă.
   const today = startOfDay(useNow()).getTime();
+  // Cei pe care i-ai blocat nu-ți mai apar în chat (audit: siguranța în chatul de grup).
+  const blocked = idsWithStatus(useFriends(), 'blocked');
+  const blockedKey = blocked.join(',');
   const rows = useMemo(
-    () => buildChatRows(messages, uid ?? '', members ?? {}, new Date(today)).reverse(),
-    [messages, uid, members, today],
+    () => buildChatRows(withoutBlocked(messages, blocked), uid ?? '', members ?? {}, new Date(today)).reverse(),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [messages, uid, members, today, blockedKey],
   );
   const listRef = useRef<FlatList<ChatRow>>(null);
 

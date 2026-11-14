@@ -135,3 +135,9 @@ export function chatRoomState(input: {
   if (messagesError === LEFT_GROUP_MESSAGE) return 'left';
   return 'ready';
 }
+
+/** Mesajele fără cele ale persoanelor pe care le-ai blocat (audit: siguranța în chatul de grup). */
+export function withoutBlocked(messages: GroupMessage[], blockedUids: string[]): GroupMessage[] {
+  if (blockedUids.length === 0) return messages;
+  return messages.filter((m) => !blockedUids.includes(m.authorUid));
+}

@@ -1,4 +1,4 @@
-import { getFirestore } from 'firebase-admin/firestore';
+import { FieldValue, getFirestore } from 'firebase-admin/firestore';
 import type { DocumentReference } from 'firebase-admin/firestore';
 import * as logger from 'firebase-functions/logger';
 import * as functionsV1 from 'firebase-functions/v1';
@@ -36,7 +36,19 @@ export const cleanupDeletedUser = functionsV1
       await batch.commit();
     }
 
+    // Grupurile în care contul a rămas (ex. intrat ocolind aplicația): îl scoatem și de acolo (audit).
     const memberships = await db.collection('memberships').doc(uid).collection('events').get();
+    for (const m of memberships.docs) {
+      const groupId = m.data().groupId;
+      if (typeof groupId !== 'string') continue;
+      const ref = db.collection('events').doc(m.id).collection('groups').doc(groupId);
+      await db.runTransaction(async (tx) => {
+        const g = await tx.get(ref);
+        const uids: string[] = g.data()?.memberUids ?? [];
+        if (!g.exists || !uids.includes(uid)) return;
+        tx.update(ref, { memberUids: uids.filter((u) => u !== uid), [`members.${uid}`]: FieldValue.delete() });
+      });
+    }
     await deleteInBatches([...memberships.docs.map((d) => d.ref), db.collection('memberships').doc(uid)]);
     await deleteInBatches([db.collection('profiles').doc(uid), db.collection('users').doc(uid)]);
 

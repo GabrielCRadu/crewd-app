@@ -10,6 +10,7 @@ import {
   lastMessagePreview,
   normalizeMessageText,
   removedMessageText,
+  withoutBlocked,
 } from '../chatRules';
 
 // Ore locale (nu UTC), ca testele să nu depindă de fusul orar al calculatorului.
@@ -213,5 +214,12 @@ describe('removed messages', () => {
 describe('removed message reason for illegal content', () => {
   it('names illegal activities', () => {
     expect(removedMessageText('illegal', true)).toBe('Mesajul tău a fost eliminat (activități ilegale)');
+  });
+});
+
+describe('withoutBlocked', () => {
+  it('hides messages from people you blocked', () => {
+    const m = (id: string, authorUid: string) => ({ id, authorUid, authorName: authorUid, text: 'x', createdAt: new Date() });
+    expect(withoutBlocked([m('1', 'a'), m('2', 'b'), m('3', 'a')], ['b']).map((x) => x.id)).toEqual(['1', '3']);
   });
 });
