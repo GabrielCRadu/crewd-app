@@ -44,6 +44,6 @@ export const INITIAL_MEMORIES: Memory[] = [
   // Ioana (prietenă)
   mock('m6', 'p3', 'e17', 'Seară de karaoke', 3, 'photo-1503095396549-807759245b35'),
   // Victor (nu e prieten: amintirea „doar prieteni” îți rămâne ascunsă)
-  mock('m7', 'p4', 'e18', 'Drumeție pe dealuri', 5, 'photo-1506905925346-21bda4d32df4'),
+  mock('m7', 'p4', 'e18', 'Drumeție pe dealuri', 8, 'photo-1506905925346-21bda4d32df4'),
   mock('m8', 'p4', 'x3', 'Tură pe creastă', 30, 'photo-1464822759023-fed622ff2c3b', 'friends'),
 ];
