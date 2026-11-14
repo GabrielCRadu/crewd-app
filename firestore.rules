@@ -152,8 +152,8 @@ service cloud.firestore {
           && d.chosenTags is map
           && d.learnedTags is list
           && (!('bio' in d) || (d.bio is string && d.bio.size() <= 500))
-          // Poza e un data URI JPEG mic (~400px); limita ține documentul mult sub 1 MB.
-          && (!('photoUrl' in d) || d.photoUrl == null || (d.photoUrl is string && d.photoUrl.size() <= 300000))
+          // Poza e un data URI JPEG (până la 1080px, ca să rămână clară și mărită); limita ține documentul sub 1 MB.
+          && (!('photoUrl' in d) || d.photoUrl == null || (d.photoUrl is string && d.photoUrl.size() <= 600000))
           // Miniatura (~96px) din aceeași poză, copiată și în grupuri (members.<uid>.photo).
           && (!('photoThumb' in d) || d.photoThumb == null || (d.photoThumb is string && d.photoThumb.size() <= 20000))
           && (!('joinedEventIds' in d) || (d.joinedEventIds is list && d.joinedEventIds.size() <= 500))
