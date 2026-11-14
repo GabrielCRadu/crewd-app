@@ -291,17 +291,33 @@ export default function ProfileScreen() {
   );
 }
 
+/** Înălțimea butoanelor din antet (iconița QR și „Editează”), ca să stea la aceeași linie. */
+const HEADER_BUTTON_HEIGHT = 40;
+
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   flex: { flex: 1 },
   content: { padding: 20, paddingBottom: 32, gap: 22 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  // `stretch`: iconița QR ia exact înălțimea butonului „Editează”.
-  headerActions: { flexDirection: 'row', alignItems: 'stretch', gap: 10 },
-  qrButton: { ...glass, aspectRatio: 1, borderRadius: radii.pill, alignItems: 'center', justifyContent: 'center' },
+  // Iconița QR și „Editează” au aceeași înălțime fixă și sunt centrate pe același rând.
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  qrButton: {
+    ...glass,
+    width: HEADER_BUTTON_HEIGHT,
+    height: HEADER_BUTTON_HEIGHT,
+    borderRadius: radii.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   qrPressed: { backgroundColor: colors.cardStrong },
   title: { ...type.screenTitle, fontSize: 32 },
-  editButton: { ...glass, paddingHorizontal: 18, paddingVertical: 10, borderRadius: radii.pill },
+  editButton: {
+    ...glass,
+    height: HEADER_BUTTON_HEIGHT,
+    paddingHorizontal: 18,
+    justifyContent: 'center',
+    borderRadius: radii.pill,
+  },
   editText: { color: colors.text, fontWeight: '500' },
   pressed: { backgroundColor: colors.cardStrong },
   identity: { ...glass, borderRadius: radii.card, overflow: 'hidden' },

@@ -14,7 +14,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import QRCode from 'react-native-qrcode-svg';
 
-import Avatar from './Avatar';
 import GlassIconButton from './GlassIconButton';
 import GradientButton from './GradientButton';
 import { copyInvite, inviteUrl, shareInvite } from '../services/inviteService';
@@ -35,7 +34,7 @@ const CLOSE_DRAG = 120;
 const COPIED_MS = 2000;
 
 /**
- * Codul tău QR, mare, într-un panou care urcă de jos: cine îl scanează ajunge pe profilul tău
+ * Codul tău QR, mare, într-un panou care urcă de jos (fără poză și nume deasupra, doar codul): cine îl scanează ajunge pe profilul tău
  * și te poate adăuga la prieteni. Dedesubt: trimiterea linkului pe alte aplicații și copierea lui.
  * Se închide cu X, cu swipe în jos sau cu o atingere în afara panoului.
  */
@@ -101,13 +100,8 @@ export default function InviteQrSheet({ visible, uid, name, photoUrl, onClose }:
             <GlassIconButton icon="close" size={38} onPress={onClose} />
           </View>
 
-          <View style={styles.who}>
-            <Avatar name={name} size={56} square photoUrl={photoUrl} />
-            <Text style={styles.name}>{name}</Text>
-          </View>
-
           {/* Codul: mereu negru pe alb, ca să-l citească orice cameră; poza ta în mijloc */}
-          <View style={styles.qrCard}>
+          <View style={styles.qrCard} accessibilityLabel={`Codul QR al lui ${name}`}>
             <QRCode
               value={url}
               size={qrSize}
@@ -155,9 +149,8 @@ const styles = StyleSheet.create({
   },
   grabber: { width: 40, height: 4, borderRadius: radii.pill, backgroundColor: colors.border },
   top: { position: 'absolute', top: 14, right: 16 },
-  who: { alignItems: 'center', gap: 8, marginTop: 8 },
-  name: { color: colors.text, fontSize: 22, fontWeight: '800' },
-  qrCard: { backgroundColor: colors.text, borderRadius: radii.card, padding: 18 },
+  // Loc deasupra codului pentru butonul X din colț.
+  qrCard: { backgroundColor: colors.text, borderRadius: radii.card, padding: 18, marginTop: 40 },
   hint: { color: colors.muted, fontSize: 15, textAlign: 'center' },
   actions: { alignSelf: 'stretch', gap: 10, marginTop: 4 },
   copyButton: {
