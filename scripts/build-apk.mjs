@@ -126,7 +126,8 @@ function main() {
 
   // 8. Build-ul (primul durează mult: descarcă Gradle și dependențele)
   step('Construiesc APK-ul (Gradle assembleRelease); primul build poate dura 10–20 de minute');
-  run(`gradlew.bat assembleRelease -PreactNativeArchitectures=${ARCHITECTURES}`, { cwd: androidDir, env });
+  // Cale completă: cmd nu caută mereu în folderul curent (NoDefaultCurrentDirectoryInExePath).
+  run(`"${join(androidDir, 'gradlew.bat')}" assembleRelease -PreactNativeArchitectures=${ARCHITECTURES}`, { cwd: androidDir, env });
 
   // 9. APK-ul în folderul fix, cu versiunea în nume
   const built = join(androidDir, 'app', 'build', 'outputs', 'apk', 'release', 'app-release.apk');
