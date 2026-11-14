@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import GlassIconButton from '../GlassIconButton';
+import AddToGoogleCalendar from './AddToGoogleCalendar';
 import { getCategory } from '../../data/categories';
 import { colors } from '../../theme/colors';
 import { type } from '../../theme/typography';
@@ -35,6 +36,7 @@ interface Props {
  * „Calendarul meu”: luna cu zilele în care ai ceva (punct sub număr) și, dedesubt, programul
  * pe zile, ca în Google Calendar: ziua în stânga, evenimentele cu ora, locul și categoria în dreapta.
  * Apeși pe o zi ca să vezi doar ziua aceea; încă o dată (sau „Toată luna”) revii la toată luna.
+ * Evenimentele care urmează au un buton „G” care le adaugă în Google Calendar.
  */
 export default function JoinedCalendar({ events, onOpenEvent, onBrowse }: Props) {
   const today = new Date();
@@ -204,7 +206,12 @@ export default function JoinedCalendar({ events, onOpenEvent, onBrowse }: Props)
                             {ended ? <Text style={styles.badgeEnded}>Încheiat</Text> : null}
                           </View>
                         </View>
-                        <Ionicons name="chevron-forward" size={16} color={colors.faint} />
+                        {/* Evenimentele care urmează se pot pune și în Google Calendar */}
+                        {ended ? (
+                          <Ionicons name="chevron-forward" size={16} color={colors.faint} />
+                        ) : (
+                          <AddToGoogleCalendar event={e} compact />
+                        )}
                       </Pressable>
                   );
                 })}
