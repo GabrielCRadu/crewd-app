@@ -18,7 +18,7 @@ import { useFriendsOnMap } from '../hooks/useFriendsOnMap';
 import { useLocationVisibility } from '../hooks/useLocationVisibility';
 import { useUserLocation } from '../hooks/useUserLocation';
 import { findPersonByName } from '../services/peopleService';
-import { colors } from '../theme/colors';
+import { colorScheme, colors, isDark } from '../theme/colors';
 import { type } from '../theme/typography';
 import { cardShadow } from '../theme/shadows';
 import { darkMapStyle } from '../theme/mapStyle';
@@ -107,8 +107,8 @@ export default function FriendsMapScreen() {
           showsUserLocation={false}
           showsMyLocationButton={false}
           toolbarEnabled={false}
-          userInterfaceStyle="dark"
-          customMapStyle={darkMapStyle}
+          userInterfaceStyle={colorScheme}
+          customMapStyle={isDark ? darkMapStyle : undefined}
         >
           {/* Poziția mea: doar când avem locația reală (altfel `coords` e centrul orașului). */}
           {location.status === 'granted' ? (

@@ -3,6 +3,7 @@ import type { ComponentProps, ComponentType } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import {
   DarkTheme,
+  DefaultTheme,
   NavigationContainer,
   createNavigationContainerRef,
   getFocusedRouteNameFromRoute,
@@ -23,7 +24,7 @@ import FriendRequestPopup from '../components/FriendRequestPopup';
 import InviteLinkHandler from '../components/InviteLinkHandler';
 import GradientButton from '../components/GradientButton';
 import { useAuth } from '../context/AuthContext';
-import { colors } from '../theme/colors';
+import { colors, isDark } from '../theme/colors';
 import { AuthNavigator, OnboardingNavigator } from './AuthNavigator';
 import { tr } from '../i18n';
 
@@ -38,10 +39,12 @@ const Tab = createMaterialTopTabNavigator();
 /** Pe Hartă nu schimbăm tab-ul trăgând: acolo degetul mută harta. */
 const NO_SWIPE_TABS = ['Map'];
 
+// Tema navigării urmează tema telefonului, ca restul aplicației (src/theme/colors.ts).
+const baseTheme = isDark ? DarkTheme : DefaultTheme;
 const theme: Theme = {
-  ...DarkTheme,
+  ...baseTheme,
   colors: {
-    ...DarkTheme.colors,
+    ...baseTheme.colors,
     primary: colors.primary,
     background: colors.background,
     card: colors.card,

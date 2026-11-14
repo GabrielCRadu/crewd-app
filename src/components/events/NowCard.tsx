@@ -28,7 +28,12 @@ export default function NowCard({ event, onOpen }: Props) {
 
   return (
     <Pressable onPress={onOpen} style={({ pressed }) => [styles.card, pressed && styles.pressed]}>
-      <EventPoster imageUrl={event.imageUrl} category={event.category} iconSize={40} style={StyleSheet.absoluteFill} />
+      <EventPoster
+        imageUrl={event.imageUrl}
+        category={event.category}
+        iconSize={40}
+        style={[StyleSheet.absoluteFill, styles.posterPlaceholder]}
+      />
       <LinearGradient colors={gradients.scrimTop} style={styles.scrimTop} />
       <LinearGradient colors={gradients.scrim} style={styles.scrimBottom} />
 
@@ -50,7 +55,7 @@ export default function NowCard({ event, onOpen }: Props) {
           <Text style={styles.until}>{tr('Până la')}{' '}{formatTime(event.endsAt)}</Text>
           <Pressable onPress={onOpen} style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}>
             <Text style={styles.ctaText}>{tr('Vezi detalii')}</Text>
-            <Ionicons name="arrow-forward" size={16} color={colors.onLight} />
+            <Ionicons name="arrow-forward" size={16} color={colors.photo.onPill} />
           </Pressable>
         </View>
         {event.imageCredit ? <Text style={styles.credit}>{tr('Foto:')}{' '}{event.imageCredit}</Text> : null}
@@ -68,17 +73,19 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     overflow: 'hidden',
-    backgroundColor: colors.surface,
+    backgroundColor: colors.photo.placeholder,
   },
   pressed: { opacity: 0.92 },
+  // Locul afișului rămâne închis și pe tema deschisă: peste el stă text alb.
+  posterPlaceholder: { backgroundColor: colors.photo.placeholder },
   scrimTop: { position: 'absolute', left: 0, right: 0, top: 0, height: '35%' },
   scrimBottom: { position: 'absolute', left: 0, right: 0, bottom: 0, height: '75%' },
   top: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   bottom: { gap: 6 },
-  eyebrow: { color: colors.text, opacity: 0.8, fontSize: 12, fontWeight: '700', letterSpacing: 1.2 },
-  name: { color: colors.text, fontSize: 26, lineHeight: 30, fontWeight: '700', letterSpacing: -0.6 },
+  eyebrow: { color: colors.photo.text, opacity: 0.8, fontSize: 12, fontWeight: '700', letterSpacing: 1.2 },
+  name: { color: colors.photo.text, fontSize: 26, lineHeight: 30, fontWeight: '700', letterSpacing: -0.6 },
   footer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginTop: 6 },
-  until: { color: colors.text, opacity: 0.8, fontSize: 14, fontWeight: '500' },
+  until: { color: colors.photo.text, opacity: 0.8, fontSize: 14, fontWeight: '500' },
   // Pastilă albă simplă (fără gradient), ca afișul să rămână singura culoare.
   cta: {
     flexDirection: 'row',
@@ -87,9 +94,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     height: 40,
     borderRadius: radii.pill,
-    backgroundColor: colors.text,
+    backgroundColor: colors.photo.pill,
   },
   ctaPressed: { opacity: 0.85 },
-  ctaText: { color: colors.onLight, fontSize: 14, fontWeight: '600' },
-  credit: { color: colors.faint, fontSize: 10, marginTop: 2 },
+  ctaText: { color: colors.photo.onPill, fontSize: 14, fontWeight: '600' },
+  credit: { color: colors.photo.faint, fontSize: 10, marginTop: 2 },
 });
