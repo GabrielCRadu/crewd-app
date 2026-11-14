@@ -79,9 +79,11 @@ export default function GroupDetailsScreen({ navigation, route }: Props) {
         text: 'Ies',
         style: 'destructive',
         onPress: () => {
-          leaveGroup(group.eventId, group.id, uid)
-            .then(() => navigation.popToTop())
-            .catch((e: Error) => Alert.alert('Nu ai ieșit din grup', e.message));
+          // Întâi înapoi la lista de chat-uri, ca să nu clipească „Nu mai ești în acest grup.” pe ecranele de aici
+          // (grupul dispare din lista ta imediat, înainte să se termine salvarea). O eroare apare peste listă.
+          const { eventId: groupEventId, id } = group;
+          navigation.popToTop();
+          leaveGroup(groupEventId, id, uid).catch((e: Error) => Alert.alert('Nu ai ieșit din grup', e.message));
         },
       },
     ]);
