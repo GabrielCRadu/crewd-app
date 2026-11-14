@@ -9,8 +9,11 @@ import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import Avatar from '../components/Avatar';
 import GradientButton from '../components/GradientButton';
 import SegmentedControl from '../components/SegmentedControl';
+import CategoryChips from '../components/events/CategoryChips';
+import EventsMap from '../components/events/EventsMap';
 import { useEvents } from '../hooks/useEvents';
-import { isUpcomingOrLive } from '../utils/eventFilters';
+import type { CategoryId } from '../types/events';
+import { addDistance, isUpcomingOrLive, matchesCategories, sortByDate } from '../utils/eventFilters';
 import { useFriendsOnMap } from '../hooks/useFriendsOnMap';
 import { useLocationVisibility } from '../hooks/useLocationVisibility';
 import { useUserLocation } from '../hooks/useUserLocation';
@@ -20,13 +23,17 @@ import { type } from '../theme/typography';
 import { cardShadow } from '../theme/shadows';
 import { darkMapStyle } from '../theme/mapStyle';
 import { glass, radii } from '../theme/shape';
-import { formatDistance, getDistanceColor, haversineKm } from '../utils/distance';
+import { formatDistance } from '../utils/distance';
 
 type Mode = 'friends' | 'events';
 
 const ZOOM_DELTA = 0.04;
 
-/** Tab-ul Hartă: prietenii (sau evenimentele) pe hartă + cardul prietenului selectat (vezi docs/layout-guide.md). */
+/**
+ * Tab-ul Hartă (vezi docs/layout-guide.md), cu două moduri:
+ * - Prieteni: prietenii pe hartă + cardul prietenului selectat;
+ * - Evenimente: harta cu afișe mutată din tab-ul Evenimente (EventsMap), cu filtrul de categorii.
+ */
 export default function FriendsMapScreen() {
   const location = useUserLocation();
   const mapRef = useRef<MapView>(null);
@@ -37,7 +44,15 @@ export default function FriendsMapScreen() {
 
   // Aceleași evenimente ca în tab-ul Evenimente (Firestore, sau mock fără config); doar cele încă neterminate.
   const { events: allEvents } = useEvents(location.coords);
-  const events = useMemo(() => allEvents.filter((e) => isUpcomingOrLive(e)), [allEvents]);
+  // Modul Evenimente: ca harta din tab-ul Evenimente (din categoriile alese, cu distanța până la tine).
+  const [categoryIds, setCategoryIds] = useState<CategoryId[]>([]);
+  const events = useMemo(
+    () =>
+      sortByDate(
+        addDistance(allEvents, location.coords).filter((e) => isUpcomingOrLive(e) && matchesCategories(e, categoryIds)),
+      ),
+    [allEvents, location.coords, categoryIds],
+  );
   // Prietenii (încă mock, vezi src/services/friendsMapService.ts). Până alegi pe cineva, cardul îl arată pe primul.
   const friends = useFriendsOnMap(location.coords, allEvents);
   const selected = friends.find((f) => f.id === selectedId) ?? friends[0] ?? null;
@@ -72,6 +87,17 @@ export default function FriendsMapScreen() {
         />
       </View>
 
+      {mode === 'events' ? (
+        <>
+          <CategoryChips selected={categoryIds} onChange={setCategoryIds} />
+          <EventsMap
+            events={events}
+            userLocation={location.coords}
+            showUserLocation={location.status === 'granted'}
+            onOpenEvent={openEvent}
+          />
+        </>
+      ) : (
       <View style={styles.mapWrap}>
         <MapView
           ref={mapRef}
@@ -92,27 +118,17 @@ export default function FriendsMapScreen() {
               </View>
             </Marker>
           ) : null}
-          {mode === 'friends'
-            ? friends.map((f) => (
-                <Marker key={f.id} coordinate={f.coordinate} onPress={() => setSelectedId(f.id)}>
-                  <View style={styles.friendMarker}>
-                    <Avatar name={f.name} size={selected?.id === f.id ? 46 : 38} />
-                    <Text style={styles.friendLabel}>{f.name}</Text>
-                  </View>
-                </Marker>
-              ))
-            : events.map((e) => (
-                <Marker
-                  key={e.id}
-                  coordinate={e.location}
-                  title={e.title}
-                  description={e.venueName}
-                  pinColor={getDistanceColor(haversineKm(location.coords, e.location))}
-                />
-              ))}
+          {friends.map((f) => (
+            <Marker key={f.id} coordinate={f.coordinate} onPress={() => setSelectedId(f.id)}>
+              <View style={styles.friendMarker}>
+                <Avatar name={f.name} size={selected?.id === f.id ? 46 : 38} />
+                <Text style={styles.friendLabel}>{f.name}</Text>
+              </View>
+            </Marker>
+          ))}
         </MapView>
 
-        {mode === 'friends' && selected ? (
+        {selected ? (
           <View style={styles.card}>
             {/* Avatarul și numele deschid profilul prietenului */}
             <Pressable
@@ -157,6 +173,7 @@ export default function FriendsMapScreen() {
           </View>
         ) : null}
       </View>
+      )}
     </SafeAreaView>
   );
 }

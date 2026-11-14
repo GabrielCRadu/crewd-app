@@ -10,7 +10,9 @@ import AboutCard from '../components/AboutCard';
 import Aurora from '../components/Aurora';
 import Avatar from '../components/Avatar';
 import Chip from '../components/Chip';
+import PhotoViewer from '../components/PhotoViewer';
 import DeleteAccount from '../components/DeleteAccount';
+import InviteQrSheet from '../components/InviteQrSheet';
 import ReputationStats from '../components/ReputationStats';
 import BadgesCard from '../components/badges/BadgesCard';
 import GradientBorderCard from '../components/GradientBorderCard';
@@ -55,6 +57,8 @@ export default function ProfileScreen() {
   // Foaia „Adaugă amintire”: închisă, deschisă fără eveniment ales, sau pentru un eveniment anume.
   const [addMemory, setAddMemory] = useState<{ eventId: string | null } | null>(null);
   const [openMemoryId, setOpenMemoryId] = useState<string | null>(null);
+  const [photoOpen, setPhotoOpen] = useState(false);
+  const [qrOpen, setQrOpen] = useState(false);
   // Badge-uri: cele votate sunt încă mock (badgesService); cele automate vin din istoricul tău.
   const badgeProgress = autoBadgeProgress(pastEvents);
 
@@ -98,19 +102,35 @@ export default function ProfileScreen() {
       >
         <View style={styles.header}>
           <Text style={styles.title}>Profil</Text>
-          <Pressable
-            onPress={() => navigation.navigate('EditProfile')}
-            style={({ pressed }) => [styles.editButton, pressed && styles.pressed]}
-          >
-            <Text style={styles.editText}>Editează</Text>
-          </Pressable>
+          <View style={styles.headerActions}>
+            {/* Codul tău QR, mic; apăsat se deschide mare, cu linkul de invitație */}
+            <Pressable
+              onPress={() => setQrOpen(true)}
+              accessibilityLabel="Codul tău QR de invitație"
+              style={({ pressed }) => [styles.qrButton, pressed && styles.qrPressed]}
+            >
+              <Ionicons name="qr-code-outline" size={18} color={colors.text} />
+            </Pressable>
+            <Pressable
+              onPress={() => navigation.navigate('EditProfile')}
+              style={({ pressed }) => [styles.editButton, pressed && styles.pressed]}
+            >
+              <Text style={styles.editText}>Editează</Text>
+            </Pressable>
+          </View>
         </View>
 
         {/* Identitatea + rândul de statistici */}
         <View style={styles.identity}>
           <Aurora style={StyleSheet.absoluteFill} />
           <View style={styles.identityRow}>
-            <Avatar name={profile.name} size={84} square photoUrl={profile.photoUrl} />
+            <Pressable
+              onPress={() => setPhotoOpen(true)}
+              disabled={!profile.photoUrl}
+              accessibilityLabel="Mărește poza"
+            >
+              <Avatar name={profile.name} size={84} square photoUrl={profile.photoUrl} />
+            </Pressable>
             <View style={styles.identityText}>
               <Text style={styles.name}>
                 {profile.name}, {profile.age}
@@ -255,6 +275,18 @@ export default function ProfileScreen() {
         onClose={() => setAddMemory(null)}
       />
       <MemoryViewer memory={memories.find((m) => m.id === openMemoryId) ?? null} onClose={() => setOpenMemoryId(null)} />
+      <PhotoViewer
+        photoUrl={photoOpen ? (profile.photoUrl ?? null) : null}
+        caption={profile.name}
+        onClose={() => setPhotoOpen(false)}
+      />
+      <InviteQrSheet
+        visible={qrOpen}
+        uid={profile.uid}
+        name={profile.name}
+        photoUrl={profile.photoUrl}
+        onClose={() => setQrOpen(false)}
+      />
     </SafeAreaView>
   );
 }
@@ -264,6 +296,10 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   content: { padding: 20, paddingBottom: 32, gap: 22 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  // `stretch`: iconița QR ia exact înălțimea butonului „Editează”.
+  headerActions: { flexDirection: 'row', alignItems: 'stretch', gap: 10 },
+  qrButton: { ...glass, aspectRatio: 1, borderRadius: radii.pill, alignItems: 'center', justifyContent: 'center' },
+  qrPressed: { backgroundColor: colors.cardStrong },
   title: { ...type.screenTitle, fontSize: 32 },
   editButton: { ...glass, paddingHorizontal: 18, paddingVertical: 10, borderRadius: radii.pill },
   editText: { color: colors.text, fontWeight: '500' },

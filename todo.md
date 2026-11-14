@@ -20,6 +20,7 @@ Actualizează lista când rezolvi ceva sau adaugi un mock nou.
 - [ ] **„Vă potriviți”** (Cami): cine ți-a dat „Aș mai ieși” e mock (`THEY_WOULD_GO_AGAIN` în `mockRatings.ts`); notificarea apare doar pe telefonul tău. Cu Firebase: se verifică pe server și primesc amândoi notificarea.
 - [ ] **Mesaje directe** (Cami, `directMessagesService`): doar în memorie, cu un răspuns automat DEMO după ce trimiți un eveniment. Cu Firebase: `directChats/{uidA_uidB}/messages` și reguli noi.
 - [x] ~~Reamintire cu o oră înainte de evenimentele la care ești înscris~~ (Cami, `remindersService`, `expo-notifications`): notificări locale, merg și în Expo Go.
+- [ ] **Codul QR și linkul de invitație** (Cami, `inviteService`, `InviteLinkHandler`): linkul e `crewd://invite/<uid>` (în Expo Go `exp://…/--/invite/<uid>`) și deschide profilul doar pentru persoanele de test (`PEOPLE`). Pentru conturi reale trebuie profilul public din Firestore. Un link `https://…/invite/<uid>` cere un domeniu propriu (universal links / app links). „Salvează codul QR” nu e făcut.
 - [ ] **Raportarea din profilul cuiva** (meniul ⋯): se adună la totalul de rapoarte din `ratingsService`, doar în memorie.
 - [ ] **Cine merge / câți caută companie** la un eveniment: generate stabil din id (`demoSocial` în `src/services/eventsService.ts`). Trebuie calculate din înscrierile reale.
 - [ ] **Evenimente trecute pentru istoric**: `e16`–`e18` (`PAST_JOINED_EVENT_IDS` în `src/data/mockEvents.ts`), adăugate peste datele din Firestore ca să meargă istoricul și evaluările.

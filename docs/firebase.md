@@ -81,7 +81,7 @@ Creat la finalul onboarding-ului (`src/services/profileService.ts`).
 | `city` | string | |
 | `gender` | string | `female`, `male` sau `other`. **Nu se poate schimba după onboarding.** |
 | `bio` | string | „Despre mine”, maxim 500 de caractere |
-| `photoUrl` | string \| null | poza de profil ca data URI JPEG mic (maxim ~300 KB) |
+| `photoUrl` | string \| null | poza de profil ca data URI JPEG (până la 1080px, maxim 600 000 de caractere) |
 | `photoThumb` | string \| null | miniatura pozei (~96 px, data URI JPEG, maxim 20 000 caractere), copiată în `members.<uid>.photo` din grupurile în care e utilizatorul |
 | `joinedEventIds` | string[] | evenimentele la care e înscris; se salvează la fiecare „Înscrie-te” / „Anulează” |
 | `tagScores` | map | scorul fiecărui tag (crește la înscriere, scade la anulare); pornește de la tag-urile din profil |
