@@ -5,6 +5,7 @@ import { useDirectThreads } from '../hooks/useDirectThreads';
 import { sortedThreads } from '../services/directMessagesService';
 import type { DirectMessage } from '../services/directMessagesService';
 import { getPerson } from '../services/peopleService';
+import { usePublicProfiles } from '../hooks/usePublicProfiles';
 import { colors, onThemeChange } from '../theme/colors';
 import { type } from '../theme/typography';
 import { glass, radii } from '../theme/shape';
@@ -25,13 +26,15 @@ function preview(message: DirectMessage): string {
 /** Secțiunea „Mesaje directe” din tab-ul Chat: conversațiile doar cu un prieten. Nu apare dacă nu ai niciuna. */
 export default function DirectThreadsSection({ onOpen }: Props) {
   const threads = sortedThreads(useDirectThreads());
+  const real = usePublicProfiles(threads.map((t) => t.personId).filter((id) => !getPerson(id)));
   if (threads.length === 0) return null;
 
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>{tr('Mesaje directe')}</Text>
       {threads.map(({ personId, last }) => {
-        const person = getPerson(personId);
+        const pub = real[personId];
+        const person = getPerson(personId) ?? (pub ? { name: pub.name, photoUrl: pub.photoUrl ?? undefined } : null);
         if (!person) return null;
         return (
           <Pressable key={personId} onPress={() => onOpen(personId)} style={({ pressed }) => [styles.row, pressed && styles.pressed]}>

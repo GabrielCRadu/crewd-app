@@ -7,6 +7,7 @@ import type { NavigationProp, RouteProp } from '@react-navigation/native';
 
 import Chip from '../components/Chip';
 import FriendButton from '../components/FriendButton';
+import MessageButton from '../components/MessageButton';
 import GlassIconButton from '../components/GlassIconButton';
 import PhotoViewer from '../components/PhotoViewer';
 import BadgesCard from '../components/badges/BadgesCard';
@@ -166,7 +167,12 @@ export default function PersonProfileScreen() {
             </Pressable>
           </View>
 
-          <FriendButton personId={person.id} name={person.name} status={status} gender={person.gender} />
+          <View style={styles.actionsRow}>
+            <View style={styles.flex}>
+              <FriendButton personId={person.id} name={person.name} status={status} gender={person.gender} />
+            </View>
+            {isFriend ? <MessageButton personId={person.id} /> : null}
+          </View>
         </View>
 
         {/* Restul paginii */}
@@ -292,6 +298,7 @@ export default function PersonProfileScreen() {
 const makeStyles = () =>
   StyleSheet.create({
     screen: { flex: 1, backgroundColor: colors.background },
+    actionsRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
     center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
     flex: { flex: 1 },
     top: { paddingHorizontal: 20, gap: 20 },
