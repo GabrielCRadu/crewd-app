@@ -12,19 +12,23 @@ import {
 import type { FriendStatus } from '../services/friendsService';
 import { colors } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
+import type { Gender } from '../types/user';
+import { removeFriendWording } from '../utils/friendWording';
 
 interface Props {
   personId: string;
   name: string;
   status: FriendStatus;
+  /** Genul persoanei (din profilul ei): „prietena” / „prietenul” în confirmarea de eliminare. */
+  gender?: Gender;
 }
 
 /**
  * Butonul de prietenie, după relația cu persoana:
- * „Adaugă prieten” → „Cerere trimisă” (Anulează) → „Prieteni ✓” (apăsat: Elimină prietenul).
+ * „Adaugă prieten” → „Cerere trimisă” (Anulează) → „Prieteni ✓” (apăsat: Elimină prietena / prietenul).
  * Dacă ea ți-a trimis cerere: „Acceptă” / „Refuză”. Dacă ai blocat-o: „Deblochează”.
  */
-export default function FriendButton({ personId, name, status }: Props) {
+export default function FriendButton({ personId, name, status, gender }: Props) {
   // Acțiunea principală e o pastilă albă; restul, sticlă.
   const primary = styles.primary;
   const primaryColor = colors.onLight;
@@ -81,10 +85,11 @@ export default function FriendButton({ personId, name, status }: Props) {
   }
 
   if (status === 'friends') {
+    const wording = removeFriendWording(gender);
     const confirmRemove = () =>
-      Alert.alert(`Elimini prietenul ${name}?`, 'Nu mai vedeți unul la altul evenimentele la care mergeți.', [
+      Alert.alert(wording.title, wording.message, [
         { text: 'Renunță', style: 'cancel' },
-        { text: 'Elimină prietenul', style: 'destructive', onPress: () => void removeFriend(personId) },
+        { text: wording.confirm, style: 'destructive', onPress: () => void removeFriend(personId) },
       ]);
     return (
       <Pressable onPress={confirmRemove} style={({ pressed }) => [styles.pill, secondary, pressed && styles.pressed]}>
