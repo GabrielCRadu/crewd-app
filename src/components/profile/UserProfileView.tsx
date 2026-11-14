@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import Chip from '../Chip';
 import FriendButton from '../FriendButton';
+import MessageButton from '../MessageButton';
 import GlassIconButton from '../GlassIconButton';
 import PhotoViewer from '../PhotoViewer';
 import { useAuth } from '../../context/AuthContext';
@@ -149,7 +150,10 @@ export default function UserProfileView({ uid, fallback, onBack, children }: Pro
           {children}
           {canBefriend && uid ? (
             <View style={styles.friendButton}>
-              <FriendButton personId={uid} name={name} status={friendStatus} />
+              <View style={styles.flex}>
+                <FriendButton personId={uid} name={name} status={friendStatus} />
+              </View>
+              {friendStatus === 'friends' ? <MessageButton personId={uid} /> : null}
             </View>
           ) : null}
         </View>
@@ -197,7 +201,8 @@ const makeStyles = () =>
   StyleSheet.create({
     screen: { flex: 1, backgroundColor: colors.background },
     header: { paddingHorizontal: 20, flexDirection: 'row', justifyContent: 'space-between' },
-    friendButton: { marginTop: 10 },
+    friendButton: { marginTop: 10, flexDirection: 'row', alignItems: 'center', gap: 10 },
+    flex: { flex: 1 },
     center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16, padding: 32 },
     identity: { paddingHorizontal: 20, paddingTop: 20, gap: 10 },
     photo: {

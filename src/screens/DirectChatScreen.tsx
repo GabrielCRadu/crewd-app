@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Alert, FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -8,10 +8,11 @@ import Avatar from '../components/Avatar';
 import GlassIconButton from '../components/GlassIconButton';
 import EventPoster from '../components/events/EventPoster';
 import { useDirectThreads } from '../hooks/useDirectThreads';
+import { usePublicProfile } from '../hooks/usePublicProfile';
 import { useEvents } from '../hooks/useEvents';
 import { useUserLocation } from '../hooks/useUserLocation';
 import type { ChatsStackParamList } from '../navigation/chatsTypes';
-import { sendDirectText } from '../services/directMessagesService';
+import { openConversation, sendDirectText } from '../services/directMessagesService';
 import type { DirectMessage } from '../services/directMessagesService';
 import { getPerson } from '../services/peopleService';
 import { colors, onThemeChange } from '../theme/colors';
@@ -28,7 +29,11 @@ type Props = NativeStackScreenProps<ChatsStackParamList, 'DirectChat'>;
  */
 export default function DirectChatScreen({ navigation, route }: Props) {
   const { personId } = route.params;
-  const person = getPerson(personId);
+  const testPerson = getPerson(personId);
+  const { profile: pub } = usePublicProfile(testPerson ? null : personId);
+  const person = testPerson ?? (pub ? { name: pub.name, photoUrl: pub.photoUrl ?? undefined } : null);
+  // Conturile reale: mesajele vin live cât e deschisă conversația.
+  useEffect(() => openConversation(personId), [personId]);
   const threads = useDirectThreads();
   const messages = threads[personId] ?? [];
   const location = useUserLocation();
@@ -36,8 +41,13 @@ export default function DirectChatScreen({ navigation, route }: Props) {
   const [draft, setDraft] = useState('');
 
   const send = () => {
-    void sendDirectText(personId, draft);
+    const text = draft;
     setDraft('');
+    sendDirectText(personId, text).catch((e: unknown) => {
+      console.warn('Nu am putut trimite mesajul:', e);
+      setDraft(text);
+      Alert.alert(tr('Mesaj'), tr('Nu a mers. Verifică conexiunea și încearcă din nou.'));
+    });
   };
 
   // Evenimentul se deschide în tab-ul Evenimente, cu lista dedesubt pentru „înapoi”.
@@ -64,7 +74,9 @@ export default function DirectChatScreen({ navigation, route }: Props) {
       <View style={styles.header}>
         <GlassIconButton icon="chevron-back" size={40} onPress={() => navigation.goBack()} />
         <Pressable
-          onPress={() => navigation.navigate('PersonProfile', { personId })}
+          onPress={() =>
+            testPerson ? navigation.navigate('PersonProfile', { personId }) : navigation.navigate('UserProfile', { uid: personId })
+          }
           style={({ pressed }) => [styles.headerPerson, pressed && styles.pressed]}
         >
           <Avatar name={person?.name ?? '?'} size={38} photoUrl={person?.photoUrl} />

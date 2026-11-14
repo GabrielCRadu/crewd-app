@@ -348,6 +348,51 @@ service cloud.firestore {
         && request.resource.data.createdAt == request.time;
     }
 
+    // Mesajele directe (conturi reale), doar între prieteni: o conversație pe pereche, dms/{a_b} (uid-urile sortate),
+    // cu ultimul mesaj pentru lista din tab-ul Chat; mesajele în dms/{a_b}/messages. Le citesc și scriu doar cei doi.
+    match /dms/{pairId} {
+      function a() {
+        return pairId.split('_')[0];
+      }
+      function b() {
+        return pairId.split('_')[1];
+      }
+      function isParty() {
+        return request.auth != null && pairId == a() + '_' + b()
+          && (request.auth.uid == a() || request.auth.uid == b());
+      }
+      function validLast(d) {
+        return d.keys().hasOnly(['users', 'lastText', 'lastEventId', 'lastBy', 'lastAt'])
+          && d.users == [a(), b()]
+          && d.lastText is string && d.lastText.size() <= 1000
+          && (d.lastEventId == null || (d.lastEventId is string && d.lastEventId.size() <= 100))
+          && d.lastBy == request.auth.uid
+          && d.lastAt == request.time;
+      }
+
+      allow get: if isParty();
+      allow list: if request.auth != null && request.auth.uid in resource.data.users;
+      // Scrie doar unul dintre cei doi, când sunt prieteni (la fiecare mesaj nou se actualizează ultimul mesaj).
+      allow create, update: if isParty() && a() < b() && areFriends(a(), b()) && validLast(request.resource.data);
+      allow delete: if isParty();
+
+      match /messages/{messageId} {
+        allow read: if isParty();
+        allow create: if isParty() && areFriends(a(), b())
+          && request.resource.data.keys().hasOnly(['authorUid', 'text', 'eventId', 'createdAt'])
+          && request.resource.data.authorUid == request.auth.uid
+          && (!('text' in request.resource.data)
+            || (request.resource.data.text is string && request.resource.data.text.size() > 0 && request.resource.data.text.size() <= 1000))
+          && (!('eventId' in request.resource.data)
+            || (request.resource.data.eventId is string && request.resource.data.eventId.size() <= 100))
+          && ('text' in request.resource.data || 'eventId' in request.resource.data)
+          && request.resource.data.createdAt == request.time;
+        allow update: if false;
+        // Ștergerea contului: își șterge doar propriile mesaje.
+        allow delete: if isParty() && resource.data.authorUid == request.auth.uid;
+      }
+    }
+
     // Orice altceva e închis până adăugăm reguli explicite.
     match /{document=**} {
       allow read, write: if false;

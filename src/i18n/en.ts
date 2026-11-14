@@ -517,6 +517,7 @@ export const EN: Record<string, string> = {
   // ---------- Prieteni (conturi reale) ----------
   'Nu am putut trimite cererea. Încearcă mai târziu.': "Couldn't send the request. Try again later.",
   'Prietenie': 'Friendship',
+  'Mesaj': 'Message',
   'Cererea nu mai există.': 'This request no longer exists.',
   '{n} prieten în comun': '{n} mutual friend',
   '{n} prieteni în comun': '{n} mutual friends',

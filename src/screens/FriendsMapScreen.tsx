@@ -38,7 +38,7 @@ const ZOOM_DELTA = 0.04;
 export default function FriendsMapScreen() {
   const location = useUserLocation();
   const mapRef = useRef<MapView>(null);
-  const [mode, setMode] = useState<Mode>('friends');
+  const [mode, setMode] = useState<Mode>('events');
   const navigation = useNavigation<BottomTabNavigationProp<Record<string, object | undefined>>>();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isVisible, setIsVisible] = useLocationVisibility();
@@ -80,8 +80,8 @@ export default function FriendsMapScreen() {
         <Text style={styles.title}>{tr('Hartă')}</Text>
         <SegmentedControl
           options={[
-            { value: 'friends', label: tr('Prieteni') },
             { value: 'events', label: tr('Evenimente') },
+            { value: 'friends', label: tr('Prieteni') },
           ]}
           value={mode}
           onChange={setMode}
