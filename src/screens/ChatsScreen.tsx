@@ -40,9 +40,9 @@ export default function ChatsScreen({ navigation }: Props) {
   const open = (g: CrewGroup) => {
     if (!canOpenChat(g)) {
       if (groupStatus(g, now) === 'expired') {
-        Alert.alert('Grupulețul nu s-a format', 'Nu s-au strâns 3 persoane la timp. Alege alt grupuleț de la eveniment.');
+        Alert.alert('Grupul nu s-a format', 'Nu s-au strâns 3 persoane la timp. Alege alt grup de la eveniment.');
       } else {
-        Alert.alert('Grupulețul se formează', `Chat-ul se deschide când sunteți cel puțin ${MIN_FORM_MEMBERS}.`);
+        Alert.alert('Grupul se formează', `Chat-ul se deschide când sunteți cel puțin ${MIN_FORM_MEMBERS}.`);
       }
       return;
     }
@@ -55,11 +55,11 @@ export default function ChatsScreen({ navigation }: Props) {
         <Text style={styles.title}>Chat-uri</Text>
         {/* Conversațiile doar cu un prieten (ex. un eveniment trimis) */}
         <DirectThreadsSection onOpen={(personId) => navigation.navigate('DirectChat', { personId })} />
-        <Text style={styles.sectionTitle}>Grupulețele tale</Text>
+        <Text style={styles.sectionTitle}>Grupurile tale</Text>
 
         {loading ? <ActivityIndicator color={colors.text} /> : null}
         {!loading && sorted.length === 0 ? (
-          <Text style={styles.empty}>Intră într-un grupuleț de la un eveniment ca să-l vezi aici.</Text>
+          <Text style={styles.empty}>Intră într-un grup de la un eveniment ca să-l vezi aici.</Text>
         ) : null}
 
         {sorted.map((g) => {

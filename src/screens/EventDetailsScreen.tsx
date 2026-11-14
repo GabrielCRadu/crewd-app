@@ -95,7 +95,7 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
   const confirmLeave = () =>
     Alert.alert(
       'Ieși din eveniment?',
-      myGroup ? 'Ieși și din grupulețul tău de la acest eveniment.' : 'Te poți înscrie din nou oricând.',
+      myGroup ? 'Ieși și din grupul tău de la acest eveniment.' : 'Te poți înscrie din nou oricând.',
       [
         { text: 'Rămân', style: 'cancel' },
         { text: 'Ies', style: 'destructive', onPress: leaveEventAndGroup },
@@ -103,12 +103,12 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
     );
   // Ce scrie pe butonul „Vezi grupulețele”, după starea grupulețului meu.
   const groupsHint = !myGroup
-    ? 'Alege un grupuleț cu care să mergi.'
+    ? 'Alege un grup cu care să mergi.'
     : canOpenChat(myGroup)
-      ? `Ești într-un grupuleț de ${myGroup.memberUids.length} · chat-ul e deschis.`
+      ? `Ești într-un grup de ${myGroup.memberUids.length} · chat-ul e deschis.`
       : myGroupStatus === 'expired'
-        ? 'Grupulețul tău nu s-a format. Alege altul.'
-        : `Grupulețul tău se formează: mai e nevoie de ${missing}.`;
+        ? 'Grupul tău nu s-a format. Alege altul.'
+        : `Grupul tău se formează: mai e nevoie de ${missing}.`;
 
   return (
     <View style={styles.screen}>
@@ -225,7 +225,7 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
           {!ended && !joined ? (
             <View style={styles.groupsHint}>
               <Ionicons name="people-outline" size={18} color={colors.muted} />
-              <Text style={styles.groupsHintText}>Înscrie-te ca să vezi grupulețele celor care merg.</Text>
+              <Text style={styles.groupsHintText}>Înscrie-te ca să vezi grupurile celor care merg.</Text>
             </View>
           ) : null}
         </View>
@@ -269,7 +269,7 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
               <Ionicons name="exit-outline" size={18} color={colors.text} />
               <Text style={styles.ticketText}>Ieși</Text>
             </Pressable>
-            <GradientButton label="Vezi grupulețele" icon="people" onPress={openGroups} style={styles.ctaMain} />
+            <GradientButton label="Vezi grupurile" icon="people" onPress={openGroups} style={styles.ctaMain} />
           </View>
         ) : (
           <View style={styles.ctaRow}>

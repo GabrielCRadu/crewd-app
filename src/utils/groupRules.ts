@@ -67,14 +67,14 @@ export function isVisibleTo(g: CrewGroup, viewer: { uid: string; age: number }, 
 
 /** De ce nu poate intra (mesaj pentru utilizator), sau null dacă poate. */
 export function joinBlockReason(g: CrewGroup, ctx: JoinContext, now: Date): string | null {
-  if (ctx.currentGroupId === g.id) return 'Ești deja în acest grupuleț.';
-  if (g.memberUids.length === 0) return 'Grupulețul nu mai există.';
+  if (ctx.currentGroupId === g.id) return 'Ești deja în acest grup.';
+  if (g.memberUids.length === 0) return 'Grupul nu mai există.';
   if (!ctx.isRegistered) return 'Înscrie-te întâi la eveniment.';
-  if (ctx.isBlocked) return 'Nu poți intra în grupulețe o perioadă, din cauza raportărilor.';
+  if (ctx.isBlocked) return 'Nu poți intra în grupuri o perioadă, din cauza raportărilor.';
   const status = groupStatus(g, now);
   if (status === 'closed') return 'Întâlnirea a început deja.';
-  if (status === 'full') return 'Grupulețul s-a umplut.';
-  if (status === 'expired') return 'Grupulețul nu s-a format la timp.';
+  if (status === 'full') return 'Grupul s-a umplut.';
+  if (status === 'expired') return 'Grupul nu s-a format la timp.';
   if (ctx.age < g.minAge || ctx.age > g.maxAge) return 'Nu te încadrezi în intervalul de vârstă al grupului.';
   return null;
 }

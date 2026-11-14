@@ -112,13 +112,13 @@ describe('joinBlockReason', () => {
 
   it('blocks users with confirmed reports', () => {
     expect(joinBlockReason(group(), { ...okCtx, isBlocked: true }, now)).toBe(
-      'Nu poți intra în grupulețe o perioadă, din cauza raportărilor.',
+      'Nu poți intra în grupuri o perioadă, din cauza raportărilor.',
     );
   });
 
   it('blocks full groups', () => {
     const g = group({ maxSize: 3, memberUids: ['u1', 'u2', 'u3'], formedAt: at(-5 * HOUR) });
-    expect(joinBlockReason(g, okCtx, now)).toBe('Grupulețul s-a umplut.');
+    expect(joinBlockReason(g, okCtx, now)).toBe('Grupul s-a umplut.');
   });
 
   it('blocks users outside the age range', () => {
@@ -130,11 +130,11 @@ describe('joinBlockReason', () => {
   });
 
   it('blocks expired groups', () => {
-    expect(joinBlockReason(group(), okCtx, at(-HOUR))).toBe('Grupulețul nu s-a format la timp.');
+    expect(joinBlockReason(group(), okCtx, at(-HOUR))).toBe('Grupul nu s-a format la timp.');
   });
 
   it('blocks joining the group you are already in', () => {
-    expect(joinBlockReason(group(), { ...okCtx, currentGroupId: 'g1' }, now)).toBe('Ești deja în acest grupuleț.');
+    expect(joinBlockReason(group(), { ...okCtx, currentGroupId: 'g1' }, now)).toBe('Ești deja în acest grup.');
   });
 
   it('allows joining when everything checks out (even if you are in another group)', () => {
@@ -229,7 +229,7 @@ describe('final review fixes', () => {
   });
 
   it('does not allow joining a group with no members left', () => {
-    expect(joinBlockReason(group({ memberUids: [] }), okCtx, at(-3 * HOUR))).toBe('Grupulețul nu mai există.');
+    expect(joinBlockReason(group({ memberUids: [] }), okCtx, at(-3 * HOUR))).toBe('Grupul nu mai există.');
   });
 
   it('rejects a meetup exactly 30 minutes away (the server needs strictly more)', () => {
