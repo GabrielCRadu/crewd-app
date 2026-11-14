@@ -133,6 +133,10 @@ Prieteniile conturilor reale (`docs/superpowers/specs/2026-11-14-prieteni-aminti
 
 Blocările: `blocker`, `blocked`, `createdAt`. Le vede și le șterge doar cine a blocat; blocarea șterge și prietenia sau cererea dintre cei doi (același batch). Cel blocat nu le poate citi; cererile lui sunt refuzate de reguli, iar aplicația îi arată un mesaj neutru.
 
+### `dms/{pairId}` și `dms/{pairId}/messages/{id}`
+
+Mesajele directe între conturi reale, doar între prieteni. O conversație pe pereche (id-ul: uid-urile sortate, unite cu `_`), creată la primul mesaj: `users`, `lastText`, `lastEventId`, `lastBy`, `lastAt` (ultimul mesaj, pentru lista din tab-ul Chat). Mesajele: `authorUid`, `text` (1–1000 caractere) și/sau `eventId` (un eveniment trimis), `createdAt`. Le citesc și le scriu doar cei doi, iar scrierea cere o prietenie acceptată; nimeni nu poate semna în numele celuilalt. La ștergerea contului se șterg mesajele tale și conversațiile tale. Scrie `src/services/dmFirestore.ts` (prin `src/services/directMessagesService.ts`).
+
 ### `meta/eventsImport`
 
 Data colectării, intervalul de date, numărul de evenimente, notele sursei și data importului.

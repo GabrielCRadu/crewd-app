@@ -9,6 +9,8 @@ export type ChatsStackParamList = {
   MemberProfile: { eventId: string; groupId: string; uid: string };
   /** Profilul unei persoane (din conversațiile directe și din lista de prieteni). */
   PersonProfile: { personId: string };
+  /** Profilul complet al unui cont real (din antetul unei conversații directe). */
+  UserProfile: { uid: string };
   /** Prietenii unei persoane (toți sau doar cei comuni). */
   PersonFriends: { personId: string };
   /** Conversația doar între tine și un prieten (ex. când îi trimiți un eveniment). */

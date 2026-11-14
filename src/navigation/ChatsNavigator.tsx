@@ -7,6 +7,7 @@ import GroupDetailsScreen from '../screens/GroupDetailsScreen';
 import MemberProfileScreen from '../screens/MemberProfileScreen';
 import PersonFriendsScreen from '../screens/PersonFriendsScreen';
 import PersonProfileScreen from '../screens/PersonProfileScreen';
+import UserProfileScreen from '../screens/UserProfileScreen';
 import { colors } from '../theme/colors';
 import type { ChatsStackParamList } from './chatsTypes';
 
@@ -21,6 +22,7 @@ export default function ChatsNavigator() {
       <Stack.Screen name="GroupDetails" component={GroupDetailsScreen} />
       <Stack.Screen name="MemberProfile" component={MemberProfileScreen} />
       <Stack.Screen name="PersonProfile" component={PersonProfileScreen} />
+      <Stack.Screen name="UserProfile" component={UserProfileScreen as never} />
       <Stack.Screen name="PersonFriends" component={PersonFriendsScreen} />
       <Stack.Screen name="DirectChat" component={DirectChatScreen} />
     </Stack.Navigator>
