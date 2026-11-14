@@ -41,7 +41,7 @@ interface Props {
  * Profilul complet al unui cont real (spec 2026-11-14-profil-membru-tema-design.md): poza mare
  * (se mărește la apăsare), numele, vârsta și orașul, @username, „Despre” și tag-urile, cu cele comune
  * cu tine evidențiate. Arată la fel ca profilul persoanelor de test, fără secțiunile care nu există încă
- * pentru conturile reale (prieteni, badge-uri, amintiri).
+ * pentru conturile reale (lista de prieteni, badge-uri).
  */
 export default function UserProfileView({ uid, fallback, onBack, children }: Props) {
   const insets = useSafeAreaInsets();

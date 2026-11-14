@@ -1,5 +1,7 @@
 # Prieteni și amintiri pe Firestore — plan de implementare
 
+> **Actualizare:** amintirile au fost abandonate de utilizator după Task 3. Task 4 a fost anulat (revert), Task 5 și partea de amintiri din Task 6 nu se mai fac; amintirile de test au fost scoase din aplicație. Rămân: ștergerea prieteniilor la ștergerea contului (Task 6) și verificarea finală (Task 7).
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Prietenii (cerere, acceptare, blocare, „în comun”) și amintirile (poze cu vizibilitate) pentru conturile reale, în Firestore, vizibile pe profilul complet deschis de alții.

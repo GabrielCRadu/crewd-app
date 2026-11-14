@@ -11,27 +11,22 @@ import GlassIconButton from '../components/GlassIconButton';
 import PhotoViewer from '../components/PhotoViewer';
 import BadgesCard from '../components/badges/BadgesCard';
 import EventHistoryCarousel from '../components/events/EventHistoryCarousel';
-import MemoriesGrid from '../components/memories/MemoriesGrid';
-import MemoryViewer from '../components/memories/MemoryViewer';
 import { allProfileTags, useAuth } from '../context/AuthContext';
 import { RATING_TAGS } from '../data/ratingTags';
 import { useBadgeProposals } from '../hooks/useBadgeProposals';
 import { useEvents } from '../hooks/useEvents';
 import { useFriends } from '../hooks/useFriends';
-import { useMemories } from '../hooks/useMemories';
 import { usePastEvents } from '../hooks/usePastEvents';
 import { useRatings } from '../hooks/useRatings';
 import { useUserLocation } from '../hooks/useUserLocation';
 import { getAutoBadges, getVotedBadges } from '../services/badgesService';
 import { blockPerson, idsWithStatus, statusOf, unblockPerson } from '../services/friendsService';
-import { memoriesOf } from '../services/memoriesService';
 import { commonTags, friendsOfPerson, getPerson, mutualFriends } from '../services/peopleService';
 import { getReputation, hasReportedPerson, reportPerson } from '../services/ratingsService';
 import { colors } from '../theme/colors';
 import { radii } from '../theme/shape';
 import { formatEventDate } from '../utils/dates';
 import { isUpcomingOrLive, sortByDate } from '../utils/eventFilters';
-import { hiddenMemoriesCount, sortMemories, visibleMemories } from '../utils/memoryRules';
 import { tr } from '../i18n';
 
 /**
@@ -55,8 +50,6 @@ export default function PersonProfileScreen() {
   const { profile } = useAuth();
   const myRatings = useRatings();
   const myBadgeProposals = useBadgeProposals();
-  const allMemories = useMemories();
-  const [openMemoryId, setOpenMemoryId] = useState<string | null>(null);
   const [photoOpen, setPhotoOpen] = useState(false);
   const friends = useFriends();
   const location = useUserLocation();
@@ -86,13 +79,6 @@ export default function PersonProfileScreen() {
   const blocked = status === 'blocked';
   const reputation = getReputation(myRatings, person.id);
   const shared = commonTags(person, myTags);
-  // Amintirile ei/lui: cele „doar prieteni” se văd numai dacă sunteți prieteni;
-  // cele de la evenimentele la care ați fost amândoi apar primele, cu eticheta „Împreună”.
-  const viewer = { isOwner: false, isFriend };
-  const personMemories = memoriesOf(allMemories, person.id);
-  const togetherIds = together.map((e) => e.id);
-  const memories = sortMemories(visibleMemories(personMemories, viewer), togetherIds);
-  const hiddenMemories = hiddenMemoriesCount(personMemories, viewer);
   const personFriends = friendsOfPerson(person.id);
   const mutualCount = mutualFriends(person.id, idsWithStatus(friends, 'friends')).length;
   const others = person.tags.filter((t) => !shared.includes(t));
@@ -261,23 +247,6 @@ export default function PersonProfileScreen() {
                 </View>
               ) : null}
 
-              {/* Amintiri: doar de văzut; cele de la evenimentele comune sunt evidențiate */}
-              {personMemories.length > 0 ? (
-                <View style={styles.section}>
-                  <Text style={styles.label}>{tr('AMINTIRI')}</Text>
-                  {memories.length > 0 ? (
-                    <MemoriesGrid memories={memories} sharedEventIds={togetherIds} onOpen={(m) => setOpenMemoryId(m.id)} />
-                  ) : null}
-                  {hiddenMemories > 0 ? (
-                    <Text style={styles.muted}>
-                      {hiddenMemories === 1
-                        ? tr('Mai are o amintire doar pentru prieteni.')
-                        : tr('Mai are {hiddenMemories} amintiri doar pentru prieteni.', { hiddenMemories: hiddenMemories })}
-                    </Text>
-                  ) : null}
-                </View>
-              ) : null}
-
               {/* Merge la… (doar prietenii văd) */}
               <View style={styles.section}>
                 <Text style={styles.label}>{tr('MERGE LA')}</Text>
@@ -311,7 +280,6 @@ export default function PersonProfileScreen() {
         </View>
       </ScrollView>
 
-      <MemoryViewer memory={memories.find((m) => m.id === openMemoryId) ?? null} onClose={() => setOpenMemoryId(null)} />
       <PhotoViewer
         photoUrl={photoOpen ? (person.photoUrl ?? null) : null}
         caption={person.name}

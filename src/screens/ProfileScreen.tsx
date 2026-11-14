@@ -28,20 +28,15 @@ import ReputationStats from '../components/ReputationStats';
 import BadgesCard from '../components/badges/BadgesCard';
 import GradientBorderCard from '../components/GradientBorderCard';
 import EventHistoryCarousel from '../components/events/EventHistoryCarousel';
-import AddMemorySheet from '../components/memories/AddMemorySheet';
-import MemoriesGrid from '../components/memories/MemoriesGrid';
-import MemoryViewer from '../components/memories/MemoryViewer';
 import { useAuth } from '../context/AuthContext';
 import { ME_ID } from '../data/mockRatings';
 import { useMyGroups } from '../hooks/useMyGroups';
 import { TAG_GROUPS } from '../data/tags';
 import { useFriends } from '../hooks/useFriends';
-import { useMemories } from '../hooks/useMemories';
 import { usePastEvents } from '../hooks/usePastEvents';
 import { useRatings } from '../hooks/useRatings';
 import { getMyVotedBadges } from '../services/badgesService';
 import { idsWithStatus } from '../services/friendsService';
-import { myMemories } from '../services/memoriesService';
 import { getReputation } from '../services/ratingsService';
 import { TAG_GROUP_STYLE as GROUP_STYLE } from '../data/tagGroupStyle';
 import type { ProfileStackParamList } from '../navigation/profileTypes';
@@ -49,7 +44,6 @@ import { colors, tagTints } from '../theme/colors';
 import { type } from '../theme/typography';
 import { glass, radii } from '../theme/shape';
 import { autoBadgeProgress } from '../utils/badgeRules';
-import { sortMemories } from '../utils/memoryRules';
 import { tr } from '../i18n';
 
 /**
@@ -64,11 +58,6 @@ export default function ProfileScreen() {
   const { groups: myGroups } = useMyGroups();
   // Reputația e încă mock (ratingsService); cu Firebase va fi pe uid-ul din Auth.
   const reputation = getReputation(useRatings(), ME_ID);
-  // Amintiri: pozele tale de la evenimentele trecute (încă doar în memorie, memoriesService).
-  const memories = sortMemories(myMemories(useMemories()));
-  // Foaia „Adaugă amintire”: închisă, deschisă fără eveniment ales, sau pentru un eveniment anume.
-  const [addMemory, setAddMemory] = useState<{ eventId: string | null } | null>(null);
-  const [openMemoryId, setOpenMemoryId] = useState<string | null>(null);
   const [photoOpen, setPhotoOpen] = useState(false);
   const [qrOpen, setQrOpen] = useState(false);
   // Meniul cu trei linii: unde se deschide (null = închis).
@@ -234,26 +223,6 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* Amintiri: poze de la evenimentele la care ai fost; se văd și pe profilul tău public */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>{tr('Amintiri')}</Text>
-            <Pressable
-              onPress={() => setAddMemory({ eventId: null })}
-              hitSlop={8}
-              style={({ pressed }) => [styles.addMemoryButton, pressed && styles.pressed]}
-            >
-              <Ionicons name="add" size={16} color={colors.text} />
-              <Text style={styles.addMemoryText}>{tr('Adaugă amintire')}</Text>
-            </Pressable>
-          </View>
-          {memories.length === 0 ? (
-            <Text style={styles.hint}>{tr('Încă nicio amintire. Adaugă poze de la evenimentele la care ai fost.')}</Text>
-          ) : (
-            <MemoriesGrid memories={memories} showVisibility onOpen={(m) => setOpenMemoryId(m.id)} />
-          )}
-        </View>
-
         {/* Istoricul (privat): evenimentele trecute apar automat; o carte deschide detaliile, de unde evaluezi */}
         <View style={styles.section}>
           <View>
@@ -263,23 +232,12 @@ export default function ProfileScreen() {
               <Text style={styles.hint}>{tr('Doar tu vezi această listă.')}</Text>
             </View>
           </View>
-          <EventHistoryCarousel
-            events={pastEvents}
-            onOpen={openPastEvent}
-            onAddMemory={(eventId) => setAddMemory({ eventId })}
-          />
+          <EventHistoryCarousel events={pastEvents} onOpen={openPastEvent} />
         </View>
         {/* Contul (emailul, ieșirea, ștergerea) s-a mutat în Setări (meniul cu trei linii). */}
       </ScrollView>
       </KeyboardAvoidingView>
 
-      <AddMemorySheet
-        visible={addMemory !== null}
-        events={pastEvents}
-        initialEventId={addMemory?.eventId}
-        onClose={() => setAddMemory(null)}
-      />
-      <MemoryViewer memory={memories.find((m) => m.id === openMemoryId) ?? null} onClose={() => setOpenMemoryId(null)} />
       <PhotoViewer
         photoUrl={photoOpen ? (profile.photoUrl ?? null) : null}
         caption={profile.name}
@@ -348,16 +306,6 @@ const styles = StyleSheet.create({
   statDivider: { width: 1, alignSelf: 'stretch', backgroundColor: colors.border },
   section: { gap: 10 },
   sectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  addMemoryButton: {
-    ...glass,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: radii.pill,
-  },
-  addMemoryText: { color: colors.text, fontSize: 13, fontWeight: '500' },
   sectionTitle: { ...type.label },
   card: { ...glass, padding: 18, borderRadius: radii.card },
   cardTitle: { fontSize: 16, fontWeight: '600', color: colors.text },

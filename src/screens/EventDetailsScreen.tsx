@@ -9,7 +9,6 @@ import Aurora from '../components/Aurora';
 import GlassIconButton from '../components/GlassIconButton';
 import AddToGoogleCalendar from '../components/events/AddToGoogleCalendar';
 import ShareEventSheet from '../components/events/ShareEventSheet';
-import AddMemorySheet from '../components/memories/AddMemorySheet';
 import GradientButton from '../components/GradientButton';
 import GlassBadge from '../components/events/GlassBadge';
 import { useAuth } from '../context/AuthContext';
@@ -52,7 +51,6 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
   const { groups: myGroups } = useMyGroups();
   const now = useNow();
   const [shareOpen, setShareOpen] = useState(false);
-  const [addMemoryOpen, setAddMemoryOpen] = useState(false);
 
   const event = useMemo(() => events.find((e) => e.id === eventId) ?? null, [events, eventId]);
 
@@ -211,15 +209,8 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
               <Text style={styles.endedText}>{tr('Evenimentul s-a terminat')}</Text>
             </View>
           ) : (
-            /* Ai fost la eveniment: adaugi o amintire și evaluezi oamenii */
+            /* Ai fost la eveniment: evaluezi oamenii */
             <View style={styles.endedActions}>
-              <Pressable
-                onPress={() => setAddMemoryOpen(true)}
-                style={({ pressed }) => [styles.memoryButton, pressed && styles.pressed]}
-              >
-                <Ionicons name="image-outline" size={18} color={colors.text} />
-                <Text style={styles.memoryButtonText}>{tr('Adaugă amintire')}</Text>
-              </Pressable>
               {rated ? (
                 <View style={styles.joinedRow}>
                   <View style={styles.joinedPill}>
@@ -268,14 +259,6 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
           setShareOpen(false);
           navigation.getParent()?.navigate('Chats', { screen: 'DirectChat', params: { personId }, initial: false });
         }}
-      />
-
-      {/* Amintirea se leagă de acest eveniment (doar dacă ai fost și s-a terminat) */}
-      <AddMemorySheet
-        visible={addMemoryOpen}
-        events={[event]}
-        initialEventId={event.id}
-        onClose={() => setAddMemoryOpen(false)}
       />
     </View>
   );
@@ -366,16 +349,6 @@ const styles = StyleSheet.create({
   },
   joinedRow: { flexDirection: 'row', alignItems: 'center', gap: 16 },
   endedActions: { gap: 10 },
-  memoryButton: {
-    ...glass,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    height: 48,
-    borderRadius: radii.pill,
-  },
-  memoryButtonText: { color: colors.text, fontSize: 15, fontWeight: '500' },
   joinedPill: {
     ...glass,
     flex: 1,

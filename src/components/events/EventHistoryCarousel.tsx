@@ -14,8 +14,6 @@ import { tr } from '../../i18n';
 interface Props {
   events: Event[];
   onOpen: (eventId: string) => void;
-  /** Dacă e dat, fiecare carte are și pastila „+ Amintire” (istoricul tău). */
-  onAddMemory?: (eventId: string) => void;
 }
 
 const CARD_WIDTH = 200;
@@ -26,7 +24,7 @@ const GAP = 12;
  * Istoricul din Profil ca un carusel de cărți mici: poza evenimentului,
  * data sus, numele și pastila „Evaluează” / „Evaluat ✓” jos.
  */
-export default function EventHistoryCarousel({ events, onOpen, onAddMemory }: Props) {
+export default function EventHistoryCarousel({ events, onOpen }: Props) {
   const myRatings = useRatings();
 
   if (events.length === 0) {
@@ -68,17 +66,6 @@ export default function EventHistoryCarousel({ events, onOpen, onAddMemory }: Pr
                     {rated ? tr('Evaluat ✓') : tr('Evaluează')}
                   </Text>
                 </View>
-                {onAddMemory ? (
-                  <Pressable
-                    onPress={() => onAddMemory(item.id)}
-                    hitSlop={6}
-                    accessibilityRole="button"
-                    accessibilityLabel={tr('Adaugă amintire de la {title}', { title: item.title })}
-                    style={({ pressed }) => [styles.status, styles.memoryPill, pressed && styles.pressed]}
-                  >
-                    <Text style={styles.statusText}>{tr('+ Amintire')}</Text>
-                  </Pressable>
-                ) : null}
               </View>
             </View>
           </Pressable>
@@ -110,7 +97,6 @@ const styles = StyleSheet.create({
   title: { color: colors.photo.text, fontSize: 16, fontWeight: '600', letterSpacing: -0.2 },
   actions: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   // Fundal opac, ca pastila să se citească și peste afișe deschise la culoare.
-  memoryPill: { backgroundColor: colors.photo.placeholder },
   status: { borderWidth: 1, borderColor: colors.photo.glassBorder, backgroundColor: colors.photo.glass, alignSelf: 'flex-start', paddingHorizontal: 10, paddingVertical: 5, borderRadius: radii.pill },
   statusTodo: { backgroundColor: colors.photo.pill, borderColor: colors.photo.pill },
   statusText: { fontSize: 12, fontWeight: '500', color: colors.photo.text },

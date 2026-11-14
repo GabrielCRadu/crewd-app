@@ -1,5 +1,7 @@
 # Prieteni și amintiri pe Firestore — design
 
+> **Actualizare (2026-11-14):** utilizatorul a renunțat la amintiri („eliminăm tot legat de amintiri, e prea complicat”). Amintirile au fost scoase complet din aplicație (și cele de test); din acest design se construiesc doar **prieteniile**. Secțiunile despre `memories/` rămân doar ca istoric al deciziei.
+
 ## De ce
 
 Profilul complet al unui cont real (spec 2026-11-14-profil-membru-tema-design.md) arată doar ce e în Firestore: poza, numele, vârsta, orașul, „Despre”, tag-urile alese. Prieteniile și amintirile stau acum doar în memoria aplicației (cu persoane de test), deci nu le vede nimeni altcineva. Vrem ca, pentru conturile reale:
