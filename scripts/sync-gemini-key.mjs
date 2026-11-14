@@ -46,6 +46,25 @@ const secret = await json(
 );
 if (typeof secret.value !== 'string' || !secret.value) throw new Error('Secretul din 1claw e gol.');
 
+// --check: verifică doar că 1claw dă cheia (fără s-o afișeze și fără să scrie ceva).
+if (process.argv.includes('--check')) {
+  const looksLikeGemini = secret.value.trim().startsWith('AIza');
+  console.log(`1claw OK: secretul „${path}” (versiunea ${secret.version}) are ${secret.value.trim().length} caractere${looksLikeGemini ? ', arată ca o cheie Gemini' : ', nu începe cu AIza…'}.`);
+  // O cerere inofensivă la Gemini (lista modelelor), ca să vedem că cheia merge; cheia merge în antet, nu în URL.
+  const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=50', {
+    headers: { 'x-goog-api-key': secret.value.trim() },
+  });
+  const body = await res.json().catch(() => ({}));
+  if (res.ok) {
+    const names = (body.models ?? []).map((m) => m.name.replace('models/', ''));
+    const wanted = 'gemini-3.5-flash-lite';
+    console.log(`Gemini OK (HTTP ${res.status}). Modelul ${wanted} ${names.includes(wanted) ? 'e disponibil' : 'NU apare în listă'}.`);
+  } else {
+    console.log(`Gemini a refuzat cheia: HTTP ${res.status} ${body.error?.status ?? ''} ${body.error?.message ?? ''}`.trim());
+  }
+  process.exit(res.ok ? 0 : 1);
+}
+
 // 3. În Secret Manager, prin Firebase CLI; valoarea merge pe stdin, nu în argumente.
 console.log(`Cheia Gemini a fost luată din 1claw (versiunea ${secret.version}). O scriu în GEMINI_API_KEY…`);
 const child = spawn('npx', ['--yes', 'firebase-tools@15', 'functions:secrets:set', 'GEMINI_API_KEY', '--force'], {

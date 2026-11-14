@@ -6,7 +6,7 @@ import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 import type { FirestoreEvent, QueryDocumentSnapshot } from 'firebase-functions/v2/firestore';
 import { defineSecret } from 'firebase-functions/params';
 import * as logger from 'firebase-functions/logger';
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenAI, HarmBlockThreshold, HarmCategory } from '@google/genai';
 
 import { moderateMessage } from './moderation/moderate';
 import type { Classify, IncomingMessage, Store } from './moderation/moderate';
@@ -26,7 +26,7 @@ const db = getFirestore();
 /** Baza de date e în eur3: triggerele Firestore rulează în europe-west1. */
 const REGION = 'europe-west1';
 /** Un model Gemini rapid și ieftin; se schimbă aici. */
-const MODEL = 'gemini-2.5-flash-lite';
+const MODEL = 'gemini-3.5-flash-lite';
 
 const GEMINI_API_KEY = defineSecret('GEMINI_API_KEY');
 
@@ -64,11 +64,21 @@ const BLOCK_FINISH_REASONS = new Set([
   'OTHER',
 ]);
 
+const SAFETY_OFF = [
+  HarmCategory.HARM_CATEGORY_HARASSMENT,
+  HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+  HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+  HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+].map((category) => ({ category, threshold: HarmBlockThreshold.OFF }));
+
 const classify: Classify = async (prompt) => {
   const response = await gemini().models.generateContent({
     model: MODEL,
     contents: prompt,
     config: {
+      // Moderatorul trebuie să poată citi mesajele periculoase: filtrele reglabile ale Gemini sunt oprite,
+      // decide instrucțiunea noastră. (Protecțiile de bază ale Google rămân; un blocaj se tratează în moderate.ts.)
+      safetySettings: SAFETY_OFF,
       systemInstruction: SYSTEM_INSTRUCTION,
       temperature: 0,
       responseMimeType: 'application/json',
