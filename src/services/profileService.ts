@@ -4,6 +4,7 @@ import { db } from '../lib/firebase';
 import type { UserPreferences } from '../types/events';
 import type { ProfileChanges, ProfileDraft, UserProfile } from '../types/user';
 import { ageFromBirthDate } from '../utils/birthDate';
+import { sanitizeText } from '../utils/safeText';
 import { reserveUsernameInTransaction } from './usernamesService';
 
 /*
@@ -74,10 +75,10 @@ export async function createProfile(uid: string, draft: ProfileDraft, photoThumb
   await runTransaction(database, async (tx) => {
     await reserveUsernameInTransaction(tx, uid, { username: draft.username, name: draft.name, photoThumb });
     tx.set(doc(database, 'users', uid), {
-      name: profile.name,
+      name: sanitizeText(profile.name, 50),
       username: draft.username,
       birthDate: birthDateToTimestamp(draft.birthDate),
-      city: profile.city,
+      city: sanitizeText(profile.city, 60),
       gender: profile.gender,
       bio: '',
       photoUrl: draft.photoUrl,
@@ -100,7 +101,10 @@ export async function setBio(uid: string, bio: string): Promise<void> {
 
 /** Salvează modificările din „Editează profilul” (doar câmpurile trimise; nu data nașterii sau genul). */
 export async function updateProfileFields(uid: string, changes: ProfileChanges): Promise<void> {
-  await updateDoc(doc(requireDb(), 'users', uid), { ...changes, updatedAt: serverTimestamp() });
+  const clean: ProfileChanges = { ...changes };
+  if (clean.name !== undefined) clean.name = sanitizeText(clean.name, 50);
+  if (clean.city !== undefined) clean.city = sanitizeText(clean.city, 60);
+  await updateDoc(doc(requireDb(), 'users', uid), { ...clean, updatedAt: serverTimestamp() });
 }
 
 /** Scoate un tag învățat (din cardul „Învățate din evenimentele tale”). */

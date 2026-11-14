@@ -5,6 +5,7 @@ import { PAST_JOINED_EVENT_IDS, placeMockEvents } from '../data/mockEvents';
 import { FRIENDS } from '../data/mockSocial';
 import { db } from '../lib/firebase';
 import type { CategoryId, Event, EventPrice, LatLng } from '../types/events';
+import { safeExternalUrl } from '../utils/safeText';
 
 /*
  * Sursa de date pentru evenimente. Ecranele folosesc DOAR funcțiile de aici.
@@ -73,8 +74,9 @@ function fromDoc(doc: QueryDocumentSnapshot<DocumentData>): Event | null {
     priceInfo,
     organizer: d.organizer ?? null,
     ageRestriction: d.ageRestriction ?? null,
-    ticketUrl: d.ticketUrl ?? null,
-    source: d.sourceName && d.sourceUrl ? { name: d.sourceName, url: d.sourceUrl } : null,
+    ticketUrl: safeExternalUrl(d.ticketUrl),
+    // Atribuirea rămâne vizibilă; linkul doar dacă e https (un link tel:/sms:/market: din import nu se deschide).
+    source: d.sourceName ? { name: d.sourceName, url: safeExternalUrl(d.sourceUrl) ?? '' } : null,
     ...demoSocial(doc.id),
   };
 }

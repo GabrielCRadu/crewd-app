@@ -90,6 +90,7 @@ export default function OnboardingIdentityScreen({ navigation, route }: Props) {
             onChangeText={setName}
             error={errors.name}
             placeholder={tr('Cum te strigă prietenii')}
+            maxLength={50}
             autoCapitalize="words"
             autoComplete="given-name"
             textContentType="givenName"
@@ -123,6 +124,7 @@ export default function OnboardingIdentityScreen({ navigation, route }: Props) {
               onChangeText={setCity}
               error={errors.city}
               placeholder={tr('Timișoara')}
+              maxLength={60}
               autoCapitalize="words"
               returnKeyType="done"
               containerStyle={styles.cityField}

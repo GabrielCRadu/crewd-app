@@ -2,6 +2,7 @@ import type { ChatRow, GroupMessage } from '../types/chat';
 import { addDays, formatDay, formatTime, startOfDay } from './dates';
 import { canOpenChat } from './groupRules';
 import { tr } from '../i18n';
+import { stripInvisible } from './safeText';
 
 /** Ce vede cine a ieșit (sau a fost scos) din grup cu conversația deschisă. */
 export const LEFT_GROUP_MESSAGE = 'Nu mai ești în acest grup.';
@@ -11,7 +12,7 @@ export const MAX_MESSAGE_LENGTH = 1000;
 
 /** Textul gata de trimis, sau null dacă e gol ori prea lung. */
 export function normalizeMessageText(text: string): string | null {
-  const trimmed = text.trim();
+  const trimmed = stripInvisible(text).trim();
   if (trimmed.length === 0 || trimmed.length > MAX_MESSAGE_LENGTH) return null;
   return trimmed;
 }

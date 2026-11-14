@@ -26,6 +26,7 @@ import { deletePublicProfile, getPublicProfile, savePublicProfile } from '../ser
 import { publicProfileKey, toPublicProfile } from '../utils/publicProfile';
 import { startFriendsSync, stopFriendsSync } from '../services/friendsService';
 import { deleteMyFriendData } from '../services/friendshipsFirestore';
+import { cancelAllReminders } from '../services/remindersService';
 import { startDmSync, stopDmSync } from '../services/directMessagesService';
 import { deleteMyDms } from '../services/dmFirestore';
 import { allProfileTags } from '../utils/profileTags';
@@ -98,6 +99,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setError(null);
       if (!nextUser) {
         publishedKey.current = null;
+        // Reamintirile contului vechi nu mai sună după ieșirea din cont (audit: datele rămâneau).
+        void cancelAllReminders();
         setProfile(null);
         loadUserPreferences(null, null, []);
         setStatus('signedOut');

@@ -64,8 +64,8 @@ export function getFriendsOnMap(me: LatLng, events: Event[], now = Date.now()): 
 
 const VISIBILITY_KEY = 'crewd.locationVisibleToFriends';
 
-/** Implicit locația e vizibilă (ca în ghidul de layout), până alege utilizatorul altceva. */
-let locationVisible = true;
+/** Implicit locația NU e vizibilă (confidențialitate implicită, GDPR art. 25), până o pornește utilizatorul. */
+let locationVisible = false;
 let loadStarted = false;
 /** true după ce utilizatorul a apăsat switch-ul: valoarea citită târziu de pe disc nu o mai suprascrie. */
 let changedByUser = false;
