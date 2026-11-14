@@ -36,8 +36,12 @@ type IconName = ComponentProps<typeof Ionicons>['name'];
  */
 const Tab = createMaterialTopTabNavigator();
 
-/** Pe Hartă nu schimbăm tab-ul trăgând: acolo degetul mută harta. */
-const NO_SWIPE_TABS = ['Map'];
+/**
+ * Tab-urile pe care nu se schimbă tab-ul trăgând. Hartă nu e aici: când degetul e pe hartă,
+ * harta oprește singură tragerea paginii (react-native-maps cere asta pe Android), așa că
+ * deasupra hărții (titlu, comutator) și sub ea (cardurile) poți trage, iar pe hartă o muți.
+ */
+const NO_SWIPE_TABS: string[] = [];
 
 // Tema navigării urmează tema telefonului, ca restul aplicației (src/theme/colors.ts).
 const baseTheme = isDark ? DarkTheme : DefaultTheme;
