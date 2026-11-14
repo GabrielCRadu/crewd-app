@@ -125,6 +125,7 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
             icon="chevron-back"
             onPress={() => navigation.goBack()}
             style={[styles.back, styles.onPhoto, { top: insets.top + 8 }]}
+            color={colors.photo.text}
           />
           {/* Trimite evenimentul unui prieten, în conversația voastră directă */}
           {!ended ? (
@@ -132,6 +133,7 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
               icon="paper-plane-outline"
               onPress={() => setShareOpen(true)}
               style={[styles.share, styles.onPhoto, { top: insets.top + 8 }]}
+            color={colors.photo.text}
             />
           ) : null}
           <View style={styles.heroBadges}>
@@ -313,7 +315,7 @@ function Fact({ icon, children }: { icon: IconName; children: React.ReactNode })
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
-  imageCredit: { position: 'absolute', right: 12, bottom: 8, fontSize: 10, color: colors.faint },
+  imageCredit: { position: 'absolute', right: 12, bottom: 8, fontSize: 10, color: colors.photo.faint },
   factsCard: { ...glass, padding: 14, gap: 10, borderRadius: radii.inner },
   factRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
   factText: { flex: 1, fontSize: 14, lineHeight: 20, color: colors.text },
@@ -341,7 +343,7 @@ const styles = StyleSheet.create({
   scrimTop: { position: 'absolute', left: 0, right: 0, top: 0 },
   back: { position: 'absolute', left: 20 },
   // Butoanele de pe poză: fundal închis (nu sticlă albă), ca să rămână vizibile pe afișe deschise la culoare.
-  onPhoto: { backgroundColor: colors.backdrop },
+  onPhoto: { backgroundColor: colors.photo.glass, borderColor: colors.photo.glassBorder },
   share: { position: 'absolute', right: 20 },
   heroBadges: { position: 'absolute', left: 20, bottom: 16, flexDirection: 'row', gap: 8 },
   body: { padding: 20, gap: 16 },

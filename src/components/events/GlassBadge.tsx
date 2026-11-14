@@ -9,14 +9,14 @@ import { radii } from '../../theme/shape';
 export default function GlassBadge({ label, icon }: { label: string; icon?: IconName }) {
   return (
     <View style={styles.badge}>
-      {icon ? <Ionicons name={icon} size={12} color={colors.text} /> : null}
+      {icon ? <Ionicons name={icon} size={12} color={colors.photo.text} /> : null}
       <Text style={styles.text}>{label}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  // Sticlă mai opacă (cardStrong), ca să se citească și peste poze sau aurora.
+  // Stă peste poze: sticlă închisă și text alb, la fel pe ambele teme.
   badge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -26,8 +26,8 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     borderRadius: radii.pill,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.cardStrong,
+    borderColor: colors.photo.glassBorder,
+    backgroundColor: colors.photo.glass,
   },
-  text: { color: colors.text, fontSize: 12, fontWeight: '600', letterSpacing: 0.4 },
+  text: { color: colors.photo.text, fontSize: 12, fontWeight: '600', letterSpacing: 0.4 },
 });

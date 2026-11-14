@@ -6,7 +6,7 @@ import { useRatings } from '../../hooks/useRatings';
 import { hasRated } from '../../services/ratingsService';
 import { colors } from '../../theme/colors';
 import { gradients } from '../../theme/gradients';
-import { glass, radii } from '../../theme/shape';
+import { radii } from '../../theme/shape';
 import type { Event } from '../../types/events';
 import { formatShortDate } from '../../utils/dates';
 
@@ -99,20 +99,20 @@ const styles = StyleSheet.create({
     borderRadius: radii.card,
     borderWidth: 1,
     borderColor: colors.border,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.photo.placeholder,
     overflow: 'hidden',
   },
   pressed: { opacity: 0.85 },
   scrim: { position: 'absolute', left: 0, right: 0, bottom: 0, height: '70%' },
   top: { flexDirection: 'row' },
   bottom: { gap: 8 },
-  title: { color: colors.text, fontSize: 16, fontWeight: '600', letterSpacing: -0.2 },
+  title: { color: colors.photo.text, fontSize: 16, fontWeight: '600', letterSpacing: -0.2 },
   actions: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   // Fundal opac, ca pastila să se citească și peste afișe deschise la culoare.
-  memoryPill: { backgroundColor: colors.surface },
-  status: { ...glass, alignSelf: 'flex-start', paddingHorizontal: 10, paddingVertical: 5, borderRadius: radii.pill },
-  statusTodo: { backgroundColor: colors.text, borderColor: colors.text },
-  statusText: { fontSize: 12, fontWeight: '500', color: colors.text },
-  statusTextTodo: { color: colors.onLight, fontWeight: '600' },
+  memoryPill: { backgroundColor: colors.photo.placeholder },
+  status: { borderWidth: 1, borderColor: colors.photo.glassBorder, backgroundColor: colors.photo.glass, alignSelf: 'flex-start', paddingHorizontal: 10, paddingVertical: 5, borderRadius: radii.pill },
+  statusTodo: { backgroundColor: colors.photo.pill, borderColor: colors.photo.pill },
+  statusText: { fontSize: 12, fontWeight: '500', color: colors.photo.text },
+  statusTextTodo: { color: colors.photo.onPill, fontWeight: '600' },
   empty: { fontSize: 13, color: colors.muted },
 });

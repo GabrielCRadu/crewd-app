@@ -105,14 +105,14 @@ export default function InviteQrSheet({ visible, uid, name, photoUrl, onClose }:
             <QRCode
               value={url}
               size={qrSize}
-              color={colors.onLight}
-              backgroundColor={colors.text}
+              color={colors.qr.dark}
+              backgroundColor={colors.qr.light}
               ecl="H"
               logo={photoUrl ? { uri: photoUrl } : undefined}
               logoSize={qrSize * 0.2}
               logoMargin={3}
               logoBorderRadius={8}
-              logoBackgroundColor={colors.text}
+              logoBackgroundColor={colors.qr.light}
             />
           </View>
           <Text style={styles.hint}>Scanează ca să mă adaugi ca prieten</Text>
@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
   grabber: { width: 40, height: 4, borderRadius: radii.pill, backgroundColor: colors.border },
   top: { position: 'absolute', top: 14, right: 16 },
   // Loc deasupra codului pentru butonul X din colț.
-  qrCard: { backgroundColor: colors.text, borderRadius: radii.card, padding: 18, marginTop: 40 },
+  qrCard: { backgroundColor: colors.qr.light, borderRadius: radii.card, padding: 18, marginTop: 40 },
   hint: { color: colors.muted, fontSize: 15, textAlign: 'center' },
   actions: { alignSelf: 'stretch', gap: 10, marginTop: 4 },
   copyButton: {

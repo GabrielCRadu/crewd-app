@@ -5,7 +5,7 @@ import MapView from 'react-native-maps';
 import EventMapMarker from './EventMapMarker';
 import EventMapPreview from './EventMapPreview';
 import type { EventWithDistance, LatLng } from '../../types/events';
-import { colors } from '../../theme/colors';
+import { colorScheme, colors, isDark } from '../../theme/colors';
 import { darkMapStyle } from '../../theme/mapStyle';
 import { radii } from '../../theme/shape';
 
@@ -54,8 +54,8 @@ export default function EventsMap({ events, userLocation, showUserLocation, onOp
         showsUserLocation={showUserLocation}
         showsMyLocationButton={false}
         toolbarEnabled={false}
-        userInterfaceStyle="dark"
-        customMapStyle={darkMapStyle}
+        userInterfaceStyle={colorScheme}
+        customMapStyle={isDark ? darkMapStyle : undefined}
         // O apăsare pe hartă (nu pe un eveniment) închide previzualizarea.
         onPress={(e) => {
           if (e.nativeEvent.action !== 'marker-press') setSelectedId(null);
