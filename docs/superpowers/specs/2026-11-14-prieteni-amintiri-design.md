@@ -37,7 +37,7 @@ Profilul complet al unui cont real (spec 2026-11-14-profil-membru-tema-design.md
 
 ## Abordări luate în calcul (prietenii în comun)
 
-1. **Aleasă.** O prietenie poate fi citită de cele două persoane **și de prietenii oricăreia dintre ele**. Pentru „în comun cu X”, telefonul tău verifică, pentru fiecare prieten Y al tău, dacă există prietenia Y–X (regulile permit, pentru că Y e prietenul tău). Nu dezvăluie mai mult decât „în comun” în sine; costă o citire pentru fiecare prieten al tău, la deschiderea unui profil.
+1. **Aleasă.** O prietenie **încheiată** (`friends`) poate fi citită de cele două persoane **și de prietenii oricăreia dintre ele**; cererile în așteptare le văd doar cei doi. Pentru „în comun cu X”, telefonul tău verifică, pentru fiecare prieten Y al tău, dacă există prietenia Y–X. Costă o citire pentru fiecare prieten al tău, la deschiderea unui profil. **Preț acceptat de utilizator:** un prieten al lui Y poate verifica dacă Y e prieten cu orice cont pe care îl cunoaște (din grupuri, chat), nu doar pe profilurile deschise; fără server nu se poate altfel.
 2. Fiecare își publică lista de prieteni, citibilă doar de prietenii lui: nu merge, pentru că nu ești prieten cu X, deci nu-i poți citi lista.
 3. Fără prieteni în comun: cel mai simplu, dar pierde rândul „în comun” cerut.
 
@@ -53,7 +53,8 @@ Profilul complet al unui cont real (spec 2026-11-14-profil-membru-tema-design.md
   - refuz / anulare / eliminare: oricare dintre cei doi șterge documentul;
   - „Vă potriviți” (amândoi „Aș mai ieși”) rămâne pe datele de test; nu face parte din acest design.
 - Reguli:
-  - `get`: cei doi, sau un utilizator care are prietenie `friends` cu unul dintre ei (pentru „în comun”); fără blocare implicată (vezi mai jos).
+  - Cele două uid-uri se iau din `pairId` (sortate, separate prin `_`), nu din `resource.data`, ca regulile să meargă și pe documente care nu există (`get` la „în comun”, ștergerea în batch-ul de blocare).
+  - `get`: cei doi; sau, doar dacă documentul are `status == 'friends'`, un utilizator care are prietenie `friends` cu unul dintre ei (pentru „în comun”).
   - `list`: doar interogarea `users array-contains <uid-ul tău>` (îți vezi propriile relații).
   - `create`: tu ești în `users` și ești `requestedBy`, `status == 'pending'`, id-ul corespunde perechii sortate, celălalt nu te-a blocat și nici tu pe el, nu există deja documentul.
   - `update`: doar acceptarea descrisă mai sus (doar `status` și `updatedAt` se schimbă, de la `pending` la `friends`, de către celălalt).
@@ -62,19 +63,22 @@ Profilul complet al unui cont real (spec 2026-11-14-profil-membru-tema-design.md
 ### `blocks/{blockerUid_blockedUid}`
 
 - Câmpuri: `blocker`, `blocked`, `createdAt`.
-- Îl citește și îl șterge doar cel care a blocat; regulile îl folosesc (prin `exists`) ca să refuze cererile de prietenie în ambele direcții și citirea „în comun”/amintirilor celui blocat.
+- Îl citește și îl șterge doar cel care a blocat; regulile îl folosesc (prin `exists`) **doar** ca să refuze cererile de prietenie în ambele direcții. Citirile („în comun”, amintirile „toți”) nu țin cont de blocare, ca cel blocat să nu vadă refuzuri în plus; amintirile „doar prieteni” dispar oricum pentru el, pentru că blocarea șterge prietenia.
+- **Limită acceptată de utilizator:** regulile pot doar permite sau refuza, deci cine e blocat primește refuz la fiecare cerere și ar putea deduce blocarea; în aplicație, refuzul arată ca o eroare de rețea.
 - Blocarea: creezi documentul și ștergi prietenia/cererea dintre voi (dacă există), în același batch.
 - Cel blocat nu află: o cerere nouă spre cine l-a blocat eșuează în reguli, iar aplicația îi arată același mesaj neutru ca la o eroare de rețea („Nu am putut trimite cererea. Încearcă mai târziu.”).
 
-### `memories/{memoryId}`
+### `memories/{ownerUid}/items/{memoryId}` și `memories/{ownerUid}/photos/{memoryId}`
 
-- Câmpuri: `ownerUid`, `eventId`, `eventTitle`, `eventDate` (Timestamp), `visibility: 'everyone' | 'friends'`, `thumb` (data URI JPEG, ~320px, ≤ 40 000 caractere), `createdAt`.
-- `memoryPhotos/{memoryId}` (același id): `ownerUid`, `visibility` (copiat, ca regulile să nu mai citească alt document), `photo` (data URI JPEG, ~1080px, ≤ 700 000 caractere).
+(Proprietarul e în cale, ca regulile și interogările să fie simple; alegerea mea.)
+
+- `items/{memoryId}` — câmpuri: `ownerUid`, `eventId`, `eventTitle`, `eventDate` (Timestamp), `visibility: 'everyone' | 'friends'`, `thumb` (data URI JPEG, ~320px, ≤ 40 000 caractere), `createdAt`.
+- `photos/{memoryId}` (același id): `ownerUid`, `visibility` (copiat, ca regulile să nu mai citească alt document), `photo` (data URI JPEG, ~1080px, ≤ 700 000 caractere).
 - Adăugare: ambele documente în același batch.
 - Reguli:
-  - citire (`get` și `list`): proprietarul; oricine logat dacă `visibility == 'everyone'`; prietenii proprietarului (prietenia `friends` există) dacă `visibility == 'friends'`; niciodată cine a fost blocat de proprietar.
-  - Interogările din aplicație trebuie să poată fi dovedite de reguli: pe profilul altcuiva se cer separat `ownerUid == X && visibility == 'everyone'` și, doar dacă sunteți prieteni, `ownerUid == X && visibility == 'friends'`.
-  - `create`: `ownerUid` ești tu, câmpuri fixe și limitele de mărime, pozele sunt `data:image/jpeg;base64`, iar `eventId` e în `users/{tu}.joinedEventIds` (doar la evenimentele la care te-ai înscris).
+  - citire (`get` și `list`): proprietarul; oricine logat dacă `visibility == 'everyone'`; prietenii proprietarului (prietenia `friends` există) dacă `visibility == 'friends'`.
+  - Interogările din aplicație trebuie să poată fi dovedite de reguli: pe profilul altcuiva se cer separat, în `memories/{X}/items`, `visibility == 'everyone'` și, doar dacă sunteți prieteni, `visibility == 'friends'`.
+  - `create`: `ownerUid` ești tu, câmpuri fixe și limitele de mărime, pozele sunt `data:image/jpeg;base64`, `eventId` e un text scurt. **Regulile nu verifică dacă ai fost la eveniment** (decizia utilizatorului): singurele evenimente încheiate acum sunt cele demo, care nu sunt în Firestore și nici în înscrierile salvate. Verificarea o face aplicația (foaia „Adaugă amintire” oferă doar evenimentele la care ai fost); prețul: o aplicație modificată ar putea pune o amintire la un eveniment la care n-a fost.
   - `update`: doar proprietarul, doar `visibility` (în ambele documente, același batch).
   - `delete`: doar proprietarul (ambele documente).
 - Limită: cel mult 50 de amintiri pe cont, verificată în aplicație (fără numărare pe server; e o protecție de bun-simț, nu de securitate).
@@ -88,8 +92,8 @@ Profilul complet al unui cont real (spec 2026-11-14-profil-membru-tema-design.md
   - conturile reale, din `onSnapshot` pe `friendships` (`users array-contains` tu) și pe `blocks` ale tale, pornit după login și oprit la logout.
 - Acțiunile pe un id de persoană de test lucrează în memorie; pe un uid real, scriu în Firestore (starea se actualizează din snapshot, cu actualizare optimistă locală).
 - O cerere nouă primită live (document `pending` cu `requestedBy` ≠ tu, apărut după primul snapshot) declanșează notificarea existentă (`announce({ kind: 'request' })`).
-- `useMutualFriends(uid)`: pentru un cont real, verifică prieteniile tale `friends` cu conturi reale contra lui X (citiri `get` pe `friendships/{Y_X}`, în paralel) și întoarce lista uid-urilor în comun.
-- `memoriesService.ts`: amintirile tale reale din Firestore (`ownerUid == tu`, prin `onSnapshot`), plus cele de test; `memoriesOfUser(uid, isFriend)` pentru profilul altcuiva (cele două interogări de mai sus); poza mare se încarcă doar la deschiderea amintirii (`memoryPhotos/{id}`).
+- `useMutualFriends(uid)`: pentru un cont real, verifică prieteniile tale `friends` cu conturi reale contra lui X (citiri `get` pe `friendships/{Y_X}`, în paralel; un refuz sau „nu există” înseamnă „nu e în comun”) și întoarce lista uid-urilor în comun.
+- `memoriesService.ts`: amintirile tale reale din Firestore (`ownerUid == tu`, prin `onSnapshot`), plus cele de test; `memoriesOfUser(uid, isFriend)` pentru profilul altcuiva (cele două interogări de mai sus); poza mare se încarcă doar la deschiderea amintirii (`memories/{X}/photos/{id}`).
 - Pozele: `pickMemoryPhoto` produce deja poza; se adaugă redimensionarea la ~1080px (poza mare) și ~320px (miniatura), ca data URI, prin `expo-image-manipulator` (deja folosit pentru poza de profil).
 - `deleteAccount` (AuthContext): șterge și prieteniile, blocările și amintirile tale înainte de profil.
 
@@ -110,7 +114,10 @@ Lista ta de prieteni și cererile sunt în stiva Profil: ecranul profilului comp
 - Doar prietenii în comun se văd pe profilul altcuiva (utilizatorul).
 - Abordarea 1 pentru „în comun” (utilizatorul).
 - Pozele amintirilor în Firestore, în două documente (miniatură + poză mare), fără Storage (constrângere a utilizatorului, propunerea mea).
-- Blocarea e secretă și oprește cererile în ambele direcții (comportamentul existent al aplicației).
+- Blocarea oprește doar cererile, în ambele direcții; secretă în aplicație, nu și la nivel de reguli (utilizatorul).
+- Prieteniile văzute de alții: doar cele încheiate; prețul „verificării” prin prieteni e acceptat (utilizatorul).
+- Regulile nu verifică participarea la eveniment pentru amintiri (utilizatorul).
+- `visibility` ținut la fel în cele două documente ale unei amintiri (regulile verifică cu `getAfter`; alegerea mea).
 
 ## Lăsat constructorului
 
