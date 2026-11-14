@@ -1,5 +1,6 @@
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import Avatar from '../components/Avatar';
@@ -14,6 +15,7 @@ import { isFirebaseConfigured } from '../lib/firebase';
 import type { ChatsStackParamList } from '../navigation/chatsTypes';
 import { MOCK_UID, leaveGroup } from '../services/groupsService';
 import { LEFT_GROUP_MESSAGE } from '../services/chatService';
+import { getPerson } from '../services/peopleService';
 import { colors } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
 import { type } from '../theme/typography';
@@ -129,7 +131,19 @@ export default function GroupDetailsScreen({ navigation, route }: Props) {
         <View style={styles.card}>
           <Text style={type.label}>{tr('Membri ·')}{' '}{group.memberUids.length}</Text>
           {members.map(([memberUid, m], i) => (
-            <View key={memberUid} style={[styles.member, i > 0 && styles.memberDivider]}>
+            // Apăsat: persoanele de test își deschid profilul complet, conturile reale profilul de membru; „tu” nu se deschide.
+            <Pressable
+              key={memberUid}
+              disabled={memberUid === uid}
+              onPress={() =>
+                getPerson(memberUid)
+                  ? navigation.navigate('PersonProfile', { personId: memberUid })
+                  : navigation.navigate('MemberProfile', { eventId: group.eventId, groupId: group.id, uid: memberUid })
+              }
+              accessibilityRole="button"
+              accessibilityLabel={tr('Profilul lui {name}', { name: m.name })}
+              style={({ pressed }) => [styles.member, i > 0 && styles.memberDivider, pressed && styles.pressed]}
+            >
               <Avatar name={m.name || '?'} size={40} photoUrl={m.photo ?? null} />
               <View style={styles.memberText}>
                 <Text style={styles.body}>
@@ -143,7 +157,8 @@ export default function GroupDetailsScreen({ navigation, route }: Props) {
                   </Text>
                 ) : null}
               </View>
-            </View>
+              {memberUid !== uid ? <Ionicons name="chevron-forward" size={16} color={colors.faint} /> : null}
+            </Pressable>
           ))}
         </View>
 

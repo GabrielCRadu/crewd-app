@@ -267,6 +267,13 @@ describe('memberSummary', () => {
     expect(memberSummary({ ...profile, photoThumb: 'data:image/jpeg;base64,AAA' }, now).photo).toBe('data:image/jpeg;base64,AAA');
   });
 
+  it('copies the username into the group (null when there is none)', () => {
+    expect(memberSummary({ ...profile, username: 'radu.g' }, now).username).toBe('radu.g');
+    const summary = memberSummary(profile, now);
+    expect('username' in summary).toBe(true);
+    expect(summary.username).toBeNull();
+  });
+
   it('keeps name, age and tags', () => {
     expect(memberSummary(profile, now)).toMatchObject({ name: 'Radu', age: 24, tags: ['concerte', 'rock', 'bere'] });
   });

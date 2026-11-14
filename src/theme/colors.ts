@@ -1,17 +1,20 @@
 import { Appearance } from 'react-native';
 
+import { getThemePreference, resolveColorScheme } from './themePreference';
+
 /**
  * Paleta aplicației, după docs/design-language.md: stil monocrom.
  * Negru, gri și alb; culoarea o dau pozele, nu interfața. Excepții: erori (roșu) și distanțe pe hartă.
  *
- * Tema (închisă / deschisă) urmează setarea telefonului și se alege o dată, la pornirea aplicației
- * (`app.json` → "userInterfaceStyle": "automatic"). Dacă schimbi tema telefonului cu aplicația
- * deschisă, noua temă se vede la următoarea pornire.
+ * Tema (închisă / deschisă) se alege o dată, la pornirea aplicației: cea din Setări (Luminoasă / Întunecată),
+ * sau cea a telefonului („Ca telefonul”, implicit; `app.json` → "userInterfaceStyle": "automatic").
+ * Alegerea se citește în index.ts înainte să se încarce ecranele (src/theme/themePreference.ts);
+ * la schimbarea ei din Setări, aplicația se reîncarcă.
  * Numele culorilor sunt aceleași în ambele teme, deci ecranele nu știu ce temă e activă.
  */
 
-/** Tema aleasă la pornire, după telefon. */
-export const colorScheme: 'light' | 'dark' = Appearance.getColorScheme() === 'light' ? 'light' : 'dark';
+/** Tema aleasă la pornire: cea din Setări, sau cea a telefonului („Ca telefonul”, implicit). */
+export const colorScheme: 'light' | 'dark' = resolveColorScheme(getThemePreference(), Appearance.getColorScheme());
 export const isDark = colorScheme === 'dark';
 
 const dark = {

@@ -7,6 +7,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import DeleteAccount from '../components/DeleteAccount';
 import GlassIconButton from '../components/GlassIconButton';
 import LanguageSwitch from '../components/LanguageSwitch';
+import ThemeSwitch from '../components/ThemeSwitch';
 import { useAuth } from '../context/AuthContext';
 import type { ProfileStackParamList } from '../navigation/profileTypes';
 import { colors } from '../theme/colors';
@@ -16,7 +17,7 @@ import { tr } from '../i18n';
 
 /**
  * Setările contului (din meniul cu trei linii de pe profil).
- * Contul: emailul, ieșirea din cont (cu confirmare Da / Nu) și ștergerea definitivă.
+ * Limba, tema, documentele legale. Contul: emailul, ieșirea din cont (cu confirmare Da / Nu) și ștergerea definitivă.
  */
 export default function SettingsScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<ProfileStackParamList, 'Settings'>>();
@@ -39,6 +40,10 @@ export default function SettingsScreen() {
         {/* Limba: toată aplicația trece pe limba aleasă */}
         <Text style={styles.label}>{tr('LIMBĂ')}</Text>
         <LanguageSwitch />
+
+        {/* Tema: luminoasă, întunecată sau ca telefonul (aplicația se reîncarcă) */}
+        <Text style={[styles.label, styles.sectionGap]}>{tr('TEMĂ')}</Text>
+        <ThemeSwitch />
 
         {/* Documentele legale */}
         <Text style={[styles.label, styles.sectionGap]}>{tr('LEGAL')}</Text>

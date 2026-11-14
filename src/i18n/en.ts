@@ -552,4 +552,17 @@ export const EN: Record<string, string> = {
   'Adăugarea la prieteni vine în curând.': 'Adding friends is coming soon.',
   'Contul nu mai există.': 'This account no longer exists.',
   'Hai să fim prieteni pe Crewd! @{username} {url}': "Let's be friends on Crewd! @{username} {url}",
+  // ---------- Profilul membrului, tema ----------
+  'Persoana nu mai e în acest grup.': 'This person is no longer in this group.',
+  'A propus grupul': 'Proposed the group',
+  'Îi place': 'Likes',
+  'În grupul tău pentru {event}': 'In your group for {event}',
+  'Profilul lui {name}': "{name}'s profile",
+  'TEMĂ': 'THEME',
+  'Luminoasă': 'Light',
+  'Întunecată': 'Dark',
+  'Ca telefonul': 'System',
+  'Tema s-a schimbat': 'Theme changed',
+  'Tema': 'Theme',
+  'Tema nouă se vede la următoarea pornire a aplicației.': 'The new theme shows the next time you open the app.',
 };
