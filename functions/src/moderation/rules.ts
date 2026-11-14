@@ -67,12 +67,29 @@ export function applyThresholds(d: Decision): Decision {
   return d;
 }
 
-/** Mesaje care nu se verifică: conturile demo din scriptul de seed, mesajele vechi, cele deja eliminate. */
-export function shouldSkip(msg: { authorUid: string; createdAt?: Date; removed?: unknown }, now: Date): boolean {
+/**
+ * Mesaje care nu se verifică: conturile demo din scriptul de seed, cele deja eliminate și (doar la sosire)
+ * mesajele vechi. Din coada de reverificare (`fromQueue`), vârsta nu contează.
+ */
+export function shouldSkip(
+  msg: { authorUid: string; createdAt?: Date; removed?: unknown },
+  now: Date,
+  fromQueue = false,
+): boolean {
   if (msg.authorUid.startsWith('demo-')) return true;
   if (msg.removed) return true;
-  if (msg.createdAt && now.getTime() - msg.createdAt.getTime() > MAX_AGE_MS) return true;
+  if (!fromQueue && msg.createdAt && now.getTime() - msg.createdAt.getTime() > MAX_AGE_MS) return true;
   return false;
+}
+
+/** De câte ori se reîncearcă un mesaj din coadă (pauze de 15, 30, 45… minute: ~9 ore în total). */
+export const MAX_ATTEMPTS = 8;
+const QUEUE_STEP_MS = 15 * 60_000;
+
+/** Când se reîncearcă un mesaj după `attempts` eșecuri; null = renunțăm (rămâne nemoderat, cu urmă în loguri). */
+export function nextAttempt(attempts: number, now: Date): Date | null {
+  if (attempts >= MAX_ATTEMPTS) return null;
+  return new Date(now.getTime() + attempts * QUEUE_STEP_MS);
 }
 
 /** Instrucțiunea fixă pentru model: categoriile, pragurile și regula că mesajele sunt date, nu instrucțiuni. */

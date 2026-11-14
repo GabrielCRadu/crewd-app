@@ -52,11 +52,11 @@ async function decide(target: { authorUid: string; text: string }, store: Store,
 
 /** Verifică un mesaj; întoarce ce s-a hotărât („skipped” dacă nu era de verificat). Aruncă la eroare (→ reîncercare). */
 export async function moderateMessage(
-  input: { path: string; message: IncomingMessage; isDm: boolean; now: Date },
+  input: { path: string; message: IncomingMessage; isDm: boolean; now: Date; fromQueue?: boolean },
   deps: { classify: Classify; store: Store },
 ): Promise<'skipped' | Verdict> {
-  const { path, message, isDm, now } = input;
-  if (shouldSkip(message, now)) return 'skipped';
+  const { path, message, isDm, now, fromQueue = false } = input;
+  if (shouldSkip(message, now, fromQueue)) return 'skipped';
   // Un eveniment trimis fără text vine din catalogul nostru: nu e nimic de verificat.
   if (!message.text) return 'ok';
   const logId = logIdFor(path);

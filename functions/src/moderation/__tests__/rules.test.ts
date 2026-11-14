@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { applyThresholds, blockedOutcome, buildPrompt, parseVerdict, shouldSkip } from '../rules';
+import { MAX_ATTEMPTS, applyThresholds, blockedOutcome, buildPrompt, nextAttempt, parseVerdict, shouldSkip } from '../rules';
 
 const now = new Date('2026-11-14T12:00:00Z');
 
@@ -95,5 +95,19 @@ describe('prompt structure cannot be forged', () => {
 describe('a removal always has a reason', () => {
   it('only flags a removal without a category', () => {
     expect(applyThresholds({ verdict: 'remove', category: 'none', confidence: 0.95, reason: '' }).verdict).toBe('flag');
+  });
+});
+
+describe('nextAttempt (re-check queue)', () => {
+  it('retries later with growing pauses, then gives up', () => {
+    expect(nextAttempt(1, now)?.getTime()).toBe(now.getTime() + 15 * 60_000);
+    expect(nextAttempt(3, now)?.getTime()).toBe(now.getTime() + 45 * 60_000);
+    expect(nextAttempt(MAX_ATTEMPTS, now)).toBeNull();
+  });
+});
+
+describe('shouldSkip from the queue', () => {
+  it('does not skip an old message when re-checking it from the queue', () => {
+    expect(shouldSkip({ authorUid: 'u1', createdAt: new Date(now.getTime() - 3 * 3600_000) }, now, true)).toBe(false);
   });
 });

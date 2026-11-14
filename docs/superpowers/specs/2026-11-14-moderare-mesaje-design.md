@@ -86,6 +86,8 @@ Ambele cheamă aceeași logică: citesc mesajul și **ultimele 5 mesaje** dinain
 
 ### Eșecuri
 
+> **Actualizare (cerută pentru perioada cu utilizatori reali):** în loc de reîncercările triggerului, un mesaj pe care Gemini nu l-a putut verifica (căzut, limită, credite epuizate, cheie invalidă) rămâne vizibil și intră în coada `moderationQueue/{id}`; funcția programată `retryModerationQueue` (la 15 minute) îl reverifică cu pauze de 15, 30, 45… minute, de cel mult 8 ori (~9 ore), apoi renunță cu `moderation_gave_up` în loguri. Fiecare eșec scrie `moderation_failed` în loguri. Fără filtre regex (prea multe greșeli în română). 1claw nu e folosit la rulare, deci căderea lui nu afectează moderarea.
+
 - Gemini nu răspunde / limită atinsă: funcția aruncă eroare și se activează reîncercarea automată a triggerului (retry, cu limită de vechime: mesajele mai vechi de 10 minute nu se mai verifică, ca reîncercările să nu continue la nesfârșit). Mesajul rămâne vizibil între timp.
 - Răspuns care nu respectă schema: tratat ca eroare (reîncercare), nu ca „ok”.
 - Funcția e idempotentă: dacă mesajul are deja `removed` sau există deja intrarea de jurnal, nu face nimic (triggerele pot rula de două ori).

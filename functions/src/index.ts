@@ -3,14 +3,15 @@ import { FieldValue, Timestamp, getFirestore } from 'firebase-admin/firestore';
 import type { DocumentReference } from 'firebase-admin/firestore';
 import { setGlobalOptions } from 'firebase-functions/v2';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
+import { onSchedule } from 'firebase-functions/v2/scheduler';
 import type { FirestoreEvent, QueryDocumentSnapshot } from 'firebase-functions/v2/firestore';
 import { defineSecret } from 'firebase-functions/params';
 import * as logger from 'firebase-functions/logger';
 import { GoogleGenAI, HarmBlockThreshold, HarmCategory } from '@google/genai';
 
-import { moderateMessage } from './moderation/moderate';
+import { logIdFor, moderateMessage } from './moderation/moderate';
 import type { Classify, IncomingMessage, Store } from './moderation/moderate';
-import { CATEGORIES, SYSTEM_INSTRUCTION } from './moderation/rules';
+import { CATEGORIES, SYSTEM_INSTRUCTION, nextAttempt } from './moderation/rules';
 
 /*
  * Moderarea automată a mesajelor (spec docs/superpowers/specs/2026-11-14-moderare-mesaje-design.md):
@@ -30,7 +31,7 @@ const MODEL = 'gemini-3.5-flash-lite';
 
 const GEMINI_API_KEY = defineSecret('GEMINI_API_KEY');
 
-setGlobalOptions({ region: REGION, maxInstances: 5 });
+setGlobalOptions({ region: REGION, maxInstances: 10 });
 
 let client: GoogleGenAI | null = null;
 function gemini(): GoogleGenAI {
@@ -154,26 +155,83 @@ function storeFor(messageRef: DocumentReference, createdAt: Date | undefined, dm
   };
 }
 
+/** Verifică un mesaj (de la sosire sau din coadă); aruncă dacă Gemini nu a putut răspunde. */
+async function check(ref: DocumentReference, data: FirebaseFirestore.DocumentData, isDm: boolean, fromQueue: boolean) {
+  const message = incoming(data);
+  const dmRef = isDm ? (ref.parent.parent as DocumentReference) : null;
+  const result = await moderateMessage(
+    { path: ref.path, message, isDm, now: new Date(), fromQueue },
+    { classify, store: storeFor(ref, message.createdAt, dmRef) },
+  );
+  if (result === 'flag' || result === 'remove') logger.info('moderation', { path: ref.path, result });
+}
+
+/*
+ * Coada de reverificare (moderationQueue/{id}): dacă Gemini nu răspunde (căzut, limită atinsă, cheie invalidă),
+ * mesajul rămâne vizibil și intră aici; funcția programată de mai jos îl reîncearcă la 15, 30, 45… minute.
+ * Așa nu se pierde nimic, iar chatul nu e niciodată blocat de moderare.
+ */
+const queue = db.collection('moderationQueue');
+
+async function enqueue(ref: DocumentReference, isDm: boolean, error: unknown) {
+  logger.warn('moderation_failed', { path: ref.path, error: String(error) });
+  const next = nextAttempt(1, new Date());
+  await queue.doc(logIdFor(ref.path)).set({
+    path: ref.path,
+    isDm,
+    attempts: 1,
+    nextAt: Timestamp.fromDate(next ?? new Date()),
+    lastError: String(error).slice(0, 500),
+  });
+}
+
 async function handle(event: FirestoreEvent<QueryDocumentSnapshot | undefined>, isDm: boolean): Promise<void> {
   const snap = event.data;
   if (!snap) return;
-  const message = incoming(snap.data());
-  const dmRef = isDm ? (snap.ref.parent.parent as DocumentReference) : null;
-  const result = await moderateMessage(
-    { path: snap.ref.path, message, isDm, now: new Date() },
-    { classify, store: storeFor(snap.ref, message.createdAt, dmRef) },
-  );
-  if (result === 'flag' || result === 'remove') logger.info('moderation', { path: snap.ref.path, result });
+  try {
+    await check(snap.ref, snap.data(), isDm, false);
+  } catch (e) {
+    await enqueue(snap.ref, isDm, e);
+  }
 }
 
 /** Chatul unui grup de la un eveniment. */
 export const moderateGroupMessage = onDocumentCreated(
-  { document: 'events/{eventId}/groups/{groupId}/messages/{messageId}', secrets: [GEMINI_API_KEY], retry: true },
+  { document: 'events/{eventId}/groups/{groupId}/messages/{messageId}', secrets: [GEMINI_API_KEY] },
   (event) => handle(event, false),
 );
 
 /** Mesajele directe între prieteni. */
 export const moderateDirectMessage = onDocumentCreated(
-  { document: 'dms/{pairId}/messages/{messageId}', secrets: [GEMINI_API_KEY], retry: true },
+  { document: 'dms/{pairId}/messages/{messageId}', secrets: [GEMINI_API_KEY] },
   (event) => handle(event, true),
+);
+
+/** La fiecare 15 minute: reverifică mesajele din coadă; după MAX_ATTEMPTS renunță (cu eroare în loguri). */
+export const retryModerationQueue = onSchedule(
+  { schedule: 'every 15 minutes', secrets: [GEMINI_API_KEY], timeoutSeconds: 300 },
+  async () => {
+    const due = await queue.where('nextAt', '<=', Timestamp.now()).limit(50).get();
+    for (const item of due.docs) {
+      const { path, isDm, attempts } = item.data() as { path: string; isDm: boolean; attempts: number };
+      const ref = db.doc(path);
+      const snap = await ref.get();
+      if (!snap.exists) {
+        await item.ref.delete();
+        continue;
+      }
+      try {
+        await check(ref, snap.data()!, isDm, true);
+        await item.ref.delete();
+      } catch (e) {
+        const next = nextAttempt(attempts + 1, new Date());
+        if (!next) {
+          logger.error('moderation_gave_up', { path, attempts: attempts + 1, error: String(e) });
+          await item.ref.delete();
+        } else {
+          await item.ref.update({ attempts: attempts + 1, nextAt: Timestamp.fromDate(next), lastError: String(e).slice(0, 500) });
+        }
+      }
+    }
+  },
 );
