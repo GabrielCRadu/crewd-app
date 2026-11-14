@@ -9,7 +9,8 @@
  * - Lucrează într-un worktree git separat, cu cale scurtă (C:\crewd-build\src), adus la origin/main;
  *   working copy-ul tău și branch-ul curent nu se ating.
  * - Versiunea: 1.0.N, unde N = numărul de commit-uri de pe origin/main (crește singură la fiecare PR unit).
- * - Semnat cu cheia de debug din șablonul Expo, aceeași la fiecare build, ca update-urile să se instaleze peste.
+ * - Semnat cu cheia privată de release (scripts/make-release-key.mjs; calea și parolele în .env.local), aceeași
+ *   la fiecare build, ca update-urile să se instaleze peste. Fără ea, build-ul se oprește (nu mai folosim cheia de debug).
  * Detalii: docs/build-apk.md și docs/superpowers/specs/2026-11-14-build-apk-design.md.
  */
 import { spawnSync } from 'node:child_process';
@@ -87,6 +88,11 @@ function main() {
   const sdkDir = findSdkDir();
   const missing = missingRequirements({ javaFound: hasJava(), sdkDir, envFileText });
   if (missing.length > 0) fail(`Nu pot construi APK-ul:\n  - ${missing.join('\n  - ')}`);
+  // Cheia privată de semnare (audit: cheia de debug e publică).
+  const keystore = envValue(envFileText, 'CREWD_KEYSTORE_PATH');
+  if (!keystore || !existsSync(keystore)) {
+    fail('Lipsește cheia de semnare. Rulează o dată: node scripts/make-release-key.mjs (și fă o copie de siguranță).');
+  }
 
   // 2. Ultima versiune de pe main
   step('Aduc ultima versiune de pe main (git fetch origin main)');
@@ -128,6 +134,12 @@ function main() {
     APP_VERSION_CODE: String(versionCode),
     GOOGLE_MAPS_API_KEY: envValue(envFileText, 'GOOGLE_MAPS_API_KEY'),
     NODE_ENV: 'production',
+    // Semnarea cu cheia privată: Gradle citește proprietățile „android.injected.signing.*” din variabile
+    // ORG_GRADLE_PROJECT_* (parolele nu apar în linia de comandă).
+    'ORG_GRADLE_PROJECT_android.injected.signing.store.file': keystore,
+    'ORG_GRADLE_PROJECT_android.injected.signing.store.password': envValue(envFileText, 'CREWD_KEYSTORE_PASSWORD'),
+    'ORG_GRADLE_PROJECT_android.injected.signing.key.alias': envValue(envFileText, 'CREWD_KEY_ALIAS'),
+    'ORG_GRADLE_PROJECT_android.injected.signing.key.password': envValue(envFileText, 'CREWD_KEY_PASSWORD'),
   };
 
   // 7. Proiectul nativ Android (generat, nu se comite)
@@ -169,7 +181,9 @@ function main() {
     }
     for (const serial of devices) {
       console.log(`  ${serial}`);
-      run(`"${adb}" -s ${serial} install -r "${apkPath}"`);
+      // Fără shell: serialul vine de la adb și nu trebuie interpretat ca o comandă (audit).
+      const result = spawnSync(adb, ['-s', serial, 'install', '-r', apkPath], { stdio: 'inherit' });
+      if (result.status !== 0) fail(`Instalarea pe ${serial} a eșuat.`);
     }
     console.log(`✓ Instalat pe ${devices.length} ${devices.length === 1 ? 'telefon' : 'telefoane'}.`);
   }
