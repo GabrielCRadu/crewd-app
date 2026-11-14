@@ -83,7 +83,7 @@ Evenimentele la care ești înscris, ca într-un calendar:
 
 1. **Cardul lunii:** „Noiembrie 2026”, butonul „Azi” și săgeți ‹ › pentru luna trecută / următoare;
    rândul L Ma Mi J V S D, apoi grila zilelor. Ziua de azi are un contur, ziua aleasă e un cerc alb,
-   iar sub zilele cu evenimente apare câte un punct pentru fiecare (maxim 3).
+   iar sub zilele cu evenimente apare câte un punct **roșu** pentru fiecare (maxim 3; estompat la zilele trecute).
 2. **Programul**, sub card: „TOATĂ LUNA NOIEMBRIE” sau ziua aleasă (cu „Toată luna” în dreapta).
    Pe fiecare zi: ziua săptămânii și numărul în stânga, iar în dreapta câte un card pe eveniment,
    cu ora de început și de final, titlul, „Loc · distanță” și categoria („ACUM” / „Încheiat” când e cazul).

@@ -242,9 +242,10 @@ const styles = StyleSheet.create({
   dayNumber: { color: colors.text, fontSize: 15, fontWeight: '500' },
   dayOutside: { color: colors.faint },
   dayNumberSelected: { color: colors.onLight, fontWeight: '700' },
-  dots: { flexDirection: 'row', gap: 3, height: 5 },
-  dot: { width: 5, height: 5, borderRadius: 3, backgroundColor: colors.text },
-  dotFaded: { backgroundColor: colors.faint },
+  dots: { flexDirection: 'row', gap: 3, height: 6 },
+  // Roșu, ales intenționat (excepție de la stilul alb-negru): se vede imediat în ce zile ai ceva. Zilele trecute: același roșu, estompat.
+  dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.nope },
+  dotFaded: { opacity: 0.35 },
   agendaHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 6 },
   sectionTitle: { ...type.label },
   link: { color: colors.text, fontSize: 13, fontWeight: '600' },
