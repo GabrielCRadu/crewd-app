@@ -5,6 +5,7 @@ import { colors, onThemeChange } from '../../theme/colors';
 import { glass } from '../../theme/shape';
 import { tr } from '../../i18n';
 import type { ChatRow } from '../../types/chat';
+import { removedMessageText } from '../../utils/chatRules';
 
 const AVATAR_SIZE = 28;
 
@@ -26,6 +27,18 @@ export default function MessageRow({
   onOpenAuthor?: (uid: string) => void;
 }) {
   const { message, isMine, showName, showAvatar, photo, time } = row;
+
+  // Ascuns de moderarea automată: ceilalți văd doar că a fost eliminat, autorul și motivul.
+  if (message.removed) {
+    return (
+      <View style={[styles.bubble, styles.bubbleRemoved, isMine ? styles.mine : styles.removedOther]}>
+        <Text style={styles.removedText}>
+          {removedMessageText(message.removed.category, isMine)}
+          <Text style={styles.time}>{`  ${time}`}</Text>
+        </Text>
+      </View>
+    );
+  }
 
   if (isMine) {
     return (
@@ -85,6 +98,9 @@ const makeStyles = () =>
     bubble: { paddingHorizontal: 14, paddingVertical: 9, borderRadius: 20, flexShrink: 1 },
     bubbleOther: { ...glass, borderBottomLeftRadius: 6 },
     bubbleMine: { backgroundColor: colors.text, borderBottomRightRadius: 6 },
+    bubbleRemoved: { borderWidth: 1, borderColor: colors.border, borderStyle: 'dashed' },
+    removedOther: { alignSelf: 'flex-start', maxWidth: '85%', marginLeft: AVATAR_SIZE + 8 },
+    removedText: { color: colors.muted, fontSize: 14, fontStyle: 'italic' },
     text: { color: colors.text, fontSize: 15 },
     textMine: { color: colors.onLight },
     time: { color: colors.faint, fontSize: 11 },

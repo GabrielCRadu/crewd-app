@@ -68,6 +68,7 @@ Nu îți cerem date sensibile: sănătate, religie, orientare sexuală, opinii p
 - **Fișa publică, profilul public și codul QR** (username, nume, vârstă, oraș, descriere, poză, tag-uri alese): executarea contractului, ca ceilalți să te poată recunoaște și găsi.
 - **Prieteni** (cereri, prietenii, blocări, prieteni în comun): executarea contractului.
 - **Moderare și prevenirea abuzurilor** (de exemplu verificarea vârstei minime la crearea contului): interes legitim; obligație legală (Regulamentul (UE) 2022/2065 privind serviciile digitale), art. 6(1)(c).
+- **Moderarea automată a mesajelor** (mesajele din chatul de grup și cele directe, cu câteva mesaje anterioare din aceeași conversație, fără numele autorilor): un serviciu AI (Google Gemini) verifică fiecare mesaj nou. Mesajele clar periculoase (amenințări, hărțuire, ură, conținut sexual nedorit, înșelătorii, droguri sau arme, date personale ale altcuiva, spam) sunt ascunse; în locul lor apare „Mesaj eliminat de moderare”, iar autorul vede și motivul. Cele nesigure sau despre autovătămare nu se ascund, ci se notează pentru verificare umană. Temei: interes legitim (siguranța utilizatorilor) și obligația legală de mai sus.
 - **Reamintiri înainte de evenimente:** notificări create direct pe telefon, cu permisiunea ta.
 - **Răspunsul la cererile autorităților și apărarea în litigii** (datele relevante): obligație legală; interes legitim.
 
@@ -114,6 +115,8 @@ Nu îți vindem datele. Le transmitem doar:
 
 - **Furnizorilor noștri**, care lucrează la instrucțiunile noastre, pe bază de contract (art. 28 GDPR):
   - autentificare și baza de date: Google Firebase (Firebase Authentication și Cloud Firestore), Google [Ireland Limited / LLC];
+  - moderarea automată a mesajelor: Google Gemini API și Cloud Functions for Firebase, Google [Ireland Limited / LLC]; mesajele nu sunt folosite de Google pentru antrenarea modelelor;
+  - păstrarea cheilor de acces: 1claw (seif pentru chei; nu primește mesajele tale);
   - hărți: Google Maps, prin harta din aplicație (pentru afișarea hărții, Google primește adresa IP și zona afișată);
   - [alți furnizori, dacă e cazul].
 - **Site-urilor organizatorilor de evenimente:** pozele evenimentelor se încarcă direct de pe site-urile surselor, care primesc adresa IP a telefonului, ca la orice site.
@@ -150,6 +153,7 @@ Ai dreptul:
 
 - **Cont și profil:** cât timp ai cont. Când îți ștergi contul (Setări → Șterge contul), se șterg contul, profilul, înscrierile și locul tău în grupuri, iar username-ul și fișa publică se eliberează.
 - **Mesajele din chatul de grup:** rămân vizibile celorlalți membri, cu numele tău, [__] (de exemplu până la ștergerea grupului), pentru că fac parte și din conversația lor.
+- **Mesajele ascunse sau notate de moderare:** textul original se păstrează 30 de zile într-un jurnal pe care nu îl vede nimeni din aplicație (pentru contestații și abuzuri), apoi se șterge automat. Se păstrează cele 30 de zile și dacă îți ștergi contul.
 - **Locația:** nu se păstrează pe serverele noastre.
 - **Istoricul înscrierilor și tag-urile:** cât timp ai cont.
 - **Funcțiile în testare** (secțiunea 3.5): nimic pe server; pe telefon, până închizi aplicația.

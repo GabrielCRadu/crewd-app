@@ -63,6 +63,7 @@ function fromDoc(snap: QueryDocumentSnapshot<DocumentData>): GroupMessage | null
     authorName: typeof d.authorName === 'string' ? d.authorName : '',
     text: d.text,
     createdAt: d.createdAt instanceof Timestamp ? d.createdAt.toDate() : new Date(),
+    ...(d.removed && typeof d.removed.category === 'string' ? { removed: { category: d.removed.category } } : {}),
   };
 }
 

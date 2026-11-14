@@ -29,6 +29,8 @@ export interface RemoteDm {
   text?: string;
   eventId?: string;
   sentAt: Date;
+  /** Ascuns de moderarea automată. */
+  removed?: { category: string };
 }
 
 export interface RemoteThread {
@@ -87,6 +89,9 @@ export function subscribeToDmMessages(me: string, other: string, onChange: (mess
               text: typeof data.text === 'string' ? data.text : undefined,
               eventId: typeof data.eventId === 'string' ? data.eventId : undefined,
               sentAt: toDate(data.createdAt),
+              ...(data.removed && typeof data.removed.category === 'string'
+                ? { removed: { category: String(data.removed.category) } }
+                : {}),
             };
           })
           .reverse(),

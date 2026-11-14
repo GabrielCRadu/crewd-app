@@ -6,6 +6,8 @@ export interface GroupMessage {
   authorName: string;
   text: string;
   createdAt: Date;
+  /** Mesaj ascuns de moderarea automată (functions/; textul e gol). */
+  removed?: { category: string };
 }
 
 /** Un rând din lista conversației: separator de zi sau mesaj. */

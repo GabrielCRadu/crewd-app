@@ -9,6 +9,7 @@ import {
   dayLabel,
   lastMessagePreview,
   normalizeMessageText,
+  removedMessageText,
 } from '../chatRules';
 
 // Ore locale (nu UTC), ca testele să nu depindă de fusul orar al calculatorului.
@@ -192,5 +193,25 @@ describe('chatRoomState', () => {
 
   it('stays ready on other errors (e.g. no internet), which are shown separately', () => {
     expect(chatRoomState({ groupsLoading: false, group: formed, uid: 'me', messagesError: 'Verifică conexiunea.' })).toBe('ready');
+  });
+});
+
+describe('removed messages', () => {
+  const removed = { id: 'm', authorUid: 'u2', authorName: 'Ana', text: '', createdAt: new Date(), removed: { category: 'threat' } };
+
+  it('previews a removed message without its text', () => {
+    expect(lastMessagePreview(removed, 'u1')).toBe('Ana: Mesaj eliminat de moderare');
+  });
+
+  it('tells the author why their message was removed', () => {
+    expect(removedMessageText('threat', true)).toBe('Mesajul tău a fost eliminat (amenințare)');
+    expect(removedMessageText('threat', false)).toBe('Mesaj eliminat de moderare');
+    expect(removedMessageText('unknown', true)).toBe('Mesajul tău a fost eliminat');
+  });
+});
+
+describe('removed message reason for illegal content', () => {
+  it('names illegal activities', () => {
+    expect(removedMessageText('illegal', true)).toBe('Mesajul tău a fost eliminat (activități ilegale)');
   });
 });
