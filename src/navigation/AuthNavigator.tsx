@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from '../screens/auth/LoginScreen';
 import SignUpScreen from '../screens/auth/SignUpScreen';
 import OnboardingIdentityScreen from '../screens/onboarding/OnboardingIdentityScreen';
+import OnboardingPhotoScreen from '../screens/onboarding/OnboardingPhotoScreen';
 import OnboardingTagsScreen from '../screens/onboarding/OnboardingTagsScreen';
 import { colors } from '../theme/colors';
 import type { AuthStackParamList, OnboardingStackParamList } from './authTypes';
@@ -27,6 +28,7 @@ export function OnboardingNavigator() {
   return (
     <OnboardingStack.Navigator screenOptions={screenOptions}>
       <OnboardingStack.Screen name="OnboardingIdentity" component={OnboardingIdentityScreen} />
+      <OnboardingStack.Screen name="OnboardingPhoto" component={OnboardingPhotoScreen} />
       <OnboardingStack.Screen name="OnboardingTags" component={OnboardingTagsScreen} />
     </OnboardingStack.Navigator>
   );

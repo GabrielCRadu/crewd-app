@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
@@ -11,6 +11,7 @@ import ScreenGlow from '../../components/ScreenGlow';
 import { useAuth } from '../../context/AuthContext';
 import { TAG_GROUPS } from '../../data/tags';
 import type { OnboardingStackParamList } from '../../navigation/authTypes';
+import { UsernameTakenError } from '../../services/usernamesService';
 import { colors } from '../../theme/colors';
 import { type } from '../../theme/typography';
 import type { TagGroup } from '../../types/social';
@@ -42,28 +43,43 @@ export default function OnboardingTagsScreen({ navigation, route }: Props) {
     }));
   };
 
-  const finish = async () => {
-    if (total < MIN_TAGS) {
-      setError(`Alege cel puțin ${MIN_TAGS} tag-uri, ca să-ți putem recomanda evenimente și oameni.`);
-      return;
-    }
+  const save = async () => {
     setError(null);
     setSaving(true);
     try {
       await completeOnboarding({ ...identity, photoUrl, chosenTags: selected });
       // Profilul e salvat: RootNavigator trece singur la tab-uri.
     } catch (e) {
+      setSaving(false);
+      if (e instanceof UsernameTakenError) {
+        // Cineva l-a luat între timp: înapoi la pasul 1, ca să alegi altul.
+        Alert.alert('Username-ul e deja luat', 'Între timp l-a ales altcineva. Alege altul.', [
+          { text: 'OK', onPress: () => navigation.popTo('OnboardingIdentity') },
+        ]);
+        return;
+      }
       console.warn('Nu am putut salva profilul:', e);
       setError('Nu am putut salva profilul. Verifică conexiunea și încearcă din nou.');
-      setSaving(false);
     }
+  };
+
+  // Username-ul nu se mai poate schimba: îl confirmăm înainte de salvare.
+  const finish = () => {
+    if (total < MIN_TAGS) {
+      setError(`Alege cel puțin ${MIN_TAGS} tag-uri, ca să-ți putem recomanda evenimente și oameni.`);
+      return;
+    }
+    Alert.alert('Username-ul tău', `Așa te vor găsi ceilalți: @${identity.username}. Nu se mai poate schimba.`, [
+      { text: 'Schimb', style: 'cancel', onPress: () => navigation.popTo('OnboardingIdentity') },
+      { text: 'Confirm', onPress: () => void save() },
+    ]);
   };
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <ScreenGlow />
       <ScrollView contentContainerStyle={styles.content}>
-        <OnboardingHeader step={2} onBack={() => navigation.goBack()} />
+        <OnboardingHeader step={3} onBack={() => navigation.goBack()} />
 
         <View style={styles.heading}>
           <Text style={styles.title}>Ce îți place?</Text>

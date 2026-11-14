@@ -17,8 +17,9 @@ export interface IdentityDraft {
   username: string;
 }
 
-/** Cei doi pași de onboarding (după crearea contului, înainte de tab-uri). */
+/** Cei trei pași de onboarding (după crearea contului, înainte de tab-uri): identitate, poză, tag-uri. */
 export type OnboardingStackParamList = {
   OnboardingIdentity: undefined;
+  OnboardingPhoto: { identity: IdentityDraft };
   OnboardingTags: { identity: IdentityDraft; photoUrl: string };
 };

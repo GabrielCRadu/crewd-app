@@ -10,7 +10,9 @@ import GradientButton from '../../components/GradientButton';
 import OnboardingHeader from '../../components/OnboardingHeader';
 import ScreenGlow from '../../components/ScreenGlow';
 import TextField from '../../components/TextField';
+import UsernameField from '../../components/UsernameField';
 import { useAuth } from '../../context/AuthContext';
+import { useUsernameAvailability } from '../../hooks/useUsernameAvailability';
 import type { OnboardingStackParamList } from '../../navigation/authTypes';
 import { colors } from '../../theme/colors';
 import { type } from '../../theme/typography';
@@ -26,7 +28,7 @@ const GENDERS: { value: Gender; label: string }[] = [
   { value: 'other', label: 'Altul' },
 ];
 
-type Errors = { name?: string; birthDate?: string; city?: string; gender?: string };
+type Errors = { name?: string; username?: string; birthDate?: string; city?: string; gender?: string };
 
 /** Mesajul de sub data nașterii și gen: nu se pot schimba după crearea profilului. */
 const LOCKED_HINT = 'Nu mai poate fi modificat după crearea profilului.';
@@ -40,6 +42,8 @@ export default function OnboardingIdentityScreen({ navigation }: Props) {
   const { signOut } = useAuth();
   const cityRef = useRef<TextInputInstance>(null);
   const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
+  const usernameStatus = useUsernameAvailability(username);
   const [birthDate, setBirthDate] = useState<string | null>(null);
   const [city, setCity] = useState('');
   const [gender, setGender] = useState<Gender | null>(null);
@@ -49,6 +53,7 @@ export default function OnboardingIdentityScreen({ navigation }: Props) {
     const age = birthDate ? ageFromBirthDate(birthDate) : null;
     const nextErrors: Errors = {
       name: name.trim().length >= 2 ? undefined : 'Scrie-ți numele.',
+      username: usernameStatus === 'available' ? undefined : 'Alege un username disponibil.',
       birthDate: !birthDate
         ? 'Alege data nașterii.'
         : age !== null && age >= MIN_AGE && age <= MAX_AGE
@@ -59,9 +64,8 @@ export default function OnboardingIdentityScreen({ navigation }: Props) {
     };
     setErrors(nextErrors);
     if (Object.values(nextErrors).some(Boolean) || !gender || !birthDate) return;
-    navigation.navigate('OnboardingTags', {
-      identity: { name: name.trim(), birthDate, city: city.trim(), gender, username: '' },
-      photoUrl: '',
+    navigation.navigate('OnboardingPhoto', {
+      identity: { name: name.trim(), birthDate, city: city.trim(), gender, username },
     });
   };
 
@@ -88,6 +92,16 @@ export default function OnboardingIdentityScreen({ navigation }: Props) {
             textContentType="givenName"
             returnKeyType="next"
             onSubmitEditing={() => cityRef.current?.focus()}
+          />
+
+          <UsernameField
+            value={username}
+            onChange={(next) => {
+              setUsername(next);
+              setErrors((prev) => ({ ...prev, username: undefined }));
+            }}
+            status={usernameStatus}
+            error={errors.username && usernameStatus !== 'invalid' && usernameStatus !== 'taken' ? errors.username : null}
           />
 
           <View style={styles.row}>
