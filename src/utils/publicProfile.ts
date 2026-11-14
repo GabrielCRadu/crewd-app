@@ -1,5 +1,4 @@
 import type { PublicProfile, UserProfile } from '../types/user';
-import { allProfileTags } from './profileTags';
 
 /** Câte tag-uri intră în profilul public (aceeași limită ca în firestore.rules). */
 export const PUBLIC_TAGS_MAX = 60;
@@ -14,7 +13,11 @@ export function toPublicProfile(profile: UserProfile): PublicProfile {
     bio: profile.bio,
     photoUrl: profile.photoUrl,
     username: profile.username ?? null,
-    tags: [...new Set(allProfileTags(profile))].slice(0, PUBLIC_TAGS_MAX),
+    // Doar tag-urile alese; cele învățate vin din evenimentele la care te-ai înscris, deci rămân private.
+    tags: [...new Set([...profile.chosenTags.events, ...profile.chosenTags.music, ...profile.chosenTags.hobbies])].slice(
+      0,
+      PUBLIC_TAGS_MAX,
+    ),
   };
 }
 

@@ -37,7 +37,7 @@ Cerut după prima variantă: „vreau ca apăsarea pe un membru să deschidă pr
 
 ### Profilul public: `profiles/{uid}`
 
-- Câmpuri: `name`, `age` (calculată, fără data nașterii), `city`, `bio`, `photoUrl` (poza de ~400px, data URI JPEG), `username` (sau `null`), `tags` (tag-urile alese + cele învățate), `updatedAt`. Emailul, data nașterii, genul, înscrierile și scorurile rămân private în `users/{uid}`.
+- Câmpuri: `name`, `age` (calculată, fără data nașterii), `city`, `bio`, `photoUrl` (poza de ~400px, data URI JPEG), `username` (sau `null`), `tags` (doar tag-urile alese; cele învățate din înscrieri rămân private), `updatedAt`. Emailul, data nașterii, genul, înscrierile și scorurile rămân private în `users/{uid}`.
 - Reguli: `get` pentru orice utilizator logat, `list` interzis. Scrie și șterge doar proprietarul; câmpuri fixe, limite de mărime (aceleași ca în `users/`), poza trebuie să fie `data:image/jpeg;base64`, iar `username` (dacă e pus) trebuie să fie al tău în `usernames/`. Regulile le publică utilizatorul.
 - Ținut la zi din AuthContext: de câte ori profilul tău (complet) se schimbă în aplicație, se rescrie documentul public, doar dacă s-a schimbat ceva. Asta acoperă crearea contului, completarea profilului, „Editează profilul”, „Despre mine”, tag-urile învățate și conturile existente (la primul login după actualizare). La ștergerea contului se șterge și el.
 

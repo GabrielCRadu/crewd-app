@@ -123,7 +123,7 @@ Username-urile unice (`docs/superpowers/specs/2026-11-14-username-parola-design.
 
 ### `profiles/{uid}`
 
-Profilul public (`docs/superpowers/specs/2026-11-14-profil-membru-tema-design.md`), deschis din lista de membri a unui grup, din chat și din codul QR. E o copie a câmpurilor publice din `users/{uid}`: `name`, `age` (calculată; fără data nașterii), `city`, `bio`, `photoUrl` (data URI JPEG), `username` (sau `null`; trebuie să fie al tău în `usernames/`), `tags` (alese + învățate, cel mult 60) și `updatedAt` (ora serverului). Orice utilizator logat poate citi un profil anume (`get`), dar nu poate lista colecția; scrie și șterge doar proprietarul. Îl ține la zi `src/context/AuthContext.tsx` (prin `src/services/publicProfileService.ts`) de câte ori se schimbă profilul, și o dată după login; la ștergerea contului se șterge.
+Profilul public (`docs/superpowers/specs/2026-11-14-profil-membru-tema-design.md`), deschis din lista de membri a unui grup, din chat și din codul QR. E o copie a câmpurilor publice din `users/{uid}`: `name`, `age` (calculată; fără data nașterii), `city`, `bio`, `photoUrl` (data URI JPEG), `username` (sau `null`; trebuie să fie al tău în `usernames/`), `tags` (doar cele alese, cel mult 60; cele învățate rămân private) și `updatedAt` (ora serverului). Orice utilizator logat poate citi un profil anume (`get`), dar nu poate lista colecția; scrie și șterge doar proprietarul. Îl ține la zi `src/context/AuthContext.tsx` (prin `src/services/publicProfileService.ts`) de câte ori se schimbă profilul, și o dată după login; la ștergerea contului se șterge.
 
 ### `meta/eventsImport`
 

@@ -50,7 +50,8 @@ export default function UserProfileView({ uid, fallback, onBack, children }: Pro
   const city = pub?.city ?? '';
   const bio = pub?.bio ?? '';
   const photoUrl = pub?.photoUrl ?? fallback?.photoUrl ?? null;
-  const username = pub?.username ?? fallback?.username ?? null;
+  // Username-ul vine din profilul public (verificat de reguli) sau, fără el, din fișa username-ului (codul QR).
+  const username = pub ? pub.username : (fallback?.username ?? null);
   const tags = pub?.tags ?? fallback?.tags ?? [];
   const shared = tags.filter((t) => myTags.includes(t));
   const others = tags.filter((t) => !myTags.includes(t));
@@ -122,7 +123,7 @@ export default function UserProfileView({ uid, fallback, onBack, children }: Pro
             <View style={styles.section}>
               <Text style={styles.label}>
                 {tr('ÎN COMUN ·')}{' '}
-                {shared.length === 0 ? tr('NICIUN TAG') : shared.length === 1 ? '1 TAG' : `${shared.length} TAG-URI`}
+                {shared.length === 0 ? tr('NICIUN TAG') : shared.length === 1 ? tr('1 TAG') : tr('{count} TAG-URI', { count: shared.length })}
               </Text>
               <View style={styles.tags}>
                 {shared.map((t) => (

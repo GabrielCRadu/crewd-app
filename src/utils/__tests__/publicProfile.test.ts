@@ -33,8 +33,12 @@ describe('toPublicProfile', () => {
       bio: 'Îmi place jazz-ul.',
       photoUrl: PHOTO,
       username: 'ana.pop',
-      tags: ['Concerte', 'Jazz', 'Drumeții', 'Teatru'],
+      tags: ['Concerte', 'Jazz', 'Drumeții'],
     });
+  });
+
+  it('keeps learned tags private (they come from the events you joined)', () => {
+    expect(toPublicProfile(profile()).tags).not.toContain('Teatru');
   });
 
   it('never exposes the birth date, gender or thumbnail', () => {
@@ -50,7 +54,7 @@ describe('toPublicProfile', () => {
 
   it('caps the tags at 60', () => {
     const many = Array.from({ length: 80 }, (_, i) => `t${i}`);
-    expect(toPublicProfile(profile({ learnedTags: many })).tags).toHaveLength(60);
+    expect(toPublicProfile(profile({ chosenTags: { events: many, music: [], hobbies: [] } })).tags).toHaveLength(60);
   });
 });
 

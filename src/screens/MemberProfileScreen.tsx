@@ -15,7 +15,8 @@ type Props = NativeStackScreenProps<ChatsStackParamList, 'MemberProfile'>;
  * Profilul complet al unui membru (cont real), deschis din lista „Membri” a Detaliilor grupului
  * sau din avatarul lui din chat (spec 2026-11-14-profil-membru-tema-design.md).
  * Datele vin din profilul lui public; până se încarcă (sau dacă nu are încă unul), se arată ce știe grupul.
- * Cine a ieșit între timp din grup își păstrează profilul.
+ * Cine a ieșit între timp din grup își păstrează profilul. @username-ul vine doar din profilul public
+ * (regulile grupului nu verifică username-ul copiat în grup).
  */
 export default function MemberProfileScreen({ navigation, route }: Props) {
   const { eventId, groupId, uid } = route.params;
@@ -31,7 +32,7 @@ export default function MemberProfileScreen({ navigation, route }: Props) {
       uid={uid}
       fallback={
         member
-          ? { name: member.name || '?', age: member.age, photoUrl: member.photo ?? null, username: member.username, tags: member.tags }
+          ? { name: member.name || '?', age: member.age, photoUrl: member.photo ?? null, tags: member.tags }
           : null
       }
       onBack={() => navigation.goBack()}

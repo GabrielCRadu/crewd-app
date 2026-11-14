@@ -22,7 +22,7 @@ import { isNewPhoto } from '../utils/profilePhoto';
 import { isProfileComplete } from '../utils/profileCompleteness';
 import { usernameFromName } from '../utils/usernameRules';
 import { claimUsername, releaseUsername, updatePublicCard } from '../services/usernamesService';
-import { deletePublicProfile, savePublicProfile } from '../services/publicProfileService';
+import { deletePublicProfile, getPublicProfile, savePublicProfile } from '../services/publicProfileService';
 import { publicProfileKey, toPublicProfile } from '../utils/publicProfile';
 import { allProfileTags } from '../utils/profileTags';
 import { tr } from '../i18n';
@@ -121,18 +121,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [attempt]);
 
-  // Profilul public (profiles/{uid}) urmează profilul tău complet: se rescrie doar când se schimbă ceva
-  // din el, deci și o dată după login (așa îl primesc și conturile de dinainte).
+  // Profilul public (profiles/{uid}) urmează profilul tău complet: se rescrie doar când diferă de ce e salvat
+  // (așa îl primesc și conturile de dinainte, la primul login după actualizare).
   useEffect(() => {
     if (!isFirebaseConfigured || status !== 'ready' || !profile || !user || profile.uid !== user.uid) return;
     const pub = toPublicProfile(profile);
     const key = publicProfileKey(pub);
     if (key === publishedKey.current) return;
+    // Prima dată după pornire comparăm cu ce e deja salvat, ca să nu retrimitem poza la fiecare pornire.
+    const firstCheck = publishedKey.current === null;
     publishedKey.current = key;
-    savePublicProfile(pub).catch((e: unknown) => {
-      publishedKey.current = null;
-      console.warn('Nu am putut actualiza profilul public:', e);
-    });
+    void (async () => {
+      try {
+        if (firstCheck) {
+          const saved = await getPublicProfile(pub.uid);
+          if (saved && publicProfileKey(saved) === key) return;
+        }
+        await savePublicProfile(pub);
+      } catch (e) {
+        publishedKey.current = null;
+        console.warn('Nu am putut actualiza profilul public:', e);
+      }
+    })();
   }, [status, profile, user]);
 
   // Fără Firebase (profil demo): scorurile pornesc o dată de la tag-urile profilului demo.

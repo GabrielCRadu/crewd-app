@@ -557,6 +557,8 @@ export const EN: Record<string, string> = {
   'În grupul tău pentru {event}': 'In your group for {event}',
   'Profilul lui {name}': "{name}'s profile",
   '{age} ani': '{age} years',
+  '{count} TAG-URI': '{count} TAGS',
+  '1 TAG': '1 TAG',
   'Profilul nu e disponibil.': 'This profile is not available.',
   'TEMĂ': 'THEME',
   'Luminoasă': 'Light',
