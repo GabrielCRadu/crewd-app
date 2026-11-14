@@ -209,3 +209,9 @@ describe('removed messages', () => {
     expect(removedMessageText('unknown', true)).toBe('Mesajul tău a fost eliminat');
   });
 });
+
+describe('removed message reason for illegal content', () => {
+  it('names illegal activities', () => {
+    expect(removedMessageText('illegal', true)).toBe('Mesajul tău a fost eliminat (activități ilegale)');
+  });
+});

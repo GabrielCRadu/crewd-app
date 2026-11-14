@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { MAX_ATTEMPTS, applyThresholds, blockedOutcome, buildPrompt, nextAttempt, parseVerdict, shouldSkip } from '../rules';
+import { MAX_ATTEMPTS, applyThresholds, blockedOutcome, buildPrompt, isOverloaded, nextAttempt, parseVerdict, shouldSkip } from '../rules';
 
 const now = new Date('2026-11-14T12:00:00Z');
 
@@ -109,5 +109,21 @@ describe('nextAttempt (re-check queue)', () => {
 describe('shouldSkip from the queue', () => {
   it('does not skip an old message when re-checking it from the queue', () => {
     expect(shouldSkip({ authorUid: 'u1', createdAt: new Date(now.getTime() - 3 * 3600_000) }, now, true)).toBe(false);
+  });
+});
+
+describe('isOverloaded', () => {
+  it('treats overload, rate limit and server errors as worth trying another model', () => {
+    expect(isOverloaded({ status: 503 })).toBe(true);
+    expect(isOverloaded({ status: 429 })).toBe(true);
+    expect(isOverloaded({ status: 500 })).toBe(true);
+    expect(isOverloaded({ status: 400 })).toBe(false);
+    expect(isOverloaded(new Error('x'))).toBe(false);
+  });
+});
+
+describe('illegal category', () => {
+  it('accepts drugs and weapons as illegal', () => {
+    expect(parseVerdict('{"verdict":"remove","category":"illegal","confidence":0.95,"reason":"droguri"}').category).toBe('illegal');
   });
 });

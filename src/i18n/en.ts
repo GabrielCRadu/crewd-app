@@ -526,6 +526,7 @@ export const EN: Record<string, string> = {
   'discurs de ură': 'hate speech',
   'conținut sexual': 'sexual content',
   'înșelătorie': 'scam',
+  'activități ilegale': 'illegal activity',
   'date personale': 'personal data',
   'spam': 'spam',
   'Cererea nu mai există.': 'This request no longer exists.',

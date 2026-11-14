@@ -93,6 +93,8 @@ function categoryLabel(category: string): string | null {
       return tr('conținut sexual');
     case 'scam':
       return tr('înșelătorie');
+    case 'illegal':
+      return tr('activități ilegale');
     case 'personal_data':
       return tr('date personale');
     case 'spam':

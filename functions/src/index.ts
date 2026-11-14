@@ -11,7 +11,7 @@ import { GoogleGenAI, HarmBlockThreshold, HarmCategory } from '@google/genai';
 
 import { logIdFor, moderateMessage } from './moderation/moderate';
 import type { Classify, IncomingMessage, Store } from './moderation/moderate';
-import { CATEGORIES, SYSTEM_INSTRUCTION, nextAttempt } from './moderation/rules';
+import { CATEGORIES, SYSTEM_INSTRUCTION, isOverloaded, nextAttempt } from './moderation/rules';
 
 /*
  * Moderarea automată a mesajelor (spec docs/superpowers/specs/2026-11-14-moderare-mesaje-design.md):
@@ -26,8 +26,11 @@ const db = getFirestore();
 
 /** Baza de date e în eur3: triggerele Firestore rulează în europe-west1. */
 const REGION = 'europe-west1';
-/** Un model Gemini rapid și ieftin; se schimbă aici. */
-const MODEL = 'gemini-3.5-flash-lite';
+/**
+ * Modelele Gemini, în ordine: dacă primul e suprasolicitat (503) sau la limită (429), se încearcă imediat
+ * următorul, ca mesajul să nu aștepte coada de 15 minute.
+ */
+const MODELS = ['gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-3.5-flash'];
 
 const GEMINI_API_KEY = defineSecret('GEMINI_API_KEY');
 
@@ -72,9 +75,24 @@ const SAFETY_OFF = [
   HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
 ].map((category) => ({ category, threshold: HarmBlockThreshold.OFF }));
 
-const classify: Classify = async (prompt) => {
-  const response = await gemini().models.generateContent({
-    model: MODEL,
+async function generate(prompt: string) {
+  let lastError: unknown;
+  for (const [i, model] of MODELS.entries()) {
+    try {
+      return await generateWith(model, prompt);
+    } catch (e) {
+      lastError = e;
+      if (!isOverloaded(e)) throw e;
+      logger.warn('moderation_model_busy', { model, status: (e as { status?: number }).status });
+      if (i < MODELS.length - 1) await new Promise((r) => setTimeout(r, 500 * (i + 1)));
+    }
+  }
+  throw lastError;
+}
+
+function generateWith(model: string, prompt: string) {
+  return gemini().models.generateContent({
+    model,
     contents: prompt,
     config: {
       // Moderatorul trebuie să poată citi mesajele periculoase: filtrele reglabile ale Gemini sunt oprite,
@@ -86,6 +104,10 @@ const classify: Classify = async (prompt) => {
       responseJsonSchema: RESPONSE_SCHEMA,
     },
   });
+}
+
+const classify: Classify = async (prompt) => {
+  const response = await generate(prompt);
   const blockReason = response.promptFeedback?.blockReason;
   if (blockReason) return { blocked: String(blockReason) };
   const finish = response.candidates?.[0]?.finishReason;
