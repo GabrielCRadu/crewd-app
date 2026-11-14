@@ -22,6 +22,7 @@ import { useAuth } from '../context/AuthContext';
 import { useEvents } from '../hooks/useEvents';
 import { useGroupMessages } from '../hooks/useGroupMessages';
 import { useMyGroups } from '../hooks/useMyGroups';
+import { useNow } from '../hooks/useNow';
 import { useUserLocation } from '../hooks/useUserLocation';
 import { isFirebaseConfigured } from '../lib/firebase';
 import type { ChatsStackParamList } from '../navigation/chatsTypes';
@@ -38,7 +39,7 @@ import {
   chatRoomState,
   normalizeMessageText,
 } from '../utils/chatRules';
-import { formatDay, formatTime } from '../utils/dates';
+import { formatDay, formatTime, startOfDay } from '../utils/dates';
 
 type Props = NativeStackScreenProps<ChatsStackParamList, 'ChatRoom'>;
 
@@ -62,7 +63,12 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
   const members = group?.members;
   // Lista e inversată (cea mai nouă întâi), ca în orice aplicație de chat: se deschide direct jos, la ultimul
   // mesaj, fără să coboare animat, iar mesajele noi apar jos cât timp ești acolo.
-  const rows = useMemo(() => buildChatRows(messages, uid ?? '', members ?? {}).reverse(), [messages, uid, members]);
+  // Ziua de azi intră în calcul, ca după miezul nopții „Azi” să devină „Ieri” și cu conversația deschisă.
+  const today = startOfDay(useNow()).getTime();
+  const rows = useMemo(
+    () => buildChatRows(messages, uid ?? '', members ?? {}, new Date(today)).reverse(),
+    [messages, uid, members, today],
+  );
   const listRef = useRef<FlatList<ChatRow>>(null);
 
   const state = chatRoomState({ groupsLoading: loading, group, uid, messagesError: error });
