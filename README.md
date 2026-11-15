@@ -6,7 +6,8 @@
 
 **Find events in your city, and people to go with.**
 
-Plenty of people skip a concert or a play simply because they have no one to go with: first-year and international students, newcomers to the city, people whose friends like different things. Crewd fixes that. It is an Android app (Expo / React Native) for going out in Timișoara: you pick an event, join a small group of people who are heading there and like the same things you do, and meet up before it starts. You don't need a friend to say yes first, you go with your crew.
+Plenty of people skip a concert or a play simply because they have no one to go with: first-year and international students, newcomers to the city, people whose friends like different things.
+Crewd fixes that. It is an Android app (Expo / React Native) for going out in Timișoara: you pick an event, join a small group of people who are heading there and like the same things you do, and meet up before it starts. You don't need a friend to say yes first, you go with your crew.
 
 ## Features
 
