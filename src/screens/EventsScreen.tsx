@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import type { ScrollViewInstance } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -38,7 +39,7 @@ type Mode = 'all' | 'calendar';
  */
 export default function EventsScreen({ navigation }: Props) {
   // Logo-ul din bara de sus, apăsat când ești deja aici, duce lista sus (src/navigation/navigationRef.ts).
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<ScrollViewInstance>(null);
   useEffect(() => subscribeToEventsScrollTop(() => scrollRef.current?.scrollTo({ y: 0, animated: true })), []);
   const location = useUserLocation();
   const { events, loading, error } = useEvents(location.coords);
