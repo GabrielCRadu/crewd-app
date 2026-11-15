@@ -105,6 +105,12 @@ export const colors = {
   },
   /** Codul QR: mereu negru pe alb, ca să-l citească orice cameră, pe ambele teme. */
   qr: { dark: '#0A0A0A', light: '#FFFFFF' },
+  /**
+   * Fundalul inițialelor unui grup fără poză (ales după titlu): griuri închise, ușor diferite între ele,
+   * cu text alb. La fel în ambele teme (ca un afiș lipsă), fără culori vii.
+   */
+  groupTones: ['#2B2B2B', '#3A3A3A', '#4A4A4A', '#34312E', '#2E3236', '#3B3640'],
+  groupToneText: '#FFFFFF',
 };
 
 /** Tag-uri evidențiate (stil monocrom: fundal gri ușor + contur fin). Numele cheilor rămân din varianta colorată. */

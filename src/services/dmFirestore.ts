@@ -31,6 +31,8 @@ export interface RemoteDm {
   sentAt: Date;
   /** Ascuns de moderarea automată. */
   removed?: { category: string };
+  /** Verificat de moderarea automată (scris doar de functions/). */
+  checked?: boolean;
 }
 
 export interface RemoteThread {
@@ -92,6 +94,7 @@ export function subscribeToDmMessages(me: string, other: string, onChange: (mess
               ...(data.removed && typeof data.removed.category === 'string'
                 ? { removed: { category: String(data.removed.category) } }
                 : {}),
+              ...(data.checked === true ? { checked: true } : {}),
             };
           })
           .reverse(),

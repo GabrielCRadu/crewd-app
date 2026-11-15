@@ -105,6 +105,7 @@ Ambele cheamă aceeași logică: citesc mesajul și **ultimele 5 mesaje** dinain
 - Chatul grupului (`MessageRow`) și DM-ul (`DirectChatScreen`): un mesaj cu `removed` apare ca o bulă discretă „Mesaj eliminat de moderare”; autorul vede în plus categoria („Mesajul tău a fost eliminat: amenințare”).
 - Previzualizări: ultimul mesaj al grupului (`LastMessageLine` / `subscribeToLastMessage`) și lista DM-urilor arată textul de mai sus în loc de conținut.
 - Fără schimbări la regulile de scriere ale aplicației (câmpul `removed` îl scrie doar funcția).
+- **Actualizare:** un mesaj nou e ascuns celorlalți până la verificare: funcția scrie `checked: true` după verdict (la `remove`, în tranzacție; după coadă, abia când reușește), iar aplicația (`isReadyToShow`) îl arată la `checked`/`removed` sau după 60 s (fail-open); autorul îl vede imediat. Previzualizarea grupului păstrează ultimul mesaj deja vizibil (sau „…”).
 
 ### Cost și siguranța facturării
 

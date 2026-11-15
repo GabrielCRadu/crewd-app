@@ -136,6 +136,39 @@ export function chatRoomState(input: {
   return 'ready';
 }
 
+/**
+ * Cât așteaptă un mesaj nou verificarea moderării (Gemini) înainte să-l vadă ceilalți. După atât îl arătăm
+ * oricum (fail-open), ca o moderare căzută să nu blocheze niciodată conversațiile.
+ */
+export const MODERATION_WAIT_MS = 60_000;
+
+/**
+ * Îl poate vedea `myUid` acum? Da dacă e al lui, dacă moderarea l-a verificat (`checked`) sau ascuns (`removed`),
+ * dacă e mai vechi de MODERATION_WAIT_MS sau dacă e un mesaj demo (`demo-…`, nu trece prin moderare).
+ */
+export function isReadyToShow(
+  message: { authorUid: string; createdAt: Date; checked?: boolean; removed?: unknown },
+  myUid: string,
+  now: number,
+): boolean {
+  if (message.authorUid === myUid) return true;
+  if (message.checked || message.removed) return true;
+  if (message.authorUid.startsWith('demo-')) return true;
+  return now - message.createdAt.getTime() >= MODERATION_WAIT_MS;
+}
+
+/** Același lucru pentru un mesaj direct (în care autorul e doar „eu” sau „celălalt”). */
+export function isDmReadyToShow(
+  message: { fromMe: boolean; sentAt: Date; checked?: boolean; removed?: unknown },
+  now: number,
+): boolean {
+  return isReadyToShow(
+    { authorUid: message.fromMe ? 'me' : 'other', createdAt: message.sentAt, checked: message.checked, removed: message.removed },
+    'me',
+    now,
+  );
+}
+
 /** Mesajele fără cele ale persoanelor pe care le-ai blocat (audit: siguranța în chatul de grup). */
 export function withoutBlocked(messages: GroupMessage[], blockedUids: string[]): GroupMessage[] {
   if (blockedUids.length === 0) return messages;

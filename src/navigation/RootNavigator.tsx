@@ -5,7 +5,6 @@ import {
   DarkTheme,
   DefaultTheme,
   NavigationContainer,
-  createNavigationContainerRef,
   getFocusedRouteNameFromRoute,
 } from '@react-navigation/native';
 import type { NavigationState, Theme } from '@react-navigation/native';
@@ -25,6 +24,8 @@ import InviteLinkHandler from '../components/InviteLinkHandler';
 import GradientButton from '../components/GradientButton';
 import LogoSplash from '../components/LogoSplash';
 import { useAuth } from '../context/AuthContext';
+import { ChatActivityProvider, useChatActivity } from '../context/ChatActivity';
+import { navigationRef } from './navigationRef';
 import { getPerson } from '../services/peopleService';
 import { appearance, colors, onThemeChange } from '../theme/colors';
 import { AuthNavigator, OnboardingNavigator } from './AuthNavigator';
@@ -82,7 +83,7 @@ const TABS: {
 let savedNavigationState: NavigationState | undefined;
 
 /** Navigarea din afara ecranelor (ex. notificarea de cerere de prietenie). */
-const navigationRef = createNavigationContainerRef<Record<string, object | undefined>>();
+// navigationRef e în src/navigation/navigationRef.ts (folosit și de logo-ul din bara de sus).
 
 /** Deschide profilul unei persoane în tab-ul Profil (cu profilul tău dedesubt, pentru „înapoi”). */
 function openPersonProfile(personId: string) {
@@ -147,7 +148,10 @@ export default function RootNavigator() {
     >
       {status === 'ready' ? (
         <>
-          <MainTabs />
+          {/* Ultimele mesaje și necititele din chat, pentru lista de chat-uri și bulina de pe tab-ul Chat */}
+          <ChatActivityProvider>
+            <MainTabs />
+          </ChatActivityProvider>
           {/* Cererile de prietenie: notificarea mare, apoi butonul mic cu numărul lor */}
           <FriendRequestPopup
             onOpenProfile={openPersonProfile}
@@ -227,6 +231,8 @@ function MainTabs() {
  */
 function MainTabBar({ state, navigation }: MaterialTopTabBarProps) {
   const insets = useSafeAreaInsets();
+  const { unreadGroupIds, unreadDmIds } = useChatActivity();
+  const chatUnread = unreadGroupIds.length > 0 || unreadDmIds.length > 0;
   const focusedTab = state.routes[state.index];
   if (focusedTab && FULLSCREEN_ROUTES.includes(getFocusedRouteNameFromRoute(focusedTab) ?? '')) return null;
 
@@ -254,6 +260,8 @@ function MainTabBar({ state, navigation }: MaterialTopTabBarProps) {
           >
             <View style={[styles.iconPill, focused && styles.iconPillActive]}>
               <Ionicons name={focused ? tab.iconActive : tab.icon} size={20} color={color} />
+              {/* Bulina: ai mesaje necitite (grupuri sau directe) */}
+              {tab.name === 'Chats' && chatUnread ? <View style={styles.unreadDot} accessibilityLabel={tr('Mesaje necitite')} /> : null}
             </View>
             <Text style={[styles.tabLabel, { color }]}>{tr(tab.title)}</Text>
           </Pressable>
@@ -282,6 +290,17 @@ const makeStyles = () =>
     // `overflow: hidden`: pe Android, fără el, fundalul pastilei active ieșea cu colțuri drepte.
     iconPill: { width: 48, height: 28, borderRadius: 14, overflow: 'hidden', alignItems: 'center', justifyContent: 'center' },
     iconPillActive: { backgroundColor: colors.cardStrong },
+    unreadDot: {
+      position: 'absolute',
+      top: 2,
+      right: 10,
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: colors.text,
+      borderWidth: 1.5,
+      borderColor: colors.background,
+    },
   });
 let styles = makeStyles();
 // Stilurile se refac când se schimbă tema (Setări → Temă).

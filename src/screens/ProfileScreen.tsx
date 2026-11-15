@@ -16,7 +16,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-import Logo from '../components/Logo';
+import HeaderLogo from '../components/HeaderLogo';
 import AboutCard from '../components/AboutCard';
 import Aurora from '../components/Aurora';
 import Avatar from '../components/Avatar';
@@ -62,6 +62,8 @@ export default function ProfileScreen() {
   const reputation = getReputation(useRatings(), ME_ID);
   const [photoOpen, setPhotoOpen] = useState(false);
   const [qrOpen, setQrOpen] = useState(false);
+  // Linia subțire de sub bara fixă apare doar după ce conținutul a derulat.
+  const [scrolled, setScrolled] = useState(false);
   // Meniul cu trei linii: unde se deschide (null = închis).
   const [menuAnchor, setMenuAnchor] = useState<MenuAnchor | null>(null);
   const menuButton = useRef<ComponentRef<typeof View>>(null);
@@ -102,36 +104,38 @@ export default function ProfileScreen() {
     <SafeAreaView style={styles.safe} edges={['top']}>
       {/* „Despre mine” se editează direct aici: tastatura nu trebuie să acopere câmpul (edge-to-edge pe Android) */}
       <KeyboardAvoidingView style={styles.flex} behavior="padding">
+      {/* Bara de sus rămâne fixă; doar conținutul profilului derulează sub ea */}
+      <View style={[styles.header, scrolled && styles.headerScrolled]}>
+        <HeaderLogo label={tr('Profil')} />
+        <View style={styles.headerActions}>
+          {/* Codul tău QR (cu username-ul), mic; apăsat se deschide mare, cu linkul de invitație */}
+          {profile.username ? (
+            <Pressable
+              onPress={() => setQrOpen(true)}
+              accessibilityLabel={tr('Codul tău QR de invitație')}
+              style={({ pressed }) => [styles.qrButton, pressed && styles.qrPressed]}
+            >
+              <Ionicons name="qr-code-outline" size={18} color={colors.text} />
+            </Pressable>
+          ) : null}
+          {/* Meniul (trei linii, ca pe Instagram): Editează, Setări, Delogare */}
+          <Pressable
+            ref={menuButton}
+            onPress={openMenu}
+            accessibilityLabel={tr('Meniu')}
+            style={({ pressed }) => [styles.qrButton, pressed && styles.qrPressed]}
+          >
+            <Ionicons name="menu" size={20} color={colors.text} />
+          </Pressable>
+        </View>
+      </View>
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        scrollEventThrottle={16}
+        onScroll={(e) => setScrolled(e.nativeEvent.contentOffset.y > 4)}
       >
-        <View style={styles.header}>
-          <Logo height={30} accessibilityLabel={tr('Profil')} />
-          <View style={styles.headerActions}>
-            {/* Codul tău QR (cu username-ul), mic; apăsat se deschide mare, cu linkul de invitație */}
-            {profile.username ? (
-              <Pressable
-                onPress={() => setQrOpen(true)}
-                accessibilityLabel={tr('Codul tău QR de invitație')}
-                style={({ pressed }) => [styles.qrButton, pressed && styles.qrPressed]}
-              >
-                <Ionicons name="qr-code-outline" size={18} color={colors.text} />
-              </Pressable>
-            ) : null}
-            {/* Meniul (trei linii, ca pe Instagram): Editează, Setări, Delogare */}
-            <Pressable
-              ref={menuButton}
-              onPress={openMenu}
-              accessibilityLabel={tr('Meniu')}
-              style={({ pressed }) => [styles.qrButton, pressed && styles.qrPressed]}
-            >
-              <Ionicons name="menu" size={20} color={colors.text} />
-            </Pressable>
-          </View>
-        </View>
-
         {/* Identitatea + rândul de statistici */}
         <View style={styles.identity}>
           <Aurora style={StyleSheet.absoluteFill} />
@@ -274,8 +278,20 @@ const makeStyles = () =>
   StyleSheet.create({
     safe: { flex: 1, backgroundColor: colors.background },
     flex: { flex: 1 },
-    content: { padding: 20, paddingBottom: 32, gap: 22 },
-    header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    content: { paddingHorizontal: 20, paddingTop: 11, paddingBottom: 32, gap: 22 },
+    // Bara fixă: aceeași spațiere ca înainte (20 sus/lateral, 22 până la primul card, împărțit cu content).
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 20,
+      paddingTop: 20,
+      paddingBottom: 11,
+      backgroundColor: colors.background,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: 'transparent',
+    },
+    headerScrolled: { borderBottomColor: colors.border },
     // Iconița QR și „Editează” au aceeași înălțime fixă și sunt centrate pe același rând.
     headerActions: { flexDirection: 'row', alignItems: 'center', gap: 10 },
     qrButton: {

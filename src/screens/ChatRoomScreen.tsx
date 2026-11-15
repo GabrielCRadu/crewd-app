@@ -17,10 +17,12 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import Aurora from '../components/Aurora';
 import GlassIconButton from '../components/GlassIconButton';
+import GroupAvatar from '../components/GroupAvatar';
 import MessageRow, { DayRow } from '../components/chat/MessageRow';
 import { useAuth } from '../context/AuthContext';
 import { useEvents } from '../hooks/useEvents';
 import { useGroupMessages } from '../hooks/useGroupMessages';
+import { useModerationTick } from '../hooks/useModerationTick';
 import { useMyGroups } from '../hooks/useMyGroups';
 import { useNow } from '../hooks/useNow';
 import { useUserLocation } from '../hooks/useUserLocation';
@@ -28,6 +30,7 @@ import { isFirebaseConfigured } from '../lib/firebase';
 import type { ChatsStackParamList } from '../navigation/chatsTypes';
 import { openMemberProfile } from '../navigation/openMemberProfile';
 import { chatErrorMessage, sendGroupMessage } from '../services/chatService';
+import { useMarkChatRead } from '../services/chatReadState';
 import { MOCK_UID } from '../services/groupsService';
 import { colors, onThemeChange } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
@@ -37,11 +40,13 @@ import {
   MAX_MESSAGE_LENGTH,
   authorNameFor,
   buildChatRows,
+  isReadyToShow,
   chatRoomState,
   normalizeMessageText,
   withoutBlocked,
 } from '../utils/chatRules';
 import { formatDay, formatTime, startOfDay } from '../utils/dates';
+import { groupReadKey } from '../utils/chatListRules';
 import { tr, trPlural } from '../i18n';
 import { useFriends } from '../hooks/useFriends';
 import { idsWithStatus } from '../services/friendsService';
@@ -64,6 +69,8 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
   const uid = isFirebaseConfigured ? (user?.uid ?? null) : MOCK_UID;
   const isMember = !!uid && !!group?.memberUids.includes(uid);
   const { messages, error } = useGroupMessages(eventId, groupId, isMember);
+  // Cât e deschisă, conversația e citită (pentru bulinele din lista de chat-uri).
+  useMarkChatRead(groupReadKey(eventId, groupId), messages[messages.length - 1]?.createdAt);
 
   const members = group?.members;
   // Lista e inversată (cea mai nouă întâi), ca în orice aplicație de chat: se deschide direct jos, la ultimul
@@ -73,10 +80,17 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
   // Cei pe care i-ai blocat nu-ți mai apar în chat (audit: siguranța în chatul de grup).
   const blocked = idsWithStatus(useFriends(), 'blocked');
   const blockedKey = blocked.join(',');
+  // Mesajele altora apar după ce le-a verificat moderarea (sau după 60 s); timerul merge doar cât așteaptă unul.
+  const waiting = messages.some((m) => !isReadyToShow(m, uid ?? '', Date.now()));
+  const moderationTick = useModerationTick(waiting);
   const rows = useMemo(
-    () => buildChatRows(withoutBlocked(messages, blocked), uid ?? '', members ?? {}, new Date(today)).reverse(),
+    () => {
+      const now = Date.now();
+      const ready = withoutBlocked(messages, blocked).filter((m) => isReadyToShow(m, uid ?? '', now));
+      return buildChatRows(ready, uid ?? '', members ?? {}, new Date(today)).reverse();
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [messages, uid, members, today, blockedKey],
+    [messages, uid, members, today, blockedKey, moderationTick],
   );
   const listRef = useRef<FlatList<ChatRow>>(null);
 
@@ -129,6 +143,7 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <View style={styles.header}>
         <GlassIconButton icon="chevron-back" size={40} onPress={() => navigation.goBack()} />
+        <GroupAvatar group={group} event={event} title={title} size={38} />
         <Pressable
           style={({ pressed }) => [styles.headerText, pressed && styles.pressed]}
           onPress={() => navigation.navigate('GroupDetails', { eventId, groupId })}
