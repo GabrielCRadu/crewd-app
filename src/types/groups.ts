@@ -32,6 +32,8 @@ export interface CrewGroup {
   createdAt: Date;
   /** Când a ajuns prima dată la 3 membri; odată setat, grupul rămâne format. */
   formedAt: Date | null;
+  /** Poza grupului (opțională; încă nu se scrie nicăieri). Fără ea se arată afișul evenimentului. */
+  photo?: string | null;
 }
 
 /**

@@ -305,6 +305,10 @@ export const EN: Record<string, string> = {
   // ---------- Chat ----------
   'Mesaje directe': 'Direct messages',
   'Doar voi doi': 'Just you two',
+  'Necitit': 'Unread',
+  'Mesaje necitite': 'Unread messages',
+  'Nu ești încă în niciun grup. Înscrie-te la un eveniment și alătură-te unui grup! 🎉': "You're not in any group yet. Sign up for an event and join a group! 🎉",
+  'Nicio conversație încă. Scrie-i unui prieten! 💬': 'No conversations yet. Message a friend! 💬',
   'Scrie un mesaj…': 'Write a message…',
   'Mesajul nu s-a trimis': 'Message not sent',
   'Mesajul e gol sau prea lung.': 'The message is empty or too long.',

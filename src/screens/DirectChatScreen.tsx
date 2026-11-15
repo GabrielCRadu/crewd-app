@@ -16,11 +16,13 @@ import type { ChatsStackParamList } from '../navigation/chatsTypes';
 import { openConversation, sendDirectText } from '../services/directMessagesService';
 import type { DirectMessage } from '../services/directMessagesService';
 import { getPerson } from '../services/peopleService';
+import { useMarkChatRead } from '../services/chatReadState';
 import { colors, onThemeChange } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
 import type { Event } from '../types/events';
 import { isDmReadyToShow, removedMessageText } from '../utils/chatRules';
 import { formatEventDate, formatTime } from '../utils/dates';
+import { dmReadKey } from '../utils/chatListRules';
 import { tr } from '../i18n';
 
 type Props = NativeStackScreenProps<ChatsStackParamList, 'DirectChat'>;
@@ -46,6 +48,8 @@ export default function DirectChatScreen({ navigation, route }: Props) {
     return all.filter((m) => isDmReadyToShow(m, now));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [all, moderationTick]);
+  // Cât e deschisă, conversația e citită (pentru bulinele din lista de chat-uri).
+  useMarkChatRead(dmReadKey(personId), messages[messages.length - 1]?.sentAt);
   const location = useUserLocation();
   const { events } = useEvents(location.coords);
   const [draft, setDraft] = useState('');
