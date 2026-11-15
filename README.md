@@ -111,7 +111,7 @@ We work through pull requests: one branch per task (`<name>/<short-task>`), a dr
 ## Team
 
 - Radu Gabriel Claudiu ([@GabrielCRadu](https://github.com/GabrielCRadu))
-- Camelia Ghid ([@camiG123](https://github.com/camiG123))
+- Camelia Ghib ([@camiG123](https://github.com/camiG123))
 - Ștefan Covaci ([@Innesity](https://github.com/Innesity))
 - David Dumitru ([@xHash200](https://github.com/xHash200))
 
