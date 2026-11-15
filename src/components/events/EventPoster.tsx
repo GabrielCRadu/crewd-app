@@ -28,7 +28,15 @@ export default function EventPoster({ imageUrl, category, style, iconSize = 28, 
   return (
     <View style={[styles.base, style]}>
       {showImage ? (
-        <Image source={{ uri: imageUrl }} style={StyleSheet.absoluteFill} resizeMode="cover" onError={() => setFailed(true)} onLoadEnd={onLoadEnd} />
+        <Image
+          source={{ uri: imageUrl }}
+          style={StyleSheet.absoluteFill}
+          resizeMode="cover"
+          // Android decodează afișul direct la mărimea afișată (mai rapid, mult mai puțină memorie).
+          resizeMethod="resize"
+          onError={() => setFailed(true)}
+          onLoadEnd={onLoadEnd}
+        />
       ) : (
         <Ionicons name={getCategory(category).icon} size={iconSize} color={colors.faint} />
       )}
