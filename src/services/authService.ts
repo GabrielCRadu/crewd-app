@@ -107,6 +107,8 @@ function toMessage(e: unknown): string {
     case 'auth/email-already-in-use':
       return tr('Există deja un cont cu acest email. Încearcă să te loghezi.');
     case 'auth/weak-password':
+    // Politica de parole din consola Firebase (aceleași reguli ca în aplicație).
+    case 'auth/password-does-not-meet-requirements':
       return tr('Parola e prea slabă: minim {min} caractere, o literă mică și o literă mare.', { min: MIN_PASSWORD_LENGTH });
     case 'auth/too-many-requests':
       return tr('Prea multe încercări. Așteaptă puțin și încearcă din nou.');

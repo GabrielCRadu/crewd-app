@@ -35,6 +35,14 @@ import type { IconName } from '../types/events';
 import { formatLongDay, formatTime, hasEnded, isLive } from '../utils/dates';
 import { formatDistance, haversineKm } from '../utils/distance';
 import { tr } from '../i18n';
+import { safeExternalUrl } from '../utils/safeText';
+import { isFirebaseConfigured } from '../lib/firebase';
+
+/** Deschide un link de eveniment doar dacă e https; o eroare la deschidere nu blochează ecranul. */
+function openExternal(url: string | null | undefined) {
+  const safe = safeExternalUrl(url);
+  if (safe) Linking.openURL(safe).catch((e: unknown) => console.warn('Nu am putut deschide linkul:', e));
+}
 
 type Props = NativeStackScreenProps<EventsStackParamList, 'EventDetails'>;
 
@@ -189,7 +197,7 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
 
           {/* Atribuire: de unde provine evenimentul (obligatoriu cât timp folosim date din surse externe) */}
           {event.source ? (
-            <Pressable onPress={() => Linking.openURL(event.source!.url)} hitSlop={6} style={styles.sourceRow}>
+            <Pressable onPress={() => openExternal(event.source?.url)} disabled={!event.source.url} hitSlop={6} style={styles.sourceRow}>
               <Ionicons name="open-outline" size={14} color={colors.faint} />
               <Text style={styles.sourceText}>{tr('Sursa:')} <Text style={styles.sourceLink}>{event.source.name}</Text> {tr('· verifică detaliile acolo')}</Text>
             </Pressable>
@@ -234,7 +242,14 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
                   </Pressable>
                 </View>
               ) : (
-                <GradientButton label={tr('Evaluează oamenii')} icon="people" onPress={openRating} />
+                isFirebaseConfigured ? (
+                  // Evaluarea oamenilor listează încă persoane de test: la conturile reale nu apare (audit).
+                  <View style={styles.joinedPill}>
+                    <Text style={styles.endedText}>{tr('Evenimentul s-a terminat')}</Text>
+                  </View>
+                ) : (
+                  <GradientButton label={tr('Evaluează oamenii')} icon="people" onPress={openRating} />
+                )
               )}
             </View>
           )
@@ -251,7 +266,7 @@ export default function EventDetailsScreen({ navigation, route }: Props) {
           <View style={styles.ctaRow}>
             {event.ticketUrl ? (
               <Pressable
-                onPress={() => Linking.openURL(event.ticketUrl!)}
+                onPress={() => openExternal(event.ticketUrl)}
                 style={({ pressed }) => [styles.ticketButton, pressed && styles.pressed]}
               >
                 <Ionicons name="ticket-outline" size={18} color={colors.text} />

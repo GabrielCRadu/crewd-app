@@ -180,6 +180,7 @@ export default function EditProfileScreen({ navigation }: Props) {
               onChangeText={setCity}
               error={errors.city}
               placeholder={tr('Orașul tău')}
+              maxLength={60}
               autoCapitalize="words"
               containerStyle={styles.cityField}
             />

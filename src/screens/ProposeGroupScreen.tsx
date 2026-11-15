@@ -20,15 +20,7 @@ import { type } from '../theme/typography';
 import { glass, radii } from '../theme/shape';
 import type { ProposalDraft } from '../types/groups';
 import { formatLongDay, formatTime } from '../utils/dates';
-import {
-  MAX_GROUP_SIZE,
-  MIN_GROUP_SIZE,
-  MIN_MEMBER_AGE,
-  VIBE_MAX_LENGTH,
-  defaultProposal,
-  profileAge,
-  proposalErrors,
-} from '../utils/groupRules';
+import { MAX_GROUP_SIZE, MIN_GROUP_SIZE, MIN_MEMBER_AGE, VIBE_MAX_LENGTH, defaultProposal, meetupTimeFor, profileAge, proposalErrors } from '../utils/groupRules';
 import { tr } from '../i18n';
 
 type Props = NativeStackScreenProps<EventsStackParamList, 'ProposeGroup'>;
@@ -74,9 +66,7 @@ export default function ProposeGroupScreen({ navigation, route }: Props) {
       is24Hour: true,
       onChange: (e, date) => {
         if (e.type !== 'set' || !date) return;
-        const next = new Date(event.startsAt);
-        next.setHours(date.getHours(), date.getMinutes(), 0, 0);
-        update({ meetupAt: next });
+        update({ meetupAt: meetupTimeFor(event.startsAt, date.getHours(), date.getMinutes()) });
       },
     });
   };
@@ -130,9 +120,7 @@ export default function ProposeGroupScreen({ navigation, route }: Props) {
                   themeVariant={appearance.scheme}
                   onChange={(_e, date) => {
                     if (!date) return;
-                    const next = new Date(event.startsAt);
-                    next.setHours(date.getHours(), date.getMinutes(), 0, 0);
-                    update({ meetupAt: next });
+                    update({ meetupAt: meetupTimeFor(event.startsAt, date.getHours(), date.getMinutes()) });
                   }}
                 />
               </View>

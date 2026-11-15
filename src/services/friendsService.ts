@@ -39,7 +39,8 @@ let combined: FriendsState = testState;
 const listeners = new Set<() => void>();
 
 function changed() {
-  combined = { ...realState, ...testState };
+  // Contul real vede doar relațiile reale; persoanele de test rămân în modul fără Firebase (audit).
+  combined = me !== null ? realState : testState;
   listeners.forEach((listener) => listener());
 }
 
@@ -98,6 +99,7 @@ export function startFriendsSync(uid: string): void {
   if (me === uid && stopSync) return;
   stopFriendsSync();
   me = uid;
+  changed();
   stopSync = subscribeToMyFriendships(uid, (docs, blockedUids) => {
     if (me !== uid) return;
     const next = realFriendsState(uid, docs, blockedUids);

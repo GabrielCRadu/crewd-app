@@ -52,7 +52,8 @@ const listeners = new Set<() => void>();
 let counter = 0;
 
 function changed() {
-  threads = { ...realLast, ...realOpen, ...testThreads };
+  // Contul real vede doar conversațiile reale; cele de test rămân în modul fără Firebase (audit).
+  threads = me !== null ? { ...realLast, ...realOpen } : testThreads;
   listeners.forEach((listener) => listener());
 }
 
@@ -84,6 +85,7 @@ export function startDmSync(uid: string): void {
   if (me === uid && stopList) return;
   stopDmSync();
   me = uid;
+  changed();
   stopList = subscribeToMyDms(uid, (list) => {
     if (me !== uid) return;
     const next: DirectThreads = {};

@@ -9,6 +9,7 @@ import {
   groupStatus,
   isVisibleTo,
   joinBlockReason,
+  meetupTimeFor,
   memberSummary,
   otherGroupsOpenByDefault,
   profileAge,
@@ -274,8 +275,8 @@ describe('memberSummary', () => {
     expect(summary.username).toBeNull();
   });
 
-  it('keeps name, age and tags', () => {
-    expect(memberSummary(profile, now)).toMatchObject({ name: 'Radu', age: 24, tags: ['concerte', 'rock', 'bere'] });
+  it('keeps name, age and the chosen tags only (learned tags stay private)', () => {
+    expect(memberSummary(profile, now)).toMatchObject({ name: 'Radu', age: 24, tags: ['concerte', 'rock'] });
   });
 });
 
@@ -294,5 +295,17 @@ describe('otherGroupsOpenByDefault', () => {
 
   it('shows them when my group did not form in time, so I can pick another', () => {
     expect(otherGroupsOpenByDefault(group({ memberUids: ['u1', 'u2'], createdAt: at(-24 * HOUR) }), at(-HOUR))).toBe(true);
+  });
+});
+
+describe('meetupTimeFor', () => {
+  it('puts the meetup on the event day when it is before the start', () => {
+    const start = new Date(2026, 10, 14, 21, 0);
+    expect(meetupTimeFor(start, 20, 30)).toEqual(new Date(2026, 10, 14, 20, 30));
+  });
+
+  it('moves a time after the start to the evening before (events after midnight)', () => {
+    const start = new Date(2026, 10, 15, 1, 0);
+    expect(meetupTimeFor(start, 23, 30)).toEqual(new Date(2026, 10, 14, 23, 30));
   });
 });

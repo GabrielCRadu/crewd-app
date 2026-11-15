@@ -45,7 +45,7 @@ interface Props {
  */
 export default function EventGroupsSection({ event, joined, myGroup, onPropose, onOpenChat }: Props) {
   const { profile, user } = useAuth();
-  const { groups, loading, error } = useEventGroups(event.id);
+  const { groups, loading, error } = useEventGroups(event.id, joined);
   const now = useNow();
   const [busyId, setBusyId] = useState<string | null>(null);
   // null = cum e implicit (otherGroupsOpenByDefault); altfel ce a ales utilizatorul.

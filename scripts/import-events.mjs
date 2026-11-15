@@ -22,6 +22,15 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+/** Linkurile evenimentelor: doar https (altfel null). */
+function httpsOnly(url) {
+  try {
+    return url && new URL(url).protocol === 'https:' ? url : null;
+  } catch {
+    return null;
+  }
+}
+
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DATA_DIR = join(ROOT, 'scripts', 'data');
 const CACHE_FILE = join(DATA_DIR, 'geocode-cache.json');
@@ -220,8 +229,9 @@ async function main() {
         imageUrl: e.imageUrl ?? '',
         imageCredit: e.imageCredit ?? null,
         sourceName: e.sourceName ?? null,
-        sourceUrl: e.sourceUrl ?? null,
-        ticketUrl: e.ticketUrl ?? null,
+        // Doar https (audit): un link tel:/sms:/market: din sursă nu ajunge în aplicație.
+        sourceUrl: httpsOnly(e.sourceUrl),
+        ticketUrl: httpsOnly(e.ticketUrl),
       },
     });
   }

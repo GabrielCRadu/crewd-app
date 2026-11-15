@@ -10,7 +10,6 @@ import type { AuthUser } from '../services/authService';
 import { loadUserPreferences, seedTagScores } from '../services/preferencesService';
 import {
   createProfile,
-  deleteProfile,
   getProfile,
   getSavedPreferences,
   setBio,
@@ -26,6 +25,8 @@ import { deletePublicProfile, getPublicProfile, savePublicProfile } from '../ser
 import { publicProfileKey, toPublicProfile } from '../utils/publicProfile';
 import { startFriendsSync, stopFriendsSync } from '../services/friendsService';
 import { deleteMyFriendData } from '../services/friendshipsFirestore';
+import { cancelAllReminders } from '../services/remindersService';
+import { sanitizeText } from '../utils/safeText';
 import { startDmSync, stopDmSync } from '../services/directMessagesService';
 import { deleteMyDms } from '../services/dmFirestore';
 import { allProfileTags } from '../utils/profileTags';
@@ -88,16 +89,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [attempt, setAttempt] = useState(0);
   // Amprenta ultimului profil public scris (src/utils/publicProfile.ts).
   const publishedKey = useRef<string | null>(null);
+  // Contul curent: o încărcare pornită pentru alt cont (schimbare rapidă de cont) nu mai scrie nimic (audit).
+  const currentUid = useRef<string | null>(null);
 
   useEffect(() => {
     if (!isFirebaseConfigured) return;
     let active = true;
     const unsubscribe = subscribeToAuth(async (nextUser) => {
       if (!active) return;
+      currentUid.current = nextUser?.uid ?? null;
       setUser(nextUser);
       setError(null);
       if (!nextUser) {
         publishedKey.current = null;
+        // Reamintirile contului vechi nu mai sună după ieșirea din cont (audit: datele rămâneau).
+        void cancelAllReminders();
         setProfile(null);
         loadUserPreferences(null, null, []);
         setStatus('signedOut');
@@ -108,7 +114,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const loaded = await getProfile(nextUser.uid);
         // Înscrierile și scorurile salvate se încarcă o singură dată, la login.
         const saved = loaded ? await getSavedPreferences(nextUser.uid) : null;
-        if (!active) return;
+        if (!active || currentUid.current !== nextUser.uid) return;
         if (loaded) loadUserPreferences(nextUser.uid, saved, allProfileTags(loaded));
         setProfile(loaded);
         setStatus(loaded ? (isProfileComplete(loaded) ? 'ready' : 'needsCompletion') : 'needsProfile');
@@ -116,7 +122,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (loaded?.photoUrl && !loaded.photoThumb) void backfillThumbnail(loaded.uid, loaded.photoUrl, loaded.username ?? null);
       } catch (e) {
         console.warn('Nu am putut încărca profilul:', e);
-        if (active) setError(tr('Nu am putut încărca profilul. Verifică conexiunea la internet.'));
+        if (active && currentUid.current === nextUser.uid) setError(tr('Nu am putut încărca profilul. Verifică conexiunea la internet.'));
       }
     });
     return () => {
@@ -214,9 +220,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!profile) return;
       const previous = profile;
       const photoChanged = isNewPhoto(changes, profile.photoUrl);
+      // Numele și orașul curățate aici, ca în memorie să fie exact ce se salvează (regulile grupurilor le compară).
+      const clean: ProfileChanges = {
+        ...changes,
+        ...(changes.name !== undefined ? { name: sanitizeText(changes.name, 50) } : {}),
+        ...(changes.city !== undefined ? { city: sanitizeText(changes.city, 60) } : {}),
+      };
       const full: ProfileChanges = photoChanged
-        ? { ...changes, photoThumb: changes.photoUrl ? await makeThumbnail(changes.photoUrl) : null }
-        : changes;
+        ? { ...clean, photoThumb: changes.photoUrl ? await makeThumbnail(changes.photoUrl) : null }
+        : clean;
       setProfile({ ...profile, ...full });
       if (isFirebaseConfigured) {
         try {
@@ -266,8 +278,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (profile?.username) await releaseUsername(profile.username, user.uid);
       await deletePublicProfile(user.uid);
       publishedKey.current = null;
-      await deleteProfile(user.uid);
-      // Ultimul pas: contul din Firebase Auth. După el, sesiunea se închide și apare ecranul de login.
+      // Ultimul pas: contul din Firebase Auth. Profilul users/{uid} îl șterge apoi funcția cleanupDeletedUser
+      // (aplicația nu-l mai poate șterge: audit). După el, sesiunea se închide și apare ecranul de login.
       await deleteCurrentUser();
     },
     [user, profile],

@@ -24,6 +24,8 @@ import { CATEGORIES, SYSTEM_INSTRUCTION, isOverloaded, nextAttempt } from './mod
 initializeApp();
 const db = getFirestore();
 
+export { cleanupDeletedUser } from './account';
+
 /** Baza de date e în eur3: triggerele Firestore rulează în europe-west1. */
 const REGION = 'europe-west1';
 /**

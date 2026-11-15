@@ -1,10 +1,10 @@
-import { collection, getDocs, orderBy, query } from 'firebase/firestore';
+import { Timestamp, collection, getDocs, orderBy, query, where } from 'firebase/firestore';
 import type { DocumentData, QueryDocumentSnapshot } from 'firebase/firestore';
 
-import { PAST_JOINED_EVENT_IDS, placeMockEvents } from '../data/mockEvents';
-import { FRIENDS } from '../data/mockSocial';
+import { placeMockEvents } from '../data/mockEvents';
 import { db } from '../lib/firebase';
 import type { CategoryId, Event, EventPrice, LatLng } from '../types/events';
+import { safeExternalUrl } from '../utils/safeText';
 
 /*
  * Sursa de date pentru evenimente. Ecranele folosesc DOAR funcțiile de aici.
@@ -32,15 +32,14 @@ export async function getEvents(near: LatLng): Promise<Event[]> {
       throw error;
     });
   }
-  const events = await firestoreCache;
-  // DEMO: Firestore are doar evenimente viitoare. Istoricul din Profil și evaluările au nevoie de
-  // evenimente trecute la care „ai fost”, așa că le adăugăm pe cele mock până avem înscrieri reale.
-  const pastDemo = placeMockEvents(near).filter((e) => PAST_JOINED_EVENT_IDS.includes(e.id));
-  return [...events, ...pastDemo];
+  // Conturile reale văd doar evenimentele reale (audit: fără date demo amestecate cu cele reale).
+  return firestoreCache;
 }
 
 async function loadFromFirestore(): Promise<Event[]> {
-  const snapshot = await getDocs(query(collection(db!, 'events'), orderBy('startsAt')));
+  // Doar evenimentele de acum 60 de zile încolo: istoricul recent + cele viitoare (audit: nu toată colecția).
+  const since = Timestamp.fromMillis(Date.now() - 60 * 24 * 60 * 60 * 1000);
+  const snapshot = await getDocs(query(collection(db!, 'events'), where('startsAt', '>=', since), orderBy('startsAt')));
   return snapshot.docs.map(fromDoc).filter((e): e is Event => e !== null);
 }
 
@@ -73,23 +72,12 @@ function fromDoc(doc: QueryDocumentSnapshot<DocumentData>): Event | null {
     priceInfo,
     organizer: d.organizer ?? null,
     ageRestriction: d.ageRestriction ?? null,
-    ticketUrl: d.ticketUrl ?? null,
-    source: d.sourceName && d.sourceUrl ? { name: d.sourceName, url: d.sourceUrl } : null,
-    ...demoSocial(doc.id),
+    ticketUrl: safeExternalUrl(d.ticketUrl),
+    // Atribuirea rămâne vizibilă; linkul doar dacă e https (un link tel:/sms:/market: din import nu se deschide).
+    source: d.sourceName ? { name: d.sourceName, url: safeExternalUrl(d.sourceUrl) ?? '' } : null,
+    // Cine merge / cine caută companie vor veni din înscrierile reale; până atunci, nimic inventat.
+    friendsGoing: [],
+    lookingForCompanyCount: 0,
   };
 }
 
-/**
- * DEMO: cine merge și câți caută companie nu sunt încă în Firestore (vor veni din
- * înscrierile reale ale utilizatorilor). Până atunci le generăm stabil din id,
- * cu prietenii mock din mockSocial.ts, ca ecranele să arate ca în ghidul de layout.
- */
-function demoSocial(id: string): Pick<Event, 'friendsGoing' | 'lookingForCompanyCount'> {
-  let hash = 0;
-  for (const ch of id) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
-  const names = FRIENDS.map((f) => f.name);
-  const count = hash % (names.length + 1); // 0..3 prieteni
-  const start = hash % names.length;
-  const friendsGoing = Array.from({ length: count }, (_, i) => names[(start + i) % names.length]!);
-  return { friendsGoing, lookingForCompanyCount: (hash >> 3) % 9 };
-}

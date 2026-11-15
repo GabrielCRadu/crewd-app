@@ -18,7 +18,7 @@ interface Props {
  */
 export default function EventReminders({ onOpenEvent }: Props) {
   const location = useUserLocation();
-  const { events } = useEvents(location.coords);
+  const { events, loading, error } = useEvents(location.coords);
   const preferences = usePreferences();
 
   const upcomingJoined = useMemo(
@@ -27,8 +27,10 @@ export default function EventReminders({ onOpenEvent }: Props) {
   );
 
   useEffect(() => {
+    // Doar cu lista de evenimente încărcată: altfel (offline, la pornire) s-ar anula toate reamintirile.
+    if (loading || error) return;
     void syncEventReminders(upcomingJoined, (e) => haversineKm(location.coords, e.location));
-  }, [upcomingJoined, location.coords]);
+  }, [upcomingJoined, location.coords, loading, error]);
 
   useEffect(() => subscribeToReminderTaps(onOpenEvent), [onOpenEvent]);
 

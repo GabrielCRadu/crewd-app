@@ -62,8 +62,8 @@ export function loadUserPreferences(
     savedScores && Object.keys(savedScores).length > 0
       ? savedScores
       : Object.fromEntries(profileTags.map((tag) => [tag, 1]));
-  // DEMO: evenimentele trecute mock (istoricul din Profil) se adaugă doar local, nu se salvează.
-  const joinedEventIds = [...new Set([...(saved?.joinedEventIds ?? []), ...PAST_JOINED_EVENT_IDS])];
+  // Contul real: doar înscrierile lui (fără istoricul demo).
+  const joinedEventIds = [...new Set(saved?.joinedEventIds ?? [])];
   setPreferences({ tagScores, joinedEventIds });
 }
 
@@ -93,39 +93,63 @@ function changeTagScores(scores: Record<string, number>, tags: string[], delta: 
   return next;
 }
 
-/** Aplică schimbarea pe ecran imediat, apoi o salvează; dacă salvarea eșuează, revine. */
-async function commit(next: UserPreferences): Promise<void> {
-  const previous = preferences;
-  setPreferences(next);
-  if (!currentUid) return;
-  try {
-    await savePreferences(currentUid, {
-      tagScores: next.tagScores,
-      joinedEventIds: next.joinedEventIds.filter((id) => !PAST_JOINED_EVENT_IDS.includes(id)),
-    });
-  } catch (e) {
-    console.warn('Nu am putut salva înscrierea:', e);
-    setPreferences(previous);
-    throw new Error(tr('Nu am putut salva. Verifică conexiunea la internet și încearcă din nou.'));
-  }
+/** Salvările se fac pe rând, fiecare cu starea de atunci (audit: două înscrieri rapide se pierdeau). */
+let saving: Promise<void> = Promise.resolve();
+
+/**
+ * Aplică schimbarea pe ecran imediat, apoi o salvează. Dacă salvarea eșuează, se anulează doar
+ * această schimbare (`undo`), nu și cele făcute între timp.
+ */
+function commit(change: (p: UserPreferences) => UserPreferences, undo: (p: UserPreferences) => UserPreferences): Promise<void> {
+  setPreferences(change(preferences));
+  const uid = currentUid;
+  if (!uid) return Promise.resolve();
+  const attempt = saving.then(async () => {
+    if (currentUid !== uid) return;
+    try {
+      await savePreferences(uid, {
+        tagScores: preferences.tagScores,
+        joinedEventIds: preferences.joinedEventIds.filter((id) => !PAST_JOINED_EVENT_IDS.includes(id)),
+      });
+    } catch (e) {
+      console.warn('Nu am putut salva înscrierea:', e);
+      if (currentUid === uid) setPreferences(undo(preferences));
+      throw new Error(tr('Nu am putut salva. Verifică conexiunea la internet și încearcă din nou.'));
+    }
+  });
+  saving = attempt.catch(() => {});
+  return attempt;
+}
+
+function withEvent(p: UserPreferences, event: Event): UserPreferences {
+  if (isJoined(p, event.id)) return p;
+  return { tagScores: changeTagScores(p.tagScores, event.tags, TAG_SCORE_STEP), joinedEventIds: [...p.joinedEventIds, event.id] };
+}
+
+function withoutEvent(p: UserPreferences, event: Event): UserPreferences {
+  if (!isJoined(p, event.id)) return p;
+  return {
+    tagScores: changeTagScores(p.tagScores, event.tags, -TAG_SCORE_STEP),
+    joinedEventIds: p.joinedEventIds.filter((id) => id !== event.id),
+  };
 }
 
 /** Înscriere: salvează evenimentul și crește scorul tag-urilor lui. */
 export async function joinEvent(event: Event): Promise<void> {
   if (isJoined(preferences, event.id)) return;
-  await commit({
-    tagScores: changeTagScores(preferences.tagScores, event.tags, TAG_SCORE_STEP),
-    joinedEventIds: [...preferences.joinedEventIds, event.id],
-  });
+  await commit(
+    (p) => withEvent(p, event),
+    (p) => withoutEvent(p, event),
+  );
 }
 
 /** Anulare: scoate evenimentul și scade la loc scorul tag-urilor. */
 export async function leaveEvent(event: Event): Promise<void> {
   if (!isJoined(preferences, event.id)) return;
-  await commit({
-    tagScores: changeTagScores(preferences.tagScores, event.tags, -TAG_SCORE_STEP),
-    joinedEventIds: preferences.joinedEventIds.filter((id) => id !== event.id),
-  });
+  await commit(
+    (p) => withoutEvent(p, event),
+    (p) => withEvent(p, event),
+  );
 }
 
 /** Cât de potrivit e un eveniment: suma scorurilor tag-urilor lui. */

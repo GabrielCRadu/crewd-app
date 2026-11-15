@@ -73,3 +73,12 @@ describe('isKnownTaken', () => {
     expect(isKnownTaken('radu.g', [])).toBe(false);
   });
 });
+
+describe('reserved usernames (audit)', () => {
+  it('refuses names that impersonate the team', () => {
+    for (const u of ['staff', 'crewd.team', 'crewd_support', 'crewd.oficial', 'root']) {
+      expect(usernameError(u)).toBe('Username-ul e rezervat.');
+    }
+    expect(usernameError('crewdfan')).toBeNull();
+  });
+});
