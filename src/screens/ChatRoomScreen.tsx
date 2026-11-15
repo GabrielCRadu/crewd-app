@@ -17,6 +17,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import Aurora from '../components/Aurora';
 import GlassIconButton from '../components/GlassIconButton';
+import GroupAvatar from '../components/GroupAvatar';
 import MessageRow, { DayRow } from '../components/chat/MessageRow';
 import { useAuth } from '../context/AuthContext';
 import { useEvents } from '../hooks/useEvents';
@@ -28,6 +29,7 @@ import { isFirebaseConfigured } from '../lib/firebase';
 import type { ChatsStackParamList } from '../navigation/chatsTypes';
 import { openMemberProfile } from '../navigation/openMemberProfile';
 import { chatErrorMessage, sendGroupMessage } from '../services/chatService';
+import { useMarkChatRead } from '../services/chatReadState';
 import { MOCK_UID } from '../services/groupsService';
 import { colors, onThemeChange } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
@@ -42,6 +44,7 @@ import {
   withoutBlocked,
 } from '../utils/chatRules';
 import { formatDay, formatTime, startOfDay } from '../utils/dates';
+import { groupReadKey } from '../utils/chatListRules';
 import { tr, trPlural } from '../i18n';
 import { useFriends } from '../hooks/useFriends';
 import { idsWithStatus } from '../services/friendsService';
@@ -64,6 +67,8 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
   const uid = isFirebaseConfigured ? (user?.uid ?? null) : MOCK_UID;
   const isMember = !!uid && !!group?.memberUids.includes(uid);
   const { messages, error } = useGroupMessages(eventId, groupId, isMember);
+  // Cât e deschisă, conversația e citită (pentru bulinele din lista de chat-uri).
+  useMarkChatRead(groupReadKey(eventId, groupId), messages[messages.length - 1]?.createdAt);
 
   const members = group?.members;
   // Lista e inversată (cea mai nouă întâi), ca în orice aplicație de chat: se deschide direct jos, la ultimul
@@ -129,6 +134,7 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <View style={styles.header}>
         <GlassIconButton icon="chevron-back" size={40} onPress={() => navigation.goBack()} />
+        <GroupAvatar group={group} event={event} title={title} size={38} />
         <Pressable
           style={({ pressed }) => [styles.headerText, pressed && styles.pressed]}
           onPress={() => navigation.navigate('GroupDetails', { eventId, groupId })}

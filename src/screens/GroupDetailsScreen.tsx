@@ -6,6 +6,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import Avatar from '../components/Avatar';
 import Chip from '../components/Chip';
 import GlassIconButton from '../components/GlassIconButton';
+import GroupAvatar from '../components/GroupAvatar';
 import { useAuth } from '../context/AuthContext';
 import { useEvents } from '../hooks/useEvents';
 import { useMyGroups } from '../hooks/useMyGroups';
@@ -102,6 +103,9 @@ export default function GroupDetailsScreen({ navigation, route }: Props) {
 
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.titleBlock}>
+          <View style={styles.titleAvatar}>
+            <GroupAvatar group={group} event={event} title={title} size={72} />
+          </View>
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.subtitle}>
             {tr(STATUS_LABEL[groupStatus(group, now)])} · {tr('{count} din {size} locuri', { count: group.memberUids.length, size: group.maxSize })}</Text>
@@ -176,6 +180,7 @@ const makeStyles = () =>
     header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10 },
     content: { paddingHorizontal: 16, paddingBottom: 32, gap: 14 },
     titleBlock: { gap: 4, marginBottom: 4 },
+    titleAvatar: { marginBottom: 8 },
     title: { ...type.screenTitle, fontSize: 30 },
     subtitle: { color: colors.muted, fontSize: 14 },
     card: { ...glass, borderRadius: radii.card, padding: 16, gap: 8 },

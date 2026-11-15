@@ -8,13 +8,14 @@ import { getPerson } from '../services/peopleService';
 import { removedMessageText } from '../utils/chatRules';
 import { usePublicProfiles } from '../hooks/usePublicProfiles';
 import { colors, onThemeChange } from '../theme/colors';
-import { type } from '../theme/typography';
 import { glass, radii } from '../theme/shape';
-import { formatTime } from '../utils/dates';
+import { shortWhen } from '../utils/chatListRules';
 import { tr } from '../i18n';
 
 interface Props {
   onOpen: (personId: string) => void;
+  /** Conversațiile necitite (useChatActivity), cu bulină. */
+  unreadIds: string[];
 }
 
 /** Ultimul mesaj, pe scurt: textul sau „Ai trimis un eveniment”. */
@@ -26,29 +27,34 @@ function preview(message: DirectMessage): string {
   return message.fromMe ? tr('Ai trimis un eveniment') : tr('Ți-a trimis un eveniment');
 }
 
-/** Secțiunea „Mesaje directe” din tab-ul Chat: conversațiile doar cu un prieten. Nu apare dacă nu ai niciuna. */
-export default function DirectThreadsSection({ onOpen }: Props) {
+/** Tab-ul „Mesaje directe” din Chat: conversațiile doar cu un prieten, cea mai recentă prima. */
+export default function DirectThreadsSection({ onOpen, unreadIds }: Props) {
   const threads = sortedThreads(useDirectThreads());
   const real = usePublicProfiles(threads.map((t) => t.personId).filter((id) => !getPerson(id)));
-  if (threads.length === 0) return null;
+  if (threads.length === 0) return <Text style={styles.empty}>{tr('Nicio conversație încă. Scrie-i unui prieten! 💬')}</Text>;
 
   return (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>{tr('Mesaje directe')}</Text>
       {threads.map(({ personId, last }) => {
         const pub = real[personId];
         const person = getPerson(personId) ?? (pub ? { name: pub.name, photoUrl: pub.photoUrl ?? undefined } : null);
         if (!person) return null;
+        const unread = unreadIds.includes(personId);
         return (
           <Pressable key={personId} onPress={() => onOpen(personId)} style={({ pressed }) => [styles.row, pressed && styles.pressed]}>
             <Avatar name={person.name} size={48} photoUrl={person.photoUrl} />
             <View style={styles.text}>
-              <Text style={styles.name}>{person.name}</Text>
-              <Text style={styles.preview} numberOfLines={1}>
+              <Text style={styles.name} numberOfLines={1}>
+                {person.name}
+              </Text>
+              <Text style={[styles.preview, unread && styles.previewUnread]} numberOfLines={1}>
                 {preview(last)}
               </Text>
             </View>
-            <Text style={styles.time}>{formatTime(last.sentAt)}</Text>
+            <View style={styles.side}>
+              <Text style={styles.time}>{shortWhen(last.sentAt)}</Text>
+              {unread ? <View style={styles.dot} accessibilityLabel={tr('Necitit')} /> : null}
+            </View>
           </Pressable>
         );
       })}
@@ -59,13 +65,16 @@ export default function DirectThreadsSection({ onOpen }: Props) {
 const makeStyles = () =>
   StyleSheet.create({
     section: { gap: 12 },
-    sectionTitle: { ...type.label, marginTop: 12 },
+    empty: { fontSize: 14, color: colors.muted, textAlign: 'center', marginTop: 24 },
     row: { ...glass, flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: radii.card },
     pressed: { opacity: 0.8 },
     text: { flex: 1, gap: 3 },
     name: { fontSize: 16, fontWeight: '600', color: colors.text },
     preview: { fontSize: 13, color: colors.muted },
-    time: { fontSize: 12, color: colors.faint, alignSelf: 'flex-start' },
+    previewUnread: { color: colors.text, fontWeight: '600' },
+    side: { alignSelf: 'stretch', alignItems: 'flex-end', justifyContent: 'space-between', paddingVertical: 2 },
+    time: { fontSize: 12, color: colors.faint },
+    dot: { width: 10, height: 10, borderRadius: 5, backgroundColor: colors.text },
   });
 let styles = makeStyles();
 // Stilurile se refac când se schimbă tema (Setări → Temă).
