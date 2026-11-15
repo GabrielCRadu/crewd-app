@@ -2,36 +2,36 @@
 
 **Find events in your city, and people to go with.**
 
-Crewd is an Android app (Expo / React Native) for going out in Timișoara. You pick an event, join a small group of people heading there, and meet up before it starts.
+Plenty of people skip a concert or a play simply because they have no one to go with: first-year and international students, newcomers to the city, people whose friends like different things. Crewd fixes that. It is an Android app (Expo / React Native) for going out in Timișoara: you pick an event, join a small group of people who are heading there and like the same things you do, and meet up before it starts. You don't need a friend to say yes first, you go with your crew.
 
 ## Features
 
-### 📅 Events
+### Events
 - Upcoming and ongoing events near you, in a list or on a map (concerts, theatre, stand-up, parties, workshops, social nights).
 - Filters, distance from you, a calendar of the events you've joined, and a reminder one hour before each one.
 - Every event credits its source (`sourceName`, `imageCredit`) and links to tickets.
 - Signing up for events shapes your preference tags. You pick the first ones during onboarding.
 
-### 👥 Small groups at every event
+### Small groups at every event
 - Once you've joined an event, you see the small groups going to it, ranked by how well they match you (shared tags and age).
 - Join a group, or propose your own with a meetup time and place before the event.
 - A group forms once **3 people** are in. Only then does its group chat open.
 
-### 💬 Chat
+### Chat
 - Two tabs: **Groups** and **Direct messages**.
 - Messages are moderated automatically by Gemini (Gemini API, called from Cloud Functions). Harmful messages are hidden from the chat; the original is kept for 30 days in a private moderation log. You can also block users.
 
-### 🗺️ Friends map
+### Friends map
 - See where your friends are and which event they're heading to.
 - Location sharing is **off by default**.
 
-### 🙋 Profile and friends
+### Profile and friends
 - A unique `@username`, a required profile photo, bio and tags.
 - Badges, memories from past events, and ratings after an event ("I'd go out with them again").
 - Friend requests, plus a QR code / invite link (`crewd://invite/<username>`).
 - Account deletion. A Cloud Function then cleans up the user's data.
 
-### 🌐 Languages
+### Languages
 The app is in Romanian, with an English version you can switch to at login or in Settings.
 
 ## Tech stack
