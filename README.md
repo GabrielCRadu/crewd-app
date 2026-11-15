@@ -72,7 +72,6 @@ Setup, Firestore rules, the event import and the data schema are documented in [
 | --- | --- |
 | `npm start` | Start the Expo dev server |
 | `npm run android` | Start and open on Android |
-| `npm test` | Run the Jest tests |
 | `npx tsc --noEmit` | Type-check |
 | `npx expo lint` | Lint |
 | `npm run apk` | Build a signed release APK from `origin/main` (Windows; needs the release key, see `scripts/make-release-key.mjs`) |
