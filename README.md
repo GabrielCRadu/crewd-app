@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="github_readme_banner.svg" alt="Crewd" width="100%">
+</p>
+
 # Crewd
 
 **Find events in your city, and people to go with.**
