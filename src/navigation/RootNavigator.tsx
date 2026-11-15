@@ -5,7 +5,6 @@ import {
   DarkTheme,
   DefaultTheme,
   NavigationContainer,
-  createNavigationContainerRef,
   getFocusedRouteNameFromRoute,
 } from '@react-navigation/native';
 import type { NavigationState, Theme } from '@react-navigation/native';
@@ -25,6 +24,7 @@ import InviteLinkHandler from '../components/InviteLinkHandler';
 import GradientButton from '../components/GradientButton';
 import LogoSplash from '../components/LogoSplash';
 import { useAuth } from '../context/AuthContext';
+import { navigationRef } from './navigationRef';
 import { getPerson } from '../services/peopleService';
 import { appearance, colors, onThemeChange } from '../theme/colors';
 import { AuthNavigator, OnboardingNavigator } from './AuthNavigator';
@@ -82,7 +82,7 @@ const TABS: {
 let savedNavigationState: NavigationState | undefined;
 
 /** Navigarea din afara ecranelor (ex. notificarea de cerere de prietenie). */
-const navigationRef = createNavigationContainerRef<Record<string, object | undefined>>();
+// navigationRef e în src/navigation/navigationRef.ts (folosit și de logo-ul din bara de sus).
 
 /** Deschide profilul unei persoane în tab-ul Profil (cu profilul tău dedesubt, pentru „înapoi”). */
 function openPersonProfile(personId: string) {

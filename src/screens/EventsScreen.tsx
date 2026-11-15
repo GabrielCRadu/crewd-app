@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-import Logo from '../components/Logo';
+import HeaderLogo from '../components/HeaderLogo';
+import { subscribeToEventsScrollTop } from '../navigation/navigationRef';
 import ScreenGlow from '../components/ScreenGlow';
 import SegmentedControl from '../components/SegmentedControl';
 import CategoryChips from '../components/events/CategoryChips';
@@ -36,6 +37,9 @@ type Mode = 'all' | 'calendar';
  * Harta evenimentelor s-a mutat în tab-ul Hartă (modul Evenimente).
  */
 export default function EventsScreen({ navigation }: Props) {
+  // Logo-ul din bara de sus, apăsat când ești deja aici, duce lista sus (src/navigation/navigationRef.ts).
+  const scrollRef = useRef<ScrollView>(null);
+  useEffect(() => subscribeToEventsScrollTop(() => scrollRef.current?.scrollTo({ y: 0, animated: true })), []);
   const location = useUserLocation();
   const { events, loading, error } = useEvents(location.coords);
   const preferences = usePreferences();
@@ -78,7 +82,7 @@ export default function EventsScreen({ navigation }: Props) {
       <ScreenGlow />
 
       <View style={styles.header}>
-        <Logo height={30} accessibilityLabel={tr('Evenimente')} />
+        <HeaderLogo label={tr('Evenimente')} />
         <SegmentedControl
           options={[
             { value: 'all', label: tr('Toate') },
@@ -107,7 +111,7 @@ export default function EventsScreen({ navigation }: Props) {
       ) : null}
 
       {mode === 'calendar' ? (
-        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <ScrollView ref={scrollRef} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           {loading ? (
             <ActivityIndicator color={colors.text} style={styles.loader} />
           ) : (
@@ -115,7 +119,7 @@ export default function EventsScreen({ navigation }: Props) {
           )}
         </ScrollView>
       ) : (
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView ref={scrollRef} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           {liveNow.length > 0 ? (
             <NowCarousel events={liveNow} onOpen={openEvent} />
           ) : null}

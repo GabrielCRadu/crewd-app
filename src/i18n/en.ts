@@ -518,6 +518,7 @@ export const EN: Record<string, string> = {
   'Nu am putut trimite cererea. Încearcă mai târziu.': "Couldn't send the request. Try again later.",
   'Prietenie': 'Friendship',
   'Mesaj': 'Message',
+  'Du-mă la Evenimente': 'Take me to Events',
   'Mesaj eliminat de moderare': 'Message removed by moderation',
   'Mesajul tău a fost eliminat': 'Your message was removed',
   'Mesajul tău a fost eliminat ({reason})': 'Your message was removed ({reason})',

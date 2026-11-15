@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useIsFocused, useNavigation } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 
-import Logo from '../components/Logo';
+import HeaderLogo from '../components/HeaderLogo';
 import Avatar from '../components/Avatar';
 import GradientButton from '../components/GradientButton';
 import SegmentedControl from '../components/SegmentedControl';
@@ -80,7 +80,7 @@ export default function FriendsMapScreen() {
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.header}>
-        <Logo height={30} accessibilityLabel={tr('Hartă')} />
+        <HeaderLogo label={tr('Hartă')} />
         <SegmentedControl
           options={[
             { value: 'events', label: tr('Evenimente') },
