@@ -175,6 +175,7 @@ export const EN: Record<string, string> = {
   'Ești în afara Timișoarei: distanțele sunt calculate de la centrul orașului.':
     "You're outside Timișoara: distances are measured from the city center.",
   'Azi': 'Today',
+  'Ieri': 'Yesterday',
   'Mâine': 'Tomorrow',
   'Când': 'When',
   'Unde': 'Where',

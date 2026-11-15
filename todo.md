@@ -63,3 +63,20 @@ Actualizează lista când rezolvi ceva sau adaugi un mock nou.
 
 - [ ] **Evenimentele din Firestore** (din `evenimente-timisoara-verificate.json`) sunt doar pentru **demo intern**. Înainte de o lansare publică trebuie acordul surselor (iaBilet, Zile și Nopți, OnEvent etc.) sau o sursă cu licență (ex. acord scris de la OMD Timișoara / Visit Timișoara).
 - [ ] **Imaginile evenimentelor** sunt încărcate direct de pe site-urile organizatorilor (cu „Foto: …”). Pentru producție: acordul organizatorilor sau imagini proprii.
+
+## De întărit (scanare 15 nov 2026, neurgente)
+
+- [ ] **Reguli: propunerea de grup fără listă fixă de câmpuri** (`firestore.rules`, regula de creare a grupului): adaugă `keys().hasOnly([...])` și `tags.size() <= 30`, ca un cont rău-intenționat să nu poată umple un grup (~1 MB) sau crea grupuri la nesfârșit.
+- [ ] **Intrarea / propunerea eșuează dacă `groupByEvent` arată spre un grup din care ai ieșit** (`groupsService.ts`, join și propose): `removeMember(previous)` doar dacă `previous.memberUids` te mai conține (ca în `firestoreLeave`).
+- [ ] **Ștergerea contului întreruptă la ultimul pas** (`AuthContext.tsx`, `deleteAccount`): dacă `deleteCurrentUser()` eșuează, username-ul e deja eliberat; prinde eroarea și cere reîncercarea imediată (sau rezervă din nou username-ul).
+- [ ] **DM fără `maxLength`** (`DirectChatScreen.tsx`): peste 1000 de caractere apare o eroare generică; adaugă `maxLength={1000}`.
+
+## Din auditul lui Stef (rămase)
+
+- [ ] Afișele mari (1200×1200) în listă: `expo-image` / miniaturi, `FlatList`.
+- [ ] Poza de profil descărcată din nou la fiecare schimbare a profilului (poza în alt document).
+- [ ] Un singur store pentru „grupurile mele” (acum 6 abonări).
+- [ ] Buton „Raportează” în chatul de grup (colecție `reports/` doar de scris).
+- [ ] Linkuri de invitație https verificate în loc de `crewd://`.
+- [ ] Limită de viteză pentru scrieri (mesaje, grupuri).
+- [ ] Decizii de echipă: genul (îl folosim sau nu), reputație publică vs. privată, check-in pentru badge-uri, chatul după eveniment.
