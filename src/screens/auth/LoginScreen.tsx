@@ -15,6 +15,7 @@ import { colors, onThemeChange } from '../../theme/colors';
 import { type } from '../../theme/typography';
 import { radii } from '../../theme/shape';
 import { tr } from '../../i18n';
+import Logo from '../../components/Logo';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
@@ -72,7 +73,8 @@ export default function LoginScreen({ navigation }: Props) {
             </View>
 
             <View style={styles.brand}>
-              <Text style={styles.logo}>crewd</Text>
+              {/* Logo-ul Crewd (logo.svg): „c” cu gradient, restul în culoarea textului */}
+              <Logo height={44} />
               <Text style={styles.tagline}>{tr('Găsește-ți crew-ul pentru diseară.')}</Text>
             </View>
 
@@ -136,7 +138,6 @@ const makeStyles = () =>
     content: { flexGrow: 1, padding: 24, gap: 28, justifyContent: 'space-between' },
     language: { alignSelf: 'flex-end', width: 220 },
     brand: { marginTop: 8, gap: 6 },
-    logo: { ...type.screenTitle, fontSize: 44 },
     tagline: { fontSize: 17, color: colors.text, opacity: 0.85 },
     form: { gap: 16 },
     title: { ...type.screenTitle, fontSize: 28 },
