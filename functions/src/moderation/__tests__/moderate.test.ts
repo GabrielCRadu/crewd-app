@@ -8,16 +8,22 @@ const now = new Date('2026-11-14T12:00:00Z');
 const path = 'events/e1/groups/g1/messages/m1';
 const message = { authorUid: 'u1', text: 'te găsesc și te bat', createdAt: now };
 
-function fakeStore(logged = false): Store & { actions: StoreAction[] } {
+function fakeStore(logged = false, markFails = false): Store & { actions: StoreAction[]; checked: number } {
   const actions: StoreAction[] = [];
-  return {
+  const store = {
     actions,
+    checked: 0,
     alreadyLogged: async () => logged,
     context: async () => [{ authorUid: 'u2', text: 'ce faci' }],
-    commit: async (a) => {
+    commit: async (a: StoreAction) => {
       actions.push(a);
     },
+    markChecked: async () => {
+      if (markFails) throw new Error('scriere eșuată');
+      store.checked += 1;
+    },
   };
+  return store;
 }
 
 const answer = (verdict: string, category: string, confidence: number): Classify => async () => ({
@@ -79,5 +85,58 @@ describe('moderateMessage', () => {
     };
     await moderateMessage({ path, message: { authorUid: 'u1', eventId: 'ev9', createdAt: now }, isDm: true, now }, { classify, store });
     expect(prompts).toEqual([]);
+  });
+
+  describe('checked', () => {
+    it('marks an ok message as checked', async () => {
+      const store = fakeStore();
+      await moderateMessage({ path, message, isDm: false, now }, { classify: answer('ok', 'none', 0.9), store });
+      expect(store.checked).toBe(1);
+    });
+
+    it('marks a flagged message as checked after the log', async () => {
+      const store = fakeStore();
+      expect(await moderateMessage({ path, message, isDm: false, now }, { classify: answer('flag', 'harassment', 0.7), store })).toBe(
+        'flag',
+      );
+      expect(store.actions).toHaveLength(1);
+      expect(store.checked).toBe(1);
+    });
+
+    it('marks a skipped message (already logged) as checked', async () => {
+      const store = fakeStore(true);
+      expect(await moderateMessage({ path, message, isDm: false, now }, { classify: answer('ok', 'none', 0.9), store })).toBe('skipped');
+      expect(store.checked).toBe(1);
+    });
+
+    it('leaves a removed message to the commit transaction (no separate write)', async () => {
+      const store = fakeStore();
+      await moderateMessage({ path, message, isDm: false, now }, { classify: answer('remove', 'threat', 0.95), store });
+      expect(store.actions[0]!.kind).toBe('remove');
+      expect(store.checked).toBe(0);
+    });
+
+    it('does not mark a message whose check failed (it goes to the re-check queue)', async () => {
+      const store = fakeStore();
+      const classify: Classify = async () => {
+        throw new Error('503');
+      };
+      await expect(moderateMessage({ path, message, isDm: false, now }, { classify, store })).rejects.toThrow();
+      expect(store.checked).toBe(0);
+    });
+
+    it('marks a message once the queue re-check succeeds', async () => {
+      const store = fakeStore();
+      const old = { ...message, createdAt: new Date(now.getTime() - 60 * 60_000) };
+      expect(await moderateMessage({ path, message: old, isDm: false, now, fromQueue: true }, { classify: answer('ok', 'none', 0.9), store })).toBe('ok');
+      expect(store.checked).toBe(1);
+    });
+
+    it('keeps the verdict and warns when writing checked fails', async () => {
+      const store = fakeStore(false, true);
+      const warn = jest.fn();
+      expect(await moderateMessage({ path, message, isDm: false, now }, { classify: answer('ok', 'none', 0.9), store, warn })).toBe('ok');
+      expect(warn).toHaveBeenCalledWith('moderation_mark_checked_failed', expect.objectContaining({ path }));
+    });
   });
 });

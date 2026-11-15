@@ -141,6 +141,8 @@ Mesajele directe între conturi reale, doar între prieteni. O conversație pe p
 
 Jurnalul moderării automate (`docs/superpowers/specs/2026-11-14-moderare-mesaje-design.md`), scris doar de Cloud Functions (`functions/src/index.ts`); aplicația nu îl poate citi sau scrie (regula implicită `if false`). Id-ul e calea mesajului cu `/` înlocuit prin `__`. Câmpuri: `path`, `authorUid`, `text` (originalul), `verdict` (`flag` sau `remove`), `category`, `confidence`, `reason`, `checkedAt`, `expireAt` (+30 de zile; politica TTL a Firestore pe acest câmp le șterge automat). Un mesaj eliminat primește `text: ''` (la DM și `eventId` șters) și `removed: { category, at }`; la DM, dacă era ultimul, `dms/{a_b}.lastText` devine gol.
 
+După verificare (orice verdict, și când mesajul nu era de verificat), funcția marchează mesajul (grup sau DM) cu `checked: true`; la `remove`, în aceeași tranzacție. Un mesaj trimis în coada de reverificare se marchează abia când coada reușește. Câmpul îl scrie doar funcția (regulile de creare acceptă doar câmpurile de mai sus, iar `update` e interzis). Aplicația (`isReadyToShow` din `src/utils/chatRules.ts`) arată mesajul altcuiva doar când are `checked` sau `removed`, ori după 60 de secunde (fail-open, ca o moderare căzută să nu blocheze chatul); autorul își vede mesajul imediat.
+
 ### `meta/eventsImport`
 
 Data colectării, intervalul de date, numărul de evenimente, notele sursei și data importului.

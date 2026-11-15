@@ -8,6 +8,8 @@ export interface GroupMessage {
   createdAt: Date;
   /** Mesaj ascuns de moderarea automată (functions/; textul e gol). */
   removed?: { category: string };
+  /** Verificat de moderarea automată (scris doar de functions/); până atunci îl vede doar autorul (max. 60 s). */
+  checked?: boolean;
 }
 
 /** Un rând din lista conversației: separator de zi sau mesaj. */

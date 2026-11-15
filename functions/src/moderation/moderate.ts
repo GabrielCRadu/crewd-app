@@ -21,9 +21,14 @@ export interface Store {
   alreadyLogged(logId: string): Promise<boolean>;
   /** Ultimele mesaje dinaintea celui verificat, de la cel mai vechi la cel mai nou. */
   context(limit: number): Promise<{ authorUid: string; text: string }[]>;
-  /** Scrie jurnalul și, la „remove”, ascunde mesajul (o singură scriere). */
+  /** Scrie jurnalul și, la „remove”, ascunde mesajul și îl marchează `checked` (o singură scriere). */
   commit(action: StoreAction): Promise<void>;
+  /** Marchează mesajul `checked: true`: ceilalți îl pot vedea (aplicația îl ține ascuns până atunci, max. 60 s). */
+  markChecked(): Promise<void>;
 }
+
+/** Unde ajung avertismentele (în index.ts: loggerul Cloud Functions). */
+export type Warn = (message: string, data: Record<string, unknown>) => void;
 
 export interface IncomingMessage {
   authorUid: string;
@@ -50,8 +55,28 @@ async function decide(target: { authorUid: string; text: string }, store: Store,
   return blockedOutcome(alone.blocked, true) as Decision;
 }
 
-/** Verifică un mesaj; întoarce ce s-a hotărât („skipped” dacă nu era de verificat). Aruncă la eroare (→ reîncercare). */
+/**
+ * Verifică un mesaj; întoarce ce s-a hotărât („skipped” dacă nu era de verificat). Aruncă la eroare (→ coada de
+ * reverificare): atunci mesajul nu e marcat `checked`, ci abia când coada reușește.
+ */
 export async function moderateMessage(
+  input: { path: string; message: IncomingMessage; isDm: boolean; now: Date; fromQueue?: boolean },
+  deps: { classify: Classify; store: Store; warn?: Warn },
+): Promise<'skipped' | Verdict> {
+  const result = await decideAndCommit(input, deps);
+  // La „remove”, `checked` s-a scris deja în tranzacția care ascunde mesajul.
+  if (result !== 'remove') {
+    try {
+      await deps.store.markChecked();
+    } catch (e) {
+      // Moderarea a reușit; fără `checked`, aplicația arată oricum mesajul după 60 s.
+      deps.warn?.('moderation_mark_checked_failed', { path: input.path, error: String(e) });
+    }
+  }
+  return result;
+}
+
+async function decideAndCommit(
   input: { path: string; message: IncomingMessage; isDm: boolean; now: Date; fromQueue?: boolean },
   deps: { classify: Classify; store: Store },
 ): Promise<'skipped' | Verdict> {
