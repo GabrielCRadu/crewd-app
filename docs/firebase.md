@@ -143,6 +143,10 @@ Jurnalul moderării automate (`docs/superpowers/specs/2026-11-14-moderare-mesaje
 
 După verificare (orice verdict, și când mesajul nu era de verificat), funcția marchează mesajul (grup sau DM) cu `checked: true`; la `remove`, în aceeași tranzacție. Un mesaj trimis în coada de reverificare se marchează abia când coada reușește. Câmpul îl scrie doar funcția (regulile de creare acceptă doar câmpurile de mai sus, iar `update` e interzis). Aplicația (`isReadyToShow` din `src/utils/chatRules.ts`) arată mesajul altcuiva doar când are `checked` sau `removed`, ori după 60 de secunde (fail-open, ca o moderare căzută să nu blocheze chatul); autorul își vede mesajul imediat.
 
+### `going/{uid}`
+
+La ce evenimente s-a înscris un cont: `eventIds` (doar id-urile) și `updatedAt`. O citesc proprietarul și prietenii lui (prietenie acceptată), pentru „Prieteni care participă”; înscrierile complete rămân private în `users/{uid}`. O scrie aplicația la fiecare înscriere / anulare și la login (`src/services/goingService.ts`); se șterge odată cu contul.
+
 ### `meta/eventsImport`
 
 Data colectării, intervalul de date, numărul de evenimente, notele sursei și data importului.

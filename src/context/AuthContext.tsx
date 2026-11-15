@@ -31,6 +31,7 @@ import { startDmSync, stopDmSync } from '../services/directMessagesService';
 import { deleteMyDms } from '../services/dmFirestore';
 import { allProfileTags } from '../utils/profileTags';
 import { tr } from '../i18n';
+import { deleteGoing, publishGoing } from '../services/goingService';
 
 /*
  * Starea de autentificare pentru toată aplicația:
@@ -116,6 +117,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const saved = loaded ? await getSavedPreferences(nextUser.uid) : null;
         if (!active || currentUid.current !== nextUser.uid) return;
         if (loaded) loadUserPreferences(nextUser.uid, saved, allProfileTags(loaded));
+        if (loaded) void publishGoing(nextUser.uid, saved?.joinedEventIds ?? []).catch(() => {});
         setProfile(loaded);
         setStatus(loaded ? (isProfileComplete(loaded) ? 'ready' : 'needsCompletion') : 'needsProfile');
         // Profilurile cu poză de dinainte de chat n-au miniatură: o generăm o dată, în fundal.
@@ -277,6 +279,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Username-ul se eliberează înainte de profil (regulile verifică proprietarul din fișa publică).
       if (profile?.username) await releaseUsername(profile.username, user.uid);
       await deletePublicProfile(user.uid);
+      await deleteGoing(user.uid);
       publishedKey.current = null;
       // Ultimul pas: contul din Firebase Auth. Profilul users/{uid} îl șterge apoi funcția cleanupDeletedUser
       // (aplicația nu-l mai poate șterge: audit). După el, sesiunea se închide și apare ecranul de login.
