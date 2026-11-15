@@ -19,7 +19,7 @@ Crewd is an Android app (Expo / React Native) for going out in Timișoara. You p
 
 ### 💬 Chat
 - Two tabs: **Groups** and **Direct messages**.
-- Messages are moderated automatically (Gemini, through Google AI Platform). Harmful messages are deleted, and you can block users.
+- Messages are moderated automatically by Gemini (Gemini API, called from Cloud Functions). Harmful messages are hidden from the chat; the original is kept for 30 days in a private moderation log. You can also block users.
 
 ### 🗺️ Friends map
 - See where your friends are and which event they're heading to.
@@ -56,8 +56,8 @@ npm install
 npx expo start          # scan the QR code with Expo Go, or press "a" for the emulator
 ```
 
-### Firebase (required)
-With no Firebase config, the app runs on **mock data**: demo events, a demo profile, no login. To use the real backend:
+### Firebase (required for the full app)
+Login, real events, groups and chat all need Firebase. Without a config the app only starts in a demo mode on **mock data** (demo events, a demo profile, no login). To use the real backend:
 
 1. Copy `.env.example` to `.env.local`.
 2. Fill in the `EXPO_PUBLIC_FIREBASE_*` values from Firebase Console → Project settings → Your apps → Web app.
