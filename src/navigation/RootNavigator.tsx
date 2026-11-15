@@ -22,6 +22,7 @@ import EventReminders from '../components/EventReminders';
 import FriendRequestPopup from '../components/FriendRequestPopup';
 import InviteLinkHandler from '../components/InviteLinkHandler';
 import GradientButton from '../components/GradientButton';
+import Logo from '../components/Logo';
 import LogoSplash from '../components/LogoSplash';
 import { useAuth } from '../context/AuthContext';
 import { ChatActivityProvider, useChatActivity } from '../context/ChatActivity';
@@ -180,9 +181,9 @@ export default function RootNavigator() {
 function LoadingScreen({ error, onRetry, onSignOut }: { error: string | null; onRetry: () => void; onSignOut: () => void }) {
   return (
     <View style={styles.loading}>
-      <Text style={styles.logo}>crewd</Text>
       {error ? (
         <View style={styles.loadingError}>
+          <Logo height={44} />
           <Text style={styles.loadingText}>{error}</Text>
           <GradientButton label={tr('Încearcă din nou')} icon="refresh" onPress={onRetry} compact />
           <Pressable onPress={onSignOut} hitSlop={8}>
@@ -274,7 +275,6 @@ function MainTabBar({ state, navigation }: MaterialTopTabBarProps) {
 const makeStyles = () =>
   StyleSheet.create({
     loading: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 24, padding: 32, backgroundColor: colors.background },
-    logo: { fontSize: 44, fontWeight: '600', letterSpacing: -1.5, color: colors.text },
     loadingError: { alignItems: 'center', gap: 16 },
     loadingText: { color: colors.muted, fontSize: 15, textAlign: 'center' },
     loadingLink: { color: colors.faint, fontSize: 13, textDecorationLine: 'underline' },

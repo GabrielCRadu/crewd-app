@@ -7,6 +7,7 @@ import { type } from '../theme/typography';
 import { gradients } from '../theme/gradients';
 import { radii } from '../theme/shape';
 import { tr } from '../i18n';
+import Logo from './Logo';
 
 interface Props {
   step: 1 | 2 | 3;
@@ -19,7 +20,7 @@ export default function OnboardingHeader({ step, onBack }: Props) {
   return (
     <View style={styles.container}>
       <View style={styles.row}>
-        {onBack ? <GlassIconButton icon="chevron-back" onPress={onBack} /> : <Text style={styles.logo}>crewd</Text>}
+        {onBack ? <GlassIconButton icon="chevron-back" onPress={onBack} /> : <Logo height={30} />}
         <Text style={styles.step}>{tr('Pasul {step} din 3', { step })}</Text>
       </View>
       <View style={styles.bars}>
@@ -39,7 +40,6 @@ const makeStyles = () =>
   StyleSheet.create({
     container: { gap: 18 },
     row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 44 },
-    logo: { ...type.screenTitle, fontSize: 26 },
     step: { fontSize: 13, fontWeight: '500', color: colors.muted },
     bars: { flexDirection: 'row', gap: 8 },
     bar: { flex: 1, height: 6, borderRadius: radii.pill },
