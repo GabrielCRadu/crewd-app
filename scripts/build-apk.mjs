@@ -134,6 +134,9 @@ function main() {
     APP_VERSION_CODE: String(versionCode),
     GOOGLE_MAPS_API_KEY: envValue(envFileText, 'GOOGLE_MAPS_API_KEY'),
     NODE_ENV: 'production',
+    // Fără micșorarea codului (R8): în SDK 58 e pornită implicit și scoate clasa generată de Room pentru
+    // WorkManager, deci aplicația se închidea la pornire. APK-ul e puțin mai mare, dar fără surprize.
+    'ORG_GRADLE_PROJECT_android.enableMinifyInReleaseBuilds': 'false',
     // Semnarea cu cheia privată: Gradle citește proprietățile „android.injected.signing.*” din variabile
     // ORG_GRADLE_PROJECT_* (parolele nu apar în linia de comandă).
     'ORG_GRADLE_PROJECT_android.injected.signing.store.file': keystore,
