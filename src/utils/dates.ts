@@ -65,7 +65,7 @@ export function formatWeekdayShort(d: Date): string {
 
 /** „Azi”, „Mâine” sau „Sâm, 14 nov”. */
 export function formatDay(d: Date, now = new Date()): string {
-  if (sameDay(d, now)) return 'Azi';
+  if (sameDay(d, now)) return tr('Azi');
   if (sameDay(d, addDays(now, 1))) return tr('Mâine');
   return `${WEEKDAYS_SHORT()[d.getDay()]}, ${d.getDate()} ${MONTHS_SHORT()[d.getMonth()]}`;
 }

@@ -1,7 +1,7 @@
 import type { GroupMessage } from '../types/chat';
 import type { CrewGroup } from '../types/groups';
 import { dayLabel } from './chatRules';
-import { formatTime } from './dates';
+import { formatTime, startOfDay } from './dates';
 
 /*
  * Logica listei din tab-ul Chat (fără React, ca să se poată testa): ce e necitit, ordinea grupurilor,
@@ -43,8 +43,8 @@ export function sortGroupsByActivity(
 
 /** Ora din dreapta rândului: azi ora („18:02”), altfel ziua („Ieri”, „Mar, 10 nov”). */
 export function shortWhen(d: Date, now = new Date()): string {
-  const label = dayLabel(d, now);
-  return label === 'Azi' ? formatTime(d) : label;
+  // Azi: ora; altfel eticheta zilei (tradusă, deci nu comparăm cu textul „Azi”).
+  return startOfDay(d).getTime() === startOfDay(now).getTime() ? formatTime(d) : dayLabel(d, now);
 }
 
 /** Două inițiale din titlu („Open Mic Night” → „OM”; un singur cuvânt → primele două litere). */

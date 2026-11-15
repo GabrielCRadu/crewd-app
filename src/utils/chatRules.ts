@@ -21,8 +21,8 @@ export function normalizeMessageText(text: string): string | null {
 export function dayLabel(d: Date, now = new Date()): string {
   const day = startOfDay(d).getTime();
   const today = startOfDay(now);
-  if (day === today.getTime()) return 'Azi';
-  if (day === addDays(today, -1).getTime()) return 'Ieri';
+  if (day === today.getTime()) return tr('Azi');
+  if (day === addDays(today, -1).getTime()) return tr('Ieri');
   return formatDay(d, now);
 }
 
