@@ -458,6 +458,17 @@ service cloud.firestore {
       allow delete: if isOwner() && leftOld();
     }
 
+    // La ce evenimente merge un cont (doar lista de id-uri): o citesc proprietarul și prietenii lui,
+    // pentru „Prieteni care participă”. Înscrierile complete rămân private în users/{uid}.
+    match /going/{uid} {
+      allow read: if request.auth != null && (request.auth.uid == uid || areFriends(request.auth.uid, uid));
+      allow create, update: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['eventIds', 'updatedAt'])
+        && request.resource.data.eventIds is list && request.resource.data.eventIds.size() <= 500
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if request.auth != null && request.auth.uid == uid;
+    }
+
     // Orice altceva e închis până adăugăm reguli explicite.
     match /{document=**} {
       allow read, write: if false;

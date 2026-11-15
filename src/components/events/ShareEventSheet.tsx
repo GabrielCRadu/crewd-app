@@ -15,6 +15,8 @@ import type { Event } from '../../types/events';
 import type { Person } from '../../types/social';
 import { formatEventDate } from '../../utils/dates';
 import { tr } from '../../i18n';
+import { usePublicProfiles } from '../../hooks/usePublicProfiles';
+import { personFromPublic } from '../../utils/publicProfile';
 
 interface Props {
   event: Event;
@@ -33,13 +35,16 @@ export default function ShareEventSheet({ event, visible, onClose, onSent }: Pro
   const friends = useFriends();
   const [note, setNote] = useState('');
 
+  // Prietenii de test și cei reali (numele și poza din profilul public).
+  const friendIds = idsWithStatus(friends, 'friends');
+  const realProfiles = usePublicProfiles(friendIds.filter((id) => !getPerson(id)));
   const people = useMemo(
     () =>
-      idsWithStatus(friends, 'friends')
-        .map(getPerson)
-        .filter((p): p is Person => p !== undefined)
+      friendIds
+        .map((id) => getPerson(id) ?? personFromPublic(id, realProfiles[id]))
         .sort((a, b) => a.name.localeCompare(b.name)),
-    [friends],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [friends, realProfiles],
   );
 
   const send = async (personId: string) => {

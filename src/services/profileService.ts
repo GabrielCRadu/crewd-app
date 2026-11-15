@@ -6,6 +6,7 @@ import type { ProfileChanges, ProfileDraft, UserProfile } from '../types/user';
 import { ageFromBirthDate } from '../utils/birthDate';
 import { sanitizeText } from '../utils/safeText';
 import { reserveUsernameInTransaction } from './usernamesService';
+import { publishGoing } from './goingService';
 
 /*
  * Profilul utilizatorului în Firestore: users/{uid}.
@@ -137,4 +138,6 @@ export async function savePreferences(uid: string, prefs: UserPreferences): Prom
     tagScores: prefs.tagScores,
     updatedAt: serverTimestamp(),
   });
+  // Lista vizibilă prietenilor („Prieteni care participă”); o eroare aici nu anulează înscrierea.
+  publishGoing(uid, prefs.joinedEventIds).catch((e: unknown) => console.warn('Nu am putut publica înscrierile:', e));
 }

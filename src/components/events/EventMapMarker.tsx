@@ -17,8 +17,11 @@ interface Props {
 const SIZE = 46;
 const SIZE_SELECTED = 60;
 
-/** Cât mai urmărește harta schimbările marcajului după ce s-a redesenat (ms). */
-const SETTLE_MS = 500;
+/**
+ * Cât mai urmărește harta schimbările marcajului după ce s-a redesenat (ms). Afișele mari se decodează
+ * și după `onLoadEnd`: la 500 ms unele marcaje rămâneau goale până la o atingere.
+ */
+const SETTLE_MS = 1500;
 
 /**
  * Un eveniment pe hartă: afișul lui, mic, la locul evenimentului.

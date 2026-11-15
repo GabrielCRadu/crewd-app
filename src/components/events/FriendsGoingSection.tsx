@@ -16,6 +16,9 @@ import type { Event } from '../../types/events';
 import type { Person } from '../../types/social';
 import { friendsAtEvent, groupOwnerName } from '../../utils/friendsAtEvent';
 import { tr } from '../../i18n';
+import { useFriendsGoing } from '../../hooks/useFriendsGoing';
+import { usePublicProfiles } from '../../hooks/usePublicProfiles';
+import { personFromPublic } from '../../utils/publicProfile';
 
 /** Câți prieteni se văd până apeși „Vezi toți”. */
 const VISIBLE = 5;
@@ -38,13 +41,16 @@ export default function FriendsGoingSection({ event, onOpenPerson }: Props) {
   const { groups, loading } = useEventGroups(event.id, isJoined(preferences, event.id));
   const [expanded, setExpanded] = useState(false);
 
+  // Doar prieteniile acceptate: cererile și persoanele blocate au alt status, deci nu intră.
+  const friendIds = idsWithStatus(friendsState, 'friends');
+  const realIds = friendIds.filter((id) => !getPerson(id));
+  const realProfiles = usePublicProfiles(realIds);
+  const goingUids = useFriendsGoing(event.id, realIds);
   const going = useMemo(() => {
-    // Doar prieteniile acceptate: cererile și persoanele blocate au alt status, deci nu intră.
-    const friends = idsWithStatus(friendsState, 'friends')
-      .map(getPerson)
-      .filter((p): p is Person => p !== undefined);
-    return friendsAtEvent({ friends, goingNames: event.friendsGoing, groups });
-  }, [friendsState, event.friendsGoing, groups]);
+    const friends = friendIds.map((id) => getPerson(id) ?? personFromPublic(id, realProfiles[id]));
+    return friendsAtEvent({ friends, goingNames: event.friendsGoing, groups, goingUids });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [friendsState, event.friendsGoing, groups, goingUids, realProfiles]);
 
   const shown = expanded ? going : going.slice(0, VISIBLE);
 

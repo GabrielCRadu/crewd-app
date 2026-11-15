@@ -59,3 +59,13 @@ describe('groupOwnerName', () => {
     expect(groupOwnerName(group('g', ['x', 'y'], 'y'))).toBe('N-y');
   });
 });
+
+describe('friendsAtEvent with real friends', () => {
+  it('counts a real friend whose sign-ups include the event', () => {
+    const real = person('uid-real', 'Radu');
+    const other = person('uid-other', 'Ioana');
+    expect(friendsAtEvent({ friends: [real, other], goingNames: [], groups: [], goingUids: ['uid-real'] }).map((f) => f.person.id)).toEqual([
+      'uid-real',
+    ]);
+  });
+});

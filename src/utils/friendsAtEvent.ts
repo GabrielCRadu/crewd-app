@@ -20,18 +20,21 @@ interface Input {
   goingNames: string[];
   /** Grupurile de la acest eveniment. */
   groups: CrewGroup[];
+  /** Prietenii reali (uid) care și-au anunțat înscrierea la eveniment (going/{uid}, citit doar de prieteni). */
+  goingUids?: string[];
 }
 
 /**
  * Prietenii care merg: înscriși la eveniment sau membri ai unui grup de acolo.
  * Ordine: întâi cei dintr-un grup, apoi alfabetic.
  */
-export function friendsAtEvent({ friends, goingNames, groups }: Input): FriendAtEvent[] {
+export function friendsAtEvent({ friends, goingNames, groups, goingUids = [] }: Input): FriendAtEvent[] {
   const going = new Set(goingNames.map((n) => n.trim().toLowerCase()));
+  const goingIds = new Set(goingUids);
   const result: FriendAtEvent[] = [];
   for (const person of friends) {
     const group = groups.find((g) => g.memberUids.includes(person.id)) ?? null;
-    if (group || going.has(person.name.trim().toLowerCase())) result.push({ person, group });
+    if (group || goingIds.has(person.id) || going.has(person.name.trim().toLowerCase())) result.push({ person, group });
   }
   return result.sort((a, b) => {
     if (!!a.group !== !!b.group) return a.group ? -1 : 1;

@@ -28,7 +28,7 @@ export const cleanupDeletedUser = functionsV1
     const db = getFirestore();
     const uid = user.uid;
     // Întâi datele personale (profilul): dacă un pas următor eșuează, ele sunt deja șterse.
-    await deleteInBatches([db.collection('profiles').doc(uid), db.collection('users').doc(uid)]);
+    await deleteInBatches([db.collection('profiles').doc(uid), db.collection('users').doc(uid), db.collection('going').doc(uid)]);
     const step = async (name: string, run: () => Promise<void>) => {
       try {
         await run();
