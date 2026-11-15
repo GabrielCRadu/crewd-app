@@ -43,7 +43,6 @@ The app is in Romanian, with an English version you can switch to at login or in
 | Backend | Firebase JS SDK: Auth (email + password) and Firestore |
 | Server-side | Cloud Functions (`functions/`): message moderation with Gemini, cleanup after account deletion |
 | Maps & device | `react-native-maps`, `expo-location`, `expo-notifications`, `expo-image-picker` |
-| Tests | Jest (`jest-expo`) |
 
 ## Getting started
 
