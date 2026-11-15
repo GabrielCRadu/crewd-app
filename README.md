@@ -42,6 +42,7 @@ The app is in Romanian, with an English version you can switch to at login or in
 | Navigation | React Navigation 7 (bottom tabs as a material top-tab pager + native stacks) |
 | Backend | Firebase JS SDK: Auth (email + password) and Firestore |
 | Server-side | Cloud Functions (`functions/`): message moderation with Gemini, cleanup after account deletion |
+| Secrets | 1claw vault holds the Gemini API key; `scripts/sync-gemini-key.mjs` copies it into Google Secret Manager for the Cloud Functions |
 | Maps & device | `react-native-maps`, `expo-location`, `expo-notifications`, `expo-image-picker` |
 
 ## Getting started
@@ -77,7 +78,7 @@ Setup, Firestore rules, the event import and the data schema are documented in [
 | `npm run apk` | Build a signed release APK from `origin/main` (Windows; needs the release key, see `scripts/make-release-key.mjs`) |
 | `node scripts/import-events.mjs --dry-run` | Preview the event import (needs a service-account key) |
 
-The Cloud Functions live in `functions/` and are deployed with `npm --prefix functions run deploy`. Push the Gemini key into Secret Manager first, with `scripts/sync-gemini-key.mjs`.
+The Cloud Functions live in `functions/` and are deployed with `npm --prefix functions run deploy`. Push the Gemini key into Secret Manager first, with `scripts/sync-gemini-key.mjs` (it reads the key from the 1claw vault).
 
 ## Project structure
 
@@ -110,9 +111,9 @@ We work through pull requests: one branch per task (`<name>/<short-task>`), a dr
 ## Team
 
 - Radu Gabriel Claudiu ([@GabrielCRadu](https://github.com/GabrielCRadu))
-- Camelia Ghid ([@camiG123](https://github.com/camiG123))
+- Camelia Ghib ([@camiG123](https://github.com/camiG123))
 - Ștefan Covaci ([@Innesity](https://github.com/Innesity))
-- David Dumitru ([@xHash200](https://github.com/xHash200))
+- Dumitru David Gabriel ([@xHash200](https://github.com/xHash200))
 
 ## License
 
