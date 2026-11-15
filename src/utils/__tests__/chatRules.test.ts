@@ -3,10 +3,13 @@ import { describe, expect, it } from '@jest/globals';
 import type { ChatRow, GroupMessage } from '../../types/chat';
 import {
   LEFT_GROUP_MESSAGE,
+  MODERATION_WAIT_MS,
   authorNameFor,
   buildChatRows,
   chatRoomState,
   dayLabel,
+  isDmReadyToShow,
+  isReadyToShow,
   lastMessagePreview,
   normalizeMessageText,
   removedMessageText,
@@ -221,5 +224,40 @@ describe('withoutBlocked', () => {
   it('hides messages from people you blocked', () => {
     const m = (id: string, authorUid: string) => ({ id, authorUid, authorName: authorUid, text: 'x', createdAt: new Date() });
     expect(withoutBlocked([m('1', 'a'), m('2', 'b'), m('3', 'a')], ['b']).map((x) => x.id)).toEqual(['1', '3']);
+  });
+});
+
+describe('isReadyToShow', () => {
+  const now = new Date('2026-11-15T12:00:00Z').getTime();
+  const fresh = { authorUid: 'ana', createdAt: new Date(now - 5_000) };
+
+  it("hides someone else's fresh message until moderation checks it", () => {
+    expect(isReadyToShow(fresh, 'me', now)).toBe(false);
+    expect(isReadyToShow({ ...fresh, checked: true }, 'me', now)).toBe(true);
+  });
+
+  it('always shows my own messages', () => {
+    expect(isReadyToShow(fresh, 'ana', now)).toBe(true);
+  });
+
+  it('shows a removed message (its placeholder)', () => {
+    expect(isReadyToShow({ ...fresh, removed: { category: 'spam' } }, 'me', now)).toBe(true);
+  });
+
+  it('fails open after the wait, so chats never get stuck', () => {
+    expect(isReadyToShow({ ...fresh, createdAt: new Date(now - MODERATION_WAIT_MS + 1) }, 'me', now)).toBe(false);
+    expect(isReadyToShow({ ...fresh, createdAt: new Date(now - MODERATION_WAIT_MS) }, 'me', now)).toBe(true);
+  });
+
+  it('shows demo messages (never checked)', () => {
+    expect(isReadyToShow({ ...fresh, authorUid: 'demo-ioana' }, 'me', now)).toBe(true);
+  });
+
+  it('works the same for direct messages', () => {
+    const dm = { fromMe: false, sentAt: new Date(now - 5_000) };
+    expect(isDmReadyToShow(dm, now)).toBe(false);
+    expect(isDmReadyToShow({ ...dm, fromMe: true }, now)).toBe(true);
+    expect(isDmReadyToShow({ ...dm, checked: true }, now)).toBe(true);
+    expect(isDmReadyToShow({ ...dm, sentAt: new Date(now - MODERATION_WAIT_MS) }, now)).toBe(true);
   });
 });

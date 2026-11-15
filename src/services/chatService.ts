@@ -64,6 +64,7 @@ function fromDoc(snap: QueryDocumentSnapshot<DocumentData>): GroupMessage | null
     text: d.text,
     createdAt: d.createdAt instanceof Timestamp ? d.createdAt.toDate() : new Date(),
     ...(d.removed && typeof d.removed.category === 'string' ? { removed: { category: d.removed.category } } : {}),
+    ...(d.checked === true ? { checked: true } : {}),
   };
 }
 
@@ -93,6 +94,7 @@ function mockMessagesFor(eventId: string, groupId: string): GroupMessage[] {
             authorName: author.name,
             text,
             createdAt: new Date(Date.now() - (3 - i) * 3_600_000),
+            checked: true,
           };
         })
       : [];

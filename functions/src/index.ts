@@ -165,6 +165,7 @@ function storeFor(messageRef: DocumentReference, createdAt: Date | undefined, dm
         if (action.kind !== 'remove') return;
         tx.update(messageRef, {
           text: '',
+          checked: true,
           ...(action.isDm ? { eventId: FieldValue.delete() } : {}),
           removed: { category: action.log.category, at: FieldValue.serverTimestamp() },
         });
@@ -176,6 +177,9 @@ function storeFor(messageRef: DocumentReference, createdAt: Date | undefined, dm
         }
       });
     },
+    markChecked: async () => {
+      await messageRef.update({ checked: true });
+    },
   };
 }
 
@@ -185,7 +189,7 @@ async function check(ref: DocumentReference, data: FirebaseFirestore.DocumentDat
   const dmRef = isDm ? (ref.parent.parent as DocumentReference) : null;
   const result = await moderateMessage(
     { path: ref.path, message, isDm, now: new Date(), fromQueue },
-    { classify, store: storeFor(ref, message.createdAt, dmRef) },
+    { classify, store: storeFor(ref, message.createdAt, dmRef), warn: (msg, data) => logger.warn(msg, data) },
   );
   if (result === 'flag' || result === 'remove') logger.info('moderation', { path: ref.path, result });
 }

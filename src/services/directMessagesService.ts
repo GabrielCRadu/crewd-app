@@ -24,6 +24,8 @@ export interface DirectMessage {
   sentAt: Date;
   /** Ascuns de moderarea automată (conturile reale). */
   removed?: { category: string };
+  /** Verificat de moderarea automată (conturile reale); persoanele de test nu trec prin moderare: mereu true. */
+  checked?: boolean;
 }
 
 /** personId → mesajele, de la cel mai vechi la cel mai nou. */
@@ -34,9 +36,9 @@ const minutesAgo = (m: number) => new Date(Date.now() - m * 60_000);
 /** Start: o conversație cu Maria, ca lista să nu fie goală. */
 let testThreads: DirectThreads = {
   p1: [
-    { id: 'd1', fromMe: false, text: 'Mergi diseară la Open Mic?', sentAt: minutesAgo(95) },
-    { id: 'd2', fromMe: true, text: 'Cred că da! Tu?', sentAt: minutesAgo(90) },
-    { id: 'd3', fromMe: false, text: 'Sigur, ne vedem la intrare', sentAt: minutesAgo(88) },
+    { id: 'd1', fromMe: false, text: 'Mergi diseară la Open Mic?', sentAt: minutesAgo(95), checked: true },
+    { id: 'd2', fromMe: true, text: 'Cred că da! Tu?', sentAt: minutesAgo(90), checked: true },
+    { id: 'd3', fromMe: false, text: 'Sigur, ne vedem la intrare', sentAt: minutesAgo(88), checked: true },
   ],
 };
 
@@ -59,7 +61,8 @@ function changed() {
 
 function addMessage(personId: string, message: Omit<DirectMessage, 'id' | 'sentAt'>) {
   counter += 1;
-  const full: DirectMessage = { ...message, id: `local-${Date.now()}-${counter}`, sentAt: new Date() };
+  // Conversațiile de test nu trec prin moderare: răspunsul demo apare imediat.
+  const full: DirectMessage = { ...message, id: `local-${Date.now()}-${counter}`, sentAt: new Date(), checked: true };
   testThreads = { ...testThreads, [personId]: [...(testThreads[personId] ?? []), full] };
   changed();
 }
@@ -77,6 +80,7 @@ function fromRemote(m: RemoteDm, uid: string): DirectMessage {
     eventId: m.eventId,
     sentAt: m.sentAt,
     ...(m.removed ? { removed: m.removed } : {}),
+    ...(m.checked ? { checked: true } : {}),
   };
 }
 

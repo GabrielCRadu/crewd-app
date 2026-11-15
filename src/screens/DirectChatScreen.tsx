@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Alert, FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -10,6 +10,7 @@ import EventPoster from '../components/events/EventPoster';
 import { useDirectThreads } from '../hooks/useDirectThreads';
 import { usePublicProfile } from '../hooks/usePublicProfile';
 import { useEvents } from '../hooks/useEvents';
+import { useModerationTick } from '../hooks/useModerationTick';
 import { useUserLocation } from '../hooks/useUserLocation';
 import type { ChatsStackParamList } from '../navigation/chatsTypes';
 import { openConversation, sendDirectText } from '../services/directMessagesService';
@@ -18,7 +19,7 @@ import { getPerson } from '../services/peopleService';
 import { colors, onThemeChange } from '../theme/colors';
 import { glass, radii } from '../theme/shape';
 import type { Event } from '../types/events';
-import { removedMessageText } from '../utils/chatRules';
+import { isDmReadyToShow, removedMessageText } from '../utils/chatRules';
 import { formatEventDate, formatTime } from '../utils/dates';
 import { tr } from '../i18n';
 
@@ -36,7 +37,15 @@ export default function DirectChatScreen({ navigation, route }: Props) {
   // Conturile reale: mesajele vin live cât e deschisă conversația.
   useEffect(() => openConversation(personId), [personId]);
   const threads = useDirectThreads();
-  const messages = threads[personId] ?? [];
+  const all = threads[personId] ?? [];
+  // Mesajele prietenului apar după ce le-a verificat moderarea (sau după 60 s); timerul merge doar cât așteaptă unul.
+  const waiting = all.some((m) => !isDmReadyToShow(m, Date.now()));
+  const moderationTick = useModerationTick(waiting);
+  const messages = useMemo(() => {
+    const now = Date.now();
+    return all.filter((m) => isDmReadyToShow(m, now));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [all, moderationTick]);
   const location = useUserLocation();
   const { events } = useEvents(location.coords);
   const [draft, setDraft] = useState('');

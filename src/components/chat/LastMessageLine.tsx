@@ -1,8 +1,11 @@
+import { useRef } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { useLastMessage } from '../../hooks/useLastMessage';
+import { useModerationTick } from '../../hooks/useModerationTick';
 import { colors, onThemeChange } from '../../theme/colors';
-import { dayLabel, lastMessagePreview } from '../../utils/chatRules';
+import type { GroupMessage } from '../../types/chat';
+import { dayLabel, isReadyToShow, lastMessagePreview } from '../../utils/chatRules';
 import { formatTime } from '../../utils/dates';
 
 interface Props {
@@ -18,7 +21,22 @@ interface Props {
  * E o componentă separată ca fiecare card să aibă propriul hook (hook-urile nu se apelează într-un `map`).
  */
 export default function LastMessageLine({ eventId, groupId, myUid, fallback }: Props) {
-  const message = useLastMessage(eventId, groupId);
+  const latest = useLastMessage(eventId, groupId);
+  // Un mesaj nou încă neverificat de moderare nu apare nici aici: rămâne ultimul mesaj arătat (sau „…”).
+  const waiting = !!latest && !isReadyToShow(latest, myUid, Date.now());
+  useModerationTick(waiting);
+  const shown = useRef<GroupMessage | null>(null);
+  if (latest && !waiting) shown.current = latest;
+  if (!latest) shown.current = null;
+  const message = waiting ? shown.current : latest;
+
+  if (waiting && !message) {
+    return (
+      <Text style={styles.text} numberOfLines={1}>
+        …
+      </Text>
+    );
+  }
 
   if (!message) {
     return (

@@ -21,6 +21,7 @@ import MessageRow, { DayRow } from '../components/chat/MessageRow';
 import { useAuth } from '../context/AuthContext';
 import { useEvents } from '../hooks/useEvents';
 import { useGroupMessages } from '../hooks/useGroupMessages';
+import { useModerationTick } from '../hooks/useModerationTick';
 import { useMyGroups } from '../hooks/useMyGroups';
 import { useNow } from '../hooks/useNow';
 import { useUserLocation } from '../hooks/useUserLocation';
@@ -37,6 +38,7 @@ import {
   MAX_MESSAGE_LENGTH,
   authorNameFor,
   buildChatRows,
+  isReadyToShow,
   chatRoomState,
   normalizeMessageText,
   withoutBlocked,
@@ -73,10 +75,17 @@ export default function ChatRoomScreen({ navigation, route }: Props) {
   // Cei pe care i-ai blocat nu-ți mai apar în chat (audit: siguranța în chatul de grup).
   const blocked = idsWithStatus(useFriends(), 'blocked');
   const blockedKey = blocked.join(',');
+  // Mesajele altora apar după ce le-a verificat moderarea (sau după 60 s); timerul merge doar cât așteaptă unul.
+  const waiting = messages.some((m) => !isReadyToShow(m, uid ?? '', Date.now()));
+  const moderationTick = useModerationTick(waiting);
   const rows = useMemo(
-    () => buildChatRows(withoutBlocked(messages, blocked), uid ?? '', members ?? {}, new Date(today)).reverse(),
+    () => {
+      const now = Date.now();
+      const ready = withoutBlocked(messages, blocked).filter((m) => isReadyToShow(m, uid ?? '', now));
+      return buildChatRows(ready, uid ?? '', members ?? {}, new Date(today)).reverse();
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [messages, uid, members, today, blockedKey],
+    [messages, uid, members, today, blockedKey, moderationTick],
   );
   const listRef = useRef<FlatList<ChatRow>>(null);
 
